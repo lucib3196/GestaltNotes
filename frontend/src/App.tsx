@@ -1,8 +1,7 @@
+import "./App.css";
+import { MathJaxContext } from "better-react-mathjax";
 
-import './App.css'
-import { MathJax, MathJaxContext } from "better-react-mathjax";
-
-import MarkDownEditor from './components/MarkdownEditor/MarkdownEditor'
+import MarkDownEditor from "./components/MarkdownEditor/MarkdownEditor";
 
 const mathJaxConfig = {
   tex: {
@@ -11,17 +10,13 @@ const mathJaxConfig = {
   },
 };
 
-
 function App() {
-
   return (
-
     <MathJaxContext config={mathJaxConfig}>
-      <h1 className='text-blue-500 text-3xl'>MarkdownEditor</h1>
+      
       <MarkDownEditor />
     </MathJaxContext>
-
-  )
+  );
 }
 
-export default App
+export default App;

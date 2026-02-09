@@ -1,0 +1,104 @@
+# =====================
+# OS / Editor junk
+# =====================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+*.log
+
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.env
+.env.*
+venv/
+.venv/
+env/
+ENV/
+
+# Python build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# =====================
+# Node / JavaScript
+# =====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+
+# =====================
+# Frontend frameworks
+# =====================
+.next/
+out/
+.nuxt/
+.svelte-kit/
+
+# =====================
+# Databases / local storage
+# =====================
+*.sqlite
+*.sqlite3
+*.db
+
+# =====================
+# Secrets / credentials
+# =====================
+.env.local
+.env.development
+.env.production
+.env.test
+*.pem
+*.key
+credentials.json
+serviceAccountKey.json
+
+# =====================
+# Uploads / generated content
+# =====================
+uploads/
+generated/
+tmp/
+temp/
+
+# =====================
+# Logs
+# =====================
+logs/
+*.log
+
+# =====================
+# Docker
+# =====================
+docker-data/
+
+
+# FIREBASE
+FIREBASE_CRED.json
