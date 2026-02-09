@@ -1,0 +1,59 @@
+import os
+from contextlib import asynccontextmanager
+
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRouter
+
+from src.core import get_settings, create_db_and_tables, logger, initialize_firebase_app
+from src.web import ALL_ROUTES
+
+
+settings = get_settings()
+
+
+## Intializes the database
+@asynccontextmanager
+async def on_startup(app: FastAPI):
+    engine = create_db_and_tables()
+    initialize_firebase_app()
+    logger.info("Created database successfully")
+    yield
+
+
+def add_routes(app: FastAPI, routes: list[APIRouter] = ALL_ROUTES):
+    for r in routes:
+        app.include_router(r)
+
+
+def get_app():
+    app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            str(origin) for origin in settings.BACKEND_CORS_ORIGINS
+        ],  # allow specific frontend origins
+        allow_credentials=True,  # allow cookies, Authorization headers
+        allow_methods=["*"],  # allow all HTTP methods (GET, POST, etc.)
+        allow_headers=["*"],  # allow all headers (including Authorization)
+        expose_headers=["Content-Disposition"],
+    )
+    add_routes(app)
+    return app
+
+
+app = get_app()
+
+
+def main():
+    uvicorn.run(
+        "src.main:app",
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", 8010)),
+        reload=True,
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,6 @@
-import "./App.css";
-import { MathJaxContext } from "better-react-mathjax";
 
+import { MathJaxContext } from "better-react-mathjax";
+import ViewNotes from "./pages/NotesPage";
 import MarkDownEditor from "./components/MarkdownEditor/MarkdownEditor";
 
 const mathJaxConfig = {
@@ -13,8 +13,9 @@ const mathJaxConfig = {
 function App() {
   return (
     <MathJaxContext config={mathJaxConfig}>
-      
-      <MarkDownEditor />
+      <ViewNotes />
+
+      {/* <MarkDownEditor /> */}
     </MathJaxContext>
   );
 }

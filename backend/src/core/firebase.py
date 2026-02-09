@@ -4,7 +4,6 @@ from firebase_admin import credentials
 import firebase_admin
 from functools import lru_cache
 from src.core import get_settings
-
 app_settings = get_settings()
 
 
