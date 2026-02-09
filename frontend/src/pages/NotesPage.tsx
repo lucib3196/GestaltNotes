@@ -7,7 +7,6 @@ export default function ViewNotes() {
     const getNotes = async () => {
         try {
             const response = await NotesAPI.getNotes()
-            console.log(response)
             return response
         }
         catch (error: any) {
