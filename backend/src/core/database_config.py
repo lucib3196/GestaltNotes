@@ -3,7 +3,8 @@ from typing import Annotated, Generator
 from dotenv import load_dotenv
 from fastapi import Depends
 from sqlmodel import SQLModel, Session, create_engine
-from src.core import get_settings, logger
+from src.core.settings import get_settings
+from src.core.logger import logger
 
 app_settings = get_settings()
 

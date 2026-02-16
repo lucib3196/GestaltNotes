@@ -6,7 +6,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 
-from src.core import get_settings, create_db_and_tables, logger, initialize_firebase_app
+from src.core.logger import logger
+from src.core.database_config import create_db_and_tables
+from src.core.firebase import initialize_firebase_app
+from src.core.settings import get_settings
 from src.web import ALL_ROUTES
 
 
@@ -29,6 +32,7 @@ def add_routes(app: FastAPI, routes: list[APIRouter] = ALL_ROUTES):
 
 def get_app():
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
+    logger.info("[Initialization] Initialized app")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[

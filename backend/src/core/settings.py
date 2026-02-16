@@ -27,6 +27,7 @@ class AppSettings(BaseSettings):
     PROJECT_ROOT: Path | str
 
     FIREBASE_CRED: str | None = None
+    FIREBASE_AUTH_EMULATOR_HOST: str | None = None
     STORAGE_BUCKET: str | None = None
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
@@ -52,6 +53,7 @@ class AppSettings(BaseSettings):
 def get_settings() -> AppSettings:
     valid_modes = ("testing", "dev", "production")
     env_mode = os.getenv("MODE", "dev")
+    auth_emulator = os.getenv("FIREBASE_AUTH_EMULATOR_HOST", None)
     if env_mode not in valid_modes:
         raise ValueError(f"Invalid MODE: {env_mode}. Must be one of {valid_modes}")
     allowed_origins = os.getenv("ALLOWED_ORIGINS")
@@ -59,6 +61,10 @@ def get_settings() -> AppSettings:
         allowed_origins = allowed_origins.split(",")
     else:
         allowed_origins = ["http://localhost:5174"]
+
+    if env_mode and not auth_emulator:
+
+        raise ValueError("FIREBASE_AUTH_EMULATOR_HOST must be provided during dev env")
 
     app_settings = AppSettings(
         PROJECT_NAME="GestaltQuestions",

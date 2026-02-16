@@ -1,3 +1,3 @@
 from .notes import router
-
-ALL_ROUTES = [router]
+from .user import router as user_router
+ALL_ROUTES = [router, user_router]
