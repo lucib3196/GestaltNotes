@@ -1,17 +1,14 @@
-import { MathJaxContext } from "better-react-mathjax";
+
 import { Section } from "./components/Section";
 import Chat from "./features/Chat/Chat";
-const mathJaxConfig = {
-  tex: {
-    inlineMath: [["$", "$"]],
-    displayMath: [["$$", "$$"]],
-  },
-};
+import { useAuth } from "./context";
 import NavBar from "./components/NavBar/NavBar";
 
 function App() {
+  
   return (
-    <MathJaxContext config={mathJaxConfig}>
+    <>
+
 
       <NavBar />
       <Section>
@@ -21,7 +18,7 @@ function App() {
       {/* <Chat /> */}
 
       {/* <MarkDownEditor /> */}
-    </MathJaxContext>
+    </>
   );
 }
 
