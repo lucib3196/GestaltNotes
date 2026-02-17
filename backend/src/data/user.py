@@ -1,10 +1,9 @@
 from src.model.user import User, UserCreate
 from sqlmodel import Session, select
 from src.core.logger import logger
-from uuid import UUID
-from sqlalchemy.exc import SQLAlchemyError
 
-ID = str | UUID
+from sqlalchemy.exc import SQLAlchemyError
+from . import ID
 
 
 class UserDB:

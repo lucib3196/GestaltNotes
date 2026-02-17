@@ -3,13 +3,10 @@ from functools import lru_cache
 from typing import Annotated
 from src.core.database_config import SessionDep
 from src.core.settings import get_settings
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from starlette import status
+from fastapi import Depends
 from src.core.logger import logger
-from src.data.user import UserDB
 from src.service.user.user_manager import UserManager
-from firebase_admin.auth import verify_id_token
+from src.data.course import CourseDB
 
 
 @lru_cache
@@ -41,3 +38,15 @@ def get_user_manager(session: SessionDep) -> UserManager:
 
 
 UserManagerDependency = Annotated[UserManager, Depends(get_user_manager)]
+
+
+@lru_cache
+def get_course_db(session: SessionDep) -> CourseDB:
+    try:
+        logger.debug("Initialized Course DB")
+        return CourseDB(session)
+    except Exception as e:
+        raise ValueError("Failed to initialize Course DB")
+
+
+CourseDBDependency = Annotated[CourseDB, Depends(get_course_db)]
