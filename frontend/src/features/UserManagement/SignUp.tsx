@@ -1,6 +1,7 @@
 import { UserManager } from "../../services";
 import AuthBase from "./AuthBase";
 import { toast } from "react-toastify"
+
 export function SignUpForm() {
     const onSubmit = async (
         email: string,
@@ -22,6 +23,7 @@ export function SignUpForm() {
             });
 
             toast.success("Account created successfully!");
+            
         } catch (error: any) {
             toast.error(error.message ?? "Failed to create account");
         }

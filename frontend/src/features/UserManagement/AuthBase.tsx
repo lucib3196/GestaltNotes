@@ -34,7 +34,7 @@ export default function AuthBase({ onSubmit }: AuthProps) {
             className="flex flex-col gap-y-5 items-center justify-center w-full h-full"
             id={""}
         >
-            <div className="grid sm:grid-cols-2 gap-y-2 gap-x-0 place-content-center justify-items-center w-fit mx-auto">
+            <div className="flex flex-col gap-y-2 gap-x-0 place-content-center justify-items-center w-fit mx-auto">
                 {mode === "signup" && (
                     <>
                         <InputTextForm
