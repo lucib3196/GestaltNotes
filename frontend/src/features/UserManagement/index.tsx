@@ -1,3 +1,4 @@
 export * from "./context"
-export * from "./Login"
+
+export {default as LogInForm} from './LogIn';
 export * from "./AuthPage"

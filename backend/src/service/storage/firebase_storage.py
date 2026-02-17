@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Sequence
 from firebase_admin import storage
 
 Target = str | Path
@@ -18,10 +19,11 @@ class FirebaseStorage:
             blob = self.bucket.get_blob(target)
             if blob:
                 return blob.download_as_bytes()
+            
         except Exception as e:
             raise ValueError(f"Could not read contents from blob {e}")
 
-    def list_files(self, target: str | Path, recursive: bool = False):
+    def list_files(self, target: str | Path, recursive: bool = False) -> Sequence[str]:
         if isinstance(target, Path):
             target = target.as_posix()
         if not target.endswith("/"):

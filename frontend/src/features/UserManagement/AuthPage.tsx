@@ -3,7 +3,7 @@ import * as React from "react";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { type UserMode } from "./context";
-import { LogInForm } from "./Login";
+import LogInForm from "./LogIn";
 import { SignUpForm } from "./SignUp";
 
 export default function AuthPage() {
