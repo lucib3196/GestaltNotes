@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     async function logout() {
         await signOut(auth);
+        window.location.reload()
     }
     async function getIdToken() {
         if (!user) return null;

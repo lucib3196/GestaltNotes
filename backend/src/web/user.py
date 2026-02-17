@@ -20,7 +20,11 @@ async def create_user(user_manager: UserManagerDependency, data: UserCreate) -> 
             )
         return user
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={str(e)})
+        if "EMAIL_EXISTS" in str(e):
+            raise HTTPException(
+                status_code=400, detail="User with this email already exists."
+            )
+    raise HTTPException(status_code=400, detail="User creation failed.")
 
 
 @router.post("/login")

@@ -56,7 +56,7 @@ def get_settings() -> AppSettings:
     auth_emulator = os.getenv("FIREBASE_AUTH_EMULATOR_HOST", None)
     if env_mode not in valid_modes:
         raise ValueError(f"Invalid MODE: {env_mode}. Must be one of {valid_modes}")
-    allowed_origins = os.getenv("ALLOWED_ORIGINS")
+    allowed_origins = os.getenv("ALLOWED_ORIGINS","")
     if allowed_origins:
         allowed_origins = allowed_origins.split(",")
     else:

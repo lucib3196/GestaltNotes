@@ -8,9 +8,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useAuth } from "../../context";
 import Modal from "../Modal/PopUpModal";
 import { useState } from "react";
-
+import { LogInForm } from "../../features/UserManagement";
+import { SignUpForm } from "../../features/UserManagement/SignUp";
 export default function NavBar() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [showModal, setShowModal] = useState<boolean>(false);
 
     return (
@@ -29,9 +30,13 @@ export default function NavBar() {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         Gestalt Notes
                     </Typography>
+
+
+
+
                     {user ? (
-                        <Button color="inherit" onClick={() => console.log("Logging In")}>
-                            Login
+                        <Button color="inherit" onClick={() => logout()}>
+                            Sign out
                         </Button>
                     ) : (
                         <Button
@@ -41,7 +46,11 @@ export default function NavBar() {
                             Sign Up
                         </Button>
                     )}
-                    {showModal && <Modal setShowModal={setShowModal}>Content</Modal>}
+                    {showModal && (
+                        <Modal setShowModal={setShowModal}>
+                            <SignUpForm />
+                        </Modal>
+                    )}
                 </Toolbar>
             </AppBar>
         </Box>
