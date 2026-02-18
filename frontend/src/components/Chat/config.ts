@@ -16,7 +16,7 @@ export const MessageBaseStyle = `
 export type ToolType = "invokation" | "tool_result";
 export type MessageType = "ai" | "human" | "tool";
 
-export const MessageStyle: Partial<Record<MessageType | ToolType, string>> = {
+export const MessageStyle: Partial<Record<MessageType | ToolType , string>> = {
   ai: `
     bg-slate-100
     text-slate-900

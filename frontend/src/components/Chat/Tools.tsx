@@ -13,7 +13,7 @@ type ToolBubbleProps = {
 export function ToolBubble({ message }: ToolBubbleProps) {
     const [showToolResult, setShowToolResult] = useState<boolean>(false)
     const parsed = parseToolResult(message);
-
+    
     return (
         <div
             className={clsx(MessageBaseStyle, MessageStyle["invokation"], "self-start")}

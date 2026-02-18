@@ -8,7 +8,7 @@ import { ToastContainer } from "react-toastify";
 import './index.css'
 import App from './App.tsx'
 import { theme } from './theme';
-
+import { LectureChatProvider } from './features/Chat/context.tsx';
 const mathJaxConfig = {
   tex: {
     inlineMath: [["$", "$"]],
@@ -18,17 +18,19 @@ const mathJaxConfig = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthModeProvider>
-      <MathJaxContext config={mathJaxConfig}>
-        <AuthProvider>
-          <ThemeProvider theme={theme}>
-            <ToastContainer position="top-right" autoClose={3000} />
-            <App />
+    <LectureChatProvider>
+      <AuthModeProvider>
+        <MathJaxContext config={mathJaxConfig}>
+          <AuthProvider>
+            <ThemeProvider theme={theme}>
+              <ToastContainer position="top-right" autoClose={3000} />
+              <App />
 
-          </ThemeProvider>
-        </AuthProvider>
-      </MathJaxContext>
-    </AuthModeProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </MathJaxContext>
+      </AuthModeProvider>
+    </LectureChatProvider>
 
   </StrictMode>,
 )
