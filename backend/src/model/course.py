@@ -1,7 +1,13 @@
+from __future__ import annotations
 from sqlmodel import SQLModel, Field
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from uuid import uuid4, UUID
 from pydantic import BaseModel
+from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
+
+
+if TYPE_CHECKING:
+    from .user import User
 
 
 class Course(SQLModel, table=True):
@@ -13,9 +19,20 @@ class Course(SQLModel, table=True):
     )
     description: str | None = Field(default=None)
 
+    owner: UUID | None = Field(default=None, foreign_key="user.id")
+
 
 class CourseData(BaseModel):
     name: str
     discipline: str
     blob: str | None
     description: str | None
+
+
+class StudentCourseLink(SQLModel, table=True):
+    student_id: UUID | None = Field(
+        default=None, foreign_key="user.id", primary_key=True
+    )
+    course_id: UUID | None = Field(
+        default=None, foreign_key="course.id", primary_key=True
+    )

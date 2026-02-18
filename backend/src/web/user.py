@@ -1,5 +1,5 @@
 from .dependencies import UserManagerDependency
-from src.model.user import UserLogin, UserCreate, UserRead, User
+from src.model.user import UserCreate, UserRead, User, VALID_ROLES
 from fastapi.routing import APIRouter
 from fastapi.exceptions import HTTPException
 from starlette import status
@@ -10,9 +10,11 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/")
-async def create_user(user_manager: UserManagerDependency, data: UserCreate) -> User:
+async def create_user(
+    user_manager: UserManagerDependency, data: UserCreate, role: VALID_ROLES = "student"
+) -> User:
     try:
-        user = await user_manager.create_user(data)
+        user = await user_manager.create_user(data, role=role)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

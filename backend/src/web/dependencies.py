@@ -9,6 +9,8 @@ from src.service.user.user_manager import UserManager
 from src.data.course import CourseDB
 
 
+
+
 @lru_cache
 def get_firebase_storage() -> FirebaseStorage:
     settings = get_settings()
@@ -38,6 +40,7 @@ def get_user_manager(session: SessionDep) -> UserManager:
 
 
 UserManagerDependency = Annotated[UserManager, Depends(get_user_manager)]
+
 
 
 @lru_cache

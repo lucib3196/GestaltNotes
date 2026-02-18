@@ -1,18 +1,21 @@
 from src.data.user import UserDB
-from src.model.user import User, UserCreate, UserLogin
+from src.model.user import User, UserCreate
 from firebase_admin import auth
 from sqlmodel import Session
 from uuid import UUID
-
-
-ID = str | UUID
+from src.model.user import User, UserCreate, VALID_ROLES
+from src.data.role import RoleDB
+from . import ID, logger
 
 
 class UserManager:
     def __init__(self, session: Session):
         self.udb = UserDB(session)
+        self.rm = RoleDB(session)
 
-    async def create_user(self, data: UserCreate) -> User | None:
+    async def create_user(
+        self, data: UserCreate, role: VALID_ROLES | None = "student"
+    ) -> User:
 
         try:
             user_orm = User(
@@ -28,7 +31,16 @@ class UserManager:
                 uid=str(user_orm.id),
                 password=data.password,
             )
-            return await self.udb.create_user(data=user_orm)
+            user = await self.udb.create_user(data=user_orm)
+            assert user
+
+            # Add role to user
+            if role:
+                r = await self.rm.get_role(role)
+                user.roles.append(r)
+                logger.debug("Added role succesfully")
+
+            return user
         except Exception as e:
             raise ValueError(f"[UserManager] Failed to create user {e}")
 

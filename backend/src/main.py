@@ -11,6 +11,8 @@ from src.core.database_config import create_db_and_tables
 from src.core.firebase import initialize_firebase_app
 from src.core.settings import get_settings
 from src.web import ALL_ROUTES
+from src.data.role import RoleDB
+from src.core.database_config import SessionDep, Session
 
 
 settings = get_settings()
@@ -22,6 +24,13 @@ async def on_startup(app: FastAPI):
     engine = create_db_and_tables()
     initialize_firebase_app()
     logger.info("Created database successfully")
+
+    logger.debug("Seeding roles")
+    with Session(engine) as session:
+        await RoleDB(session).seed_roles()
+        logger.info("[Initialization] Roles Created/verified Successfully")
+        session.commit()
+
     yield
 
 
@@ -43,7 +52,7 @@ def get_app():
         allow_headers=["*"],  # allow all headers (including Authorization)
         expose_headers=["Content-Disposition"],
     )
-    
+
     add_routes(app)
     return app
 
