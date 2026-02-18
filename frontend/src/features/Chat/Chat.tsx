@@ -7,14 +7,15 @@ import { type Message } from "@langchain/langgraph-sdk";
 
 export default function Chat() {
   const [message, setMessage] = useState<string>("");
+  const { sources, setSources, agent } = UseLectureChatContext()
+
   const stream = useStream({
-    assistantId: "agent_me135",
+    assistantId: agent,
     // Local development
     apiUrl: import.meta.env.VITE_LOCAL_URL,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
   });
 
-  const { sources, setSources } = UseLectureChatContext()
 
   const handleArtifacts = (message: Message) => {
     if (message.type === "tool") {

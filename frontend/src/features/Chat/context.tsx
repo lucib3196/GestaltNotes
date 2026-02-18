@@ -1,6 +1,9 @@
 import { createContext, useState, useContext, } from "react";
 import type { LectureMetadata } from "../../types/Metadata.types";
 
+
+type ValidAgent = "agent_me135" | "agent_me118";
+
 export type LectureArtifact = {
     id: string;
     metadata: LectureMetadata;
@@ -9,6 +12,8 @@ export type LectureArtifact = {
 };
 
 type LectureChatContext = {
+    agent: ValidAgent
+    setAgent: (val: ValidAgent) => void
     sources: LectureArtifact[]
     setSources: (val: LectureArtifact[]) => void
 }
@@ -18,8 +23,9 @@ const LectureChatContext = createContext<LectureChatContext | undefined>(undefin
 
 export function LectureChatProvider({ children }: { children: React.ReactNode }) {
     const [sources, setSources] = useState<LectureArtifact[]>([])
+    const [agent, setAgent] = useState<ValidAgent>("agent_me135")
 
-    return <LectureChatContext.Provider value={{ sources, setSources }}>
+    return <LectureChatContext.Provider value={{ sources, setSources, agent, setAgent }}>
         {children}
     </LectureChatContext.Provider>
 }
