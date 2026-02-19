@@ -3,6 +3,7 @@ from sqlmodel import SQLModel, Field as SqlField, Relationship as SQLMODELRelati
 from typing import Optional, Literal
 from uuid import uuid4, UUID
 from pydantic import BaseModel
+from datetime import datetime
 
 
 VALID_ROLES = Literal["educator", "student", "admin"]
@@ -34,11 +35,11 @@ class User(SQLModel, table=True):
     first_name: str
     last_name: str
     email: str
-
     roles: list["Role"] = SQLMODELRelationship(
         back_populates="users",
         link_model=UserRoleLink,
     )
+    threads: list["Thread"] = SQLMODELRelationship(back_populates="user")
 
 
 class Role(SQLModel, table=True):
@@ -49,3 +50,24 @@ class Role(SQLModel, table=True):
         back_populates="roles",
         link_model=UserRoleLink,
     )
+
+class Thread(SQLModel, table=True):
+    id: Optional[UUID] = SqlField(default_factory=uuid4, primary_key=True)
+    user_id: UUID = SqlField(foreign_key="user.id")
+    title: Optional[str] = None
+    created_at: datetime = SqlField(default_factory=datetime.utcnow)
+    
+    user: Optional[User] = SQLMODELRelationship(back_populates="threads")
+    messages: list["Message"] = SQLMODELRelationship(back_populates="thread")
+
+# might be doing 1 to 1 but need to do many to many because of forgein key
+# 
+
+class Message(SQLModel, table=True):
+    id: Optional[UUID] = SqlField(default_factory=uuid4, primary_key=True)
+    thread_id: UUID = SqlField(foreign_key="thread.id")
+    role: str 
+    content: str
+    created_at: datetime = SqlField(default_factory=datetime.utcnow)
+    
+    thread: Optional[Thread] = SQLMODELRelationship(back_populates="messages")
