@@ -5,6 +5,6 @@ import pytest
 def user_db(db_session):
     return UserDB(db_session)
 
-
-def test_user(user_db):
+@pytest.mark.asyncio
+async def test_user(user_db):
     print("Testing users")
