@@ -23,12 +23,10 @@ class RoleDB:
             logger.error(message)
             raise ValueError(message)
 
-    async def get_role(self, name: VALID_ROLES) -> Role:
+    async def get_role(self, name: VALID_ROLES) -> Role|None:
         try:
             stmt = select(Role).where(Role.name == name)
             role = self.session.exec(stmt).first()
-            if not role:
-                raise ValueError(f"[ROLEDB] Fole {name} does not exist in DB")
             return role
         except SQLAlchemyError as e:
             self.session.rollback()
@@ -38,4 +36,12 @@ class RoleDB:
 
     async def seed_roles(self) -> List[Role]:
         roles: List[VALID_ROLES] = ["educator", "student", "admin"]
-        return await asyncio.gather(*[self.create_role(r) for r in roles])
+        created_roles = []
+        for r in roles:
+            r_exist = await self.get_role(r)
+            if r_exist:
+                created_roles.append(r_exist)
+            else:
+                created_roles.append(await self.create_role(r))
+        return created_roles
+        
