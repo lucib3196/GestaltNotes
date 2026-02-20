@@ -5,8 +5,14 @@ from fastapi.exceptions import HTTPException
 from starlette import status
 from firebase_admin import auth
 import requests
+from pydantic import BaseModel
+
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+class LoginRequest(BaseModel):
+    id_token: str
 
 
 @router.post("/")
@@ -26,12 +32,13 @@ async def create_user(
             raise HTTPException(
                 status_code=400, detail="User with this email already exists."
             )
-    raise HTTPException(status_code=400, detail="User creation failed.")
+
+        raise HTTPException(status_code=400, detail=f"User creation failed. {e}")
 
 
 @router.post("/login")
-async def login(id_token: str):
-    decoded = auth.verify_id_token(id_token)
+async def login(payload: LoginRequest):
+    decoded = auth.verify_id_token(payload.id_token)
     user_read = UserRead(email=decoded.get("email", None))
     return user_read
 

@@ -1,13 +1,15 @@
 from pathlib import Path
 from typing import Sequence
 from firebase_admin import storage
-
+import firebase_admin
+from src.core.firebase import initialize_firebase_app
 Target = str | Path
 
-
+initialize_firebase_app()
 class FirebaseStorage:
     def __init__(self, bucket: str):
         self.bucket = storage.bucket(bucket)
+  
 
     def create_storage(self, target: str | Path) -> str:
         blob = self.bucket.blob(target)
@@ -38,3 +40,9 @@ class FirebaseStorage:
                     result.append(blob.name)
             return result
         return [blob.name for blob in blobs]
+
+
+if __name__ == "__main__":
+    import os
+    
+    FirebaseStorage(bucket="gestaltnotes.firebasestorage.app").create_storage("name")

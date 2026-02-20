@@ -28,6 +28,7 @@ class AppSettings(BaseSettings):
 
     FIREBASE_CRED: str | None = None
     FIREBASE_AUTH_EMULATOR_HOST: str | None = None
+    FIREBASE_STORAGE_EMULATOR_HOST: str|None = None
     STORAGE_BUCKET: str | None = None
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")

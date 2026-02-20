@@ -25,7 +25,7 @@ class UserManager:
                 f"{user_orm.first_name}_{user_orm.last_name}_{str(user_orm.id)[:4]}"
             )
             # First create the user in the firebase auth
-            auth.create_user(
+            response = auth.create_user(
                 email=data.email,
                 display_name=display_name,
                 uid=str(user_orm.id),
@@ -37,6 +37,9 @@ class UserManager:
             # Add role to user
             if role:
                 r = await self.rm.get_role(role)
+                if not r:
+                    logger.error("failed to add user role")
+                    return user
                 user.roles.append(r)
                 logger.debug("Added role succesfully")
 
