@@ -13,7 +13,7 @@ class CourseDB:
         try:
             course_orm = Course(
                 name=data.name,
-                discipline=data.name,
+                discipline=data.discipline,
                 blob=data.blob,
                 description=data.description,
             )

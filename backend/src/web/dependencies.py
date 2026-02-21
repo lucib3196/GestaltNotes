@@ -7,7 +7,8 @@ from fastapi import Depends
 from src.core.logger import logger
 from src.service.user.user_manager import UserManager
 from src.data.course import CourseDB
-
+from src.data.thread import ThreadDB
+from src.data.message import MessageDB
 
 
 
@@ -53,3 +54,26 @@ def get_course_db(session: SessionDep) -> CourseDB:
 
 
 CourseDBDependency = Annotated[CourseDB, Depends(get_course_db)]
+
+@lru_cache
+def get_thread_db(session: SessionDep) -> ThreadDB:
+    try:
+        logger.debug("Initialized Thread DB")
+        return ThreadDB(session)
+    except Exception as e:
+        raise ValueError("Failed to initialize Thread DB")
+
+
+ThreadDBDependency = Annotated[ThreadDB, Depends(get_thread_db)]
+
+
+@lru_cache
+def get_message_db(session: SessionDep) -> MessageDB:
+    try:
+        logger.debug("Initialized Message DB")
+        return MessageDB(session)
+    except Exception as e:
+        raise ValueError("Failed to initialize Message DB")
+
+
+MessageDBDependency = Annotated[MessageDB, Depends(get_message_db)]

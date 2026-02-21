@@ -1,13 +1,13 @@
-from __future__ import annotations
+
 from sqlmodel import SQLModel, Field
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 from uuid import uuid4, UUID
 from pydantic import BaseModel
 from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
 
 
 if TYPE_CHECKING:
-    from .user import User
+    from .user import User, Thread
 
 
 class Course(SQLModel, table=True):
@@ -20,6 +20,8 @@ class Course(SQLModel, table=True):
     description: str | None = Field(default=None)
 
     owner: UUID | None = Field(default=None, foreign_key="user.id")
+
+    threads: List["Thread"] = Relationship(back_populates="course")
 
 
 class CourseData(BaseModel):
