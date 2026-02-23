@@ -1,9 +1,13 @@
 
 from sqlmodel import SQLModel, Field as SqlField, Relationship as SQLMODELRelationship
-from typing import Optional, Literal
+from typing import List, Optional, Literal, TYPE_CHECKING
 from uuid import uuid4, UUID
 from pydantic import BaseModel
+from datetime import datetime
 
+if TYPE_CHECKING:
+    from .chat import Thread
+    from .course import Course
 
 VALID_ROLES = Literal["educator", "student", "admin"]
 
@@ -34,11 +38,11 @@ class User(SQLModel, table=True):
     first_name: str
     last_name: str
     email: str
-
     roles: list["Role"] = SQLMODELRelationship(
         back_populates="users",
         link_model=UserRoleLink,
     )
+    threads: List["Thread"] = SQLMODELRelationship(back_populates="user")
 
 
 class Role(SQLModel, table=True):
@@ -49,3 +53,4 @@ class Role(SQLModel, table=True):
         back_populates="roles",
         link_model=UserRoleLink,
     )
+
