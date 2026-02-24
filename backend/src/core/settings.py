@@ -64,8 +64,7 @@ def get_settings() -> AppSettings:
     else:
         allowed_origins = ["http://localhost:5174"]
 
-    if env_mode and not auth_emulator:
-
+    if env_mode=="dev" and not auth_emulator:
         raise ValueError("FIREBASE_AUTH_EMULATOR_HOST must be provided during dev env")
 
     app_settings = AppSettings(
