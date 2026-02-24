@@ -52,6 +52,7 @@ def get_app():
         allow_headers=["*"],  # allow all headers (including Authorization)
         expose_headers=["Content-Disposition"],
     )
+    logger.info(f"Intialization. Allowed origins {settings.BACKEND_CORS_ORIGINS}")
 
     add_routes(app)
     return app

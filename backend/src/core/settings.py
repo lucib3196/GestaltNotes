@@ -60,6 +60,7 @@ def get_settings() -> AppSettings:
     allowed_origins = os.getenv("ALLOWED_ORIGINS","")
     if allowed_origins:
         allowed_origins = allowed_origins.split(",")
+        allowed_origins = [o if o.startswith("http://") else "http://" + o for o in allowed_origins]
     else:
         allowed_origins = ["http://localhost:5174"]
 

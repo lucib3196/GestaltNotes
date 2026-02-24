@@ -6,7 +6,7 @@ from starlette import status
 from firebase_admin import auth
 import requests
 from pydantic import BaseModel
-
+from src.core.logger import logger
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -19,6 +19,7 @@ class LoginRequest(BaseModel):
 async def create_user(
     user_manager: UserManagerDependency, data: UserCreate, role: VALID_ROLES = "student"
 ) -> User:
+    logger.info("Received request")
     try:
         user = await user_manager.create_user(data, role=role)
         if not user:
