@@ -3,6 +3,7 @@ import {
   ChatMessage,
   ChatContainer,
   ChatInput,
+  ChatSideBar,
   SourceSection,
 } from "../../components/Chat";
 import { useEffect, useState } from "react";
@@ -51,7 +52,7 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col max-w-3xl mx-auto h-[80vh]">
+    <div className="flex flex-col max-w-6xl mx-auto h-[80vh]">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-slate-800">
@@ -65,38 +66,42 @@ export default function Chat() {
           setSelected={(v) => setAgent(v as ValidAgent)}
         />
       </div>
+      <div className="flex flex-1 min-h-0 items-stretch">
+        {/* <ChatSideBar chats={[]} onSelectChat={() => {}} /> */}
+          <div className="flex-1 min-w-0">
+            {/* Chat Container */}
+            <ChatContainer className="flex flex-col flex-1 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3 bg-slate-50">
+                {stream.messages.map((msg, idx) => {
+                  handleArtifacts(msg);
+                  return <ChatMessage key={idx} message={msg} id={idx} />;
+                })}
 
-      {/* Chat Container */}
-      <ChatContainer className="flex flex-col flex-1 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3 bg-slate-50">
-          {stream.messages.map((msg, idx) => {
-            handleArtifacts(msg);
-            return <ChatMessage key={idx} message={msg} id={idx} />;
-          })}
+                {stream.isLoading && (
+                  <div className="text-sm text-slate-400 animate-pulse">
+                    Assistant is thinking...
+                  </div>
+                )}
 
-          {stream.isLoading && (
-            <div className="text-sm text-slate-400 animate-pulse">
-              Assistant is thinking...
-            </div>
-          )}
+                {sources.length > 0 && (
+                  <div className="pt-2">
+                    <SourceSection sources={sources} />
+                  </div>
+                )}
+              </div>
 
-          {sources.length > 0 && (
-            <div className="pt-2">
-              <SourceSection sources={sources} />
-            </div>
-          )}
-        </div>
-
-        {/* Input */}
-        <div className="border-t border-slate-200 bg-white px-5 py-4">
-          <ChatInput
-            value={message}
-            setValue={setMessage}
-            onSubmit={handleSubmit}
-          />
-        </div>
-      </ChatContainer>
+              {/* Input */}
+              <div className="border-t border-slate-200 bg-white px-5 py-4">
+                <ChatInput
+                  value={message}
+                  setValue={setMessage}
+                  onSubmit={handleSubmit}
+                />
+              </div>
+            </ChatContainer>
+          </div>
+      </div>
     </div>
   );
 }
