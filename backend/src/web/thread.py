@@ -2,10 +2,11 @@ from fastapi.routing import APIRouter
 from uuid import UUID
 
 from .dependencies import ThreadDBDependency, MessageDBDependency
-from src.model.chat import Thread, Message
-from .thread_model import ThreadCreate, ThreadList, MessageCreate
+from src.model.chat import Thread, Message, ThreadCreate, ThreadList, MessageCreate
+
 
 router = APIRouter(prefix="/threads", tags=["threads"])
+
 
 @router.post("/", response_model=Thread)
 async def create_thread(
@@ -61,3 +62,6 @@ async def list_messages(
     mdb: MessageDBDependency,
 ) -> list[Message]:
     return await mdb.list_messages(thread_id)
+
+
+

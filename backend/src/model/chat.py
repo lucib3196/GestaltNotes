@@ -1,12 +1,30 @@
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 from uuid import UUID, uuid4
 
+from pydantic import BaseModel
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
     from .user import User
     from .course import Course
+
+
+class ThreadCreate(BaseModel):
+    user_id: UUID
+    course_id: UUID
+    title: str | None = None
+    agent: str | None = None
+
+
+class ThreadList(BaseModel):
+    user_id: UUID
+    course_id: UUID | None = None
+
+
+class MessageCreate(BaseModel):
+    role: str
+    content: str
 
 
 class Thread(SQLModel, table=True):

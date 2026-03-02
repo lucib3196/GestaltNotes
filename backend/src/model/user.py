@@ -1,4 +1,3 @@
-
 from sqlmodel import SQLModel, Field as SqlField, Relationship as SQLMODELRelationship
 from typing import List, Optional, Literal, TYPE_CHECKING
 from uuid import uuid4, UUID
@@ -18,8 +17,8 @@ class UserRoleLink(SQLModel, table=True):
 
 
 class UserCreate(BaseModel):
-    first_name: str
-    last_name: str
+    first_name: str | None = None
+    last_name: str | None = None
     password: str
     email: str
 
@@ -30,13 +29,13 @@ class UserLogin(BaseModel):
 
 
 class UserRead(BaseModel):
-    email: str
+    email: str | None = None
 
 
 class User(SQLModel, table=True):
     id: Optional[UUID] = SqlField(default_factory=uuid4, primary_key=True)
-    first_name: str
-    last_name: str
+    first_name: str | None = None
+    last_name: str | None = None
     email: str
     roles: list["Role"] = SQLMODELRelationship(
         back_populates="users",
@@ -53,4 +52,3 @@ class Role(SQLModel, table=True):
         back_populates="roles",
         link_model=UserRoleLink,
     )
-

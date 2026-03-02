@@ -11,7 +11,7 @@ export default function ChatContainer({
   ...rest 
 }: ChatContainerProps) {
   return (
-    <MathJax className="h-full block">
+    <MathJax>
       <div
         className={clsx(
           "flex flex-col h-full bg-gray-100 border rounded-lg shadow-md overflow-hidden",
