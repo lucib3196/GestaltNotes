@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, } from "react";
-import type { LectureMetadata } from "../../types/Metadata.types";
+import type { LectureMetadata } from "../types/Metadata.types";
 
 
 export type ValidAgent = "agent_me135" | "agent_me118";

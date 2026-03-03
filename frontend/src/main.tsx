@@ -8,7 +8,7 @@ import { ToastContainer } from "react-toastify";
 import './index.css'
 import App from './App.tsx'
 import { theme } from './theme';
-import { LectureChatProvider } from './features/Chat/context.tsx';
+import { LectureChatProvider } from './context/ChatContext.tsx';
 const mathJaxConfig = {
   tex: {
     inlineMath: [["$", "$"]],
