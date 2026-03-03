@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from uuid import UUID
 
 class ThreadCreate(BaseModel):
+    thread_id: UUID
     user_id: UUID
     course_id: UUID
     title: str | None = None

@@ -16,11 +16,13 @@ class ThreadDB:
         self,
         user_id: UUID,
         course_id: UUID,
+        id: UUID,
         title: str | None = None,
         agent: str | None = None,
     ) -> Thread:
         try:
             thread_orm = Thread(
+                id=id,
                 user_id=user_id,
                 course_id=course_id,
                 title=title,

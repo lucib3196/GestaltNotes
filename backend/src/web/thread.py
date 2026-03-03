@@ -13,6 +13,7 @@ async def create_thread(
     tdb: ThreadDBDependency,
 ) -> Thread:
     return await tdb.create_thread(
+        id=data.thread_id,
         user_id=data.user_id,
         course_id=data.course_id,
         title=data.title,
