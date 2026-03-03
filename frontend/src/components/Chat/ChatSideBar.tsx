@@ -3,9 +3,6 @@ import clsx from "clsx";
 export type Chat = {
   id: string;
   title: string;
-  preview?: string;
-  timestamp?: string;
-  unread?: boolean;
 };
 
 export type ChatSideBarProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -86,22 +83,7 @@ export default function ChatSideBar({
                 <span className="truncate text-sm text-slate-800">
                   {chat.title}
                 </span>
-                <div className="flex items-center gap-1 shrink-0">
-                  {chat.unread && (
-                    <span className="h-2 w-2 rounded-full bg-blue-500" aria-label="Unread" />
-                  )}
-                  {chat.timestamp && (
-                    <span className="text-xs text-slate-400">{chat.timestamp}</span>
-                  )}
-                </div>
               </div>
-
-              {/* Preview row */}
-              {chat.preview && (
-                <p className="mt-0.5 truncate text-xs text-slate-400">
-                  {chat.preview}
-                </p>
-              )}
             </button>
           ))
         )}

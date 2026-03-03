@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const rawURL = import.meta.env.VITE_API_URL ?? "http://localhost:8010";
+const rawURL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 function PrepareURL(raw: string) {
   return raw.startsWith("http")

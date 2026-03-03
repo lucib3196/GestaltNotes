@@ -33,8 +33,10 @@ def sample_thread():
 async def test_create_thread(db, mock_session):
     user_id = uuid4()
     course_id = uuid4()
+    thread_id = uuid4()
 
     result = await db.create_thread(
+        id=thread_id,
         user_id=user_id,
         course_id=course_id,
         title="thread",
@@ -52,7 +54,7 @@ async def test_create_thread(db, mock_session):
 
 @pytest.mark.asyncio
 async def test_create_thread_optional_fields_blank(db):
-    result = await db.create_thread(user_id=uuid4(), course_id=uuid4())
+    result = await db.create_thread(id=uuid4(), user_id=uuid4(), course_id=uuid4())
 
     assert result.title is None
     assert result.agent is None
@@ -63,7 +65,7 @@ async def test_create_thread_error_and_rollback(db, mock_session):
     mock_session.commit = raise_error
 
     with pytest.raises(ValueError, match=r"\[ThreadDB\] failed to create thread"):
-        await db.create_thread(user_id=uuid4(), course_id=uuid4())
+        await db.create_thread(id = uuid4(), user_id=uuid4(), course_id=uuid4())
 
     mock_session.rollback.assert_called_once()
 
