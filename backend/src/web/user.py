@@ -7,10 +7,16 @@ from firebase_admin import auth
 import requests
 from pydantic import BaseModel
 from src.core.logger import logger
-from src.web.dependencies import FireBaseToken, ThreadDBDependency
+from src.web.dependencies import FireBaseToken, ThreadDBDependency, CurrentUser
 from starlette import status
 from typing import List
 from src.model.chat import Thread
+from typing import Dict
+from fastapi.responses import Response
+
+
+class PasswordUpdate(BaseModel):
+    new_password: str
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -45,7 +51,10 @@ async def create_user(
 @router.post("/login")
 async def login(payload: LoginRequest):
     decoded = auth.verify_id_token(payload.id_token)
-    user_read = UserRead(email=decoded.get("email", None))
+    user_read = UserRead(
+        email=decoded.get("email", None),
+        force_password_reset=decoded.get("force_password_reset", False),
+    )
     return user_read
 
 
@@ -56,6 +65,16 @@ def get_current_user(
     decoded = token
     user_read = UserRead(email=decoded.get("email", None))
     return user_read
+
+
+@router.post("/password_reset/temp")
+async def password_reset(user_id: CurrentUser, update: PasswordUpdate) -> Response:
+    try:
+        auth.update_user(uid=user_id, password=update.new_password)
+        auth.set_custom_user_claims(str(user_id), {"force_password_reset": False})
+        return Response(status_code=200, content="Updated password okay")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to update password")
 
 
 @router.get("/thread")

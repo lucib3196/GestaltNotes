@@ -13,7 +13,10 @@ class UserManager:
         self.rm = RoleDB(session)
 
     async def create_user(
-        self, data: UserCreate, role: VALID_ROLES | None = "student"
+        self,
+        data: UserCreate,
+        role: VALID_ROLES | None = "student",
+        force_password_reset: bool = True,
     ) -> User:
 
         try:
@@ -38,6 +41,11 @@ class UserManager:
                     return user
                 user.roles.append(r)
                 logger.debug("Added role succesfully")
+
+            if force_password_reset:
+                auth.set_custom_user_claims(
+                    str(user.id), {"force_password_reset": True}
+                )
 
             return user
         except Exception as e:

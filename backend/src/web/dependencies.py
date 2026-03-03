@@ -14,6 +14,7 @@ from src.data.message import MessageDB
 from src.data.thread import ThreadDB
 from src.service import FirebaseStorage
 from src.service.user.user_manager import UserManager
+from src.model.user import User
 
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -35,6 +36,29 @@ def get_firebase_user_from_token(
 
 
 FireBaseToken = Annotated[Dict[str, str], Depends(get_firebase_user_from_token)]
+
+
+def get_current_user_id(
+    token: FireBaseToken,
+) -> str:
+    try:
+        user_id = token.get("user_id", None)
+        if user_id is None:
+            raise HTTPException(
+                detail="Failed to retrieve signed in user",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+        return user_id
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            detail=f"Failed to retrieve signed in user {e}",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+CurrentUser = Annotated[str, Depends(get_current_user_id)]
 
 
 @lru_cache
