@@ -4,7 +4,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { parseToolResult } from "./utils";
 import { useState } from "react";
-import { Button } from "../Button";
+import { Button } from "../../../components/Button";
 import { MessageBaseStyle, MessageStyle } from "./config";
 type ToolBubbleProps = {
     message: ToolMessage;

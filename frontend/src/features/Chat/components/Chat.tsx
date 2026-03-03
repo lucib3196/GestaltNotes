@@ -1,18 +1,17 @@
+
 import { useStream } from "@langchain/langgraph-sdk/react";
-import {
-  ChatMessage,
-  ChatContainer,
-  ChatInput,
-  ChatSideBar,
-  SourceSection,
-  type ChatThread,
-} from "../../components/Chat";
+
+import ChatMessage from "./ChatMessage";
+import ChatContainer from "./ChatContainer";
+import ChatSideBar from "./ChatSideBar";
+import ChatInput from "./ChatInput";
+import { type ChatThread } from "./ChatSideBar";
 import { useRef, useState, useEffect } from "react";
-import { type ValidAgent } from "./context";
-import { UseLectureChatContext, type LectureArtifact } from "./context";
+
+import { UseLectureChatContext, type LectureArtifact, type ValidAgent } from "../../../context/ChatContext";
 import { type Message } from "@langchain/langgraph-sdk";
-import { DropDown } from "../../components/DropDown";
-import api from "../../config/api";
+import { DropDown } from "../../../components/DropDown";
+import api from "../../../config/api";
 
 let threadCreated = false;
 
@@ -32,9 +31,9 @@ export default function Chat() {
     threadId: threadId ?? undefined,
     onThreadId: async (id: string) => {
       if (threadCreated) return;
-        threadCreated = true;
+      threadCreated = true;
       setThreadId(id);
-      
+
 
       // First message so create the FastAPI thread with LangGraph's Thread ID
       const response = await api.post("/threads", {
@@ -84,19 +83,19 @@ export default function Chat() {
     setMessage("");
   };
 
-    const handleArtifacts = (message: Message) => {
-      if (message.type !== "tool" || !message.artifact) return;
+  const handleArtifacts = (message: Message) => {
+    if (message.type !== "tool" || !message.artifact) return;
 
-      const artifacts = (
-        Array.isArray(message.artifact)
-          ? message.artifact
-          : Object.values(message.artifact)
-      ) as LectureArtifact[];
+    const artifacts = (
+      Array.isArray(message.artifact)
+        ? message.artifact
+        : Object.values(message.artifact)
+    ) as LectureArtifact[];
 
-      setSources(artifacts);
-    };
+    setSources(artifacts);
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     if (!stream.isLoading && stream.messages.length > 0 && threadId) {
       const lastMessage = stream.messages[stream.messages.length - 1];
       if (lastMessage.type === "ai") {
@@ -108,64 +107,64 @@ export default function Chat() {
     }
   }, [stream.isLoading]);
 
-    return (
-      <div className="flex flex-col max-w-6xl mx-auto h-[80vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-slate-800">
-            Lecture Tutor: Thread {threadId}
-          </h2>
+  return (
+    <div className="flex flex-col max-w-6xl mx-auto h-[80vh]">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-slate-800">
+          Lecture Tutor: Thread {threadId}
+        </h2>
 
-          <DropDown
-            options={["agent_me135", "agent_me118"]}
-            selected={agent}
-            label="Select Course"
-            setSelected={(v) => setAgent(v as ValidAgent)}
-          />
-        </div>
-        <div className="flex flex-1 min-h-0 items-stretch">
-          <ChatSideBar chats={chats}
-            activeChatId={threadId ?? undefined}
-            onSelectChat={(id) => loadThread(id)}
-            onNewChat={() => {
-              threadCreated = false;
-              setThreadId(null);
-              stream.stop?.();
-            }} />
-            <div className="flex-1 min-w-0">
-              {/* Chat Container */}
-              <ChatContainer className="flex flex-col flex-1 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3 bg-slate-50">
-                  {stream.messages.map((msg, idx) => {
-                    handleArtifacts(msg);
-                    return <ChatMessage key={idx} message={msg} id={idx} />;
-                  })}
+        <DropDown
+          options={["agent_me135", "agent_me118"]}
+          selected={agent}
+          label="Select Course"
+          setSelected={(v) => setAgent(v as ValidAgent)}
+        />
+      </div>
+      <div className="flex flex-1 min-h-0 items-stretch">
+        <ChatSideBar chats={chats}
+          activeChatId={threadId ?? undefined}
+          onSelectChat={(id) => loadThread(id)}
+          onNewChat={() => {
+            threadCreated = false;
+            setThreadId(null);
+            stream.stop?.();
+          }} />
+        <div className="flex-1 min-w-0">
+          {/* Chat Container */}
+          <ChatContainer className="flex flex-col flex-1 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3 bg-slate-50">
+              {stream.messages.map((msg, idx) => {
+                handleArtifacts(msg);
+                return <ChatMessage key={idx} message={msg} id={idx} />;
+              })}
 
-                  {stream.isLoading && (
-                    <div className="text-sm text-slate-400 animate-pulse">
-                      Assistant is thinking...
-                    </div>
-                  )}
-
-                  {sources.length > 0 && (
-                    <div className="pt-2">
-                      <SourceSection sources={sources} />
-                    </div>
-                  )}
+              {stream.isLoading && (
+                <div className="text-sm text-slate-400 animate-pulse">
+                  Assistant is thinking...
                 </div>
+              )}
 
-                {/* Input */}
-                <div className="border-t border-slate-200 bg-white px-5 py-4">
-                  <ChatInput
-                    value={message}
-                    setValue={setMessage}
-                    onSubmit={handleSubmit}
-                  />
+              {sources.length > 0 && (
+                <div className="pt-2">
+                  <SourceSection sources={sources} />
                 </div>
-              </ChatContainer>
+              )}
             </div>
+
+            {/* Input */}
+            <div className="border-t border-slate-200 bg-white px-5 py-4">
+              <ChatInput
+                value={message}
+                setValue={setMessage}
+                onSubmit={handleSubmit}
+              />
+            </div>
+          </ChatContainer>
         </div>
       </div>
-    );
+    </div>
+  );
 }

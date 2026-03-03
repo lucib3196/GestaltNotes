@@ -1,12 +1,12 @@
 import clsx from "clsx";
 
-export type Chat = {
+export type ChatThread = {
   id: string;
   title: string;
 };
 
 export type ChatSideBarProps = React.HTMLAttributes<HTMLDivElement> & {
-  chats: Chat[];
+  chats: ChatThread[];
   activeChatId?: string;
   onSelectChat: (id: string) => void;
   onNewChat?: () => void;
