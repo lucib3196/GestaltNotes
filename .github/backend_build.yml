@@ -25,7 +25,7 @@ jobs:
     env:
       MODE: "dev"
       STORAGE_BUCKET: ${{secrets.STORAGE_BUCKET}}
-      FIREBASE_CRED: ${{vars.FIREBASE_JSON_PATH}}
+      FIREBASE_CRED: FIREBASE_CRED.json
       FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099
       STORAGE_EMULATOR_HOST: http://localhost:9199
 
