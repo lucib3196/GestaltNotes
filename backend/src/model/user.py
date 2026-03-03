@@ -30,6 +30,7 @@ class UserLogin(BaseModel):
 
 class UserRead(BaseModel):
     email: str | None = None
+    force_password_reset: bool = False
 
 
 class User(SQLModel, table=True):
