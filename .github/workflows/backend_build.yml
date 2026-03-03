@@ -61,7 +61,7 @@ jobs:
         working-directory: ./backend
         run: |
           mkdir -p secrets
-          echo '${{ secrets.FIREBASE_JSON }}' > ${{vars.FIREBASE_JSON_PATH}}
+          echo '${{ secrets.FIREBASE_JSON }}' > FIREBASE_CRED.json
           cd secrets
           ls -l
       - name: Install Firebase CLI
