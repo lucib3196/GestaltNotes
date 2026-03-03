@@ -11,8 +11,14 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
   appId: import.meta.env.appId,
 };
-
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth();
-connectAuthEmulator(auth, "http://127.0.0.1:9099");
+
+const isProduction =
+  import.meta.env.MODE === "production" ||
+  import.meta.env.VITE_ENV === "production";
+
+if (!isProduction) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099");
+}
