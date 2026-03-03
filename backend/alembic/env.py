@@ -9,6 +9,7 @@ from alembic import context
 # Database models
 from src.model.user import User, Role, UserRoleLink
 from src.model.course import Course, StudentCourseLink
+from src.model.chat import Thread, Message
 
 
 # this is the Alembic Config object, which provides
