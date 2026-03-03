@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 
 class ThreadCreate(BaseModel):
+    thread_id: UUID
     user_id: UUID
     course_id: UUID
     title: str | None = None
@@ -28,7 +29,7 @@ class MessageCreate(BaseModel):
 
 
 class Thread(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    id: Optional[UUID] = Field(default=None, primary_key=True)
 
     user_id: UUID = Field(foreign_key="user.id")
     course_id: Optional[UUID] = Field(default=None, foreign_key="course.id")
