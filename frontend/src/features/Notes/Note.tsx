@@ -6,13 +6,13 @@ import { MathJax } from "better-react-mathjax";
 import { markdownComponents } from "./config";
 
 export default function Note() {
-    const [note, setNote] = useState<string | null>(null);
+    const [note, _] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const getNote = async () => {
             try {
-                const result = await NotesAPI.getTestNote();
+                await NotesAPI.getTestNote();
 
                 // setNote(data);
             } finally {

@@ -1,5 +1,5 @@
 import { Section } from "./components/Section";
-import { PDFViewer } from "./components/Viewer/PDFViewer";
+
 import NavBar from "./components/NavBar/NavBar";
 import Chat from "./features/Chat/Chat";
 

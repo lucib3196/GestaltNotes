@@ -4,7 +4,6 @@ import {
   ChatContainer,
   ChatInput,
   ChatSideBar,
-  ChatSideBar,
   SourceSection,
   type ChatThread,
 } from "../../components/Chat";
