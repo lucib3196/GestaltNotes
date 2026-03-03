@@ -1,15 +1,40 @@
-from src.service import FirebaseStorage
 from functools import lru_cache
-from typing import Annotated
-from src.core.database_config import SessionDep
-from src.core.settings import get_settings
-from fastapi import Depends
-from src.core.logger import logger
-from src.service.user.user_manager import UserManager
-from src.data.course import CourseDB
-from src.data.thread import ThreadDB
-from src.data.message import MessageDB
+from typing import Annotated, Dict, Any
 
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from firebase_admin.auth import verify_id_token
+from starlette import status
+
+from src.core.database_config import SessionDep
+from src.core.logger import logger
+from src.core.settings import get_settings
+from src.data.course import CourseDB
+from src.data.message import MessageDB
+from src.data.thread import ThreadDB
+from src.service import FirebaseStorage
+from src.service.user.user_manager import UserManager
+
+
+bearer_scheme = HTTPBearer(auto_error=False)
+
+
+def get_firebase_user_from_token(
+    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+) -> Dict[str, str] | None:
+    try:
+        if not token:
+            raise ValueError("No Token")
+        return verify_id_token(token.credentials)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Not logged in or Invalid credentials {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+FireBaseToken = Annotated[Dict[str, str], Depends(get_firebase_user_from_token)]
 
 
 @lru_cache
@@ -43,7 +68,6 @@ def get_user_manager(session: SessionDep) -> UserManager:
 UserManagerDependency = Annotated[UserManager, Depends(get_user_manager)]
 
 
-
 @lru_cache
 def get_course_db(session: SessionDep) -> CourseDB:
     try:
@@ -54,6 +78,7 @@ def get_course_db(session: SessionDep) -> CourseDB:
 
 
 CourseDBDependency = Annotated[CourseDB, Depends(get_course_db)]
+
 
 @lru_cache
 def get_thread_db(session: SessionDep) -> ThreadDB:

@@ -7,6 +7,11 @@ from firebase_admin import auth
 import requests
 from pydantic import BaseModel
 from src.core.logger import logger
+from src.web.dependencies import FireBaseToken, ThreadDBDependency
+from starlette import status
+from typing import List
+from src.model.chat import Thread
+
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -44,6 +49,50 @@ async def login(payload: LoginRequest):
     return user_read
 
 
+@router.post("/get_current_user")
+def get_current_user(
+    token: FireBaseToken,
+) -> UserRead:
+    decoded = token
+    user_read = UserRead(email=decoded.get("email", None))
+    return user_read
+
+
+@router.get("/thread")
+async def get_user_threads(
+    token: FireBaseToken, thread_db: ThreadDBDependency
+) -> List[Thread]:
+    try:
+        user_id = token.get("user_id", None)
+        if user_id is None:
+            raise HTTPException(
+                detail="Failed to retrieve signed in user",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+        threads = await thread_db.list_threads_for_user(user_id, None)
+        return threads
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create user {e}")
+
+
+@router.post("/thread")
+async def create_user_thread(token: FireBaseToken, thread_db: ThreadDBDependency):
+    try:
+        user_id = token.get("user_id", None)
+        if user_id is None:
+            raise HTTPException(
+                detail="Failed to retrieve signed in user",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+        thread = await thread_db.create_thread(user_id)
+        return thread
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create user {e}")
+
+
+# @router.post()
 @router.post("/login_test")
 def emulator_login(email: str, password: str):
     """Testing endpoint for login using password and email

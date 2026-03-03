@@ -4,30 +4,98 @@ import {
   ChatContainer,
   ChatInput,
   ChatSideBar,
+  ChatSideBar,
   SourceSection,
+  type ChatThread,
 } from "../../components/Chat";
-import { useEffect, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { type ValidAgent } from "./context";
 import { UseLectureChatContext, type LectureArtifact } from "./context";
 import { type Message } from "@langchain/langgraph-sdk";
 import { DropDown } from "../../components/DropDown";
 
+let threadCreated = false;
+
 export default function Chat() {
   const [message, setMessage] = useState<string>("");
+  const [chats, setChats] = useState<ChatThread[]>([]);
 
   const { sources, setSources, agent, setAgent, threadId, setThreadId } =
     UseLectureChatContext();
 
-  useEffect(() => {
-    setThreadId(crypto.randomUUID());
-  }, [agent]);
+const pendingMessage = useRef<string | null>(null);
 
-  const stream = useStream({
-    assistantId: agent,
-    apiUrl: import.meta.env.VITE_LOCAL_URL,
-    apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
-    onThreadId: setThreadId,
+const stream = useStream({
+  assistantId: agent,
+  apiUrl: import.meta.env.VITE_PRODUCTION_URL,
+  apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
+  threadId: threadId ?? undefined,
+  onThreadId: async (id: string) => {
+    // deals with the strict mode
+    if (threadCreated) return;
+      threadCreated = true;
+    setThreadId(id);
+    
+
+    // First message — create the FastAPI thread with LangGraph's ID
+    const response = await fetch(`${import.meta.env.VITE_LOCAL_URL}threads`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        thread_id: id,
+        user_id: "00000000-0000-0000-0000-000000000001",
+        course_id: "86d28f0c-1a7d-4346-8922-0f95cbfffcdd",
+        title: pendingMessage.current ?? "New Chat",
+        agent: agent,
+      }),
+    });
+    const data = await response.json();
+    setChats((prev) => [{ id, title: data.title ?? "New Chat" }, ...prev]);
+
+    // Now save the pending human message
+    if (pendingMessage.current) {
+      await fetch(`${import.meta.env.VITE_LOCAL_URL}threads/${id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "human",
+          content: pendingMessage.current,
+        }),
+      });
+      pendingMessage.current = null;
+    }
+  },
+});
+
+const loadThread = async (id: string) => {
+  threadCreated = true;
+  setThreadId(id);
+};
+
+const handleSubmit = async () => {
+  if (!message.trim()) return;
+
+  if (!threadId) {
+    // First message — store it and let onThreadId handle saving it
+    pendingMessage.current = message;
+  } else {
+    // Subsequent messages — thread already exists, save directly
+    await fetch(`${import.meta.env.VITE_LOCAL_URL}threads/${threadId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role: "human",
+        content: message,
+      }),
+    });
+  }
+
+  stream.submit({
+    messages: [{ content: message, type: "human" }],
   });
+
+  setMessage("");
+};
 
   const handleArtifacts = (message: Message) => {
     if (message.type !== "tool" || !message.artifact) return;
@@ -41,15 +109,21 @@ export default function Chat() {
     setSources(artifacts);
   };
 
-  const handleSubmit = () => {
-    if (!message.trim()) return;
-
-    stream.submit({
-      messages: [{ content: message, type: "human" }],
-    });
-
-    setMessage("");
-  };
+  useEffect(() => {
+  if (!stream.isLoading && stream.messages.length > 0 && threadId) {
+    const lastMessage = stream.messages[stream.messages.length - 1];
+    if (lastMessage.type === "ai") {
+      fetch(`${import.meta.env.VITE_LOCAL_URL}threads/${threadId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "ai",
+          content: String(lastMessage.content),
+        }),
+      });
+    }
+  }
+}, [stream.isLoading]);
 
   return (
     <div className="flex flex-col max-w-6xl mx-auto h-[80vh]">
@@ -67,7 +141,14 @@ export default function Chat() {
         />
       </div>
       <div className="flex flex-1 min-h-0 items-stretch">
-        {/* <ChatSideBar chats={[]} onSelectChat={() => {}} /> */}
+        <ChatSideBar chats={chats}
+          activeChatId={threadId ?? undefined}
+          onSelectChat={(id) => loadThread(id)}
+          onNewChat={() => {
+            threadCreated = false;
+            setThreadId(null);
+            stream.stop?.();
+          }} />
           <div className="flex-1 min-w-0">
             {/* Chat Container */}
             <ChatContainer className="flex flex-col flex-1 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">

@@ -1,7 +1,7 @@
 from src.model.user import User, UserCreate
 from sqlmodel import Session, select
 from src.core.logger import logger
-
+from src.utils.utils import convert_uuid
 from sqlalchemy.exc import SQLAlchemyError
 from . import ID
 
@@ -27,7 +27,9 @@ class UserDB:
 
     async def get_user(self, id: ID) -> User | None:
         try:
-            return self.session.exec(select(User).where(User.id == ID)).first()
+            return self.session.exec(
+                select(User).where(User.id == convert_uuid(id))
+            ).first()
         except SQLAlchemyError as e:
             self.session.rollback()
             message = f"[UserDB] failed to get user {e}"

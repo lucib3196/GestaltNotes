@@ -3,3 +3,4 @@ export { default as ChatContainer } from "./ChatContainer";
 export { default as ChatInput } from "./ChatInput";
 export { default as SourceSection}  from "./Sources";
 export { default as ChatSideBar } from "./ChatSideBar";
+export type { ChatThread } from "./ChatSideBar";

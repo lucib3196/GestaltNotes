@@ -2,10 +2,11 @@ from fastapi.routing import APIRouter
 from uuid import UUID
 
 from .dependencies import ThreadDBDependency, MessageDBDependency
-from src.model.chat import Thread, Message
-from .thread_model import ThreadCreate, ThreadList, MessageCreate
+from src.model.chat import Thread, Message, ThreadCreate, ThreadList, MessageCreate
+
 
 router = APIRouter(prefix="/threads", tags=["threads"])
+
 
 @router.post("/", response_model=Thread)
 async def create_thread(
@@ -13,6 +14,7 @@ async def create_thread(
     tdb: ThreadDBDependency,
 ) -> Thread:
     return await tdb.create_thread(
+        id=data.thread_id,
         user_id=data.user_id,
         course_id=data.course_id,
         title=data.title,

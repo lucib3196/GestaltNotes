@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.model.chat import Thread
 from src.core.logger import logger
+from src.utils.utils import convert_uuid
 
 
 class ThreadDB:
@@ -14,15 +15,15 @@ class ThreadDB:
 
     async def create_thread(
         self,
-        user_id: UUID,
-        course_id: UUID,
+        user_id: UUID | str,
+        course_id: UUID | str | None = None,
         title: str | None = None,
         agent: str | None = None,
     ) -> Thread:
         try:
             thread_orm = Thread(
-                user_id=user_id,
-                course_id=course_id,
+                user_id=convert_uuid(user_id),
+                course_id=convert_uuid(course_id) if course_id else None,
                 title=title,
                 agent=agent,
                 # created_at/updated_at handled automatically
@@ -39,7 +40,9 @@ class ThreadDB:
 
     async def get_thread(self, id: UUID) -> Thread:
         try:
-            thread = self.session.exec(select(Thread).where(Thread.id == id)).first()
+            thread = self.session.exec(
+                select(Thread).where(Thread.id == convert_uuid(id))
+            ).first()
             if not thread:
                 raise ValueError(f"Could not retrieve thread, Thread {id} is None")
             return thread
@@ -51,14 +54,14 @@ class ThreadDB:
 
     async def list_threads_for_user(
         self,
-        user_id: UUID,
+        user_id: UUID | str,
         course_id: UUID | None = None,
     ) -> list[Thread]:
         try:
-            stmt = select(Thread).where(Thread.user_id == user_id)
+            stmt = select(Thread).where(Thread.user_id == convert_uuid(user_id))
             if course_id is not None:
                 stmt = stmt.where(Thread.course_id == course_id)
-            stmt = stmt.order_by(Thread.updated_at.desc())
+            stmt = stmt.order_by(Thread.updated_at.desc())  # type: ignore
             return list(self.session.exec(stmt).all())
         except SQLAlchemyError as e:
             self.session.rollback()

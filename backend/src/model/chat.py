@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 from uuid import UUID, uuid4
 
+from pydantic import BaseModel
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
@@ -9,8 +10,26 @@ if TYPE_CHECKING:
     from .course import Course
 
 
+class ThreadCreate(BaseModel):
+    thread_id: UUID
+    user_id: UUID
+    course_id: UUID
+    title: str | None = None
+    agent: str | None = None
+
+
+class ThreadList(BaseModel):
+    user_id: UUID
+    course_id: UUID | None = None
+
+
+class MessageCreate(BaseModel):
+    role: str
+    content: str
+
+
 class Thread(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    id: Optional[UUID] = Field(default=None, primary_key=True)
 
     user_id: UUID = Field(foreign_key="user.id")
     course_id: Optional[UUID] = Field(default=None, foreign_key="course.id")
