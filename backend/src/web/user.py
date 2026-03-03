@@ -70,7 +70,6 @@ async def get_user_threads(
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
         threads = await thread_db.list_threads_for_user(user_id, None)
-
         return threads
     except HTTPException:
         raise

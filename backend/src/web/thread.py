@@ -62,6 +62,3 @@ async def list_messages(
     mdb: MessageDBDependency,
 ) -> list[Message]:
     return await mdb.list_messages(thread_id)
-
-
-
