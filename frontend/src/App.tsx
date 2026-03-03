@@ -1,7 +1,7 @@
 import { Section } from "./components/Section";
 
 import NavBar from "./components/NavBar/NavBar";
-import Chat from "./features/Chat/Chat";
+import { Chat } from "./features/Chat";
 
 function App() {
   return (

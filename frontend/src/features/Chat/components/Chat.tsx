@@ -7,7 +7,7 @@ import ChatSideBar from "./ChatSideBar";
 import ChatInput from "./ChatInput";
 import { type ChatThread } from "./ChatSideBar";
 import { useRef, useState, useEffect } from "react";
-
+import SourceSection from "./Sources";
 import { UseLectureChatContext, type LectureArtifact, type ValidAgent } from "../../../context/ChatContext";
 import { type Message } from "@langchain/langgraph-sdk";
 import { DropDown } from "../../../components/DropDown";
