@@ -1,22 +1,22 @@
-import { UseAuthMode } from "./context";
+import { useAuth } from "../../../context";
 import * as React from "react";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { type UserMode } from "./context";
-import LogInForm from "./LogIn";
+import type { AuthMode } from "../../../context";
+import LogInForm from "./Login";
 import { SignUpForm } from "./SignUp";
 
 export default function AuthPage() {
-    const { mode, setMode } = UseAuthMode();
+    const { mode, setMode } = useAuth();
 
     const handleModeSwitch = (
         event: React.MouseEvent<HTMLElement>,
-        newMode: UserMode | string | null
+        newMode: AuthMode | string | null
     ) => {
         console.log(event, newMode)
         if (!newMode) return;
 
-        setMode(newMode as UserMode);
+        setMode(newMode as AuthMode);
     };
 
     return (

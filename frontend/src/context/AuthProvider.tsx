@@ -7,9 +7,14 @@ import {
 } from "firebase/auth";
 import { auth } from "../config/firebase_init";
 
+export type AuthMode = "login" | "signup" | "authenticate" | "passwordReset"
+
+
 interface AuthContextType {
     user: User | null;
     loading: boolean;
+    mode: AuthMode;
+    setMode: (val: AuthMode) => void
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
     getIdToken: () => Promise<string | null>;
@@ -20,6 +25,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    // Allows for toggling of the mode for the login page
+    const [mode, setMode] = useState<AuthMode>("signup")
 
     useEffect(() =>
         onAuthStateChanged(auth, (fbuser) => {
@@ -50,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, getIdToken }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, getIdToken, mode, setMode }}>
             {children}
         </AuthContext.Provider>
     );

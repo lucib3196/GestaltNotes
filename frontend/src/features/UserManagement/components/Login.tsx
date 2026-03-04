@@ -1,5 +1,5 @@
 import AuthBase from "./AuthBase";
-import { useAuth } from "../../context";
+import { useAuth } from "../../../context";
 import { toast } from "react-toastify";
 
 export default function LogInForm() {
