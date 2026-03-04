@@ -1,4 +1,4 @@
-export * from "./context"
 
-export {default as LogInForm} from './LogIn';
-export * from "./AuthPage"
+
+export { default as LogInForm } from "./components/Login"
+export * from "./components/AuthPage"
