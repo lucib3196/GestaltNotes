@@ -8,7 +8,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useAuth } from "../../context";
 import Modal from "../Modal/PopUpModal";
 import { useState } from "react";
-import AuthPage from "../../features/UserManagement/AuthPage";
+import AuthPage from "../../features/UserAuth/components/AuthPage";
 
 export default function NavBar() {
   const { user, logout } = useAuth();
@@ -44,8 +44,8 @@ export default function NavBar() {
             </Button>
           )}
           {showModal && (
-            <Modal setShowModal={setShowModal}>
-              <AuthPage></AuthPage>
+            <Modal className="min-h-8/10" colorVariant="signupLogin" setShowModal={setShowModal}>
+              <AuthPage />
             </Modal>
           )}
         </Toolbar>

@@ -20,3 +20,16 @@ export const modalSizeVariants = {
 };
 
 export type ModalSizeVariants = keyof typeof modalSizeVariants;
+
+export const modalStyleVariants = {
+  default: `
+    bg-white border border-gray-300 rounded-lg shadow-xl/30
+    dark:bg-background dark:border-gray-700
+  `,
+  signupLogin: `
+    bg-white border border-slate-200 rounded-xl shadow-2xl
+    
+  `,
+};
+
+export type ModalStyleVariants = keyof typeof modalStyleVariants;

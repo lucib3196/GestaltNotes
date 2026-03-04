@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../config/firebase_init";
 
-export type AuthMode = "login" | "signup" | "authenticate" | "passwordReset"
+export type AuthMode = "login" | "signup" | "authenticate" | "passwordReset" | "login-success"
 
 
 interface AuthContextType {
