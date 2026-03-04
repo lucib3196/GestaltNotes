@@ -11,11 +11,11 @@ if TYPE_CHECKING:
 
 
 class ThreadCreate(BaseModel):
-    thread_id: UUID
-    user_id: UUID
-    course_id: UUID
-    title: str | None = None
-    agent: str | None = None
+    thread_id: Optional[UUID | str] = None
+    user_id: Optional[UUID | str] = None
+    course_id: Optional[UUID | str] = None
+    title: Optional[str] = None
+    agent: Optional[str] = None
 
 
 class ThreadList(BaseModel):

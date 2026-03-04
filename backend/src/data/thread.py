@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.model.chat import Thread
+from src.model.chat import Thread, ThreadCreate
 from src.core.logger import logger
 from src.utils.utils import convert_uuid
 
@@ -16,12 +16,14 @@ class ThreadDB:
     async def create_thread(
         self,
         user_id: UUID | str,
+        thread_id: UUID | str | None = None,
         course_id: UUID | str | None = None,
         title: str | None = None,
         agent: str | None = None,
     ) -> Thread:
         try:
             thread_orm = Thread(
+                id=convert_uuid(thread_id) if thread_id else None,
                 user_id=convert_uuid(user_id),
                 course_id=convert_uuid(course_id) if course_id else None,
                 title=title,
@@ -69,11 +71,11 @@ class ThreadDB:
             logger.error(message)
             raise ValueError(message)
 
-    async def touch_updated_at(self, id: UUID) -> Thread:
+    async def touch_updated_at(self, id: UUID | str) -> Thread:
         """Bump updated_at so this thread sorts as 'most recent'."""
         # Used for when a thread is accessed, so it shows up as most recent in the UI. We want threads to sort by last used time, not creation time.
         try:
-            thread = await self.get_thread(id)
+            thread = await self.get_thread(convert_uuid(id))
             thread.updated_at = datetime.utcnow()
             self.session.add(thread)
             self.session.commit()

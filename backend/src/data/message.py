@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.model.chat import Message
 from src.core.logger import logger
+from src.utils.utils import convert_uuid
 
 
 class MessageDB:
@@ -13,13 +14,13 @@ class MessageDB:
 
     async def create_message(
         self,
-        thread_id: UUID,
+        thread_id: UUID | str,
         role: str,
         content: str,
     ) -> Message:
         try:
             msg_orm = Message(
-                thread_id=thread_id,
+                thread_id=convert_uuid(thread_id),
                 role=role,
                 content=content,
                 # created_at handled automatically

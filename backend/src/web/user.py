@@ -10,9 +10,10 @@ from src.core.logger import logger
 from src.web.dependencies import FireBaseToken, ThreadDBDependency, CurrentUser
 from starlette import status
 from typing import List
-from src.model.chat import Thread
+from src.model.chat import Thread, ThreadCreate
 from typing import Dict
 from fastapi.responses import Response
+from uuid import UUID
 
 
 class PasswordUpdate(BaseModel):
@@ -97,7 +98,9 @@ async def get_user_threads(
 
 
 @router.post("/thread")
-async def create_user_thread(token: FireBaseToken, thread_db: ThreadDBDependency):
+async def create_user_thread(
+    token: FireBaseToken, thread_db: ThreadDBDependency, data: ThreadCreate
+):
     try:
         user_id = token.get("user_id", None)
         if user_id is None:
@@ -105,10 +108,16 @@ async def create_user_thread(token: FireBaseToken, thread_db: ThreadDBDependency
                 detail="Failed to retrieve signed in user",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
-        thread = await thread_db.create_thread(user_id)
+        thread = await thread_db.create_thread(
+            thread_id=data.thread_id,
+            course_id=data.course_id,
+            title=data.title,
+            agent=data.agent,
+            user_id=user_id,
+        )
         return thread
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create user {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create thread {e}")
 
 
 # @router.post()
@@ -129,5 +138,3 @@ def emulator_login(email: str, password: str):
 
     response = requests.post(url, json=payload)
     return response.json()
-
-
