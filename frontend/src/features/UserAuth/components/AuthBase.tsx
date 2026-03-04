@@ -1,6 +1,6 @@
 
-import { UseAuthMode } from "./context";
-import { InputTextForm } from "../../components/FormComponents";
+import { useAuth } from "../../../context";
+import { InputTextForm } from "../../../components/FormComponents";
 import { useState } from "react";
 import type { FormEvent } from "react";
 interface AuthProps {
@@ -11,10 +11,10 @@ interface AuthProps {
         lastName?: string,
     ) => Promise<void>;
 }
-import { Button } from "../../components/Button";
+import { Button } from "../../../components/Button";
 
 export default function AuthBase({ onSubmit }: AuthProps) {
-    const { mode, setMode } = UseAuthMode();
+    const { mode, setMode } = useAuth();
 
     const [firstName, setFirstName] = useState<string>("");
     const [lastName, setLastName] = useState<string>("");

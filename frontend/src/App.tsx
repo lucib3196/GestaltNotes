@@ -8,6 +8,7 @@ function App() {
     <>
       <NavBar />
       <Section>
+
         {/* <PDFViewer src={"http://localhost:5173/src/assets/9-26-25.pdf"} /> */}
         <Chat />
       </Section>

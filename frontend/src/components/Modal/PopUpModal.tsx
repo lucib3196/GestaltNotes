@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { type ModalSizeVariants, modalSizeVariants } from "./config";
+import { type ModalSizeVariants, modalSizeVariants, type ModalStyleVariants, modalStyleVariants } from "./config";
 import { CloseButton } from "../Button";
 import clsx from "clsx";
 
@@ -9,6 +9,7 @@ import clsx from "clsx";
 
 type ModalProps = {
     variant?: ModalSizeVariants;
+    colorVariant?: ModalStyleVariants,
     setShowModal: (visible: boolean) => void;
     children: React.ReactNode;
     className?: string;
@@ -16,6 +17,7 @@ type ModalProps = {
 
 export default function Modal({
     variant = "default", // default applied here
+    colorVariant = "default",
     setShowModal,
     children,
     className,
@@ -43,6 +45,7 @@ export default function Modal({
                 className={clsx(
                     "flex flex-col bg-white  border-gray-300 rounded-lg shadow-xl/30 p-8 overflow-auto dark:bg-background",
                     modalSizeVariants[variant],
+                    modalStyleVariants[colorVariant],
                     className
                 )}
             >

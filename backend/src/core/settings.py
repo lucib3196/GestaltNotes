@@ -19,7 +19,7 @@ class AppSettings(BaseSettings):
     MODE: Literal["testing", "dev", "production"] = "dev"
     STORAGE_SERVICE: Literal["local", "cloud"] = "local"
 
-    BACKEND_CORS_ORIGINS: Sequence[AnyHttpUrl | str] = ()
+    BACKEND_CORS_ORIGINS: Sequence[str] = []
 
     DATABASE_URI: str | None = None
     POSTGRES_URL: str | None = None
@@ -28,13 +28,13 @@ class AppSettings(BaseSettings):
 
     FIREBASE_CRED: str | None = None
     FIREBASE_AUTH_EMULATOR_HOST: str | None = None
-    FIREBASE_STORAGE_EMULATOR_HOST: str|None = None
+    FIREBASE_STORAGE_EMULATOR_HOST: str | None = None
     STORAGE_BUCKET: str | None = None
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v: str | list[str]):
-        if isinstance(v, str):
+    def assemble_cors_origins(cls, v):
+        if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         return v
 
@@ -57,14 +57,16 @@ def get_settings() -> AppSettings:
     auth_emulator = os.getenv("FIREBASE_AUTH_EMULATOR_HOST", None)
     if env_mode not in valid_modes:
         raise ValueError(f"Invalid MODE: {env_mode}. Must be one of {valid_modes}")
-    allowed_origins = os.getenv("ALLOWED_ORIGINS","")
+    allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
     if allowed_origins:
         allowed_origins = allowed_origins.split(",")
-        allowed_origins = [o if o.startswith("http://") else "http://" + o for o in allowed_origins]
+        allowed_origins = [
+            o if o.startswith("http://") else "http://" + o for o in allowed_origins
+        ]
     else:
         allowed_origins = ["http://localhost:5174"]
 
-    if env_mode=="dev" and not auth_emulator:
+    if env_mode == "dev" and not auth_emulator:
         raise ValueError("FIREBASE_AUTH_EMULATOR_HOST must be provided during dev env")
 
     app_settings = AppSettings(
