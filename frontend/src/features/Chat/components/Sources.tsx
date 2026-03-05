@@ -104,7 +104,7 @@ export default function SourceSection({ sources }: SourcesSectionProps) {
                                 {viewMode === "iframe" && activeSrc === src && (
                                     <iframe
                                         src={`/${src}`}
-                                        className="w-full h-[600px] border rounded-lg"
+                                        className="w-full h-150 border rounded-lg"
                                     />
                                 )}
                             </div>
