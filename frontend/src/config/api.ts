@@ -1,11 +1,16 @@
 import axios from "axios";
 
-const rawURL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const rawURL = import.meta.env.VITE_API_URL;
 
-function PrepareURL(raw: string) {
-  return raw.startsWith("http")
-    ? raw.replace(/\/$/, "")
-    : `https://${raw.replace(/\/$/, "")}`;
+function PrepareURL(raw: string): string {
+  let url = raw.trim().replace(/\/$/, "");
+
+  if (!url.startsWith("https://")) {
+    url = url.replace(/^http:\/\//, ""); // remove http:// if present
+    url = `https://${url}`;
+  }
+
+  return url;
 }
 
 export const apiURL = PrepareURL(rawURL);
