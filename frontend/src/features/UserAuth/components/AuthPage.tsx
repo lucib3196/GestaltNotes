@@ -34,7 +34,7 @@ export default function AuthPage() {
                 {mode !== "login-success" && <div className="flex justify-center">
                     <ToggleButtonGroup value={mode} exclusive onChange={handleModeSwitch}>
                         <ToggleButton value="login">Log In</ToggleButton>
-                        <ToggleButton value="signup">Sign Up</ToggleButton>
+                        {/* <ToggleButton value="signup">Sign Up</ToggleButton> */}
                     </ToggleButtonGroup>
                 </div>}
 

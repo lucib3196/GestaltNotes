@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     // Allows for toggling of the mode for the login page
-    const [mode, setMode] = useState<AuthMode>("signup")
+    const [mode, setMode] = useState<AuthMode>("login")
 
     useEffect(() =>
         onAuthStateChanged(auth, (fbuser) => {
