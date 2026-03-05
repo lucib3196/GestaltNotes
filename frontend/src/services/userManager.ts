@@ -33,6 +33,29 @@ export default class UserManager {
       throw new Error(message);
     }
   }
+  static async logIn(token: string | null | undefined) {
+    try {
+      if (!token) {
+        throw new Error("User is not logged in");
+      }
+      const response = await api.post(
+        `${this.base}/get_current_user`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      return response.data;
+    } catch (error: any) {
+      const message =
+        error.response?.data?.detail ||
+        "Something went wrong. Please try again.";
+
+      throw new Error(message);
+    }
+  }
 
   static async getUserInfo(
     token: string | null | undefined,

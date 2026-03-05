@@ -4,17 +4,19 @@ import { UserManager } from "../../../services";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { type UserRead } from "../../../services/userManager";
+
 export default function LogInForm() {
-  const { login, setMode } = useAuth();
+  const { login, setMode, user } = useAuth();
   const handleSubmit = async (email: string, password: string) => {
     try {
-      login(email, password);
+      await login(email, password);
+      const token = await user?.getIdToken()
+      UserManager.logIn(token)
       toast.success("Log In Successful");
+      setMode("login-success");
     } catch (error: any) {
       toast.error(`Could not Log In ${error as string}`);
-    } finally {
-      setMode("login-success");
-    }
+    } 
   };
   return <AuthBase onSubmit={handleSubmit} />;
 }
