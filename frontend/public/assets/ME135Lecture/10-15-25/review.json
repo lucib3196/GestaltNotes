@@ -1,0 +1,10 @@
+{
+  "lecture_id": "10-15-25.pdf",
+  "page_length": 5,
+  "source_fidelity": 3,
+  "extraction_correctness": 5,
+  "completeness": 5,
+  "overall": 3,
+  "issues": [],
+  "notes": "When only given a question with no clear derivation it looks at the steps used get the final answer and treats that as a derivation"
+}

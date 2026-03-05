@@ -1,0 +1,10 @@
+{
+  "lecture_id": "9-29-25.pdf",
+  "page_length": 9,
+  "source_fidelity": 5,
+  "extraction_correctness": 4,
+  "completeness": 3,
+  "overall": 3,
+  "issues": ["missing_derivations"],
+  "notes": "The lecture included partial derivatives, the pre-requisite was flagged as basic calculus. This content is much longer compared to other lectures and misses some derivations or parts of the lecture. However the summary of the content is correct"
+}

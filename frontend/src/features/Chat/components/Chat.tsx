@@ -107,18 +107,6 @@ export default function Chat() {
     }
   };
 
-  const handleArtifacts = (message: Message) => {
-    if (message.type !== "tool" || !message.artifact) return;
-
-    const artifacts = (
-      Array.isArray(message.artifact)
-        ? message.artifact
-        : Object.values(message.artifact)
-    ) as LectureArtifact[];
-
-    setSources(artifacts);
-  };
-
   useEffect(() => {
     if (!stream.isLoading && stream.messages.length > 0 && threadId) {
       const lastMessage = stream.messages[stream.messages.length - 1];
@@ -130,6 +118,22 @@ export default function Chat() {
       }
     }
   }, [stream.isLoading]);
+
+  useEffect(() => {
+    const last = stream.messages.at(-1);
+
+    if (!last) return;
+
+    if (last.type !== "tool" || !last.artifact) return;
+
+    const artifacts = (
+      Array.isArray(last.artifact)
+        ? last.artifact
+        : Object.values(last.artifact)
+    ) as LectureArtifact[];
+
+    setSources(artifacts);
+  }, [stream.messages]);
 
   return (
     <div className="flex flex-col max-w-6xl mx-auto h-[80vh]">
@@ -160,10 +164,9 @@ export default function Chat() {
           <ChatContainer className="flex w-full h-full">
             {/* Messages */}
             <div className="flex-1 h-full overflow-y-auto px-6 py-5 space-y-3 bg-slate-50">
-              {stream.messages.map((msg, idx) => {
-                handleArtifacts(msg);
-                return <ChatMessage key={idx} message={msg} id={idx} />;
-              })}
+              {stream.messages.map((msg, idx) => (
+                <ChatMessage key={idx} message={msg} id={idx} />
+              ))}
 
               {stream.isLoading && (
                 <div className="text-sm text-slate-400 animate-pulse">

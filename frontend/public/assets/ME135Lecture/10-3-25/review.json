@@ -1,0 +1,10 @@
+{
+  "lecture_id": "10-3-25.pdf",
+  "page_length": 6,
+  "source_fidelity": 3,
+  "extraction_correctness": 4,
+  "completeness": 5,
+  "overall": 4,
+  "issues": [],
+  "notes": "When representing equations, tends to go with one convention such as explaining polytropic process, however it takes note of the sign convention and final derivation uses the same sign convetion found in notes. This lecture contains a question, it extracts small steps used to solve the question and classifies them as derivations"
+}

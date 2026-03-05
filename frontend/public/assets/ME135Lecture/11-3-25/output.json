@@ -1,0 +1,203 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/11-3-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Analysis of Centrifugal Turbomachines: Velocity Triangles, Euler Work Equation and Thermodynamic Performance",
+    "lecture_summary": "This lecture analyzes the flow through a single stage centrifugal turbomachine. It introduces velocity triangles at inlet and outlet, defines absolute and relative velocity components and blade angles, and applies conservation of angular momentum to derive Euler's turbomachinery equation for work transfer. The notes then connect the mechanical work to thermodynamic quantities (stagnation enthalpy and temperature), discuss a radial-entry special case, and outline how to use isentropic relations to estimate exit pressure and stage efficiency.",
+    "core_topics": [
+      "Centrifugal turbomachine geometry",
+      "Velocity triangles (absolute and relative velocities)",
+      "Blade inlet and outlet angles",
+      "Normal and tangential velocity components",
+      "Conservation of angular momentum",
+      "Euler turbomachinery equation (work per unit mass)",
+      "Torque and power relations",
+      "Special case: radial entry",
+      "Continuity/mass flow and area relations",
+      "Thermodynamic energy balance (stagnation enthalpy)",
+      "Stagnation temperature rise and isentropic relations",
+      "Stage efficiency estimation"
+    ],
+    "learning_objectives": [
+      "Explain the geometry and flow paths in a centrifugal turbomachine stage",
+      "Construct and interpret inlet and outlet velocity triangles including absolute and relative components",
+      "Apply conservation of angular momentum to derive the torque and Euler work expression",
+      "Use continuity and geometric relations to link mass flow to velocity components",
+      "Analyze the radial-entry special case and its effect on tangential velocity",
+      "Relate mechanical work from Euler's equation to stagnation enthalpy and temperature changes",
+      "Use isentropic relations to estimate outlet pressure and compute stage efficiency"
+    ],
+    "assumed_prerequisites": [
+      "Basic fluid mechanics (control volumes and continuity)",
+      "Introductory thermodynamics (enthalpy, stagnation properties)",
+      "Elementary mechanics (angular momentum and torque)",
+      "Familiarity with vector decomposition of velocities"
+    ],
+    "lecture_type": "derivation-heavy"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Euler's turbomachinery equation (work from change in tangential momentum)",
+      "derivation_stub": "Derive work per unit mass delivered/absorbed by a rotating blade row: w = u_2 V_{t2} - u_1 V_{t1} (Euler's turbomachinery equation).",
+      "steps": [
+        "Conservation of angular momentum for the control volume (steady state, one-dimensional through-flow): $$\\dot{H}_\\mathrm{out} - \\dot{H}_\\mathrm{in} + \\sum T = 0.$$ Rearranged for torque on rotor gives (notes' sign convention): $$T = \\dot{m}\\, (r_2 V_{t2} - r_1 V_{t1}).$$ (Here \\dot{m} is mass flow, r is radius, V_t is tangential component of absolute velocity.)",
+        "Power developed by rotor: $$P = T\\,\\omega = \\dot{m}\\,[\\omega r_2 V_{t2} - \\omega r_1 V_{t1}].$$ Define blade (peripheral) speed as $$u = \\omega r,$$ so",
+        "Divide by mass flow to obtain work per unit mass (boxed Euler equation): $$w \\;=\\; \\frac{P}{\\dot{m}} \\;=\\; u_2 V_{t2} - u_1 V_{t1}.\\qquad$$ (Euler's turbomachinery equation)",
+        "Relate tangential components from velocity triangles. Using absolute velocity decomposition and geometry at inlet/outlet: (see triangles on pages 2–3) derive",
+        "At inlet: $$V_{t1} = u_1 - V_{r1}\\cos\\beta_1.$$ Using $V_{n1}=V_1\\sin\\alpha_1 = V_{r1}\\sin\\beta_1$ and $V_{r1}=V_{n1}/\\sin\\beta_1$, rearrange to get the commonly used form",
+        "  $$V_{t1} = u_1 - V_{n1}\\cot\\beta_1.$$",
+        "At outlet (similar): $$V_{t2} = u_2 - V_{n2}\\cot\\beta_2.$$",
+        "Substitute V_t expressions into Euler equation to express w in terms of u and normal (meridional) velocity components:",
+        "  $$w = u_2(u_2 - V_{n2}\\cot\\beta_2) - u_1(u_1 - V_{n1}\\cot\\beta_1)$$",
+        "Special radial-entry case (often used): radial inlet implies $\\alpha_1=90^\\circ$ so $V_{t1}=0$. Then",
+        "  $$w = u_2 V_{t2} = u_2\\big(u_2 - V_{n2}\\cot\\beta_2\\big) = u_2^2 - u_2 V_{n2}\\cot\\beta_2.$$",
+        "Express meridional (normal) velocity from mass continuity through annular ring area at radius r: $$\\dot{m} = 2\\pi r b\\,\\rho\\,V_n\\quad\\Rightarrow\\quad V_n = \\dfrac{\\dot{m}}{2\\pi r b\\,\\rho}.$$",
+        "Substitute this into the special-case expression to write work in terms of \\dot{m}:",
+        "  $$w = u_2^2 - u_2\\cot\\beta_2\\;\\frac{\\dot{m}}{2\\pi r_2 b_2\\,\\rho}.$$ (boxed form in notes)",
+        "Assumptions / remarks: steady, axisymmetric flow; 1-D control-volume (quantities referenced at inlet/outlet radii); density \\rho treated constant at the annulus; blade forces reduced to torque (pressure and viscous losses neglected).",
+        "Completeness: The notes present a complete, standard derivation of Euler's equation and its substitution with velocity-triangle relations up to the stated assumptions. Missing/implicit steps: algebraic details converting triangle geometry to the cotangent forms are sketched (not fully expanded), and viscous/pressure-loss terms (loss models) are not included."
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 4
+      }
+    },
+    {
+      "derivation_title": "Velocity-triangle relations (supporting)",
+      "derivation_stub": "Relate absolute tangential velocity components V_t to blade speed u and meridional (normal) velocity V_n using blade-angle geometry: V_t = u - V_n cotβ.",
+      "steps": [
+        "Absolute velocity decomposed into meridional (normal) and tangential components: $$\\mathbf{V} = V_n\\mathbf{e}_n + V_t\\mathbf{e}_t.$$",
+        "From relative velocity triangles at inlet/outlet (see sketches on pages 2–3) and geometry: $$V_n = V\\sin\\alpha = V_r\\sin\\beta \\Rightarrow V_r = \\dfrac{V_n}{\\sin\\beta}.$$",
+        "Tangential component from triangle at inlet/outlet: $$V_t = u - V_r\\cos\\beta = u - \\frac{V_n}{\\sin\\beta}\\cos\\beta = u - V_n\\cot\\beta.$$",
+        "Hence inlet/outlet compact forms: $$V_{t1}=u_1 - V_{n1}\\cot\\beta_1,\\qquad V_{t2}=u_2 - V_{n2}\\cot\\beta_2.$$"
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 3
+      }
+    },
+    {
+      "derivation_title": "Mass-flow / area relation for annular ring (supporting)",
+      "derivation_stub": "Relate meridional velocity V_n to mass flow using annular flow area: \\dot{m} = 2\\pi r b \\rho V_n.",
+      "steps": [
+        "Annular ring area at a radius r with blade height b: $$A = 2\\pi r b.$$",
+        "Mass-flow through that section: $$\\dot{m} = \\rho A V_n = 2\\pi r b\\,\\rho\\, V_n.$$",
+        "Thus $$V_n = \\dfrac{\\dot{m}}{2\\pi r b\\,\\rho},$$ used to eliminate V_n from aerodynamic expressions (substituted into Euler/ work expressions)."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      }
+    },
+    {
+      "derivation_title": "Thermodynamic (stagnation enthalpy) relation (supporting)",
+      "derivation_stub": "Connect aerodynamic work w from Euler equation to change in stagnation enthalpy and stagnation temperature: h_{01}+w = h_{02} ⇒ w = c_p(T_{o2}-T_{o1}).",
+      "steps": [
+        "Energy balance for steady adiabatic turbomachine (per unit mass): stagnation enthalpy at inlet + work done on fluid = stagnation enthalpy at exit:",
+        "  $$h_{01} + w = h_{02}\\quad\\Rightarrow\\quad w = h_{02}-h_{01}.$$",
+        "For a perfect gas with constant c_p, use $h_0 = c_p T_0$ to get",
+        "  $$w = c_p\\,(T_{o2}-T_{o1}) \\quad\\Rightarrow\\quad T_{o2}=T_{o1}+\\dfrac{w}{c_p}.$$",
+        "Notes also show use of isentropic relations for total-pressure ratios: $$\\frac{p_{02}}{p_1} = \\Big(\\frac{T_{02}}{T_1}\\Big)^{\\frac{\\gamma}{\\gamma-1}}$$ and related expressions for efficiency definitions (sketched on pages 5–6)."
+      ],
+      "reference": {
+        "start_page": 5,
+        "end_page": 5
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "Which of the following is Euler’s turbomachinery equation giving the specific work (work per unit mass) delivered by a rotor in terms of blade tangential velocities and the tangential component of absolute velocity?",
+      "topics": [
+        "Euler turbomachinery equation",
+        "Velocity triangles",
+        "Specific work"
+      ],
+      "options": [
+        {
+          "text": "w = u2 * Vt2 - u1 * Vt1",
+          "is_correct": true
+        },
+        {
+          "text": "w = (V2^2 - V1^2)/2",
+          "is_correct": false
+        },
+        {
+          "text": "w = cp (T2 - T1)",
+          "is_correct": false
+        },
+        {
+          "text": "w = r2 * Vt2 - r1 * Vt1",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 4
+      },
+      "explanation": "Euler’s turbomachinery equation for steady flow gives work per unit mass w = u2·Vt2 − u1·Vt1, where u is blade (tangential) speed and Vt is the tangential component of absolute velocity. Other expressions are either kinetic-energy differences or dimensional variants and not Euler’s relation."
+    },
+    {
+      "question": "In the radial-entry special case (Vt1 = 0) the specific work simplifies to w = u2^2 − u2·Vn2·cot(β2). As the blade outlet angle β2 approaches 90°, what does the specific work tend to?",
+      "topics": [
+        "Radial-entry special case",
+        "Blade outlet angle effect",
+        "Velocity components"
+      ],
+      "options": [
+        {
+          "text": "It tends to u2^2 (i.e. the subtractive term goes to zero)",
+          "is_correct": true
+        },
+        {
+          "text": "It tends to zero",
+          "is_correct": false
+        },
+        {
+          "text": "It tends to −u2^2 (negative work)",
+          "is_correct": false
+        },
+        {
+          "text": "It becomes independent of u2 and depends only on Vn2",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 4
+      },
+      "explanation": "When β2 → 90°, cot(β2) → 0 so the term u2·Vn2·cot(β2) vanishes and w → u2^2. Thus a blade outlet angle near 90° removes the subtractive component and maximizes the theoretical specific work for that u2."
+    },
+    {
+      "question": "Which relation correctly links the rotor specific work w to the change in stagnation temperature across the rotor (assuming constant cp)?",
+      "topics": [
+        "Thermodynamics of turbomachines",
+        "Stagnation enthalpy/temperature",
+        "Work–temperature relation"
+      ],
+      "options": [
+        {
+          "text": "w = cp · (T0,2 − T0,1)",
+          "is_correct": true
+        },
+        {
+          "text": "w = T0,2 − T0,1",
+          "is_correct": false
+        },
+        {
+          "text": "w = cp · (T2 − T1)",
+          "is_correct": false
+        },
+        {
+          "text": "w = u2 · Vt2 − u1 · Vt1 (and is not related to temperature)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 5,
+        "end_page": 6
+      },
+      "explanation": "From energy (stagnation enthalpy) balance h0,1 + w = h0,2 and h0 = cp·T0 (constant cp), we get w = cp·(T0,2 − T0,1). Option 3 uses static temperatures (T) not stagnation (T0); option 4 is Euler’s form but the Euler work is related to the stagnation temperature rise by the shown cp relation."
+    }
+  ]
+}

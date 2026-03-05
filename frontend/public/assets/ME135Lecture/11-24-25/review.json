@@ -1,0 +1,10 @@
+{
+  "lecture_id": "11-24-25.pdf",
+  "page_length": 5,
+  "source_fidelity": 3,
+  "extraction_correctness": 3,
+  "completeness": 3,
+  "overall": 3,
+  "issues": ["missing_question"],
+  "notes": "Extracting question incorrect, mixed with derivations, large lecture wise derivation extracted as a whole"
+}

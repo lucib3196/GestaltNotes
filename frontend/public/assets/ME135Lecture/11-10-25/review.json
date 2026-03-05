@@ -1,0 +1,10 @@
+{
+  "lecture_id": "11-10-25.pdf",
+  "page_length": 7,
+  "source_fidelity": 5,
+  "extraction_correctness": 4,
+  "completeness": 5,
+  "overall": 3,
+  "issues": [],
+  "notes": "Sign convention can differ in specific steps, does not show cramer rule for solving"
+}

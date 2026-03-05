@@ -10,25 +10,28 @@ import { MessageStyle } from "./config";
 type ChatMessageProps = {
     id?: number | string;
     message: Message;
+    showTool?: boolean
 
 }
 
-export default function ChatMessage({ message, id, }: ChatMessageProps) {
-    if (message.type === "ai" && message.tool_calls?.length) {
-        return (
-            <>
-                {message.tool_calls.map((tool, idx) => (
-                    <ToolInvocation key={idx} name={tool.name} args={tool.args} />
-                ))}
-            </>
-        );
+export default function ChatMessage({ message, id, showTool = false }: ChatMessageProps) {
+    if (showTool) {
+        if (message.type === "ai" && message.tool_calls?.length) {
+            return (
+                <>
+                    {message.tool_calls.map((tool, idx) => (
+                        <ToolInvocation key={idx} name={tool.name} args={tool.args} />
+                    ))}
+                </>
+            );
+        }
+        if (message.type === "tool") {
+            return <ToolBubble message={message as ToolMessage} />;
+        }
     }
 
-    if (message.type === "tool") {
-
-        return <ToolBubble message={message as ToolMessage} />;
-    }
-
+    if (message.type === "tool" && !showTool) return;
+    console.log(message, message.type)
     return (
         <div
             key={message.id ?? id}

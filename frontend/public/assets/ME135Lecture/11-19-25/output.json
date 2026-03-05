@@ -1,0 +1,205 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/11-19-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Mixing and Cooling-Coil Calculations for Moist Air with Bypass Factor",
+    "lecture_summary": "The lecture presents worked examples applying psychrometric principles to mixed air streams and a cooling coil with a bypass factor. It shows how to use dry-air mass and moisture balances together with enthalpy (energy) balances and psychrometric chart/property data to find mixed-air conditions, coil leaving conditions, coil surface temperature, supply airflow, and the sensible and latent cooling capacities delivered to a conditioned space.",
+    "core_topics": [
+      "Psychrometric properties of moist air",
+      "Mixing of air streams (mass and humidity balance)",
+      "Enthalpy/energy balance for moist air",
+      "Cooling coil with bypass factor and coil surface temperature",
+      "Separation of sensible and latent heat loads",
+      "Use of psychrometric chart and property tables",
+      "Conversion between volumetric flow and mass flow of dry air"
+    ],
+    "learning_objectives": [
+      "Explain how to perform dry-air mass and humidity ratio balances for mixing air streams",
+      "Apply enthalpy balances to find mixed-air temperature and specific enthalpy",
+      "Determine coil leaving conditions accounting for a bypass factor (or by-pass ratio) and coil surface temperature",
+      "Compute sensible and latent cooling capacities for a space and for the coil",
+      "Convert between volumetric airflow and dry-air mass flow using specific volume or chart data",
+      "Use psychrometric chart/property values to obtain humidity ratio, enthalpy and saturation pressure"
+    ],
+    "assumed_prerequisites": [
+      "Basic thermodynamics (energy balances)",
+      "Fundamentals of psychrometrics (humidity ratio, enthalpy, saturation)",
+      "Elementary fluid/airflow concepts (volumetric↔mass flow conversion)"
+    ],
+    "lecture_type": "mixed"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Mixing of outdoor and recirculated air, coil bypass, and determination of supply mass flow & coil temperature",
+      "derivation_stub": "Determine mixed-air state (w3, h3, T3), coil exit state after bypass (w4, h4, T4) and supply mass flow \\(\\dot m_a\\) given SH and LH (sensible 25 kW, latent 5 kW) and coil bypass factor \\(x=0.15\\).",
+      "steps": [
+        "Given: outdoor stream (1) at \\(T_1, w_1, h_1, v_1\\) and recirculated stream (2) at \\(T_2, w_2, h_2, v_2\\). Volumetric flow(s) given as \\(\\dot V_1, \\dot V_2\\). Bypass fraction of coil: \\(x=0.15\\). Sensible load: \\(\\text{SH}=25\\ \\mathrm{kW}\\). Latent load: \\(\\text{LH}=5\\ \\mathrm{kW}\\).",
+        "Convert volumetric to dry-air mass flow for each stream:  \n  $$\\dot m_1=\\frac{\\dot V_1}{v_1}, \\qquad \\dot m_2=\\frac{\\dot V_2}{v_2}.$$  \n  (This yields numeric values in the notes, e.g. \\(\\dot m_1\\approx108.7\\ \\mathrm{kg/min},\\ \\dot m_2\\approx23.2\\ \\mathrm{kg/min}\\) for the worked example.)",
+        "Mass balance for dry air (mixture):  \n  $$\\dot m_3=\\dot m_1+\\dot m_2.$$",
+        "Humidity (mixing of humidity ratios):  \n  $$\\dot m_1 w_1 + \\dot m_2 w_2 = \\dot m_3 w_3 \\quad\\Rightarrow\\quad w_3=\\frac{\\dot m_1 w_1 + \\dot m_2 w_2}{\\dot m_3}.$$  \n  (Example numeric result: \\(w_3\\approx21.27\\ \\mathrm{g/kg_{da}}\\).)",
+        "Enthalpy (mixing):  \n  $$\\dot m_1 h_1 + \\dot m_2 h_2 = \\dot m_3 h_3 \\quad\\Rightarrow\\quad h_3=\\frac{\\dot m_1 h_1 + \\dot m_2 h_2}{\\dot m_3}.$$  \n  (Example numeric result: \\(h_3\\approx92.65\\ \\mathrm{kJ/kg}\\) and corresponding mixed dry-bulb \\(T_3\\) from \\(h= c_{ph}T + w\\,h_{fg}\\) gives \\(T_3\\approx39.3^{\\circ}\\mathrm{C}\\).)",
+        "Coil treatment with bypass: portion \\(x\\) bypasses the coil (no heat transfer), portion \\((1-x)\\) passes over the coil surface at surface temperature \\(T_{coil}\\) (assumed equals or leads to saturated state at coil surface). Use chart / surface-saturation properties \\(w_3',h_3'\\) at \\(T_{coil}\\).",
+        "Bypass mixing after the coil (mass fractions):  \n  $$w_4 = x\\,w_3 + (1-x)\\,w_3'$$  \n  $$h_4 = x\\,h_3 + (1-x)\\,h_3'$$  \n  (Substitute \\(x=0.15\\) and the chart values for \\(w_3',h_3'\\). Example in notes: \\(w_3'\\approx7.6\\ \\mathrm{g/kg},\\ h_3'\\approx29\\ \\mathrm{kJ/kg}\\) leading to \\(w_4\\approx10.5\\ \\mathrm{g/kg},\\ h_4\\approx41.73\\ \\mathrm{kJ/kg}\\).)",
+        "Recover coil-exit dry-bulb temperature \\(T_4\\) from the enthalpy relation (assuming constant dry-air specific heat \\(c_{ph}\\) and using \\(h_4=c_{ph}T_4 + w_4 h_{fg}\\) or chart lookup):  \n  $$T_4 = \\frac{h_4 - w_4 h_{fg}}{c_{ph}}.$$  \n  (Example: yields \\(T_4\\approx15.9\\text{--}16^{\\circ}\\mathrm{C}\\) and RH \\(\\approx90\\%\\) from saturation pressure relation.)",
+        "Relate sensible load to supply mass flow: the room sensible heat must be supplied by the supply air cooling:  \n  $$\\text{SH} = \\dot m_a c_{ph}(T_2 - T_4).$$  \n  Solve for supply mass flow \\(\\dot m_a\\):  \n  $$\\dot m_a = \\frac{\\text{SH}}{c_{ph}(T_2 - T_4)}.$$  \n  (Using \\(\\text{SH}=25\\ \\mathrm{kW},\\ c_{ph}\\approx1.022\\ \\mathrm{kJ/(kg\\,K)},\\ T_2=26^{\\circ}\\mathrm{C},\\ T_4\\approx16^{\\circ}\\mathrm{C}\\) gives \\(\\dot m_a\\approx2.45\\ \\mathrm{kg/s}\\) in the notes.)",
+        "Compute coil cooling capacity (total heat removed at coil):  \n  $$\\dot Q_{coil} = \\dot m_a (h_3 - h_4).$$  \n  (Example numeric result from notes: \\(\\dot Q_{coil}\\approx -111.9\\ \\mathrm{kW}\\) sign convention depending on chosen sign; magnitude ~112 kW of cooling capacity required at coil).",
+        "Compute latent cooling (if required):  \n  $$\\text{LH} = \\dot m_a\\,h_{fg}\\,(w_2 - w_4)\\quad\\text{or}\\quad \\text{LH} = \\dot m_a (h_{v2}-h_{v4}),$$  \n  and check consistency with given LH (5 kW in problem).",
+        "Completeness note: the procedure above is complete in algebraic form, but the worked solution uses psychrometric chart lookups (values \\(w_3', h_3'\\), saturated properties at coil surface) and assumed property constants (\\(c_{ph}, h_{fg}, v_i\\)). Those chart/property interpolations are used but not shown algebraically in the slides, so a few numerical intermediate values are taken from the chart rather than derived analytically here."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 4
+      }
+    },
+    {
+      "derivation_title": "Volumetric-to-mass flow conversion for dry air",
+      "derivation_stub": "Convert volumetric flow rate \\(\\dot V\\) to dry-air mass flow \\(\\dot m\\) using specific volume \\(v\\).",
+      "steps": [
+        "Relation:  $$\\dot m=\\frac{\\dot V}{v}.$$",
+        "Purpose: used to get \\(\\dot m_1\\) and \\(\\dot m_2\\) from given \\(\\dot V\\) and specific volumes \\(v_1,v_2\\) (pages 1–2 of notes).",
+        "Example numeric substitution from notes: \\(\\dot V_1=100\\ \\mathrm{m^3/min},\\ v_1\\approx0.92\\ \\mathrm{m^3/kg}\\ \\Rightarrow\\ \\dot m_1\\approx108.7\\ \\mathrm{kg/min}\\)."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      }
+    },
+    {
+      "derivation_title": "Mixing relations for humidity and enthalpy (two-stream mixture)",
+      "derivation_stub": "Mass-weighted mixing of humidity ratio and specific enthalpy to get the mixed-air state.",
+      "steps": [
+        "Dry-air mass balance:  $$\\dot m_3=\\dot m_1+\\dot m_2.$$",
+        "Humidity mixing:  $$\\dot m_1 w_1 + \\dot m_2 w_2 = \\dot m_3 w_3 \\Rightarrow w_3=\\frac{\\dot m_1 w_1 + \\dot m_2 w_2}{\\dot m_3}.$$",
+        "Enthalpy mixing:  $$\\dot m_1 h_1 + \\dot m_2 h_2 = \\dot m_3 h_3 \\Rightarrow h_3=\\frac{\\dot m_1 h_1 + \\dot m_2 h_2}{\\dot m_3}.$$",
+        "Purpose: these give the mixed supply-air state before the coil (pages 1–2)."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      }
+    },
+    {
+      "derivation_title": "Bypass factor relations for cooling coil (mix of bypassed & coil-treated airstream)",
+      "derivation_stub": "Express coil outlet properties as mass-weighted mix of bypassed stream (unchanged) and coil-treated stream (saturated at coil surface).",
+      "steps": [
+        "Let fraction \\(x\\) bypass the coil (no heat exchange) and \\(1-x\\) go through coil surface (becomes state with properties \\(w_3',h_3'\\) at coil-surface temperature).",
+        "Humidity after bypass:  $$w_4 = x\\,w_3 + (1-x)\\,w_3'.$$",
+        "Enthalpy after bypass:  $$h_4 = x\\,h_3 + (1-x)\\,h_3'.$$",
+        "Purpose: yields the final supply-air thermodynamic state (pages 3–4). The worked solution uses \\(x=0.15\\) and chart values for \\(w_3',h_3'\\)."
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 4
+      }
+    },
+    {
+      "derivation_title": "Sensible and latent heat expressions for HVAC loads",
+      "derivation_stub": "Relate sensible and latent loads to supply mass flow and supply-air temperature/humidity changes.",
+      "steps": [
+        "Sensible heat (to/from air):  $$\\text{SH} = \\dot m_a c_{ph} (T_{room} - T_{supply}) = \\dot m_a c_{ph} (T_2 - T_4).$$",
+        "Latent heat (moisture removal):  $$\\text{LH} = \\dot m_a h_{fg} (w_{room} - w_{supply}) = \\dot m_a h_{fg} (w_2 - w_4).$$",
+        "Total coil load (enthalpy difference):  $$\\dot Q_{coil} = \\dot m_a (h_3 - h_4).$$",
+        "Purpose: used to compute \\(\\dot m_a\\) from SH and to separate sensible/latent components (page 4)."
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 4
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "100 m3/min of outdoor air at 40°C and 50% RH is mixed with 20 m3/min of recirculated air at 26°C and 50% RH. Using the specific volumes v1 ≈ 0.92 m3/kg (40°C) and v2 ≈ 0.862 m3/kg (26°C), what is the resulting humidity ratio of the mixture (g water/kg dry air)?",
+      "topics": [
+        "Psychrometric mixing",
+        "Mass flow conversion from volumetric flow",
+        "Conservation of water vapour (humidity ratio)"
+      ],
+      "options": [
+        {
+          "text": "10.8 g/kg",
+          "is_correct": false
+        },
+        {
+          "text": "21.3 g/kg",
+          "is_correct": true
+        },
+        {
+          "text": "13.3 g/kg",
+          "is_correct": false
+        },
+        {
+          "text": "29.5 g/kg",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 4
+      },
+      "explanation": "Convert volumetric flows to mass flows: m1 = 100/0.92 ≈ 108.7 kg/min, m2 = 20/0.862 ≈ 23.2 kg/min. Use humidity ratios w1≈23.5 g/kg (40°C, 50% RH) and w2≈10.8 g/kg (26°C, 50% RH). w_mix = (m1*w1 + m2*w2)/(m1+m2) ≈ (108.7*23.5 + 23.2*10.8)/131.9 ≈ 21.27 g/kg ≈ 21.3 g/kg."
+    },
+    {
+      "question": "A mixed air stream with enthalpy h3 = 63 kJ/kg passes a cooling coil whose coil surface (saturation) enthalpy is h' = 39 kJ/kg. If the coil has a bypass factor (x) = 0.15, what is the enthalpy of air leaving the coil (h4)?",
+      "topics": [
+        "Bypass factor concept",
+        "Enthalpy balance across a coil",
+        "Coil leaving condition calculation"
+      ],
+      "options": [
+        {
+          "text": "h4 = 39.0 kJ/kg",
+          "is_correct": false
+        },
+        {
+          "text": "h4 = 42.6 kJ/kg",
+          "is_correct": true
+        },
+        {
+          "text": "h4 = 48.0 kJ/kg",
+          "is_correct": false
+        },
+        {
+          "text": "h4 = 56.5 kJ/kg",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 4
+      },
+      "explanation": "Leaving enthalpy with bypass factor x: h4 = x*h3 + (1-x)*h'. Substitute x=0.15 => h4 = 0.15*63 + 0.85*39 = 9.45 + 33.15 = 42.6 kJ/kg."
+    },
+    {
+      "question": "Which statement correctly describes the effect of reducing a cooling coil's bypass factor (BF) from 0.2 to 0.05 for the same entering air conditions?",
+      "topics": [
+        "Impact of bypass factor on coil performance",
+        "Relation between coil surface (ADP) and leaving air",
+        "Sensible and latent heat removal"
+      ],
+      "options": [
+        {
+          "text": "Reducing BF causes the leaving air condition to move closer to the coil surface (saturation) condition, increasing the coil's sensible and latent heat removal (i.e., higher cooling capacity).",
+          "is_correct": true
+        },
+        {
+          "text": "Reducing BF raises the leaving air temperature and humidity (worse cooling), so coil capacity decreases.",
+          "is_correct": false
+        },
+        {
+          "text": "Bypass factor only affects airflow pressure drop and has no impact on leaving air enthalpy or humidity.",
+          "is_correct": false
+        },
+        {
+          "text": "Lower BF increases recirculation fraction in the AHU and therefore reduces coil load regardless of entering air.",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 4
+      },
+      "explanation": "A smaller BF means less air bypasses the coil and more air contacts the coil surface temperature (the Apparatus Dew Point). Therefore the leaving air approaches coil surface (saturation) conditions and the coil removes more sensible and latent heat for the same entering conditions, increasing cooling capacity."
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/11-5-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Performance analysis of a single-stage centrifugal compressor",
+    "lecture_summary": "Worked example that evaluates a centrifugal compressor given geometry, operating speed and inlet conditions. The lecture develops velocity triangles at inlet and outlet, uses continuity to get radial velocity components and mass flow, applies angular momentum balance (Euler turbine relation) to find work per unit mass and shaft power, and then performs a thermodynamic station analysis using stagnation enthalpy and isentropic efficiency to compute outlet temperatures, pressures and entropy change.",
+    "core_topics": [
+      "centrifugal compressor geometry and operating data",
+      "volumetric flow and continuity in annular passages",
+      "velocity triangles (absolute, relative, tangential and radial components)",
+      "angular momentum conservation / Euler turbomachinery equation",
+      "calculation of work per unit mass and shaft power",
+      "stagnation enthalpy and total temperature",
+      "isentropic efficiency and isentropic relations for temperature and pressure",
+      "entropy change and irreversibility assessment"
+    ],
+    "learning_objectives": [
+      "compute radial and tangential velocity components from given geometry and volumetric flow",
+      "construct inlet and outlet velocity triangles and determine flow/blade angles",
+      "apply angular momentum conservation to derive work per unit mass and shaft torque/power",
+      "calculate mass flow using ideal‑gas density and volumetric flow",
+      "use stagnation enthalpy and isentropic efficiency to find compressor outlet total and static temperatures and pressures",
+      "evaluate entropy change to quantify thermodynamic losses"
+    ],
+    "assumed_prerequisites": [
+      "basic thermodynamics (stagnation properties, isentropic relations)",
+      "fluid mechanics (continuity, velocity components)",
+      "turbomachinery fundamentals (velocity triangles, Euler work equation)",
+      "ideal gas law and thermophysical properties"
+    ],
+    "lecture_type": "mixed"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Centrifugal compressor: Euler work, thermodynamic state change and entropy generation",
+      "derivation_stub": "Derive work per unit mass from Euler turbomachinery equation and compute outlet velocities, total/stagnation temperatures and pressures, and entropy change for a centrifugal compressor.",
+      "steps": [
+        "Continuity (radial flow through annulus): $$\\dot V = (2\\pi R_1 b_1) V_{n1} = (2\\pi R_2 b_2) V_{n2}.$$ => $$V_{n1}=\\frac{\\dot V}{2\\pi R_1 b_1}$$ and $$V_{n2}=\\frac{R_1}{R_2}V_{n1}.$$ (Numeric substitution: $$\\dot V=6.28\\ \\mathrm{m^3/s},\\ R_1=0.2\\ \\mathrm{m},\\ b=0.05\\ \\mathrm{m} \\Rightarrow V_{n1}=100\\ \\mathrm{m/s},\\ V_{n2}=20\\ \\mathrm{m/s}.)$$",
+        "Inlet velocity triangle (inlet radial, $\\alpha_1=90^\\circ$): $$\\mathbf{V}_1=\\mathbf{V}_{r1}+\\mathbf{u}_1,\\quad V_{t1}=0,\\ V_{n1}=V_1.$$ Blade/tip speed: $$u_1=R_1\\omega\\ (\\text{given }N=2700\\ \\mathrm{rpm}\\Rightarrow\\omega=282.7\\ \\mathrm{rad/s})\\Rightarrow u_1=0.2(282.7)=56.5\\ \\mathrm{m/s}.$$ Flow angle at inlet: $$\\beta_1=\\tan^{-1}\\frac{V_{n1}}{u_1}=\\tan^{-1}\\frac{100}{56.5}=60.5^\\circ.$$",
+        "Outlet velocity triangle (blade outlet angle $\\beta_2=55^\\circ$): tip speed $$u_2=R_2\\omega=1(282.7)=282.7\\ \\mathrm{m/s}.$$ Tangential (circumferential) component at outlet from triangle: $$V_{t2}=u_2 - V_{n2}\\cot\\beta_2$$ (since $V_{t2}+V_{n2}\\cot\\beta_2=u_2$ in the triangle). Numeric: $$V_{t2}=282.7 - 20\\cot55^\\circ =268.7\\ \\mathrm{m/s}.$$ Resultant absolute speed: $$V_2=\\sqrt{V_{t2}^2+V_{n2}^2}\\approx269.4\\ \\mathrm{m/s},\\quad \\alpha_2=\\tan^{-1}\\frac{V_{n2}}{V_{t2}}\\approx4.3^\\circ.$$",
+        "Euler (angular momentum) relation and work: general form $$T=\\dot m( V_{t2}R_2 - V_{t1}R_1).$$ With $V_{t1}=0$ (radial inlet) $$T=\\dot m\\,V_{t2}R_2.$$ Power $$P=T\\omega=\\dot m\\,V_{t2}u_2.$$ Work per unit mass (specific work) $$w = \\frac{P}{\\dot m} = V_{t2}u_2 = (u_2 - V_{n2}\\cot\\beta_2)\\,u_2.$$ Numeric: $$w=268.7\\times282.7\\approx 77{,}305\\ \\mathrm{J/kg}.$$",
+        "Mass flow from density and volumetric flow: ideal gas at inlet, $$\\rho = \\frac{p_1}{R T_1}.$$ Using $p_1=100\\ \\mathrm{kPa},\\ T_1=298\\ \\mathrm{K},\\ R=0.287\\ \\mathrm{kJ/(kg\\,K)}$ => $$\\rho\\approx1.17\\ \\mathrm{kg/m^3}.$$ Then $$\\dot m=\\rho\\dot V\\approx1.17\\times6.28=7.34\\ \\mathrm{kg/s}.$$ Power delivered $$P=\\dot m\\,w\\approx7.34\\times77{,}305\\approx567.7\\ \\mathrm{kW}.$$",
+        "Stagnation (total) temperatures and energy balance: stagnation at inlet $$T_{01}=T_1+\\frac{V_1^2}{2c_p}=298 + \\frac{100^2}{2\\cdot1005}\\approx303\\ \\mathrm{K}.$$ Euler energy: $$h_{02}=h_{01}+w\\Rightarrow T_{0 2}=T_{01}+\\frac{w}{c_p}.$$ With $c_p=1.005\\ \\mathrm{kJ/(kg\\,K)}$, $$T_{0 2}=303 + \\frac{77.305}{1.005}\\approx380\\ \\mathrm{K}.$$",
+        "Isentropic efficiency and total-pressure after (ideal) compression: given isentropic efficiency $$\\eta=0.9=\\frac{T_{0 2s}-T_{01}}{T_{0 2}-T_{01}}\\Rightarrow T_{0 2s}=\\eta (T_{0 2}-T_{01})+T_{01}=372.3\\ \\mathrm{K}.$$ Compute total pressures: first find $p_{01}$ from compression of inlet kinetic to total at inlet (or using $p_1$ and $T_{01}/T_1$): $$p_{01}=p_1\\left(\\frac{T_{01}}{T_1}\\right)^{\\gamma/(\\gamma-1)}\\approx100\\times\\left(\\frac{303}{298}\\right)^{1.4/0.4}=106\\ \\mathrm{kPa}.$$ Then isentropic relation gives $$p_{02}=p_{01}\\left(\\frac{T_{0 2s}}{T_{01}}\\right)^{\\gamma/(\\gamma-1)} =106\\left(\\frac{372.3}{303}\\right)^{1.4/0.4}\\approx218\\ \\mathrm{kPa}.$$",
+        "Real static exit temperature and static pressure: convert stagnation to static at exit using kinetic energy: $$T_2=T_{0 2}-\\frac{V_2^2}{2c_p}.$$ Numeric: $$T_2=380 - \\frac{(269.4)^2}{2\\cdot1005}\\approx343.8\\ \\mathrm{K}.$$ Then static pressure from isentropic relation relative to exit total: $$p_2 = p_{02}\\left(\\frac{T_2}{T_{0 2}}\\right)^{\\gamma/(\\gamma-1)} =218\\left(\\frac{343.8}{380}\\right)^{1.4/0.4}\\approx154\\ \\mathrm{kPa}.$$",
+        "Entropy change: specific entropy change across compressor (state 1->2): $$\\Delta s = c_p\\ln\\frac{T_2}{T_1} - R\\ln\\frac{p_2}{p_1}.$$ Numeric: $$\\Delta s = 1.005\\ln\\frac{343.8}{298} - 0.287\\ln\\frac{154}{100}\\approx0.0198\\ \\mathrm{kJ/(kg\\,K)}.$$ Total entropy rate $$\\dot S = \\dot m\\,\\Delta s \\approx7.34\\times0.0198\\approx0.145\\ \\mathrm{kJ/K\\,s}\\ (\\text{often written }\\mathrm{kW/K}).$$"
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 5
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "For a centrifugal compressor with uniform impeller width and steady mass flow, how does the normal (radial) velocity at the outlet V_n2 relate to the inlet normal velocity V_n1 and the radii R1 (inlet) and R2 (outlet)?",
+      "topics": [
+        "Continuity / mass conservation",
+        "Radial flow in impellers",
+        "Geometry effects on velocity"
+      ],
+      "options": [
+        {
+          "text": "V_n2 = (R1 / R2) · V_n1",
+          "is_correct": true
+        },
+        {
+          "text": "V_n2 = (R2 / R1) · V_n1",
+          "is_correct": false
+        },
+        {
+          "text": "V_n2 = V_n1 (independent of radii if width is constant)",
+          "is_correct": false
+        },
+        {
+          "text": "V_n2 = (R1^2 / R2^2) · V_n1",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      },
+      "explanation": "Mass flow through a cylindrical annulus 2πR b V_n is constant. With equal blade widths b, 2πR1 b V_n1 = 2πR2 b V_n2, so V_n2 = (R1/R2)·V_n1 (radial velocity decreases as radius increases)."
+    },
+    {
+      "question": "Which statement best describes the physical origin of the compressor work given by the Euler (angular-momentum) form w = u2·V_t2 − u1·V_t1?",
+      "topics": [
+        "Angular momentum / Euler turbine equation",
+        "Velocity triangles / tangential velocity",
+        "Work transfer between rotor and fluid"
+      ],
+      "options": [
+        {
+          "text": "It represents the change in fluid angular momentum — i.e., the change in the tangential component of absolute velocity multiplied by blade speed.",
+          "is_correct": true
+        },
+        {
+          "text": "It is the change in static pressure across the stage due to viscous losses.",
+          "is_correct": false
+        },
+        {
+          "text": "It is the difference in radial kinetic energy between inlet and outlet.",
+          "is_correct": false
+        },
+        {
+          "text": "It represents heat transfer into the fluid due to blade friction.",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 3
+      },
+      "explanation": "Euler’s equation expresses work exchange as the change in angular momentum per unit mass: u·V_t terms combine blade speed and tangential (absolute) velocity. That is the mechanical torque (and hence work) produced by accelerating/decelerating the tangential velocity of the fluid."
+    },
+    {
+      "question": "For a compressor stage with isentropic efficiency η (defined η = (T02s − T01)/(T02 − T01)), which of the following is true about the actual stagnation temperature rise compared to the isentropic (ideal) stagnation temperature rise?",
+      "topics": [
+        "Isentropic efficiency",
+        "Stagnation temperature",
+        "Compressor thermodynamics"
+      ],
+      "options": [
+        {
+          "text": "The actual exit stagnation temperature T02 is higher than the isentropic exit T02s (T02 > T02s) because η < 1.",
+          "is_correct": true
+        },
+        {
+          "text": "The actual exit stagnation temperature T02 equals the isentropic T02s regardless of efficiency.",
+          "is_correct": false
+        },
+        {
+          "text": "The actual exit stagnation temperature T02 is lower than the isentropic exit T02s (T02 < T02s) because more work is available in reality.",
+          "is_correct": false
+        },
+        {
+          "text": "Isentropic efficiency compares pressures, not temperatures, so no relation between T02 and T02s exists.",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 5
+      },
+      "explanation": "For a compressor, the ideal (isentropic) temperature rise T02s−T01 is the minimum required. With inefficiencies (η<1) the actual temperature rise T02−T01 is larger, so T02 > T02s. The given efficiency definition directly shows the ideal rise is η times the actual rise."
+    }
+  ]
+}

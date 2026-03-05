@@ -1,0 +1,10 @@
+{
+  "lecture_id": "10-22-25.pdf",
+  "page_length": 5,
+  "source_fidelity": 5,
+  "extraction_correctness": 5,
+  "completeness": 4,
+  "overall": 3,
+  "issues": ["missing_questions"],
+  "notes": ""
+}

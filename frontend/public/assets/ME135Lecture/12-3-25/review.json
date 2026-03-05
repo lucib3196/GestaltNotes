@@ -1,0 +1,10 @@
+{
+  "lecture_id": "12-3-25.pdf",
+  "page_length": 6,
+  "source_fidelity": 5,
+  "extraction_correctness": 3,
+  "completeness": 5,
+  "overall": 3,
+  "issues": [],
+  "notes": "Simplifies equations in ways that are not present in the lecture, not necessarily wrong just not present. Skips some steps for some derivations"
+}

@@ -1,0 +1,187 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/11-26-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Laminar Internal Flow in Circular Pipes: Velocity, Pressure Drop, Friction and Heat Transfer",
+    "lecture_summary": "The lecture develops the theory of steady, fully-developed laminar flow in pipes. Starting from a force balance on a pipe element, it derives the parabolic velocity profile (Hagen–Poiseuille solution), relates centerline and mean velocities, and obtains expressions for volumetric flow rate and pressure drop. From the velocity field the wall shear stress, friction velocity and laminar friction factors (Darcy and Fanning forms) are derived and expressed in terms of Reynolds number. The lecture finishes by treating the thermal problem for fully-developed laminar flow with constant wall temperature, producing the temperature profile, heat transfer coefficient and the constant Nusselt number for that case, and discusses hydraulic diameter for non-circular ducts.",
+    "core_topics": [
+      "Hagen–Poiseuille laminar flow",
+      "Parabolic velocity profile",
+      "Volumetric flow rate and mean vs centerline velocity",
+      "Pressure drop in laminar pipe flow",
+      "Wall shear stress and friction velocity",
+      "Darcy and Fanning friction factors for laminar flow",
+      "Hydraulic diameter for non-circular ducts",
+      "Fully-developed thermal profile in pipe flow",
+      "Nusselt number and convective heat transfer coefficient (Nu = 4 case)"
+    ],
+    "learning_objectives": [
+      "derive the velocity profile for steady, fully-developed laminar flow in a circular pipe",
+      "compute volumetric flow rate and relate mean velocity to centerline velocity",
+      "relate axial pressure drop to flow rate and pipe geometry",
+      "calculate wall shear stress and friction velocity from the velocity field",
+      "derive laminar friction factors (Darcy and Fanning) and express them in terms of Reynolds number",
+      "apply the hydraulic diameter concept to characterize non-circular ducts",
+      "determine the fully-developed temperature profile for constant wall temperature and obtain the corresponding heat transfer coefficient and Nusselt number"
+    ],
+    "assumed_prerequisites": [
+      "basic fluid mechanics (stress, momentum balance)",
+      "differential calculus and integration",
+      "concepts of viscosity and Reynolds number",
+      "basic heat transfer (conduction, convective boundary conditions)"
+    ],
+    "lecture_type": "derivation-heavy"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Hagen–Poiseuille: velocity profile, volumetric flow and laminar friction factor in a circular pipe",
+      "derivation_stub": "Derive fully-developed steady laminar pipe flow velocity profile $u(r)=u_{max}\\left(1-\\dfrac{r^2}{R^2}\\right)$, compute $Q$ and $\\bar u$, relate pressure drop $\\Delta p$ to mean velocity and obtain Darcy friction factor $f_D=64/\\mathrm{Re}$. (Complete for assumptions listed.)",
+      "steps": [
+        "1) Force balance on a cylindrical fluid element (axial momentum, steady):\n\n$$p(x)A - p(x+\\Delta x)A - \\tau_w P\\Delta x = 0 \\;\\Rightarrow\\; -\\frac{dp}{dx}A = \\tau_w P$$\n\nso the local shear from the pressure gradient is\n\n$$\\tau_w = -\\frac{dp}{dx}\\frac{A}{P}\\;.$$",
+        "2) For a circular pipe (radius $R$) the area/perimeter ratio is $A/P = \\dfrac{\\pi R^2}{2\\pi R} = \\dfrac{R}{2}$. More generally the shear at radius $r$ from the same balance gives\n\n$$\\tau(r) = -\\frac{1}{2}\\frac{dp}{dx}\\,r\\;.$$",
+        "3) Constitutive relation (Newtonian fluid) and sign convention:\n\n$$\\tau(r) = -\\mu\\frac{du}{dr}\\;.$$\n\nCombine with the expression for $\\tau(r)$ to form the ODE:\n\n$$\\mu\\frac{du}{dr} = \\frac{1}{2}\\frac{dp}{dx}\\,r\\;.$$",
+        "4) Integrate the ODE with respect to $r$:\n\n$$u(r) = \\frac{1}{4\\mu}\\frac{dp}{dx}\\,r^2 + C\\;.$$\n\nApply no-slip at the wall $u(R)=0$ to find the integration constant:\n\n$$0 = \\frac{1}{4\\mu}\\frac{dp}{dx}R^2 + C \\;\\Rightarrow\\; C = -\\frac{1}{4\\mu}\\frac{dp}{dx}R^2\\;.$$",
+        "5) Express the velocity profile in convenient form:\n\n$$u(r)=\\frac{1}{4\\mu}\\frac{dp}{dx}(r^2-R^2) = \\frac{1}{4\\mu}\\left(-\\frac{dp}{dx}\\right)(R^2-r^2)\\;.$$\n\nDefine the centreline (maximum) velocity\n\n$$u_{max} = \\frac{1}{4\\mu}\\left(-\\frac{dp}{dx}\\right)R^2\\;\\Rightarrow\\; u(r)=u_{max}\\left(1-\\frac{r^2}{R^2}\\right)\\;.$$",
+        "6) Volumetric flow rate $Q$ and mean velocity $\\bar u$:\n\n$$Q=\\int_0^{R} u(r)\\,2\\pi r\\,dr = 2\\pi u_{max}\\int_0^R r\\left(1-\\frac{r^2}{R^2}\\right)dr \\\\\n=2\\pi u_{max}\\left(\\frac{R^2}{2}-\\frac{R^2}{4}\\right)=\\frac{\\pi R^2}{2}u_{max}\\;.$$\n\nThus\n\n$$\\bar u = \\frac{Q}{\\pi R^2}=\\frac{u_{max}}{2}\\;\\Rightarrow\\;u_{max}=2\\bar u\\;.$$",
+        "7) Relate pressure gradient to mean velocity and pressure drop over length $L$:\n\nFrom the definition of $u_{max}$,\n\n$$-\\frac{dp}{dx}=\\frac{4\\mu u_{max}}{R^2}=\\frac{8\\mu\\bar u}{R^2}\\;.$$\n\nHence the pressure drop along length $L$ is\n\n$$\\Delta p=(p_1-p_2)=\\left(-\\frac{dp}{dx}\\right)L=\\frac{8\\mu\\bar u L}{R^2}=\\frac{32\\mu\\bar u L}{D^2}\\quad(D=2R)\\;.$$",
+        "8) Darcy–Weisbach friction factor for laminar flow: equate Darcy form\n\n$$\\Delta p = f_D\\frac{L}{D}\\frac{\\rho\\bar u^2}{2}\\;.$$\n\nSolve for $f_D$ using the expression for $\\Delta p$:\n\n$$f_D = \\frac{64\\mu\\bar u}{\\rho\\bar u^2 D} = \\frac{64}{\\mathrm{Re}}\\;,\\quad \\mathrm{Re}=\\frac{\\rho\\bar u D}{\\mu}\\;.$$",
+        "9) Assumptions / completeness: derivation assumes steady, incompressible, Newtonian fluid, axisymmetric fully-developed flow (\\partial u/\\partial x=0), no-slip at the wall and constant properties. Under these assumptions the derivation is complete up to the final results $u(r)=u_{max}(1-r^2/R^2)$, $\\bar u = u_{max}/2$, $\\Delta p = 32\\mu\\bar u L/D^2$, and $f_D=64/\\mathrm{Re}$."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 4
+      }
+    },
+    {
+      "derivation_title": "Friction (shear) velocity and relation to Darcy friction factor",
+      "derivation_stub": "Define friction velocity $u_* = \\sqrt{\\tau_w/\\rho}$ and show relation $f_D = 8\\,(u_*/\\bar u)^2$ (page 6).",
+      "steps": [
+        "1) Definition: $$\\tau_w = \\rho u_*^2 \\;\\Rightarrow\\; u_* = \\sqrt{\\frac{\\tau_w}{\\rho}}\\;.$$",
+        "2) From Darcy–Weisbach and earlier force balance one can show (algebra in notes) that\n\n$$f_D = 8\\left(\\frac{u_*}{\\bar u}\\right)^2\\;.$$"
+      ],
+      "reference": {
+        "start_page": 6,
+        "end_page": 6
+      }
+    },
+    {
+      "derivation_title": "Temperature profile and pipe heat-transfer (fully-developed, laminar)",
+      "derivation_stub": "Radial temperature profile for fully-developed thermal field with constant wall temperature leads to Nusselt number Nu = 4 (page 7).",
+      "steps": [
+        "1) The notes give the parabolic radial temperature profile analogous to velocity:\n\n$$T(r)-T_s = (T_m-T_s)\\left(1-\\frac{r^2}{R^2}\\right)\\;,$$\n\nso the radial derivative at the wall yields the conductive flux and, using $q=h(T_m-T_s)$, leads to",
+        "2) Result for fully-developed laminar flow with constant wall temperature:\n\n$$\\mathrm{Nu}=\\frac{hD}{k}=4\\;.$$"
+      ],
+      "reference": {
+        "start_page": 7,
+        "end_page": 7
+      }
+    },
+    {
+      "derivation_title": "Skin-friction coefficient for laminar pipe flow (Cf) and its relation to Re",
+      "derivation_stub": "Relate the skin-friction coefficient $C_f$ to Reynolds number: $C_f=16/\\mathrm{Re}$ and therefore $C_f/2 = 8/\\mathrm{Re}$ (page 8).",
+      "steps": [
+        "1) From the velocity profile and shear definitions the notes show\n\n$$C_f = \\frac{\\tau_w}{\\tfrac{1}{2}\\rho\\bar u^2}=\\frac{16}{\\mathrm{Re}}\\;.$$",
+        "2) Thus $$\\frac{C_f}{2}=\\frac{8}{\\mathrm{Re}}\\;,$$ (useful in analogies and integral relations)."
+      ],
+      "reference": {
+        "start_page": 8,
+        "end_page": 8
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "For fully developed, steady laminar flow in a circular pipe with a parabolic velocity profile, what is the relationship between the cross‑sectional mean velocity ū and the centreline (maximum) velocity u_max?",
+      "topics": [
+        "parabolic velocity profile",
+        "volumetric flow rate",
+        "fully developed laminar pipe flow"
+      ],
+      "options": [
+        {
+          "text": "ū = u_max/2",
+          "is_correct": true
+        },
+        {
+          "text": "ū = u_max",
+          "is_correct": false
+        },
+        {
+          "text": "ū = 2 u_max",
+          "is_correct": false
+        },
+        {
+          "text": "ū = u_max/4",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 3
+      },
+      "explanation": "Integrating the parabolic velocity u(r)=u_max(1−r^2/R^2) over the pipe area gives V̇ = π u_max R^2/2, so the mean velocity ū = V̇/(πR^2) = u_max/2."
+    },
+    {
+      "question": "Which expression for the Darcy (pipe) friction factor f_D for fully developed, laminar flow in a circular pipe was derived in the lecture?",
+      "topics": [
+        "pressure drop and shear",
+        "friction factor",
+        "Reynolds number scaling"
+      ],
+      "options": [
+        {
+          "text": "f_D = 64 / Re",
+          "is_correct": true
+        },
+        {
+          "text": "f_D = 16 / Re",
+          "is_correct": false
+        },
+        {
+          "text": "f_D = 32 / Re",
+          "is_correct": false
+        },
+        {
+          "text": "f_D = constant (independent of Re)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 5
+      },
+      "explanation": "Using the velocity profile and wall shear relation yields (p1−p2) ∝ μ ū L / D, leading to f_D = 64/Re for fully developed laminar flow in a circular pipe."
+    },
+    {
+      "question": "In the lecture the Nusselt number Nu for the thermally fully developed laminar flow case discussed was given as:",
+      "topics": [
+        "thermal entrance and fully developed condition",
+        "convective heat transfer",
+        "Nusselt number"
+      ],
+      "options": [
+        {
+          "text": "Nu = 4",
+          "is_correct": true
+        },
+        {
+          "text": "Nu = 3.66",
+          "is_correct": false
+        },
+        {
+          "text": "Nu = 4.36",
+          "is_correct": false
+        },
+        {
+          "text": "Nu varies with Re and Pr (not constant)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 7,
+        "end_page": 7
+      },
+      "explanation": "For the specific thermally fully developed case treated in the lecture the algebra gives hD/k = 4, so the (constant) Nusselt number reported there is Nu = 4."
+    }
+  ]
+}
