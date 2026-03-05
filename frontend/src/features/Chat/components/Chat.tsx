@@ -12,7 +12,6 @@ import {
   type LectureArtifact,
   type ValidAgent,
 } from "../../../context/ChatContext";
-import { type Message } from "@langchain/langgraph-sdk";
 import { DropDown } from "../../../components/DropDown";
 import api from "../../../config/api";
 import { useGenerateThread, useUserThreads } from "../hooks/hooks";
