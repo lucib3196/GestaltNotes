@@ -1,0 +1,10 @@
+{
+  "lecture_id": "10-17-25.pdf",
+  "page_length": 3,
+  "source_fidelity": 5,
+  "extraction_correctness": 5,
+  "completeness": 5,
+  "overall": 3,
+  "issues": ["invalid_formatting", "missing_questions"],
+  "notes": "For the extracted questions, it notes that it needs interpolation data, so it just extracts those values directly"
+}

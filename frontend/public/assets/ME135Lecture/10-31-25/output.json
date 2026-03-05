@@ -1,0 +1,178 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/10-31-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Psychrometric Mixing and Cooling-Tower Mass/Energy Balances in a Steam Power Plant",
+    "lecture_summary": "The lecture demonstrates how to apply mass and energy balances together with psychrometric relations to solve two practical problems: (1) mixing two air streams (different temperatures and relative humidities) to find the exit dry-bulb temperature and relative humidity, and (2) analysing condenser heat rejection into a cooling-water loop and a cooling tower to determine required air mass flow and makeup water at steady state. The material shows use of humidity ratio, moist-air enthalpy, saturation/partial pressures, and heat capacity of water within the context of a Rankine-cycle condenser and cooling tower.",
+    "core_topics": [
+      "Mass balance for dry air and water vapor",
+      "Energy balance for mixing streams",
+      "Psychrometric properties (humidity ratio, saturation pressure)",
+      "Enthalpy of moist air",
+      "Condenser heat rejection in Rankine cycle",
+      "Cooling tower mass and energy balances",
+      "Calculation of makeup water flow",
+      "Use of specific heat of water"
+    ],
+    "learning_objectives": [
+      "apply mass balances to dry air and vapor streams during mixing",
+      "apply energy balances to determine mixed-air temperature and enthalpy",
+      "compute humidity ratio and moist-air enthalpy from temperature and relative humidity",
+      "calculate exit relative humidity from saturation/partial pressure relationships",
+      "set up mass and energy balances for condenser–cooling tower systems",
+      "determine cooling-air mass flow and makeup water flow for steady-state operation",
+      "connect condenser heat rejection to required cooling-water flow rates"
+    ],
+    "assumed_prerequisites": [
+      "basic thermodynamics (energy balances)",
+      "properties of moist air and psychrometrics (humidity ratio, enthalpy)",
+      "familiarity with Rankine-cycle components (condenser, boiler, turbine)",
+      "basic algebra and unit conversion"
+    ],
+    "lecture_type": "mixed"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Mass & Energy Balance for Cooling Tower — determine air mass flow and evaporation (makeup) rate",
+      "derivation_stub": "Find \\dot{m}_a (mass flow rate of air) and \\dot{m}_3 (evaporated water / makeup flow) from energy and mass balances in the cooling tower given Q̇_c = 840 MW, cooling water 40°C→20°C, inlet air 25°C 35% RH, outlet air 35°C 90% RH.",
+      "steps": [
+        "1) Known / given: Q̇_c = 840×10^6 W (heat rejected by condenser, delivered to tower cooling water). Cooling-water temperature drop: T_b = 40°C (enters tower), T_a = 20°C (returns). Use cp_w = 4.187 kJ/(kg·K) (≈ 4.187 kJ/kg·°C).",
+        "2) Heat balance on cooling water (assume all Q̇_c goes to heating the water stream):\n```\nQ̇_c = \\dot{m}_w c_{p,w} (T_b - T_a)\n```\nSolve for \\dot{m}_w:\n```\n\\dot{m}_w = \\dfrac{Q̇_c}{c_{p,w}(T_b-T_a)} = \\dfrac{840×10^6}{4.187×10^3×(40-20)} = 10000\\ \\mathrm{kg/s}.\n```",
+        "3) Mass balance for evaporated water into the air: define humidity ratios (from psychrometric data taken in notes/tables):\n- w_4 = 6.912 g/kg_da = 6.912×10^{-3} kg_v/kg_da (inlet air at 25°C, 35% RH)\n- w_5 = 32.86 g/kg_da = 32.86×10^{-3} kg_v/kg_da (outlet air at 35°C, 90% RH)\nEvaporation (mass of water transferred to air) is:\n```\n\\dot{m}_3 = \\dot{m}_a (w_5 - w_4).\n```",
+        "4) Write an energy (enthalpy) balance for the tower control volume (steady state). Using moist-air specific enthalpies h (kJ per kg dry air) from psychrometric tables and accounting for sensible heating of the evaporated liquid water, the algebra used in the notes is compacted to the form:\n```\n\\dot{m}_a\\Big[(w_5 - w_4) c_{p,w}(T_b - T_a) + h_4 - h_5\\Big] = \\dot{m}_w c_{p,w}(T_b - T_a)\n```\nThis equation groups the energy required to evaporate and warm the evaporated water (first term) together with the change of moist-air enthalpy (h_4→h_5) on the left, equating them to the net energy removed from the water on the right.",
+        "5) Substitute numeric property values used in the notes (units kJ/kg or kJ/kg_da; convert g/kg → kg/kg where needed):\n- (w_5 - w_4) = (32.86 - 6.912)×10^{-3} = 0.025948 kg_v/kg_da\n- c_{p,w} = 4.187 kJ/(kg·K)\n- (T_b - T_a) = 40 - 20 = 20 K\n- h_4 = 42.74 kJ/kg_da (moist-air enthalpy at inlet conditions)\n- h_5 = 119.47 kJ/kg_da (moist-air enthalpy at outlet conditions)\n- \\dot{m}_w c_{p,w}(T_b-T_a) = 10000 × 4.187 × 20 = 837400 kJ/s (note sign usage below)\n\nCompute the bracketed coefficient:\n```\n(w_5 - w_4) c_{p,w}(T_b-T_a) = 0.025948 × 4.187 × 20 = 2.173\\ \\mathrm{kJ/kg_{da}}\n```\nSo bracket: 2.173 + 42.74 - 119.47 = -74.557 kJ/kg_da.",
+        "6) Solve for \\dot{m}_a:\n```\n\\dot{m}_a = \\dfrac{\\dot{m}_w c_{p,w}(T_b-T_a)}{(w_5-w_4)c_{p,w}(T_b-T_a)+h_4-h_5}\n= \\dfrac{10000×4.187×20}{-74.557} \\approx 11231\\ \\mathrm{kg/s}.\n```\n(Signs cancel because RHS and denominator are both negative in the numeric substitution used in the notes.)",
+        "7) Compute evaporated (makeup) water rate \\dot{m}_3:\n```\n\\dot{m}_3 = \\dot{m}_a (w_5 - w_4) = 11231 × 0.025948 ≈ 291.4\\ \\mathrm{kg/s}.\n```",
+        "8) Results (from the worked steps):\n- Air mass flow: \\dot{m}_a ≈ 11231 kg/s\n- Evaporated (makeup) water: \\dot{m}_3 ≈ 291.4 kg/s\n\nCompleteness/assumptions: The derivation is essentially complete for the calculation shown, but it relies on psychrometric property lookups (w_4, w_5, h_4, h_5) and the grouping of enthalpy terms into the compact algebraic form in step 4. Assumptions: steady state, negligible heat losses to ambient, drift/other water losses ignored except evaporation, cp_w ≈ constant, and moist-air enthalpies taken from tables."
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 6
+      }
+    },
+    {
+      "derivation_title": "Mixing of two air streams — exit dry-bulb temperature and relative humidity",
+      "derivation_stub": "Mix two air streams (150 m^3/min at 24°C, 50% RH and 300 m^3/min at 40°C, 30% RH) to find mixed air T_3 and φ_3.",
+      "steps": [
+        "1) Convert volumetric flow to dry-air mass flow using specific volumes v_1, v_2 (from psychrometric tables):\n```\n\\dot{m}_{a1} = \\dfrac{\\dot{V}_1}{v_1}, \\quad \\dot{m}_{a2} = \\dfrac{\\dot{V}_2}{v_2}.\n```\n(Numeric values used in notes: v_1 = 0.854 m^3/kg_da, v_2 = 0.907 m^3/kg_da → \\dot{m}_{a1} = 175.6 kg/min, \\dot{m}_{a2} = 330.76 kg/min.)",
+        "2) Vapor mass flows: \\dot{m}_{v1} = w_1 \\dot{m}_{a1}, \\dot{m}_{v2} = w_2 \\dot{m}_{a2} (w in g/kg converted to kg/kg). Using w_1 = 9.336 g/kg and w_2 = 13.96 g/kg (from psychrometric table) the notes compute \\dot{m}_{v1} ≈ 1.64 kg/min and \\dot{m}_{v2} ≈ 4.5 kg/min, so \\dot{m}_{v3} = \\dot{m}_{v1}+\\dot{m}_{v2} ≈ 6.1 kg/min.",
+        "3) Dry-air mass out: \\dot{m}_{a3} = \\dot{m}_{a1} + \\dot{m}_{a2} = 506.36 kg/min. Mixed humidity ratio:\n```\nw_3 = \\dfrac{\\dot{m}_{v3}}{\\dot{m}_{a3}} = \\dfrac{6.1}{506.36} = 0.01205\\ \\mathrm{kg_v/kg_da}.\n```",
+        "4) Energy (enthalpy) balance for mixing (assume negligible kinetic/potential work):\n```\n\\dot{m}_{a1} h_1 + \\dot{m}_{a2} h_2 = \\dot{m}_{a3} h_3\n```\nSolve for h_3 and then relate moist-air enthalpy to dry-bulb temperature and humidity:\n```\nh_3 = c_{p,a} T_3 + w_3(2500 + 1.9 T_3)\n```\nSubstitute numbers (h_3 computed ≈ 66.39 kJ/kg_da) and solve for T_3 → T_3 ≈ 35.3°C.",
+        "5) Using T_3 = 35.3°C, find saturation pressure p_sat(35.3°C) and vapor partial pressure p_v3 = w_3 p / (0.622 + w_3) (using p = 101.325 kPa). Compute relative humidity:\n```\nφ_3 = p_{v3}/p_{sat} ≈ 0.336 ≈ 33.6%.\n```",
+        "Completeness/assumptions: This derivation is complete given psychrometric table values used for v, w, h and the relation for moist-air enthalpy. It assumes steady mixing, no heat losses, and ideal psychrometric relations."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      }
+    },
+    {
+      "derivation_title": "Simple condenser heat transfer used to find cooling-water mass flow",
+      "derivation_stub": "Relate condenser heat rejection to cooling-water flow using Q̇ = \\dot{m}_w c_p (T_b - T_a).",
+      "steps": [
+        "Equation: Q̇_c = \\dot{m}_w c_{p,w} (T_b - T_a).",
+        "Numeric substitution from notes: 840×10^6 = \\dot{m}_w × 4.187×10^3 × (40 - 20) → \\dot{m}_w = 10000 kg/s.",
+        "Purpose: provides the cooling-water mass flow used in the cooling-tower balances above."
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 4
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "When two streams of moist air mix adiabatically in a perfectly insulated duct (no heat loss to surroundings), which quantities are conserved and which must be used to determine the final mixed-air temperature and humidity ratio?",
+      "topics": [
+        "Psychrometrics",
+        "Mass balance (dry air and water vapour)",
+        "Energy (enthalpy) balance"
+      ],
+      "options": [
+        {
+          "text": "Mass of dry air, mass of water vapour and total enthalpy are conserved; use mass balances for dry air and vapour plus an energy balance to find mixture temperature and humidity ratio.",
+          "is_correct": true
+        },
+        {
+          "text": "Only the dry-bulb temperatures of the two streams are conserved and the mixed temperature is the arithmetic mean of the two temperatures.",
+          "is_correct": false
+        },
+        {
+          "text": "Relative humidity of each stream is conserved during mixing, so the mixture RH is the average of the two inlet RH values.",
+          "is_correct": false
+        },
+        {
+          "text": "The humidity ratio of the mixture equals the humidity ratio of the hotter stream only.",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      },
+      "explanation": "In adiabatic mixing the dry air mass is conserved (no leakage), water vapour mass from each stream adds to give total vapour, and energy (enthalpy) is conserved. Solve m_da and m_v mass balances plus total enthalpy balance to get the mixed temperature and humidity ratio."
+    },
+    {
+      "question": "For a cooling tower operating at steady state where warm condenser water is cooled by counter-flow air and some water evaporates into the air, which statement correctly gives the makeup-water requirement?",
+      "topics": [
+        "Cooling tower water balance",
+        "Evaporative cooling and humidity change",
+        "Steady-state mass conservation"
+      ],
+      "options": [
+        {
+          "text": "Makeup water equals the mass of water evaporated into the air, which is the air mass flow rate multiplied by the increase in humidity ratio (m_dot_air · (ω_out − ω_in)).",
+          "is_correct": true
+        },
+        {
+          "text": "Makeup water equals the total heat rejected by the condenser divided by the water specific heat (Q̇_c / (c_p,w · ΔT)), independent of the air humidity change.",
+          "is_correct": false
+        },
+        {
+          "text": "No makeup water is required at steady state because all evaporated water returns as condensate to the condenser.",
+          "is_correct": false
+        },
+        {
+          "text": "Makeup water equals the air mass flow rate (m_dot_air), since all incoming air becomes saturated water in the tower.",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 6
+      },
+      "explanation": "At steady state the liquid water lost from the cooling circuit must be replaced by makeup. The primary loss is evaporation into the air, so m_makeup = m_evaporated = m_air·(ω_out − ω_in). The heat rejection determines the water temperature change but not directly the evaporative mass without the humidity change."
+    },
+    {
+      "question": "In a Rankine-cycle power plant, given thermal efficiency η = Ẇ / Q̇_in, which relationship between heat input Q̇_in, turbine work Ẇ and heat rejected in the condenser Q̇_out is correct?",
+      "topics": [
+        "Rankine cycle energy balance",
+        "First law for steady-flow devices",
+        "Definition of thermal efficiency"
+      ],
+      "options": [
+        {
+          "text": "Q̇_out = Q̇_in − Ẇ (energy conservation: input heat = turbine work + rejected heat).",
+          "is_correct": true
+        },
+        {
+          "text": "Q̇_out = Ẇ / η (condenser heat equals work divided by efficiency).",
+          "is_correct": false
+        },
+        {
+          "text": "Ẇ = Q̇_out − Q̇_in (work equals rejected heat minus input heat).",
+          "is_correct": false
+        },
+        {
+          "text": "η = Q̇_out / Q̇_in, so condenser heat divided by input heat gives thermal efficiency.",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 3
+      },
+      "explanation": "Apply the first law to the cycle: Q̇_in = Ẇ + Q̇_out. Rearranging gives Q̇_out = Q̇_in − Ẇ. Efficiency η is defined as Ẇ/Q̇_in, not Q̇_out/Q̇_in."
+    }
+  ]
+}

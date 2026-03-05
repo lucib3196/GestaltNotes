@@ -1,0 +1,179 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/10-20-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Psychrometrics: Gas Mixtures, Humidity, Vapor Pressure and Dew Point",
+    "lecture_summary": "Introduction to the properties of air–vapor mixtures using the ideal gas model. The lecture covers how total pressure of a mixture arises from partial pressures (Dalton’s law), how mole fraction relates to partial pressure, and how to quantify moisture in air using humidity ratio, vapor pressure and relative humidity. It also explains the concept of saturation and dew point and shows example calculations and chart-based reasoning to find dew point and moisture content.",
+    "core_topics": [
+      "Dalton's law (partial pressures)",
+      "Mole fraction in gas mixtures",
+      "Ideal gas law applied to mixtures",
+      "Humidity ratio (specific humidity)",
+      "Vapor pressure and saturation pressure",
+      "Relative humidity",
+      "Dew point determination",
+      "Psychrometric-chart interpretation and example calculations"
+    ],
+    "learning_objectives": [
+      "Explain Dalton’s law and how total pressure decomposes into partial pressures",
+      "Derive the relation between partial pressure and mole fraction in an ideal gas mixture",
+      "Calculate masses and mole numbers of gas components using ideal gas assumptions",
+      "Define and compute the humidity ratio (kg vapor per kg dry air)",
+      "Relate vapor pressure and saturation pressure to relative humidity",
+      "Determine dew point from known vapor pressure or from a psychrometric/chart interpolation",
+      "Apply the above concepts to worked numerical examples"
+    ],
+    "assumed_prerequisites": [
+      "Ideal gas law and basic thermodynamics (pressure, temperature)",
+      "Mole concept and use of molecular weights",
+      "Comfort with basic algebra and unit conversions"
+    ],
+    "lecture_type": "mixed"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Humidity ratio (mixing ratio) w = 0.622 · p_v / (p − p_v)",
+      "derivation_stub": "Derive the humidity (mixing) ratio w = m_v / m_a in terms of total pressure p and vapor partial pressure p_v: w = 0.622 · p_v / (p − p_v).",
+      "steps": [
+        "Define humidity ratio (mixing ratio):\n\nw = m_v / m_a",
+        "Treat both water vapor and dry air as ideal gases. Write mass from ideal-gas relation (per component):\n\nFor vapor: $$m_v = \\dfrac{p_v V}{R_v T}$$\nFor dry air: $$m_a = \\dfrac{p_a V}{R_a T}$$\n(where R_v and R_a are the specific gas constants for vapor and dry air respectively).",
+        "Form the ratio and cancel common factors (V,T):\n\n$$w = \\dfrac{m_v}{m_a} = \\dfrac{p_v / R_v}{p_a / R_a} = \\dfrac{p_v}{p_a}\\cdot\\dfrac{R_a}{R_v}.$$",
+        "Express the ratio of specific gas constants using molecular weights (R_i = R_u / M_i):\n\n$$\\dfrac{R_a}{R_v} = \\dfrac{M_v}{M_a}\\approx\\dfrac{18}{28.96}\\approx 0.622.$$",
+        "Use Dalton's law for the partial pressure of dry air: $$p_a = p - p_v$$ (total pressure minus vapor pressure). Substitute into w:\n\n$$w = 0.622\\;\\dfrac{p_v}{p - p_v}.$$",
+        "Result boxed: \n\n```\n$$w = 0.622\\dfrac{p_v}{p - p_v}\\quad\\text{(kg vapour / kg dry air)}$$\n```",
+        "Completeness: derivation is complete (assumes ideal-gas behavior and that p is the total pressure so p_a = p - p_v)."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 3
+      }
+    },
+    {
+      "derivation_title": "Dalton's law → partial pressures and mole-fraction relation",
+      "derivation_stub": "Show that each component partial pressure equals its mole fraction times total pressure: p_i = (n_i / n) · p.",
+      "steps": [
+        "Start from ideal-gas law for a component and for the mixture:\n\nFor component i: $$p_i V = n_i \\bar{R} T.$$\nFor mixture: $$p V = n \\bar{R} T.$$",
+        "Divide component equation by mixture equation (or compare):\n\n$$\\dfrac{p_i V}{p V} = \\dfrac{n_i \\bar{R} T}{n \\bar{R} T} \\Rightarrow \\dfrac{p_i}{p} = \\dfrac{n_i}{n}$$",
+        "Define mole fraction: $$y_i \\equiv \\dfrac{n_i}{n}$$ so\n\n$$p_i = y_i\\,p.$$",
+        "Conclude Dalton's law in mixture form: total pressure is sum of partial pressures, $$p = \\sum_i p_i,$$ and each partial equals mole fraction times p.",
+        "Purpose / how it supports main derivation: provides p_a = p - p_v (used to substitute p_a when deriving w), and justifies using p_v and p as component pressures.",
+        "Completeness: derivation is complete and standard; assumes ideal-gas mixture."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      }
+    },
+    {
+      "derivation_title": "Relative humidity and dew-point relation: φ = p_v / p_sat and dew-point determination",
+      "derivation_stub": "Derive relative humidity φ = m_v / m_{v,sat} = p_v / p_{sat} and state how to find dew point from p_v (interpolation).",
+      "steps": [
+        "Define relative humidity as ratio of actual vapor mass to saturated vapor mass at same T:\n\n$$\\phi = \\dfrac{m_v}{m_{v,\\mathrm{sat}}}.$$",
+        "Using ideal-gas expression for masses (same V and T for actual and saturated vapor):\n\n$$m_v = \\dfrac{p_v V}{R_v T},\\quad m_{v,\\mathrm{sat}} = \\dfrac{p_{\\mathrm{sat}}(T)\\,V}{R_v T}.$$",
+        "Cancel V, R_v, T to obtain:\n\n$$\\phi = \\dfrac{p_v}{p_{\\mathrm{sat}}(T)}.$$",
+        "Hence given φ and temperature T, the vapor partial pressure is\n\n$$p_v = \\phi\\,p_{\\mathrm{sat}}(T).$$\nTo find the dew-point temperature T_dp, solve for T such that\n\n$$p_{\\mathrm{sat}}(T_{\\mathrm{dp}}) = p_v.$$",
+        "Practical dew-point interpolation (as used in notes): if table values p_{sat}(T1)=p1 and p_{sat}(T2)=p2 bracket p_v, then linear interpolation for T_dp:\n\n$$T_{\\mathrm{dp}} = T_1 + \\dfrac{p_v - p_1}{p_2 - p_1}\\,(T_2 - T_1).$$\n(Used when p_v falls between tabulated saturation pressures.)",
+        "Completeness: derivation for φ = p_v/p_sat is complete under ideal-gas assumption. Dew-point step assumes monotonic p_sat(T) and uses linear interpolation (approximate)."
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 5
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "According to Dalton's law for an ideal gas mixture, which expression gives the partial pressure pA of component A?",
+      "topics": [
+        "Dalton's law",
+        "Partial pressure",
+        "Mole fraction"
+      ],
+      "options": [
+        {
+          "text": "pA = (nA / n) · P",
+          "is_correct": true
+        },
+        {
+          "text": "pA = (mA / m) · P",
+          "is_correct": false
+        },
+        {
+          "text": "pA = (MA / M) · P  (MA = molar mass of A)",
+          "is_correct": false
+        },
+        {
+          "text": "pA = P − (nA / n) · P",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      },
+      "explanation": "For an ideal gas mixture the partial pressure of A equals its mole fraction yA = nA/n times the total pressure P, i.e. pA = yA·P."
+    },
+    {
+      "question": "Which formula correctly expresses the humidity ratio w (kg water vapour per kg dry air) in terms of vapour partial pressure pv and total pressure P (assuming ideal gases and molecular weights of dry air and vapour)?",
+      "topics": [
+        "Humidity ratio",
+        "Vapour pressure",
+        "Ideal gas relations"
+      ],
+      "options": [
+        {
+          "text": "w = 0.622 · pv / (P − pv)",
+          "is_correct": true
+        },
+        {
+          "text": "w = pv / (P − pv)",
+          "is_correct": false
+        },
+        {
+          "text": "w = 0.622 · (P − pv) / pv",
+          "is_correct": false
+        },
+        {
+          "text": "w = 0.278 · pv / (P − pv)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 3
+      },
+      "explanation": "Derived from ideal-gas relations and molar masses (Mw/Ma ≈ 18/28.96 ≈ 0.622), the humidity ratio is w = (Mv/Ma)·pv/(P−pv) ≈ 0.622·pv/(P−pv)."
+    },
+    {
+      "question": "Relative humidity φ is defined as which of the following (for a given temperature)?",
+      "topics": [
+        "Relative humidity",
+        "Saturation pressure",
+        "Dew point concepts"
+      ],
+      "options": [
+        {
+          "text": "φ = pv / psat(T)",
+          "is_correct": true
+        },
+        {
+          "text": "φ = psat(T) / pv",
+          "is_correct": false
+        },
+        {
+          "text": "φ = pv / P (total pressure)",
+          "is_correct": false
+        },
+        {
+          "text": "φ = (P − pv) / psat(T)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 5
+      },
+      "explanation": "Relative humidity is the ratio of the actual vapour partial pressure pv to the saturation vapour pressure at the same temperature psat(T): φ = pv/psat."
+    }
+  ]
+}

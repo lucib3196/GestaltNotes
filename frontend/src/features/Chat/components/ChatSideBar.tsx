@@ -1,15 +1,15 @@
 import clsx from "clsx";
 
 export type ChatThread = {
-  id: string;
+  id: string | null;
   title: string;
 };
 
 export type ChatSideBarProps = React.HTMLAttributes<HTMLDivElement> & {
   chats: ChatThread[];
-  activeChatId?: string;
-  onSelectChat: (id: string) => void;
-  onNewChat?: () => void;
+  activeChatId?: string | null;
+  onSelectChat: (id: string | null) => void;
+  onNewChat?: () => Promise<void>;
 };
 
 const sidebarBaseStyle =
@@ -28,6 +28,7 @@ export default function ChatSideBar({
   className,
   ...rest
 }: ChatSideBarProps) {
+
   return (
     <div className={clsx(sidebarBaseStyle, className)} {...rest}>
 
@@ -81,7 +82,7 @@ export default function ChatSideBar({
               {/* Title row */}
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-sm text-slate-800">
-                  {chat.title}
+                  {chat.title ?? "New Chat"}
                 </span>
               </div>
             </button>

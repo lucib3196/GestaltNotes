@@ -1,0 +1,221 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/11-24-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Boundary-layer Transport: Heat, Mass and Momentum Analogies",
+    "lecture_summary": "The lecture examines transport processes in a boundary layer over a flat plate, comparing molecular and convective mechanisms for heat, mass and momentum. It defines local and overall transfer coefficients, introduces boundary-layer thicknesses for temperature, concentration and velocity, and connects these thicknesses to dimensionless groups (Reynolds, Prandtl, Schmidt, Nusselt). The Reynolds and Chilton–Colburn analogies are presented to relate heat, mass and momentum transfer, and an example estimates mass-transfer (evaporation) from an empirical heat-transfer correlation.",
+    "core_topics": [
+      "Molecular and convective transport",
+      "Thermal boundary layer",
+      "Concentration boundary layer",
+      "Momentum boundary layer",
+      "Local and overall heat/mass transfer coefficients",
+      "Nusselt and analogous dimensionless numbers for mass transfer",
+      "Reynolds, Prandtl and Schmidt numbers",
+      "Reynolds and Chilton–Colburn analogies",
+      "Relation between friction coefficient and transfer rates",
+      "Application example: evaporation mass-transfer estimation"
+    ],
+    "learning_objectives": [
+      "explain the difference between molecular diffusion and convective transport for heat, mass and momentum",
+      "describe how thermal, concentration and velocity boundary layers develop along a flat plate",
+      "distinguish local and overall heat/mass transfer coefficients and how they relate to boundary-layer thickness",
+      "identify and interpret key dimensionless numbers (Reynolds, Prandtl, Schmidt, Nusselt) in boundary-layer transport",
+      "apply Reynolds and Chilton–Colburn analogies to relate heat, mass and momentum transfer",
+      "use an empirical heat-transfer correlation together with transport analogies to estimate a mass-transfer coefficient and evaporation rate"
+    ],
+    "assumed_prerequisites": [
+      "basic fluid mechanics (boundary layers, shear stress)",
+      "introductory heat and mass transfer concepts",
+      "calculus for differentiating/integrating boundary-layer quantities"
+    ],
+    "lecture_type": "mixed"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Boundary-layer relation: local h(x), overall h̄ and Nusselt number (heat ⇄ mass ⇄ momentum analogies)",
+      "derivation_stub": "Show h(x)=k/δ_T(x), \\(\\bar h=\\frac{1}{L}\\int_0^L h(x)\\,dx\\), and derive Nu = \\(\\bar h L/k = L/\\delta_T\\) with analogous mass and momentum relations leading to Reynolds and Chilton–Colburn analogies.",
+      "steps": [
+        "Start from molecular conduction estimate in thermal boundary layer: local conductive flux approximated by the temperature drop across the thermal boundary layer thickness δ_T(x):\n\n```\nq''_molecular = -k \\frac{dT}{dy} \\approx k\\frac{T_s - T_\\infty}{\\delta_T(x)}\n```",
+        "Define local convective heat flux at the surface by Newton's law of cooling:\n\n```\nq''_{conv}(x) = h(x) (T_s - T_\\infty)\n```",
+        "Equate conduction estimate and convective form (matching flux at surface) to obtain local heat-transfer coefficient:\n\n```\nh(x) = \\frac{k}{\\delta_T(x)}\n```",
+        "Differential heat rate from a strip of plate of width W and length dx (surface temperature Ts assumed uniform):\n\n```\nd\\dot Q = h(x) W\\,dx\\,(T_s - T_\\infty)\n```",
+        "Integrate along plate length L to get total heat rate and define overall (average) h̄:\n\n```\n\\dot Q = \\int_0^L h(x) W\\,dx\\,(T_s - T_\\infty) = \\bar h\\,W L\\,(T_s - T_\\infty)\n\\\\\n\\bar h = \\frac{1}{L}\\int_0^L h(x)\\,dx\n```",
+        "Define average Nusselt number and relate it to a characteristic boundary-layer thickness (assuming a representative δ_T):\n\n```\nNu \\equiv \\frac{\\bar h L}{k} \\approx \\frac{L}{\\delta_T}\\quad\\text{(i.e. }L = Nu\\,\\delta_T\\text{)}\n```",
+        "Mass transfer analogue: concentration boundary layer thickness δ_c(x). Starting from Fick's law and the same argument:\n\n```\nj_A = -D_{AB}\\frac{dc_A}{dy} \\approx D_{AB}\\frac{c_{A,s}-c_{A,\\infty}}{\\delta_c(x)}\n\\\\\nh_M(x) = \\frac{D_{AB}}{\\delta_c(x)}\n```",
+        "Define Sherwood-like (mass-transfer Nusselt) number Nu_M and get the analogous relation:\n\n```\nNu_M \\equiv \\frac{\\bar h_M L}{D_{AB}} \\approx \\frac{L}{\\delta_c}\\quad\\text{(i.e. }L = Nu_M\\,\\delta_c\\text{)}\n```",
+        "Momentum (skin friction) scaling: estimate wall shear from velocity gradient in momentum boundary layer of thickness δ(x):\n\n```\n\\tau_w \\approx \\mu\\frac{u_\\infty}{\\delta(x)}\n```",
+        "Define skin-friction coefficient and relate to the estimate for τ_w:\n\n```\n\\tau_w = \\frac{1}{2}C_f\\,\\rho\\,u_\\infty^2 \\approx \\mu\\frac{u_\\infty}{\\delta}\\quad\\Rightarrow\\quad \\frac{C_f}{2}\\,\\rho u_\\infty^2 = \\mu\\frac{u_\\infty}{\\delta}\n```",
+        "Rearrange using the local Reynolds number Re_x = \\(\\frac{u_\\infty x}{\\nu}\\) to obtain the local relation (noting cancellation of a factor u_∞):\n\n```\n\\frac{C_f}{2}\\,Re_x = \\frac{x}{\\delta(x)}\\quad\\Rightarrow\\quad \\frac{C_f}{2}\\,Re_L = \\frac{L}{\\delta}\n```",
+        "Combine the three characteristic relations (from heat, mass, momentum) noting L = Nu\\,δ_T = Nu_M\\,δ_c = (C_f/2)Re\\,δ (from momentum) to relate transfer numbers:\n\n```\nNu\\,\\delta_T = Nu_M\\,\\delta_c = \\frac{C_f}{2}\\,Re\\,\\delta\n```",
+        "For similar thicknesses (δ_T ≈ δ_c ≈ δ) the Reynolds analogy (simple form) follows:\n\n```\nNu = Nu_M = \\frac{C_f}{2}\\,Re\n```",
+        "Chilton–Colburn (empirical) correction for fluids with Prandtl/Schmidt not equal to 1 (boundary-layer thickness scaling leads to a power 1/3):\n\n```\nNu = \\frac{C_f}{2}\\,Re\\,Pr^{1/3},\\qquad Nu_M = \\frac{C_f}{2}\\,Re\\,Sc^{1/3}\n```",
+        "Practical notes (from the notes): h(x)=k/δ_T(x) and h_M(x)=D_{AB}/δ_c(x) are local approximate scalings — the derivation captures proportionalities and how Nu, Nu_M scale with L/δ. Empirical prefactors (exact C_f(x) or full solutions for δ(x)) are not derived here (empirical/BL-solution needed)."
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 6
+      }
+    },
+    {
+      "derivation_title": "Local-to-average heat-transfer coefficient: h(x) ⇒ \\bar h",
+      "derivation_stub": "Derive h(x)=k/δ_T(x) and the average h̄ = (1/L)∫_0^L h(x) dx used to compute total heat rate.",
+      "steps": [
+        "Approximate local conductive flux across thermal boundary layer:\n\n```\nq'' \\approx k\\frac{T_s-T_\\infty}{\\delta_T(x)}\n```",
+        "Define local Newton's law and equate to get h(x):\n\n```\nh(x) = \\frac{k}{\\delta_T(x)}\n```",
+        "Total heat rate and average h̄:\n\n```\n\\dot Q = \\int_0^L h(x)W\\,dx\\,(T_s-T_\\infty) = \\bar h\\,W L\\,(T_s-T_\\infty)\n\\\\\n\\bar h = \\frac{1}{L}\\int_0^L h(x)\\,dx\n```"
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 3
+      }
+    },
+    {
+      "derivation_title": "Mass-transfer analogue (Sherwood / Nu_M)",
+      "derivation_stub": "Show h_M(x)=D_{AB}/δ_c(x) and Nu_M = \\bar h_M L/D_{AB} = L/δ_c.",
+      "steps": [
+        "From Fick's law and the concentration boundary layer thickness estimate:\n\n```\nj_A = -D_{AB}\\frac{dc_A}{dy} \\approx D_{AB}\\frac{c_{A,s}-c_{A,\\infty}}{\\delta_c(x)}\n```",
+        "Local mass-transfer coefficient:\n\n```\nh_M(x) = \\frac{D_{AB}}{\\delta_c(x)}\n```",
+        "Sherwood (mass Nusselt) number and relation to δ_c:\n\n```\nNu_M \\equiv \\frac{\\bar h_M L}{D_{AB}} \\approx \\frac{L}{\\delta_c}\\quad\\text{(i.e. }L = Nu_M\\,\\delta_c\\text{)}\n```"
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 3
+      }
+    },
+    {
+      "derivation_title": "Momentum (skin friction) scaling and local Reynolds relation",
+      "derivation_stub": "Relate wall shear estimate to skin-friction coefficient and Re_x to obtain (C_f/2) Re_x = x/δ(x).",
+      "steps": [
+        "Estimate wall shear from viscous stress using velocity gradient across momentum boundary layer:\n\n```\n\\tau_w \\approx \\mu\\frac{u_\\infty}{\\delta(x)}\n```",
+        "Use definition of skin-friction coefficient and equate:\n\n```\n\\tau_w = \\frac{1}{2}C_f\\,\\rho\\,u_\\infty^2 = \\mu\\frac{u_\\infty}{\\delta}\\Rightarrow \\frac{C_f}{2}\\,\\rho u_\\infty = \\frac{\\mu}{\\delta}\n```",
+        "Multiply both sides by x/\\mu and use Re_x = u_\\infty x/\\nu to get:\n\n```\n\\frac{C_f}{2}Re_x = \\frac{x}{\\delta(x)}\\quad\\Rightarrow\\quad \\frac{C_f}{2}Re_L = \\frac{L}{\\delta}\n```"
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 4
+      }
+    },
+    {
+      "derivation_title": "Reynolds analogy and Chilton–Colburn correction",
+      "derivation_stub": "From momentum–heat–mass scaling derive Nu = Nu_M = (C_f/2)Re (Reynolds analogy) and empirical Chilton–Colburn forms Nu = (C_f/2)Re Pr^{1/3}, Nu_M = (C_f/2)Re Sc^{1/3}.",
+      "steps": [
+        "Combine earlier characteristic relations L = Nu\\,\\delta_T = Nu_M\\,\\delta_c = (C_f/2)Re\\,\\delta. If the characteristic boundary-layer thicknesses are the same (δ_T≈δ_c≈δ), then:\n\n```\nNu = Nu_M = \\frac{C_f}{2}\\,Re\n```",
+        "Chilton–Colburn empirical adjustment accounts for Prandtl/Schmidt dependence of thermal/concentration boundary-layer thicknesses (from boundary-layer scaling):\n\n```\nNu = \\frac{C_f}{2}\\,Re\\,Pr^{1/3},\\qquad Nu_M = \\frac{C_f}{2}\\,Re\\,Sc^{1/3}\n```",
+        "Note: these forms give a practical correlation (include empirical prefactors for turbulent/laminar regimes); the notes show the scaling derivation and state the 1/3 exponent coming from boundary-layer thickness ratios δ/δ_T = Pr^{1/3} (and δ/δ_c = Sc^{1/3})."
+      ],
+      "reference": {
+        "start_page": 5,
+        "end_page": 6
+      }
+    },
+    {
+      "derivation_title": "Worked problem setup (application): estimate h_M and \\dot m_A for evaporating wetted surface",
+      "derivation_stub": "Apply relations to compute h_M and evaporation rate using given empirical h = 21 v_\\infty^{0.6} and D_AB (given at T).",
+      "steps": [
+        "Problem statement: air at 1 atm and 35°C, v_∞ = 15 m/s, area A = 1.5 m^2; given empirical average heat-transfer coefficient h = 21 v_∞^{0.6} (W/m^2K). Need h_M and mass-evaporation rate \\dot m_A = h_M A (c_{A,s}-c_{A,\\infty}).",
+        "Use mass–heat analogy and Sherwood/Nu_M relations in the notes: Nu_M δ_c = Nu δ_T and Nu_M (Sc)^{-1/3} = Nu (Pr)^{-1/3} (as written); compute D_{AB}(308) from D_{AB}(313) using temperature scaling D \\sim T^{3/2} (notes show this step).",
+        "Compute Schmidt number Sc = \\nu/D_{AB} and use Chilton–Colburn-type scaling Nu_M = (C_f/2) Re (Sc)^{1/3} or use Nu_M/Nu = (Sc/Pr)^{1/3} with known Nu from the empirical h to get h_M. Then compute \\dot m_A = h_M A (c_{A,s}-c_{A,\\infty}) using c_{A,s}=P_{sat}/(R_v T) as noted in the problem sketch (detailed numeric steps are present in the handwritten solution area)."
+      ],
+      "reference": {
+        "start_page": 6,
+        "end_page": 6
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "For flow over a flat plate, how does the local convective heat transfer coefficient h(x) depend on the local thermal boundary-layer thickness δ_T(x)?",
+      "topics": [
+        "Boundary layer",
+        "Heat transfer coefficient",
+        "Thermal boundary layer"
+      ],
+      "options": [
+        {
+          "text": "h(x) is proportional to 1/δ_T(x) (h ∝ 1/δ_T)",
+          "is_correct": true
+        },
+        {
+          "text": "h(x) is proportional to δ_T(x) (h ∝ δ_T)",
+          "is_correct": false
+        },
+        {
+          "text": "h(x) is proportional to δ_T(x)^2 (h ∝ δ_T^2)",
+          "is_correct": false
+        },
+        {
+          "text": "h(x) is independent of δ_T(x)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 1
+      },
+      "explanation": "Local conduction across the thermal boundary layer gives h(x) ~ k/δ_T(x), so the local convective coefficient varies inversely with the thermal boundary-layer thickness: thinner boundary layer → larger h."
+    },
+    {
+      "question": "Which expression correctly relates the (overall or local) Nusselt number for heat transfer on a flat plate to a characteristic length L and the thermal boundary-layer thickness δ_T?",
+      "topics": [
+        "Nusselt number",
+        "Non-dimensional groups",
+        "Boundary layer scaling"
+      ],
+      "options": [
+        {
+          "text": "Nu = L/δ_T",
+          "is_correct": true
+        },
+        {
+          "text": "Nu = δ_T/L",
+          "is_correct": false
+        },
+        {
+          "text": "Nu = L·δ_T",
+          "is_correct": false
+        },
+        {
+          "text": "Nu = 1 (Nu is independent of δ_T and L)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 2
+      },
+      "explanation": "By definition Nu = h̄ L/k and with the local scaling h̄ ~ k/δ_T, the Nusselt number scales as Nu ~ L/δ_T (overall Nu equals the ratio of plate length to thermal boundary-layer thickness)."
+    },
+    {
+      "question": "According to the Chilton–Colburn analogy used in the lecture, which formula correctly gives the Nusselt number (Nu) in terms of skin-friction coefficient Cf, Reynolds number Re and Prandtl number Pr for a boundary-layer flow?",
+      "topics": [
+        "Chilton–Colburn analogy",
+        "Reynolds and Prandtl numbers",
+        "Analogy between momentum and heat/mass transfer"
+      ],
+      "options": [
+        {
+          "text": "Nu = (Cf/2) · Re · Pr^(1/3)",
+          "is_correct": true
+        },
+        {
+          "text": "Nu = (Cf/2) · Re",
+          "is_correct": false
+        },
+        {
+          "text": "Nu = (Cf/2) · Re · Pr^(-1/3)",
+          "is_correct": false
+        },
+        {
+          "text": "Nu = Re · Pr (independent of Cf)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 5,
+        "end_page": 5
+      },
+      "explanation": "The Chilton–Colburn j-factor relation gives j_H = Nu/(Re·Pr^{1/3}) = Cf/2, which rearranges to Nu = (Cf/2)·Re·Pr^{1/3}. This is valid under the boundary-layer conditions where the analogy assumptions hold (similar velocity/thermal boundary-layer behavior)."
+    }
+  ]
+}

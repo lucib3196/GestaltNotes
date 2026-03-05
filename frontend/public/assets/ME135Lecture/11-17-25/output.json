@@ -1,0 +1,176 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/11-17-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Humid Air Enthalpy, Sensible/Latent Loads, and Bypass Ratio for Heating Coils",
+    "lecture_summary": "The lecture develops the thermodynamic description of moist air by combining dry‑air and water‑vapor properties to obtain humid specific heat and moist‑air enthalpy. It shows how to separate sensible and latent heat contributions, applies mass and enthalpy balances to heating and cooling processes through a coil, and introduces the bypass‑ratio model for coils. A worked example uses a psychrometric chart and the bypass ratio to find exit dry‑bulb temperature, relative humidity, and the sensible heat added per kilogram of dry air.",
+    "core_topics": [
+      "Humid specific heat (moist air)",
+      "Enthalpy of moist air",
+      "Sensible heat vs latent heat",
+      "Mass balance for moist air",
+      "Enthalpy (energy) balance for air processes",
+      "Sensible heating and cooling loads",
+      "Bypass ratio concept for heating/cooling coils",
+      "Use of psychrometric chart for state determination",
+      "Worked example: heating coil with bypass ratio"
+    ],
+    "learning_objectives": [
+      "explain how moist‑air enthalpy combines dry‑air and water‑vapor contributions",
+      "derive an expression for humid specific heat and moist‑air enthalpy (conceptually)",
+      "apply mass and enthalpy balances to air heating and cooling processes",
+      "differentiate between sensible and latent heat loads and identify when each applies",
+      "compute the bypass ratio for a coil using mass and enthalpy balances",
+      "use a psychrometric chart to determine dry‑bulb temperature and relative humidity at coil exit",
+      "calculate sensible heat added per unit mass of dry air for a bypass‑type coil"
+    ],
+    "assumed_prerequisites": [
+      "basic thermodynamics (energy and enthalpy concepts)",
+      "properties of air and water vapor",
+      "psychrometrics fundamentals",
+      "elementary algebra"
+    ],
+    "lecture_type": "mixed"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Humid (moist-air) specific enthalpy (humid specific heat) expression",
+      "derivation_stub": "Derive moist-air specific enthalpy per kg dry air and show the approximate linear form h ≈ 1.022 T + 2500 ω (kJ/kg dry air). (Derivation is complete for HVAC-level approximation; vaporization enthalpy treated as constant ≈ 2500 kJ/kg.)",
+      "steps": [
+        "Define specific enthalpy of moist air (per kg dry air):\n\n$$h = c_{pa}T + \\omega\\,h_v(T)$$\n\nwhere T is dry-bulb temperature (°C or K), ω is humidity ratio (kg water/kg dry air), c_{pa} is specific heat of dry air, and h_v(T) is specific enthalpy of the water vapor at temperature T.",
+        "Express vapor enthalpy as liquid sensible + latent + vapor sensible (expanded about saturation temperature T_sat):\n\n$$h_v(T)=h_f(T_{sat})+h_{fg}(T_{sat})+c_{ps}(T-T_{sat})$$\n\n(where h_f is liquid enthalpy at saturation, h_{fg} is latent heat of vaporization, c_{ps} is specific heat of condensed water or effective vapor sensible term used in linearisation).",
+        "Substitute h_v(T) into h:\n\n$$h = c_{pa}T + \\omega\\big[ h_f(T_{sat}) + h_{fg}(T_{sat}) + c_{ps}(T-T_{sat}) \\big]$$",
+        "Group the temperature-dependent terms to isolate coefficients multiplying T:\n\n$$h = c_{pa}T + \\omega\\big[ c_{ps}T + (h_f(T_{sat}) + h_{fg}(T_{sat}) - c_{ps}T_{sat}) \\big]$$\n\nRewriting,\n\n$$h = \\big(c_{pa} + \\omega c_{ps}\\big)T + \\omega\\big[h_f(T_{sat}) + h_{fg}(T_{sat}) - c_{ps}T_{sat}\\big]$$",
+        "Insert commonly used HVAC approximate values and simplify (numerical approximation step used in lecture notes):\n\n- take $c_{pa}\\approx 1.005\\ \\mathrm{kJ\\,kg^{-1}\\,K^{-1}}$\n- take $c_{ps}\\approx 1.9\\ \\mathrm{kJ\\,kg^{-1}\\,K^{-1}}$ (effective water vapour/liquid term used in linearisation)\n- approximate $h_{fg}(T_{sat})\\approx 2500\\ \\mathrm{kJ\\,kg^{-1}}$ and combine remaining small terms into the latent constant\n\nThus the coefficient of T becomes $c_{pa}+\\omega c_{ps}\\approx 1.005 + 1.9\\omega \\approx 1.022$ (for typical small ω) and the remaining term is approximated as $2500\\,\\omega$ so that, for engineering use,\n\n$$h \\approx 1.022\\,T + 2500\\,\\omega \\quad(\\mathrm{kJ\\,kg^{-1}\\ dry\\ air})$$",
+        "Final boxed (approximate) result used in the notes:\n\n$$\\boxed{\\;h \\approx 1.022\\,T + 2500\\,\\omega\\; }$$\n\nComments on completeness: This is an approximation appropriate for HVAC problems. It treats $h_{fg}$ as constant (~2500 kJ/kg) and neglects small temperature dependence in the constant term; therefore it is complete for typical psychrometric calculations but omits more accurate temperature-dependent latent enthalpy terms if high precision is required."
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 2
+      }
+    },
+    {
+      "derivation_title": "Sensible heating / cooling energy balance (moist air)",
+      "derivation_stub": "Energy balance across a heating/cooling coil per kg dry air giving Q˙ in terms of enthalpy change; special-case sensible heat expression when humidity ratio is unchanged and decomposition into sensible and latent parts when condensation/evaporation occurs.",
+      "steps": [
+        "General steady-flow energy (per kg dry air) across coil (no shaft work, neglect kinetic/potential):\n\n$$\\dot m_a h_1 - \\dot m_a h_2 + \\dot Q = 0 \\quad\\Rightarrow\\quad \\dot Q = \\dot m_a(h_2 - h_1)$$",
+        "Using approximate linear enthalpy expression from main derivation, for processes where humidity ratio does not change (ω_1 = ω_2) the heat required is purely sensible:\n\nSince $h\\approx c_{ph}T_d + 2500\\,\\omega$ and $\\omega_1=\\omega_2$, the latent terms cancel and\n\n$$\\dot Q = \\dot m_a c_{ph}(T_{d2}-T_{d1})$$\n\n(this is the sensible heating/cooling expression).",
+        "If cooling produces condensation (ω changes), split the total enthalpy change into sensible and latent components:\n\n$$\\dot Q = \\dot m_a(h_2 - h_1) = \\dot m_a\\big[c_{ph}(T_{d2}-T_{d1}) + 2500(\\omega_2-\\omega_1)\\big]$$\n\nIdentify\n- Sensible cooling load = $\\dot m_a c_{ph}(T_{d2}-T_{d1})$ (temperature change at constant moisture),\n- Latent cooling load = $\\dot m_a 2500(\\omega_2-\\omega_1)$ (moisture removed or added).",
+        "Completeness: The derivation is algebraic and complete for HVAC-level calculations using the approximate linear enthalpy relation. For higher accuracy include temperature dependence of $h_{fg}$ and more exact cp(T) variation."
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 3
+      }
+    },
+    {
+      "derivation_title": "By-pass ratio (mixing) — mass and enthalpy balance (coil bypass)",
+      "derivation_stub": "Derive the by-pass ratio x for a coil mixing/ bypass arrangement from mass (moisture) and enthalpy balances: x = (ω3 - ω2)/(ω1 - ω2) and equivalently x = (h3 - h2)/(h1 - h2). Also shown as temperature form when linearity assumed.",
+      "steps": [
+        "Mass (moisture) balance for the bypass mixing (per unit dry-air flow):\n\nLet fraction x bypasses (state 1) and (1-x) passes through coil (state 2) and mixes to state 3. Humidity ratio balance:\n\n$$x\\,\\omega_1 + (1-x)\\,\\omega_2 = \\omega_3$$\n\nRearrange to obtain by-pass ratio in terms of humidity ratios:\n\n$$x(\\omega_1-\\omega_2)=\\omega_3-\\omega_2\\quad\\Rightarrow\\quad x=\\dfrac{\\omega_3-\\omega_2}{\\omega_1-\\omega_2}$$",
+        "Enthalpy (energy) balance across the mixing (per kg dry air):\n\n$$x\\,h_1 + (1-x)\\,h_2 = h_3$$\n\nRearrange to get x in terms of enthalpies:\n\n$$x( h_1-h_2)=h_3-h_2\\quad\\Rightarrow\\quad x=\\dfrac{h_3-h_2}{h_1-h_2}$$",
+        "If the linear approximate enthalpy relation $h\\approx c_{ph}T_d + 2500\\,\\omega$ is applied and the problem is dominated by dry-bulb temperature mixing (or humidity ratios map linearly), the by-pass ratio can be expressed in the dry-bulb form used in the notes:\n\n$$x=\\dfrac{T_{d3}-T_{d2}}{T_{d1}-T_{d2}}$$\n\n(this uses linearity of h with respect to T when ω is treated appropriately).",
+        "Purpose and completeness: This derivation is algebraic and complete for the mixing model shown. Both mass (moisture) and enthalpy balances are provided; when using the enthalpy form ensure consistent enthalpy expression (e.g. use the humid enthalpy approximation from the main derivation)."
+      ],
+      "reference": {
+        "start_page": 4,
+        "end_page": 4
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "Which expression best approximates the specific enthalpy (per kg dry air) of moist air used in the lecture?",
+      "topics": [
+        "Humid specific heat",
+        "Moist air enthalpy",
+        "Latent heat contribution"
+      ],
+      "options": [
+        {
+          "text": "h ≈ 1.022·T + 2500·ω  (kJ/kg dry air), where T is dry-bulb temperature (°C) and ω is humidity ratio (kg water/kg dry air).",
+          "is_correct": true
+        },
+        {
+          "text": "h ≈ 0.718·T + 1000·ω  (kJ/kg dry air).",
+          "is_correct": false
+        },
+        {
+          "text": "h ≈ 1.022·T  (kJ/kg dry air) — latent term is negligible and omitted.",
+          "is_correct": false
+        },
+        {
+          "text": "h ≈ 2500·T + 1.022·ω  (kJ/kg dry air).",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 2
+      },
+      "explanation": "Lecture derived moist-air enthalpy by adding dry-air sensible term (≈1.022·T) and the water vapor latent/ sensible contributions; the dominant latent term is ≈2500·ω, giving h ≈ 1.022·T + 2500·ω (kJ/kg dry air)."
+    },
+    {
+      "question": "For an air stream undergoing a purely sensible heating or cooling process (no change in humidity ratio), which relation correctly gives the heat added per kg of dry air?",
+      "topics": [
+        "Sensible heating/cooling",
+        "Energy balance",
+        "Use of humid specific heat"
+      ],
+      "options": [
+        {
+          "text": "q = cp_h · (T2 - T1) per kg dry air, where cp_h is the humid specific heat (≈1.022 kJ/kg·K).",
+          "is_correct": true
+        },
+        {
+          "text": "q = 2500·(ω2 - ω1) per kg dry air (latent-only expression).",
+          "is_correct": false
+        },
+        {
+          "text": "q = cp_air · (T2 - T1) + 2500·(ω2 - ω1), but this reduces to zero when ω constant so no sensible heat occurs.",
+          "is_correct": false
+        },
+        {
+          "text": "q = m·(h2 - h1) only if temperature does not change.",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 3
+      },
+      "explanation": "When humidity ratio is unchanged (ω1 = ω2), there is no latent heat transfer and the heat equals mass·humid-specific-heat·ΔT. The lecture shows Q˙ = m˙·Cph·(Td2 - Td1) for purely sensible processes."
+    },
+    {
+      "question": "The bypass ratio x in the lecture's coil/mixing model (fraction of flow that bypasses the coil) can be found using a mass (humidity) balance. Which formula is correct?",
+      "topics": [
+        "Bypass ratio",
+        "Mass/enthalpy balance",
+        "Mixing in HVAC coils"
+      ],
+      "options": [
+        {
+          "text": "x = (ω3 − ω2) / (ω1 − ω2), where ω1 is inlet humidity, ω2 is coil outlet humidity, and ω3 is final mixed humidity.",
+          "is_correct": true
+        },
+        {
+          "text": "x = (Td3 − Td2) / (Td1 − Td2) always, independent of humidity variables.",
+          "is_correct": false
+        },
+        {
+          "text": "x = (h3 − h2) / (h1 − h2) using only enthalpy values — this gives bypass from enthalpy balance and is always equal to the humidity-based expression.",
+          "is_correct": false
+        },
+        {
+          "text": "x = (ω1 − ω3) / (ω2 − ω3).",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 5
+      },
+      "explanation": "Mass (moisture) balance on the two streams (bypassed fraction x at ω1 and coil fraction 1−x at ω2) yields x·ω1 + (1−x)·ω2 = ω3, which rearranges to x = (ω3−ω2)/(ω1−ω2). The temperature-based form only applies under special linear assumptions and is not generally the primary mass-balance expression."
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "lecture_pdf": "C:/Github/GestaltAI/app/langgraph_server/data/ME135_Lecture_Notes/10-29-25.pdf",
+  "lecture_analysis": {
+    "lecture_title": "Psychrometric Processes: Humidification, Evaporative Cooling, and Energy Balances",
+    "lecture_summary": "This lecture applies psychrometric principles to practical moist-air processes. It shows how to perform mass and energy balances on humidification by steam injection and on evaporative cooling, how to compute humidity ratios and enthalpies from psychrometric data, and how to determine heating/cooling loads and required power (including use of COP). Several worked examples illustrate using steam properties and saturation data to find steam addition, exit conditions, and water consumption rates.",
+    "core_topics": [
+      "Psychrometrics and humidity ratio",
+      "Mass balance for moist air and water",
+      "Energy balance and enthalpy of moist air",
+      "Humidification by steam injection",
+      "Evaporative cooling processes",
+      "Use of saturated-steam properties",
+      "Cooling/heating load and COP calculations"
+    ],
+    "learning_objectives": [
+      "apply mass balances to determine moisture addition or removal in moist-air streams",
+      "use energy balances and moist-air enthalpy to find heating or cooling loads",
+      "compute humidity ratio and relative humidity from saturation pressure data",
+      "determine steam mass required for humidification using saturated-steam properties",
+      "estimate water consumption and exit relative humidity in an evaporative cooler",
+      "calculate required compressor/electric power from cooling load and COP"
+    ],
+    "assumed_prerequisites": [
+      "basic thermodynamics (properties of water and steam)",
+      "heat transfer fundamentals",
+      "familiarity with psychrometric concepts (dry-bulb/wet-bulb temperatures, saturation)",
+      "unit manipulations and basic algebra"
+    ],
+    "lecture_type": "mixed"
+  },
+  "extracted_questions": [],
+  "derivations": [
+    {
+      "derivation_title": "Energy & mass balance for moist-air humidification / air-conditioning (heat duty and steam required)",
+      "derivation_stub": "Derive expressions for heat duty \\(\\dot{Q}\\) and steam mass per kg dry air (\\(\\Delta \\omega\\)) using moist-air enthalpy and mass balances",
+      "steps": [
+        "1) Mass (dry-air) conservation: \\(\\dot m_{a1}=\\dot m_{a2}=\\dot m_a\\). (page 1)",
+        "2) Specific volume (used to get \\(\\dot m_a\\) from volumetric flow):\n```\nv = \\frac{T(1+\\omega)}{\\dfrac{p_a}{R_a} + \\dfrac{p_v}{R_v}}\n```\n(used to compute \\(\\dot m_a = \\dot V / v\\)). (page 1)",
+        "3) Moist-air specific enthalpy per kg dry air (mixture form used throughout):\n```\nh = c_{p,a} T + \\omega\\, h_g(T)\n```\n(where \\(h_g\\) is the specific enthalpy of saturated vapor at temperature T; alternative linearization used in notes: \\(h_g(T)\\approx 2500+1.9T\\)). (pages 1–4)",
+        "4) General energy balance across the humidifier / control volume (including steam injection and heat):\n```\n\\dot m_a h_1 + \\dot m_{steam} h_{g,steam} + \\dot Q = \\dot m_a h_2\n```\nDivide by \\(\\dot m_a\\) to express per kg dry air:\n```\nh_1 + (\\omega_2-\\omega_1) h_{g,steam} + \\frac{\\dot Q}{\\dot m_a} = h_2\n```\n(If the spray is adiabatic, \\(\\dot Q=0\\)). (pages 3–4)",
+        "5) For adiabatic steam-spray humidifier (common case in notes): set \\(\\dot Q=0\\) and solve for added steam per kg dry air:\n```\n\\boxed{\\;\\omega_2-\\omega_1 = \\dfrac{h_2-h_1}{h_{g,steam}}\\;}\n```\nThis yields mass of steam (kg water per kg dry air). (pages 3–4)",
+        "6) For a process with heat addition/removal (e.g., cooling coil, AC load) the heat duty is obtained from enthalpy change of moist air stream:\n```\n\\boxed{\\;\\dot Q = \\dot m_a\\,(h_{out}-h_{in})\\;}\n```\n(used in notes as \\(\\dot Q = \\dot m_a(h_3-h_1)\\) or \\(\\dot Q = \\dot m_a(h_2-h_3)\\) depending on chosen states). (page 1 and page 2)",
+        "7) If mechanical power of the AC unit is related via coefficient of performance (COP):\n```\n\\dot W = \\dfrac{\\dot Q}{\\mathrm{COP}}\n```\n(used to compute compressor power from cooling load). (page 2)",
+        "8) Numerical procedure (as applied in the notes):\n - compute vapor pressures and \\(\\omega\\) from psychrometric relations (e.g. \\(\\omega=0.622\\,p_v/(p-p_v)\\)),\n - compute specific volume \\(v\\) and hence \\(\\dot m_a\\) from volumetric flow,\n - compute \\(h_1,h_2,h_3\\) using \\(h=c_{p,a}T+\\omega h_g(T)\\),\n - use energy balance equations (steps 4–6) to get \\(\\dot Q\\) and \\(\\omega_2-\\omega_1\\),\n - convert to power or mass flow of injected steam: \\(\\dot m_{steam} = \\dot m_a(\\omega_2-\\omega_1)\\). (pages 1–4)",
+        "Completeness note: The symbolic derivation (mass & energy balances and resulting boxed expressions) is complete and present in the notes. Numerical substitutions, table lookups (saturated vapor enthalpy/pressure), and intermediate algebraic simplifications are shown but some arithmetic steps are abbreviated in the handwritten work (i.e., table values and numeric algebra are not fully expanded in the images). (pages 1–4)"
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 4
+      }
+    },
+    {
+      "derivation_title": "Humidity ratio from vapor pressure (psychrometric relation)",
+      "derivation_stub": "Relation to compute humidity ratio \\(\\omega\\) from vapor partial pressure (used to get \\(\\omega_1,\\omega_2\\))",
+      "steps": [
+        "1) Definition (used repeatedly in notes):\n```\n\\boxed{\\;\\omega = 0.622\\;\\dfrac{p_v}{p - p_v}\\;}\n```\nwhere \\(p_v\\) is vapor partial pressure and \\(p\\) total pressure (often 1.01325 bar). (page 3)",
+        "2) Purpose: used to compute moisture content at given T and RH (e.g., compute \\(\\omega_1\\) from T_d and RH, and \\(\\omega_2\\) from target condition). (page 3)"
+      ],
+      "reference": {
+        "start_page": 3,
+        "end_page": 3
+      }
+    },
+    {
+      "derivation_title": "Specific volume → dry-air mass flow from volumetric flow",
+      "derivation_stub": "Compute specific volume of moist air and get dry-air mass flow \\(\\dot m_a = \\dot V / v\\)",
+      "steps": [
+        "1) Specific volume expression used in the handwritten notes (mixture form):\n```\nv = \\frac{T(1+\\omega)}{\\dfrac{p_a}{R_a} + \\dfrac{p_v}{R_v}}\n```\n(used to compute \\(v\\) in m^3/kg dry air). (page 1)",
+        "2) Dry-air mass flow from volumetric flow rate \\(\\dot V\\):\n```\n\\boxed{\\;\\dot m_a = \\dfrac{\\dot V}{v}\\;}\n```\n(Example in notes: 75 m^3/min divided by computed \\(v\\) → \\(\\dot m_a\\)). (page 1)",
+        "3) Purpose: provides \\(\\dot m_a\\) to convert per-kg-dry-air enthalpy changes into total heat/power values (\\(\\dot Q\\)). (page 1)"
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 1
+      }
+    },
+    {
+      "derivation_title": "Enthalpy expression for moist air and linearized vapor enthalpy",
+      "derivation_stub": "Specific enthalpy per kg dry air used in energy balances: \\(h = c_{p,a}T + \\omega h_g(T)\\) and linearization \\(h_g\\approx 2500 + 1.9T\\)",
+      "steps": [
+        "1) Core enthalpy formula used throughout:\n```\n\\boxed{\\;h(T,\\omega)=c_{p,a}T + \\omega\\,h_g(T)\\;}\n```\nThis is the working expression to compute \\(h_1,h_2,h_3\\). (pages 1–4)",
+        "2) Practical linear approximation for vapor enthalpy (used in notes):\n```\nh_g(T) \\approx 2500 + 1.9\\,T \\quad (\\text{kJ/kg, T in }^{\\circ}\\mathrm{C})\n```\n(used to rearrange and solve for unknown temperature in one step on page 4). (page 4)",
+        "3) Purpose: allows algebraic solution of enthalpy equations to find temperatures or \\(\\omega\\) when combined with the mass/energy balances. (pages 1–4)"
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 4
+      }
+    },
+    {
+      "derivation_title": "COP relation for required compressor power",
+      "derivation_stub": "Relate cooling load \\(\\dot Q\\) and COP to shaft/electrical power \\(\\dot W\\)",
+      "steps": [
+        "1) COP definition used in notes:\n```\n\\mathrm{COP} = \\dfrac{\\dot Q}{\\dot W}\n```\nso\n```\n\\boxed{\\;\\dot W = \\dfrac{\\dot Q}{\\mathrm{COP}}\\;}\n```\n(used on page 2 to compute required power from cooling load). (page 2)",
+        "2) Purpose: convert the computed heat duty from the enthalpy change into input power requirement for the AC unit. (page 2)"
+      ],
+      "reference": {
+        "start_page": 2,
+        "end_page": 2
+      }
+    }
+  ],
+  "conceptual_questions": [
+    {
+      "question": "During an adiabatic saturation (evaporative cooling) process for moist air, which property remains approximately constant?",
+      "topics": [
+        "Adiabatic saturation",
+        "Evaporative cooling",
+        "Moist air enthalpy"
+      ],
+      "options": [
+        {
+          "text": "Dry‑bulb temperature",
+          "is_correct": false
+        },
+        {
+          "text": "Specific enthalpy per kg of dry air (h) — enthalpy remains constant",
+          "is_correct": true
+        },
+        {
+          "text": "Humidity ratio (ω)",
+          "is_correct": false
+        },
+        {
+          "text": "Relative humidity (φ)",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 6
+      },
+      "explanation": "In an adiabatic saturation (evaporative) process no heat is added or removed from the moist air stream, so the specific enthalpy per unit dry air remains (approximately) constant. The dry‑bulb temperature falls and the humidity ratio rises; wet‑bulb temperature also remains approximately constant."
+    },
+    {
+      "question": "In a steam‑spray humidifier where saturated steam is injected into an airstream, the mass of steam sprayed per kg of dry air is equal to which of the following?",
+      "topics": [
+        "Humidification by steam injection",
+        "Humidity ratio",
+        "Mass balance for moist air"
+      ],
+      "options": [
+        {
+          "text": "The final humidity ratio ω2",
+          "is_correct": false
+        },
+        {
+          "text": "The initial humidity ratio ω1",
+          "is_correct": false
+        },
+        {
+          "text": "The increase in humidity ratio: ω2 − ω1 (mass of water added per kg dry air)",
+          "is_correct": true
+        },
+        {
+          "text": "The difference in saturation pressures before and after",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 6
+      },
+      "explanation": "Humidity ratio ω is defined as mass of water vapor per mass of dry air. Spraying steam adds water mass; per kg dry air the added steam equals the change in humidity ratio (ω2 − ω1)."
+    },
+    {
+      "question": "How is the electrical power required by an air‑conditioning compressor related to the cooling load Q̇ and the unit COP (coefficient of performance)?",
+      "topics": [
+        "Air‑conditioning performance",
+        "COP definition",
+        "Energy balance"
+      ],
+      "options": [
+        {
+          "text": "Ẇ = Q̇ / COP",
+          "is_correct": true
+        },
+        {
+          "text": "Ẇ = Q̇ × COP",
+          "is_correct": false
+        },
+        {
+          "text": "Ẇ = COP / Q̇",
+          "is_correct": false
+        },
+        {
+          "text": "Ẇ = Q̇ − COP",
+          "is_correct": false
+        }
+      ],
+      "reference": {
+        "start_page": 1,
+        "end_page": 6
+      },
+      "explanation": "COP for a cooling device is defined as cooling provided divided by input work (COP = Q̇ / Ẇ). Rearranging gives the required input power Ẇ = Q̇ / COP."
+    }
+  ]
+}

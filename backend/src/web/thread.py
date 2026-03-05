@@ -3,7 +3,8 @@ from uuid import UUID
 
 from .dependencies import ThreadDBDependency, MessageDBDependency
 from src.model.chat import Thread, Message, ThreadCreate, ThreadList, MessageCreate
-
+from fastapi.exceptions import HTTPException
+from starlette import status
 
 router = APIRouter(prefix="/threads", tags=["threads"])
 
@@ -35,7 +36,7 @@ async def list_threads(
 
 @router.get("/{thread_id}", response_model=Thread)
 async def get_thread(
-    thread_id: UUID,
+    thread_id: UUID | str,
     tdb: ThreadDBDependency,
 ) -> Thread:
     return await tdb.get_thread(thread_id)
@@ -43,18 +44,24 @@ async def get_thread(
 
 @router.post("/{thread_id}/messages", response_model=Message)
 async def create_message(
-    thread_id: UUID,
+    thread_id: UUID | str,
     data: MessageCreate,
     mdb: MessageDBDependency,
     tdb: ThreadDBDependency,
 ) -> Message:
-    msg = await mdb.create_message(
-        thread_id=thread_id,
-        role=data.role,
-        content=data.content,
-    )
-    await tdb.touch_updated_at(thread_id)
-    return msg
+    try:
+        msg = await mdb.create_message(
+            thread_id=thread_id,
+            role=data.role,
+            content=data.content,
+        )
+        await tdb.touch_updated_at(thread_id)
+        return msg
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create the message {e}",
+        )
 
 
 @router.get("/{thread_id}/messages", response_model=list[Message])

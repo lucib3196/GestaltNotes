@@ -1,0 +1,10 @@
+{
+  "lecture_id": "11-12-25.pdf",
+  "page_length": 13,
+  "source_fidelity": 4,
+  "extraction_correctness": 5,
+  "completeness": 3,
+  "overall": 3,
+  "issues": ["missing_questions"],
+  "notes": "Failed to extract question even as a derivation"
+}

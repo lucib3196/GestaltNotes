@@ -1,0 +1,10 @@
+{
+  "lecture_id": "10-13-25.pdf",
+  "page_length": 5,
+  "source_fidelity": 3,
+  "extraction_correctness": 4,
+  "completeness": 3,
+  "overall": 3,
+  "issues": ["missing_questions"],
+  "notes": "Derivation for speed of sound in compressible fluid is good however it speeds through some steps that were clearly defined in the lecture. For questions it tends to generalize and any steps for solving are seen as derivations"
+}

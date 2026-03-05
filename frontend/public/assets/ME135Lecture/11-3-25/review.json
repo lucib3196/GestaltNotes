@@ -1,0 +1,10 @@
+{
+  "lecture_id": "11-3-25.pdf",
+  "page_length": 6,
+  "source_fidelity": 5,
+  "extraction_correctness": 4,
+  "completeness": 5,
+  "overall": 3,
+  "issues": [],
+  "notes": "Derivations are bumped all into one, the question is wether we want these more atomic, or have them as a clear flow"
+}
