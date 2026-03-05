@@ -4,6 +4,7 @@ from fastapi.routing import APIRouter
 from fastapi.exceptions import HTTPException
 from starlette import status
 from firebase_admin import auth
+from typing import Optional
 import requests
 from pydantic import BaseModel
 from src.core.logger import logger
@@ -99,8 +100,10 @@ async def get_user_threads(
 
 @router.post("/thread")
 async def create_user_thread(
-    token: FireBaseToken, thread_db: ThreadDBDependency, data: ThreadCreate
-)->Thread:
+    token: FireBaseToken,
+    thread_db: ThreadDBDependency,
+    data: Optional[ThreadCreate] = None,
+) -> Thread:
     try:
         user_id = token.get("user_id", None)
         if user_id is None:
@@ -108,13 +111,16 @@ async def create_user_thread(
                 detail="Failed to retrieve signed in user",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
-        thread = await thread_db.create_thread(
-            thread_id=data.thread_id,
-            course_id=data.course_id,
-            title=data.title,
-            agent=data.agent,
-            user_id=user_id,
-        )
+        if data:
+            thread = await thread_db.create_thread(
+                thread_id=data.thread_id,
+                course_id=data.course_id,
+                title=data.title,
+                agent=data.agent,
+                user_id=user_id,
+            )
+        else:
+            thread = await thread_db.create_thread(user_id=user_id)
         return thread
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create thread {e}")
