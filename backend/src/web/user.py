@@ -100,7 +100,7 @@ async def get_user_threads(
 @router.post("/thread")
 async def create_user_thread(
     token: FireBaseToken, thread_db: ThreadDBDependency, data: ThreadCreate
-):
+)->Thread:
     try:
         user_id = token.get("user_id", None)
         if user_id is None:

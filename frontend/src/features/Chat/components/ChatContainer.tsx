@@ -6,15 +6,15 @@ type ChatContainerProps = React.ButtonHTMLAttributes<HTMLDivElement> & {
   children?: React.ReactNode;
 };
 
-export default function ChatContainer({ 
+export default function ChatContainer({
   children,
-  ...rest 
+  ...rest
 }: ChatContainerProps) {
   return (
-    <MathJax >
+    <MathJax className="h-full">
       <div
         className={clsx(
-          "flex flex-col h-full bg-gray-100 border rounded-lg shadow-md overflow-hidden",
+          "flex flex-col grow  bg-gray-100 border rounded-lg shadow-md overflow-y-auto overflow-x-hidden",
           rest.className,
         )}
       >

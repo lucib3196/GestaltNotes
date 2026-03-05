@@ -15,76 +15,75 @@ import {
 import { type Message } from "@langchain/langgraph-sdk";
 import { DropDown } from "../../../components/DropDown";
 import api from "../../../config/api";
+import { useGenerateThread, useUserThreads } from "../hooks/hooks";
 import { useAuth } from "../../../context";
 
-type ThreadCreate = {
+export type ThreadCreate = {
   thread_id: string | null;
   user_id: string | null;
   course_id: string | null;
   title: string | null;
   agent: string | null;
 };
-let threadCreated = false;
 
 export default function Chat() {
   const [message, setMessage] = useState<string>("");
   const [chats, setChats] = useState<ChatThread[]>([]);
+  const [created, setCreated] = useState<boolean>(false);
+  const { getThreads } = useUserThreads();
+  const { user } = useAuth();
 
   // Context
   const { sources, setSources, agent, setAgent, threadId, setThreadId } =
     UseLectureChatContext();
-  const { user } = useAuth();
-
   const pendingMessage = useRef<string | null>(null);
+  const generateThread = useGenerateThread();
+  // Fetch all the users previos convos
+  useEffect(() => {
+    const fetch = async () => {
+      const oldThreads = await getThreads();
+      setChats(
+        oldThreads.map((t) => ({ title: t.title, id: t.id }) as ChatThread),
+      );
+    };
+    fetch();
+  }, [user]);
+
+  const handleNewChats = async () => {
+    stream.stop?.();
+    setThreadId(null);
+    setCreated(false);
+  };
 
   const stream = useStream({
     assistantId: agent,
     apiUrl: import.meta.env.VITE_PRODUCTION_URL,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     threadId: threadId ?? undefined,
-    onThreadId: async (id: string) => {
-      if (threadCreated) return;
-      threadCreated = true;
-      setThreadId(id);
 
-      // Construct the payload for the post
-      let threadData = {
-        agent: agent,
+    onThreadId: async (id: string) => {
+      if (created) return;
+      setCreated(true);
+
+      const threadData: ThreadCreate = {
+        agent,
         thread_id: id,
         course_id: null,
         user_id: null,
         title: pendingMessage.current ?? "New Chat",
-      } as ThreadCreate;
-      const token = await user?.getIdToken();
-      // First message so create the FastAPI thread with LangGraph's Thread ID
-      const response = await api.post("/users/thread/", threadData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = response.data;
-      setChats((prev) => [{ id, title: data.title ?? "New Chat" }, ...prev]);
-
-      // Now save the pending human message
-      if (pendingMessage.current) {
-        await api.post(`/threads/${encodeURIComponent(id)}/messages`, {
-          role: "human",
-          content: pendingMessage.current,
-        });
-        pendingMessage.current = null;
-      }
+      };
+      const response = await generateThread(threadData);
+      setThreadId(id);
+      setChats((prev) => [
+        { id, title: response.title ?? "New Chat" },
+        ...prev,
+      ]);
     },
   });
 
-  const loadThread = async (id: string) => {
-    threadCreated = true;
-    setThreadId(id);
-  };
-
   const handleSubmit = async () => {
-    console.log("Handling submit", threadId);
     try {
       if (!message.trim()) {
-        console.log("Current message is None", message);
         return;
       }
 
@@ -92,20 +91,16 @@ export default function Chat() {
         // First message so store it and let onThreadId handle saving it
         pendingMessage.current = message;
       } else {
-        console.log("Passed thread", threadId);
         // thread already exists, save directly
-        let response = await api.post(`/threads/${threadId}/messages`, {
+        await api.post(`/threads/${threadId}/messages`, {
           role: "human",
           content: message,
         });
-        console.log("Okay passed", response);
       }
-      console.log("Hello message", message);
 
       stream.submit({
         messages: [{ content: message, type: "human" }],
       });
-      console.log("Current message", message);
       setMessage("");
     } catch (error: any) {
       console.log("Error", error);
@@ -155,18 +150,16 @@ export default function Chat() {
         <ChatSideBar
           chats={chats}
           activeChatId={threadId ?? undefined}
-          onSelectChat={(id) => loadThread(id)}
-          onNewChat={() => {
-            threadCreated = false;
-            setThreadId(null);
-            stream.stop?.();
+          onSelectChat={(id) => {
+            setThreadId(id);
           }}
+          onNewChat={handleNewChats}
         />
         <div className="flex-1 min-w-0">
           {/* Chat Container */}
-          <ChatContainer className="flex flex-col flex-1 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden">
+          <ChatContainer className="flex w-full h-full">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3 bg-slate-50">
+            <div className="flex-1 h-full overflow-y-auto px-6 py-5 space-y-3 bg-slate-50">
               {stream.messages.map((msg, idx) => {
                 handleArtifacts(msg);
                 return <ChatMessage key={idx} message={msg} id={idx} />;
@@ -186,13 +179,13 @@ export default function Chat() {
             </div>
 
             {/* Input */}
-            <div className="border-t border-slate-200 bg-white px-5 py-4">
+
+            <div className="w-full m-2 p-1">
               <ChatInput
                 value={message}
                 setValue={setMessage}
                 onSubmit={() => {
                   handleSubmit();
-                  console.log("Clicked", message);
                 }}
               />
             </div>
