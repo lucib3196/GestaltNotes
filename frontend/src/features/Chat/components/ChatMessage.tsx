@@ -2,6 +2,7 @@ import { type Message, type ToolMessage } from "@langchain/langgraph-sdk";
 import { MessageBaseStyle, type MessageType } from "./config";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { MathJax } from "better-react-mathjax";
 import clsx from "clsx";
 
 import { ToolInvocation, ToolBubble } from "./Tools";
@@ -31,16 +32,17 @@ export default function ChatMessage({ message, id, showTool = false }: ChatMessa
     }
 
     if (message.type === "tool" && !showTool) return;
-    console.log(message, message.type)
     return (
-        <div
-            key={message.id ?? id}
-            className={clsx(
-                MessageStyle[message.type as MessageType],
-                MessageBaseStyle,
-            )}
-        >
-            <Markdown remarkPlugins={[remarkGfm]}>{String(message.content)}</Markdown>
-        </div>
+        <MathJax>
+            <div
+                key={message.id ?? id}
+                className={clsx(
+                    MessageStyle[message.type as MessageType],
+                    MessageBaseStyle,
+                )}
+            >
+                <Markdown remarkPlugins={[remarkGfm]}>{String(message.content)}</Markdown>
+            </div>
+        </MathJax>
     );
 }
