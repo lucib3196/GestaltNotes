@@ -57,15 +57,30 @@ def get_settings() -> AppSettings:
     auth_emulator = os.getenv("FIREBASE_AUTH_EMULATOR_HOST", None)
     if env_mode not in valid_modes:
         raise ValueError(f"Invalid MODE: {env_mode}. Must be one of {valid_modes}")
-    allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
-    if allowed_origins:
-        allowed_origins = allowed_origins.split(",")
+
+    allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+
+    def normalize_origin(origin: str, scheme: str) -> str:
+        origin = origin.strip()
+
+        # remove scheme if already present
+        if origin.startswith("http://"):
+            origin = origin[len("http://") :]
+        elif origin.startswith("https://"):
+            origin = origin[len("https://") :]
+
+        return f"{scheme}://{origin}"
+
+    if allowed_origins_env:
+        scheme = "https" if env_mode == "production" else "http"
+
         allowed_origins = [
-            o if o.startswith("http://") else "http://" + o for o in allowed_origins
+            normalize_origin(o, scheme)
+            for o in allowed_origins_env.split(",")
+            if o.strip()
         ]
     else:
         allowed_origins = ["http://localhost:5174"]
-
     if env_mode == "dev" and not auth_emulator:
         raise ValueError("FIREBASE_AUTH_EMULATOR_HOST must be provided during dev env")
 
