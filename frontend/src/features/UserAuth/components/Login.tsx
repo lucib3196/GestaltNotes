@@ -11,7 +11,7 @@ export default function LogInForm() {
     try {
       await login(email, password);
       const token = await user?.getIdToken()
-      UserManager.logIn(token)
+      await UserManager.logIn(token)
       toast.success("Log In Successful");
       setMode("login-success");
     } catch (error: any) {
