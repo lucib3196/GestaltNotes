@@ -105,3 +105,5 @@ FIREBASE_CRED.json
 frontend/firebase-export*
 frontend/firebase-export*
 frontend/firebase
+frontend/firebase
+.env
