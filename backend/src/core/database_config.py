@@ -10,24 +10,24 @@ app_settings = get_settings()
 
 
 # Define choosing the settings
-if app_settings.MODE == "testing":
+if app_settings.mode == "testing":
     DATABASE_URL = "sqlite:///:memory:"
-elif app_settings.MODE == "production":
+elif app_settings.mode == "production":
     DATABASE_URL = app_settings.POSTGRES_URL
     if not DATABASE_URL:
         raise RuntimeError("POSTGRES_URL must be set in production mode")
-elif app_settings.MODE == "dev":
+elif app_settings.mode == "dev":
     DATABASE_URL = f"sqlite:///{app_settings.SQLITE_DB_PATH}"
 
     # raise NotImplementedError("Development database is not ready yet")
 else:
-    raise ValueError(f"Unknown environment: {app_settings.MODE}")
+    raise ValueError(f"Unknown environment: {app_settings.mode}")
 
 logger.debug(f"[DATABASE Intialization]: Database path set to {DATABASE_URL}")
 
 try:
     connect_args = {}
-    if app_settings.MODE == "dev" and DATABASE_URL.startswith("sqlite"):
+    if app_settings.mode == "dev" and DATABASE_URL.startswith("sqlite"):
         connect_args = {"check_same_thread": False}
     engine = create_engine(
         url=DATABASE_URL,

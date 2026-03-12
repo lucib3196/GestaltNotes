@@ -104,3 +104,5 @@ docker-data/
 FIREBASE_CRED.json
 frontend/firebase-export*
 frontend/firebase-export*
+frontend/firebase
+.env
