@@ -25,7 +25,7 @@ poetry run python src/main.py
 
 **Terminal 2 — Firebase Emulators**
 ```bash
-cd backend
+cd frontend
 firebase emulators:start --project gestaltnotes
 ```
 
