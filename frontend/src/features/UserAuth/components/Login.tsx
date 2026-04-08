@@ -7,7 +7,7 @@ import { type UserRead } from "../../../services/userManager";
 import { useNavigate } from "react-router-dom";
 
 export default function LogInForm() {
-    const { login, setMode } = useAuth();
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (email: string, password: string) => {
