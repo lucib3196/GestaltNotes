@@ -8,7 +8,7 @@ from typing import Optional
 import requests
 from pydantic import BaseModel
 from src.core.logger import logger
-from src.web.dependencies import FireBaseToken, ThreadDBDependency, CurrentUser
+from src.web.dependencies import FireBaseToken, ThreadDBDependency, CurrentUser, StudentDep, CurrentUserDep
 from starlette import status
 from typing import List
 from src.model.chat import Thread, ThreadCreate
@@ -30,11 +30,11 @@ class LoginRequest(BaseModel):
 
 @router.post("/")
 async def create_user(
-    user_manager: UserManagerDependency, data: UserCreate, role: VALID_ROLES = "student"
+    user_manager: UserManagerDependency, data: UserCreate
 ) -> User:
     logger.info("Received request")
     try:
-        user = await user_manager.create_user(data, role=role)
+        user = await user_manager.create_user(data, role=data.role)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -102,6 +102,7 @@ async def get_user_threads(
 async def create_user_thread(
     token: FireBaseToken,
     thread_db: ThreadDBDependency,
+    user: StudentDep,
     data: Optional[ThreadCreate] = None,
 ) -> Thread:
     try:
@@ -144,3 +145,7 @@ def emulator_login(email: str, password: str):
 
     response = requests.post(url, json=payload)
     return response.json()
+
+@router.get("/me")
+async def get_me(user: CurrentUserDep) -> User:
+    return user

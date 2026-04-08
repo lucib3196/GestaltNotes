@@ -1,7 +1,7 @@
 from fastapi.routing import APIRouter
 from uuid import UUID
 
-from .dependencies import ThreadDBDependency, MessageDBDependency
+from .dependencies import ThreadDBDependency, MessageDBDependency, StudentDep
 from src.model.chat import Thread, Message, ThreadCreate, ThreadList, MessageCreate
 from fastapi.exceptions import HTTPException
 from starlette import status
@@ -13,9 +13,10 @@ router = APIRouter(prefix="/threads", tags=["threads"])
 async def create_thread(
     data: ThreadCreate,
     tdb: ThreadDBDependency,
+    user: StudentDep,
 ) -> Thread:
     return await tdb.create_thread(
-        id=data.thread_id,
+        thread_id=data.thread_id,
         user_id=data.user_id,
         course_id=data.course_id,
         title=data.title,
@@ -27,6 +28,7 @@ async def create_thread(
 async def list_threads(
     data: ThreadList,
     tdb: ThreadDBDependency,
+    user: StudentDep,
 ) -> list[Thread]:
     return await tdb.list_threads_for_user(
         user_id=data.user_id,
@@ -38,6 +40,7 @@ async def list_threads(
 async def get_thread(
     thread_id: UUID | str,
     tdb: ThreadDBDependency,
+    user: StudentDep,
 ) -> Thread:
     return await tdb.get_thread(thread_id)
 
@@ -48,6 +51,7 @@ async def create_message(
     data: MessageCreate,
     mdb: MessageDBDependency,
     tdb: ThreadDBDependency,
+    user: StudentDep,
 ) -> Message:
     try:
         msg = await mdb.create_message(
@@ -68,5 +72,6 @@ async def create_message(
 async def list_messages(
     thread_id: UUID,
     mdb: MessageDBDependency,
+    user: StudentDep,
 ) -> list[Message]:
     return await mdb.list_messages(thread_id)

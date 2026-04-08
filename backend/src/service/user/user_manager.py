@@ -40,6 +40,7 @@ class UserManager:
                     logger.error("failed to add user role")
                     return user
                 user.roles.append(r)
+                self.udb.session.commit()
                 logger.debug("Added role succesfully")
 
             if force_password_reset:

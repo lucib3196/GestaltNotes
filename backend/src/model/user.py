@@ -21,6 +21,7 @@ class UserCreate(BaseModel):
     last_name: str | None = None
     password: str
     email: str
+    role: VALID_ROLES = "student"
 
 
 class UserLogin(BaseModel):
