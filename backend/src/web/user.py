@@ -147,5 +147,11 @@ def emulator_login(email: str, password: str):
     return response.json()
 
 @router.get("/me")
-async def get_me(user: CurrentUserDep) -> User:
-    return user
+async def get_me(user: CurrentUserDep):
+    return {
+        "id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "roles": [r.name for r in user.roles]
+    }
