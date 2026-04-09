@@ -12,6 +12,7 @@ from src.core.settings import get_settings
 from src.data.course import CourseDB
 from src.data.message import MessageDB
 from src.data.thread import ThreadDB
+from src.data.user import UserDB
 from src.service import FirebaseStorage
 from src.service.user.user_manager import UserManager
 from src.model.user import User
@@ -126,3 +127,37 @@ def get_message_db(session: SessionDep) -> MessageDB:
 
 
 MessageDBDependency = Annotated[MessageDB, Depends(get_message_db)]
+
+async def get_current_user(
+    user_id: CurrentUser,
+    session: SessionDep,
+) -> User:
+    user = await UserDB(session).get_user(user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return user
+
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+def require_student(user: CurrentUserDep) -> User:
+    if not any(r.name == "student" for r in user.roles):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Student access required"
+        )
+    return user
+
+def require_educator(user: CurrentUserDep) -> User:
+    if not any(r.name == "educator" for r in user.roles):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Educator access required"
+        )
+    return user
+
+StudentDep = Annotated[User, Depends(require_student)]
+EducatorDep = Annotated[User, Depends(require_educator)]

@@ -82,4 +82,10 @@ export default class UserManager {
       throw new Error(message);
     }
   }
+  static async getMe(token: string): Promise<{ email: string; roles: string[] }> {
+    const response = await api.get(`${this.base}/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  }
 }

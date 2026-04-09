@@ -4,21 +4,23 @@ import { UserManager } from "../../../services";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { type UserRead } from "../../../services/userManager";
+import { useNavigate } from "react-router-dom";
 
 export default function LogInForm() {
-  const { login, setMode, user } = useAuth();
-  const handleSubmit = async (email: string, password: string) => {
-    try {
-      await login(email, password);
-      const token = await user?.getIdToken()
-      await UserManager.logIn(token)
-      toast.success("Log In Successful");
-      setMode("login-success");
-    } catch (error: any) {
-      toast.error(`Could not Log In ${error as string}`);
-    } 
-  };
-  return <AuthBase onSubmit={handleSubmit} />;
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (email: string, password: string) => {
+        try {
+            const userCredential = await login(email, password);
+            const token = await userCredential.user.getIdToken();
+            await UserManager.logIn(token);
+            navigate("/");  // this triggers RoleRedirect which sends to /student or /educator
+        } catch (error: any) {
+            toast.error(`Could not Log In ${error as string}`);
+        }
+    };
+    return <AuthBase onSubmit={handleSubmit} />;
 }
 
 export function LoginSuccess() {
