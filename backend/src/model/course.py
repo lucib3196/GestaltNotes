@@ -1,10 +1,8 @@
-
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship, Session, create_engine
 from typing import List, Optional, TYPE_CHECKING
 from uuid import uuid4, UUID
 from pydantic import BaseModel
-from sqlmodel import Field, Relationship, Session, SQLModel, create_engine
-
+from .user import UserCourseLink
 
 if TYPE_CHECKING:
     from .user import User, Thread
@@ -22,6 +20,11 @@ class Course(SQLModel, table=True):
     owner: UUID | None = Field(default=None, foreign_key="user.id")
 
     threads: List["Thread"] = Relationship(back_populates="course")
+    
+    educators: list["User"] = Relationship(
+        back_populates="courses",
+        link_model=UserCourseLink,
+    )
 
 
 class CourseData(BaseModel):

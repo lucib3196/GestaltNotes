@@ -7,7 +7,7 @@ from datetime import datetime
 if TYPE_CHECKING:
     from .chat import Thread
     from .course import Course
-
+    
 VALID_ROLES = Literal["educator", "student", "admin"]
 
 
@@ -16,12 +16,18 @@ class UserRoleLink(SQLModel, table=True):
     role_id: UUID = SqlField(foreign_key="role.id", primary_key=True)
 
 
+class UserCourseLink(SQLModel, table=True):
+    user_id: UUID = SqlField(foreign_key="user.id", primary_key=True)
+    course_id: UUID = SqlField(foreign_key="course.id", primary_key=True)
+
+
 class UserCreate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     password: str
     email: str
     role: VALID_ROLES = "student"
+    course_id: UUID | None = None
 
 
 class UserLogin(BaseModel):
@@ -44,6 +50,10 @@ class User(SQLModel, table=True):
         link_model=UserRoleLink,
     )
     threads: List["Thread"] = SQLMODELRelationship(back_populates="user")
+    courses: list["Course"] = SQLMODELRelationship(
+        back_populates="educators",
+        link_model=UserCourseLink,
+    )
 
 
 class Role(SQLModel, table=True):
@@ -54,3 +64,9 @@ class Role(SQLModel, table=True):
         back_populates="roles",
         link_model=UserRoleLink,
     )
+
+class StudentResponse(BaseModel):
+    id: UUID
+    first_name: str | None
+    last_name: str | None
+    email: str

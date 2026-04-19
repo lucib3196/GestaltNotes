@@ -1,20 +1,302 @@
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context";
-// this is ai generated placeholder page for now
+import UserManager, { type Student } from "../../services/userManager";
+import NavBar from "../../components/NavBar/NavBar";
+import api from "../../config/api";
+
+// ─── Mock types (replace with your SQLModel API types) ───────────────────────
+
+interface LectureNote {
+    id: string;
+    title: string;
+    fileName: string;
+    uploadedAt: string;
+    sizeKb: number;
+}
+
+interface Course{
+    name: string;
+    description: string;
+}
+
+// ─── Mock data (replace with API calls) ──────────────────────────────────────
+
+const MOCK_NOTES: LectureNote[] = [
+    { id: "n1", title: "Week 1 — Linear Algebra Review",    fileName: "week1_linear_algebra.pdf",  uploadedAt: "2025-01-20", sizeKb: 1240 },
+    { id: "n2", title: "Week 2 — Probability & Statistics", fileName: "week2_probability.pdf",     uploadedAt: "2025-01-27", sizeKb: 980  },
+    { id: "n3", title: "Week 3 — Gradient Descent",         fileName: "week3_gradient_descent.pdf",uploadedAt: "2025-02-03", sizeKb: 2100 },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function fmtDate(iso: string) {
+    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function fmtSize(kb: number) {
+    return kb >= 1000 ? `${(kb / 1000).toFixed(1)} MB` : `${kb} KB`;
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+type Tab = "students" | "notes";
+
 export default function EducatorPage() {
-    const { logout } = useAuth();
+    const [tab, setTab] = useState<Tab>("students");
+    const [search, setSearch] = useState("");
+    const [notes, setNotes] = useState<LectureNote[]>(MOCK_NOTES);
+    const [dragging, setDragging] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+    const [students, setStudents] = useState<Student[]>([]);
+    const [course, setCourse] = useState<Course | null>(null);
+    const { getIdToken } = useAuth();
+
+    useEffect(() => {
+        async function fetchData() {
+            const token = await getIdToken();
+            const headers = { Authorization: `Bearer ${token}` };
+            try {
+                const [studentsData, coursesData] = await Promise.all([
+                    UserManager.getStudents(token!),
+                    api.get("/courses/get_prof_courses", { headers }).then((r) => r.data),
+                ]);
+                setStudents(studentsData);
+                setCourse(coursesData[0] ?? null);
+            } catch (e) {
+                console.error("Failed to fetch educator data", e);
+            }
+        }
+        fetchData();
+    }, []);
+
+    const filteredStudents = students.filter(
+    (s) =>
+        [s.first_name, s.last_name].filter(Boolean).join(" ").toLowerCase().includes(search.toLowerCase()) ||
+        s.email.toLowerCase().includes(search.toLowerCase())
+    );
+
+    // Simulate upload — replace with your API call
+    async function handleFiles(files: FileList | null) {
+        if (!files || files.length === 0) return;
+        setUploading(true);
+        await new Promise((r) => setTimeout(r, 1200)); // TODO: POST /api/courses/{id}/notes
+        const newNotes: LectureNote[] = Array.from(files).map((f, i) => ({
+            id: `new-${Date.now()}-${i}`,
+            title: f.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "),
+            fileName: f.name,
+            uploadedAt: new Date().toISOString().split("T")[0],
+            sizeKb: Math.round(f.size / 1024),
+        }));
+        setNotes((prev) => [...newNotes, ...prev]);
+        setUploading(false);
+    }
+
+    function handleDelete(id: string) {
+        // TODO: DELETE /api/courses/{courseId}/notes/{id}
+        setNotes((prev) => prev.filter((n) => n.id !== id));
+    }
 
     return (
-        <div className="flex flex-col h-screen">
-            <div className="flex justify-between items-center px-6 py-4 border-b">
-                <h1 className="text-xl font-semibold">Educator Dashboard</h1>
-                <button onClick={logout} className="text-sm text-red-500 hover:underline">
-                    Logout
-                </button>
+        <>
+        <NavBar />
+        <div style={{ minHeight: "100vh", background: "#f9f7f4", fontFamily: "'Georgia', serif" }}>
+            {/* ── Header ── */}
+            <header style={{ background: "#fff", padding: "1rem 2.5rem 0" }}>
+                <h1 style={{ fontSize: 26, fontWeight: 400, margin: "0 0 6px", letterSpacing: "-0.01em" }}>
+                    {course?.name ?? "No course assigned"}
+                </h1>
+                <p style={{ fontSize: 12, letterSpacing: "0.12em", color: "#a8a29e", textTransform: "uppercase", margin: "0", fontFamily: "system-ui, sans-serif" }}>
+                    {course?.description ?? "-"}
+                </p>
+            </header>
+
+            {/* ── Tabs ── */}
+            <div style={{ borderBottom: "1px solid #e7e5e4", background: "#fff", paddingLeft: "2.5rem", display: "flex", gap: 0 }}>
+                {(["students", "notes"] as Tab[]).map((t) => (
+                    <button
+                        key={t}
+                        onClick={() => setTab(t)}
+                        style={{
+                            border: "none", background: "none", padding: "14px 20px",
+                            fontSize: 14, fontFamily: "system-ui, sans-serif", cursor: "pointer",
+                            color: tab === t ? "#1c1917" : "#78716c",
+                            borderBottom: tab === t ? "2px solid #1c1917" : "2px solid transparent",
+                            marginBottom: -1, fontWeight: tab === t ? 500 : 400,
+                            transition: "all 0.15s",
+                        }}
+                    >
+                        {t === "students" ? "Students" : "Lecture Notes"}
+                    </button>
+                ))}
             </div>
-            <div className="flex flex-col items-center justify-center flex-1 gap-4">
-                <h2 className="text-lg font-medium text-slate-700">Welcome, Professor</h2>
-                <p className="text-slate-500">Course management and note uploads coming soon.</p>
-            </div>
+
+            {/* ── Content ── */}
+            <main style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 2rem" }}>
+
+                {/* ── Students Tab ── */}
+                {tab === "students" && (
+                    <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                            <input
+                                type="text"
+                                placeholder="Search students..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                style={{
+                                    width: 260, padding: "8px 14px", borderRadius: 8,
+                                    border: "1px solid #e7e5e4", fontSize: 14,
+                                    fontFamily: "system-ui, sans-serif", outline: "none",
+                                    background: "#fff", color: "#1c1917",
+                                }}
+                            />
+                            <span style={{ fontSize: 13, color: "#78716c", fontFamily: "system-ui, sans-serif" }}>
+                                {filteredStudents.length} student{filteredStudents.length !== 1 ? "s" : ""}
+                            </span>
+                        </div>
+
+                        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e7e5e4", overflow: "hidden" }}>
+                            {/* Table header */}
+                            <div style={{ display: "grid", gridTemplateColumns: "2fr 2.5fr 1.5fr 1.5fr", gap: 0, padding: "10px 20px", background: "#f5f5f4", borderBottom: "1px solid #e7e5e4" }}>
+                                {["Name", "Email"].map((h) => (
+                                    <span key={h} style={{ fontSize: 11, fontFamily: "system-ui, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em", color: "#78716c", fontWeight: 500 }}>
+                                        {h}
+                                    </span>
+                                ))}
+                            </div>
+
+                            {filteredStudents.length === 0 ? (
+                                <p style={{ padding: "2rem", textAlign: "center", color: "#a8a29e", fontFamily: "system-ui, sans-serif", fontSize: 14 }}>
+                                    No students match your search.
+                                </p>
+                            ) : (
+                                filteredStudents.map((s, i) => (
+                                    <div
+                                        key={s.id}
+                                        style={{
+                                            display: "grid", gridTemplateColumns: "2fr 2.5fr 1.5fr 1.5fr",
+                                            gap: 0, padding: "14px 20px", alignItems: "center",
+                                            borderBottom: i < filteredStudents.length - 1 ? "1px solid #f5f5f4" : "none",
+                                            transition: "background 0.1s",
+                                        }}
+                                        onMouseEnter={(e) => (e.currentTarget.style.background = "#fafaf9")}
+                                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                                    >
+                                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                            <div style={{
+                                                width: 32, height: 32, borderRadius: "50%", background: "#292524",
+                                                display: "flex", alignItems: "center", justifyContent: "center",
+                                                fontSize: 12, color: "#faf9f6", fontFamily: "system-ui, sans-serif", fontWeight: 500, flexShrink: 0,
+                                            }}>
+                                               {[s.first_name, s.last_name].filter(Boolean).map((n) => n![0]).join("").slice(0, 2)}
+                                            </div>
+                                            <span style={{ fontSize: 14, color: "#1c1917", fontFamily: "system-ui, sans-serif" }}>{[s.first_name, s.last_name].filter(Boolean).join(" ")}</span>
+                                        </div>
+                                        <span style={{ fontSize: 13, color: "#78716c", fontFamily: "system-ui, sans-serif" }}>{s.email}</span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Lecture Notes Tab ── */}
+                {tab === "notes" && (
+                    <div>
+                        {/* Upload zone */}
+                        <div
+                            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                            onDragLeave={() => setDragging(false)}
+                            onDrop={(e) => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
+                            onClick={() => fileRef.current?.click()}
+                            style={{
+                                border: `2px dashed ${dragging ? "#1c1917" : "#d6d3d1"}`,
+                                borderRadius: 12, padding: "2.5rem 2rem",
+                                textAlign: "center", cursor: "pointer",
+                                background: dragging ? "#f5f5f4" : "#fff",
+                                marginBottom: "1.5rem",
+                                transition: "all 0.15s",
+                            }}
+                        >
+                            <input
+                                ref={fileRef}
+                                type="file"
+                                accept=".pdf,.ppt,.pptx,.docx"
+                                multiple
+                                style={{ display: "none" }}
+                                onChange={(e) => handleFiles(e.target.files)}
+                            />
+                            {uploading ? (
+                                <p style={{ color: "#78716c", fontSize: 14, fontFamily: "system-ui, sans-serif", margin: 0 }}>Uploading…</p>
+                            ) : (
+                                <>
+                                    <div style={{ fontSize: 28, marginBottom: 10 }}>↑</div>
+                                    <p style={{ fontFamily: "system-ui, sans-serif", fontSize: 15, color: "#1c1917", margin: "0 0 4px", fontWeight: 500 }}>
+                                        Drop files here or click to upload
+                                    </p>
+                                    <p style={{ fontFamily: "system-ui, sans-serif", fontSize: 13, color: "#a8a29e", margin: 0 }}>
+                                        PDF, PPTX, DOCX supported
+                                    </p>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Notes list */}
+                        {notes.length === 0 ? (
+                            <p style={{ textAlign: "center", color: "#a8a29e", fontFamily: "system-ui, sans-serif", fontSize: 14 }}>
+                                No lecture notes uploaded yet.
+                            </p>
+                        ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                {notes.map((n) => (
+                                    <div
+                                        key={n.id}
+                                        style={{
+                                            background: "#fff", border: "1px solid #e7e5e4", borderRadius: 10,
+                                            padding: "14px 18px", display: "flex", alignItems: "center", gap: 14,
+                                        }}
+                                    >
+                                        {/* File icon */}
+                                        <div style={{
+                                            width: 38, height: 38, borderRadius: 8, background: "#f5f5f4",
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            fontSize: 11, fontFamily: "system-ui, sans-serif", color: "#78716c",
+                                            fontWeight: 600, flexShrink: 0, letterSpacing: "0.03em",
+                                        }}>
+                                            {n.fileName.split(".").pop()?.toUpperCase()}
+                                        </div>
+
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <p style={{ margin: "0 0 2px", fontSize: 14, color: "#1c1917", fontFamily: "system-ui, sans-serif", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                {n.title}
+                                            </p>
+                                            <p style={{ margin: 0, fontSize: 12, color: "#a8a29e", fontFamily: "system-ui, sans-serif" }}>
+                                                {n.fileName} · {fmtSize(n.sizeKb)} · Uploaded {fmtDate(n.uploadedAt)}
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            onClick={() => handleDelete(n.id)}
+                                            style={{
+                                                border: "none", background: "none", cursor: "pointer",
+                                                color: "#a8a29e", fontSize: 18, padding: "4px 8px",
+                                                borderRadius: 6, lineHeight: 1, flexShrink: 0,
+                                                transition: "color 0.1s",
+                                            }}
+                                            title="Delete note"
+                                            onMouseEnter={(e) => (e.currentTarget.style.color = "#dc2626")}
+                                            onMouseLeave={(e) => (e.currentTarget.style.color = "#a8a29e")}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </main>
         </div>
+         </>
     );
 }

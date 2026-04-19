@@ -1,14 +1,19 @@
-from .dependencies import CourseDBDependency
+from .dependencies import CourseDBDependency, EducatorDep
 from src.model.course import Course, CourseData
 from fastapi.routing import APIRouter
 from uuid import UUID
 
-router = APIRouter(prefix="/course", tags=["course"])
+router = APIRouter(prefix="/courses", tags=["courses"])
 
 
 @router.post("/")
 async def create_course(cdb: CourseDBDependency, data: CourseData) -> Course:
     return await cdb.create_course(data)
+
+
+@router.get("/get_prof_courses", response_model=list[CourseData])
+def get_my_courses(educator: EducatorDep):
+    return educator.courses
 
 
 @router.get("/{id}")
