@@ -3,6 +3,7 @@ from typing import List, Optional, TYPE_CHECKING
 from uuid import uuid4, UUID
 from pydantic import BaseModel
 from .user import UserCourseLink
+from datetime import datetime
 
 if TYPE_CHECKING:
     from .user import User, Thread
@@ -26,8 +27,11 @@ class Course(SQLModel, table=True):
         link_model=UserCourseLink,
     )
 
+    lecture_notes: list["LectureNote"] = Relationship()
+
 
 class CourseData(BaseModel):
+    id: UUID
     name: str
     discipline: str
     blob: str | None
@@ -41,3 +45,16 @@ class StudentCourseLink(SQLModel, table=True):
     course_id: UUID | None = Field(
         default=None, foreign_key="course.id", primary_key=True
     )
+
+class LectureNote(SQLModel, table=True):
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    course_id: UUID = Field(foreign_key="course.id")
+    title: str
+    file_name: str
+    file_url: str  # Firebase Storage download URL
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+
+class LectureNoteCreate(BaseModel):
+    title: str
+    file_name: str
+    file_url: str

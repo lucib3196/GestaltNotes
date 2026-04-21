@@ -3,6 +3,8 @@ import { useAuth } from "../../context";
 import UserManager, { type Student } from "../../services/userManager";
 import NavBar from "../../components/NavBar/NavBar";
 import api from "../../config/api";
+import { storage } from "../../config/firebase_init";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 // ─── Mock types (replace with your SQLModel API types) ───────────────────────
 
@@ -10,22 +12,16 @@ interface LectureNote {
     id: string;
     title: string;
     fileName: string;
+    fileUrl: string;
     uploadedAt: string;
     sizeKb: number;
 }
 
 interface Course{
+    id: string;
     name: string;
     description: string;
 }
-
-// ─── Mock data (replace with API calls) ──────────────────────────────────────
-
-const MOCK_NOTES: LectureNote[] = [
-    { id: "n1", title: "Week 1 — Linear Algebra Review",    fileName: "week1_linear_algebra.pdf",  uploadedAt: "2025-01-20", sizeKb: 1240 },
-    { id: "n2", title: "Week 2 — Probability & Statistics", fileName: "week2_probability.pdf",     uploadedAt: "2025-01-27", sizeKb: 980  },
-    { id: "n3", title: "Week 3 — Gradient Descent",         fileName: "week3_gradient_descent.pdf",uploadedAt: "2025-02-03", sizeKb: 2100 },
-];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -44,7 +40,7 @@ type Tab = "students" | "notes";
 export default function EducatorPage() {
     const [tab, setTab] = useState<Tab>("students");
     const [search, setSearch] = useState("");
-    const [notes, setNotes] = useState<LectureNote[]>(MOCK_NOTES);
+    const [notes, setNotes] = useState<LectureNote[]>([]);
     const [dragging, setDragging] = useState(false);
     const [uploading, setUploading] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
@@ -70,31 +66,69 @@ export default function EducatorPage() {
         fetchData();
     }, []);
 
+    async function handleFiles(files: FileList | null) {
+        if (!files || files.length === 0 || !course) return;
+        setUploading(true);
+        try {
+            const token = await getIdToken();
+            const newNotes: LectureNote[] = [];
+            for (const file of Array.from(files)) {
+                // 1. Upload to Firebase Storage
+                const storageRef = ref(storage, `courses/${course.id}/notes/${file.name}`);
+                await uploadBytes(storageRef, file);
+                const fileUrl = await getDownloadURL(storageRef);
+
+                // 2. Save metadata to backend
+                const res = await api.post(`/courses/${course.id}/notes`, {
+                    title: file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "),
+                    file_name: file.name,
+                    file_url: fileUrl,
+                }, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                newNotes.push({
+                    id: res.data.id,
+                    title: res.data.title,
+                    fileName: res.data.file_name,
+                    fileUrl: res.data.file_url,
+                    uploadedAt: res.data.uploaded_at,
+                    sizeKb: Math.round(file.size / 1024),
+                });
+            }
+            setNotes((prev) => [...newNotes, ...prev]);
+        } catch (e) {
+            console.error("Failed to upload notes", e);
+        } finally {
+            setUploading(false);
+        }
+    }
+
     const filteredStudents = students.filter(
     (s) =>
         [s.first_name, s.last_name].filter(Boolean).join(" ").toLowerCase().includes(search.toLowerCase()) ||
         s.email.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Simulate upload — replace with your API call
-    async function handleFiles(files: FileList | null) {
-        if (!files || files.length === 0) return;
-        setUploading(true);
-        await new Promise((r) => setTimeout(r, 1200)); // TODO: POST /api/courses/{id}/notes
-        const newNotes: LectureNote[] = Array.from(files).map((f, i) => ({
-            id: `new-${Date.now()}-${i}`,
-            title: f.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "),
-            fileName: f.name,
-            uploadedAt: new Date().toISOString().split("T")[0],
-            sizeKb: Math.round(f.size / 1024),
-        }));
-        setNotes((prev) => [...newNotes, ...prev]);
-        setUploading(false);
-    }
+    async function handleDelete(id: string) {
+        try {
+            const token = await getIdToken();
+            const note = notes.find((n) => n.id === id);
+            if (!note) return;
 
-    function handleDelete(id: string) {
-        // TODO: DELETE /api/courses/{courseId}/notes/{id}
-        setNotes((prev) => prev.filter((n) => n.id !== id));
+            // 1. Delete from Firebase Storage
+            const storageRef = ref(storage, `courses/${course?.id}/notes/${note.fileName}`);
+            await deleteObject(storageRef);
+
+            // 2. Delete from backend
+            await api.delete(`/courses/${course?.id}/notes/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setNotes((prev) => prev.filter((n) => n.id !== id));
+        } catch (e) {
+            console.error("Failed to delete note", e);
+        }
     }
 
     return (
