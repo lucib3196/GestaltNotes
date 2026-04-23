@@ -42,9 +42,22 @@ async def upload_lecture_note(
     if ext not in allowed:
         raise HTTPException(status_code=400, detail=f"File type {ext} not allowed")
 
+    # check for existing note with same filename
+    existing = session.exec(
+        select(LectureNote)
+        .where(LectureNote.course_id == course_id)
+        .where(LectureNote.file_name == file.filename)
+    ).first()
+
     contents = await file.read()
     path = f"courses/{course_id}/notes/{file.filename}"
     file_url = storage.upload_file(path, contents, file.content_type)
+
+    if existing:
+        existing.file_url = file_url
+        session.commit()
+        session.refresh(existing)
+        return existing
 
     note = LectureNote(
         course_id=course_id,
@@ -72,3 +85,12 @@ def delete_lecture_note(
     session.delete(note)
     session.commit()
     return Response(status_code=204)
+
+@router.get("/{course_id}")
+def get_course_notes(
+    course_id: UUID,
+    educator: EducatorDep,
+    session: SessionDep,
+):
+    notes = session.exec(select(LectureNote).where(LectureNote.course_id == course_id)).all()
+    return notes
