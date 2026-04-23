@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field, Relationship, Session, create_engine
+from sqlmodel import SQLModel, Field, Relationship
 from typing import List, Optional, TYPE_CHECKING
 from uuid import uuid4, UUID
 from pydantic import BaseModel
@@ -31,7 +31,6 @@ class Course(SQLModel, table=True):
 
 
 class CourseData(BaseModel):
-    id: UUID
     name: str
     discipline: str
     blob: str | None
@@ -51,9 +50,9 @@ class LectureNote(SQLModel, table=True):
     course_id: UUID = Field(foreign_key="course.id")
     title: str
     file_name: str
-    file_url: str  # Firebase Storage download URL
+    file_url: str
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
-
+    
 class LectureNoteCreate(BaseModel):
     title: str
     file_name: str

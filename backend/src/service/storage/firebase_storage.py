@@ -40,6 +40,15 @@ class FirebaseStorage:
                     result.append(blob.name)
             return result
         return [blob.name for blob in blobs]
+    
+    def delete_file(self, target: str | Path) -> None:
+        blob = self.bucket.blob(str(target))
+        blob.delete()
+
+    def upload_file(self, target: str | Path, data: bytes, content_type: str = "application/octet-stream") -> str:
+        blob = self.bucket.blob(str(target))
+        blob.upload_from_string(data, content_type=content_type)
+        return blob.public_url
 
 
 if __name__ == "__main__":

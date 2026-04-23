@@ -3,8 +3,6 @@ import { useAuth } from "../../context";
 import UserManager, { type Student } from "../../services/userManager";
 import NavBar from "../../components/NavBar/NavBar";
 import api from "../../config/api";
-import { storage } from "../../config/firebase_init";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 // ─── Mock types (replace with your SQLModel API types) ───────────────────────
 
@@ -67,26 +65,17 @@ export default function EducatorPage() {
     }, []);
 
     async function handleFiles(files: FileList | null) {
-        if (!files || files.length === 0 || !course) return;
+        if (!files || files.length === 0 || !course?.id) return;
         setUploading(true);
         try {
             const token = await getIdToken();
             const newNotes: LectureNote[] = [];
             for (const file of Array.from(files)) {
-                // 1. Upload to Firebase Storage
-                const storageRef = ref(storage, `courses/${course.id}/notes/${file.name}`);
-                await uploadBytes(storageRef, file);
-                const fileUrl = await getDownloadURL(storageRef);
-
-                // 2. Save metadata to backend
-                const res = await api.post(`/courses/${course.id}/notes`, {
-                    title: file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "),
-                    file_name: file.name,
-                    file_url: fileUrl,
-                }, {
+                const formData = new FormData();
+                formData.append("file", file);
+                const res = await api.post(`/notes/${course.id}`, formData, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-
                 newNotes.push({
                     id: res.data.id,
                     title: res.data.title,
@@ -113,18 +102,9 @@ export default function EducatorPage() {
     async function handleDelete(id: string) {
         try {
             const token = await getIdToken();
-            const note = notes.find((n) => n.id === id);
-            if (!note) return;
-
-            // 1. Delete from Firebase Storage
-            const storageRef = ref(storage, `courses/${course?.id}/notes/${note.fileName}`);
-            await deleteObject(storageRef);
-
-            // 2. Delete from backend
-            await api.delete(`/courses/${course?.id}/notes/${id}`, {
+            await api.delete(`/notes/${course?.id}/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
             setNotes((prev) => prev.filter((n) => n.id !== id));
         } catch (e) {
             console.error("Failed to delete note", e);
