@@ -20,6 +20,12 @@ export default class NotesAPI {
         validateStatus: () => true, // allow manual handling
       });
       const contentType = response.headers["content-type"];
+      
+      // Type guard: ensure contentType is a string
+      if (typeof contentType !== "string") {
+        return { type: "error", error: "Invalid content type header" };
+      }
+      
       if (contentType.includes("application/pdf")) {
         return { type: "pdf", blob: response.data };
       }
