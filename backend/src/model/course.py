@@ -52,8 +52,3 @@ class LectureNote(SQLModel, table=True):
     file_name: str
     file_url: str
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
-    
-class LectureNoteCreate(BaseModel):
-    title: str
-    file_name: str
-    file_url: str

@@ -8,9 +8,8 @@ from typing import Optional
 import requests
 from sqlmodel import select
 from pydantic import BaseModel
-from src.core.logger import logger
 from src.core.database_config import SessionDep
-from src.web.dependencies import FireBaseToken, ThreadDBDependency, CurrentUser, StudentDep, CurrentUserDep, EducatorDep
+from src.web.dependencies import FireBaseToken, ThreadDBDependency, CurrentUser, StudentDep, CurrentUserDep
 from starlette import status
 from typing import List
 from src.model.chat import Thread, ThreadCreate
