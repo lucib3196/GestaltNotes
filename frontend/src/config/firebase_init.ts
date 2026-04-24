@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -14,6 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth();
+export const storage = getStorage(app);
 
 const isProduction =
   import.meta.env.MODE === "production" ||
@@ -21,4 +23,5 @@ const isProduction =
 
 if (!isProduction) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
 }

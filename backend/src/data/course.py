@@ -18,12 +18,13 @@ class CourseDB:
                 description=data.description,
             )
             self.session.add(course_orm)
-            self.session.commit()
             self.session.flush()
+            self.session.refresh(course_orm)
+            self.session.commit()
             return course_orm
         except SQLAlchemyError as e:
             self.session.rollback()
-            message = f"[UserDB] failed to create user {e}"
+            message = f"[CourseDB] failed to create course {e}"
             logger.error(message)
             raise ValueError(message)
 

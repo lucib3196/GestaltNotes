@@ -1,20 +1,40 @@
-import { useAuth } from "../../context";
-// this is ai generated placeholder page for now
+import { useState, useRef } from "react";
+import NavBar from "../../components/NavBar/NavBar";
+import { useEducatorData } from "../../services/useEducatorData";
+import { useNotes } from "../../services/useNotes";
+import StudentList from "./components/StudentList";
+import LectureNotes from "./components/LectureNotes";
+import EducatorHeader from "./components/EducatorHeader";
+import EducatorTabs, { type Tab } from "./components/EducatorTabs";
+
 export default function EducatorPage() {
-    const { logout } = useAuth();
+    const [tab, setTab] = useState<Tab>("students");
+    const [dragging, setDragging] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+    const { students, course } = useEducatorData();
+    const { notes, uploading, handleFiles, handleDelete } = useNotes(course?.id);
 
     return (
-        <div className="flex flex-col h-screen">
-            <div className="flex justify-between items-center px-6 py-4 border-b">
-                <h1 className="text-xl font-semibold">Educator Dashboard</h1>
-                <button onClick={logout} className="text-sm text-red-500 hover:underline">
-                    Logout
-                </button>
+        <>
+            <NavBar />
+            <div style={{ minHeight: "100vh", background: "#f9f7f4", fontFamily: "'Georgia', serif" }}>
+                <EducatorHeader course={course} />
+                <EducatorTabs tab={tab} setTab={setTab} />
+                <main style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 2rem" }}>
+                    {tab === "students" && <StudentList students={students} />}
+                    {tab === "notes" && (
+                        <LectureNotes
+                            notes={notes}
+                            uploading={uploading}
+                            dragging={dragging}
+                            setDragging={setDragging}
+                            fileRef={fileRef}
+                            handleFiles={handleFiles}
+                            handleDelete={handleDelete}
+                        />
+                    )}
+                </main>
             </div>
-            <div className="flex flex-col items-center justify-center flex-1 gap-4">
-                <h2 className="text-lg font-medium text-slate-700">Welcome, Professor</h2>
-                <p className="text-slate-500">Course management and note uploads coming soon.</p>
-            </div>
-        </div>
+        </>
     );
 }

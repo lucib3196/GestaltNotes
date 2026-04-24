@@ -6,6 +6,13 @@ export interface UserBase {
   email: string;
 }
 
+export interface Student {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+}
+
 export type UserRead = {
   email: string;
 };
@@ -84,6 +91,13 @@ export default class UserManager {
   }
   static async getMe(token: string): Promise<{ email: string; roles: string[] }> {
     const response = await api.get(`${this.base}/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  }
+
+  static async getStudents(token: string): Promise<Student[]> {
+    const response = await api.get(`${this.base}/students`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;

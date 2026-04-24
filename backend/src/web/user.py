@@ -1,13 +1,14 @@
 from .dependencies import UserManagerDependency
-from src.model.user import UserCreate, UserRead, User, VALID_ROLES
+from src.model.user import UserCreate, UserRead, User, UserRoleLink, Role, StudentResponse
 from fastapi.routing import APIRouter
 from fastapi.exceptions import HTTPException
 from starlette import status
 from firebase_admin import auth
 from typing import Optional
 import requests
+from sqlmodel import select
 from pydantic import BaseModel
-from src.core.logger import logger
+from src.core.database_config import SessionDep
 from src.web.dependencies import FireBaseToken, ThreadDBDependency, CurrentUser, StudentDep, CurrentUserDep
 from starlette import status
 from typing import List
@@ -15,6 +16,7 @@ from src.model.chat import Thread, ThreadCreate
 from typing import Dict
 from fastapi.responses import Response
 from uuid import UUID
+from src.model.course import Course
 
 
 class PasswordUpdate(BaseModel):
@@ -30,9 +32,8 @@ class LoginRequest(BaseModel):
 
 @router.post("/")
 async def create_user(
-    user_manager: UserManagerDependency, data: UserCreate
+    user_manager: UserManagerDependency, data: UserCreate, session: SessionDep
 ) -> User:
-    logger.info("Received request")
     try:
         user = await user_manager.create_user(data, role=data.role)
         if not user:
@@ -40,13 +41,19 @@ async def create_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Unexpected Error User is None",
             )
+        if data.course_id and data.role == "educator":
+            course = session.get(Course, data.course_id)
+            if not course:
+                raise HTTPException(status_code=404, detail="Course not found")
+            course.educators.append(user)
+            session.commit()
+
         return user
     except Exception as e:
         if "EMAIL_EXISTS" in str(e):
             raise HTTPException(
                 status_code=400, detail="User with this email already exists."
             )
-
         raise HTTPException(status_code=400, detail=f"User creation failed. {e}")
 
 
@@ -155,3 +162,13 @@ async def get_me(user: CurrentUserDep):
         "email": user.email,
         "roles": [r.name for r in user.roles]
     }
+
+@router.get("/students", response_model=list[StudentResponse])
+def get_students(session: SessionDep):
+    students = session.exec(
+        select(User)
+        .join(UserRoleLink, UserRoleLink.user_id == User.id)
+        .join(Role, Role.id == UserRoleLink.role_id)
+        .where(Role.name == "student")
+    ).all()
+    return students
