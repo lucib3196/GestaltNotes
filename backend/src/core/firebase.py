@@ -39,6 +39,7 @@ def initialize_firebase_app():
         # -----------------------------
         cred_path = Path(app_settings.PROJECT_ROOT) / app_settings.FIREBASE_CRED
 
+
         if cred_path.exists():
             cred = credentials.Certificate(str(cred_path))
         else:

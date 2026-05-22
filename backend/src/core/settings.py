@@ -1,11 +1,9 @@
-
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal, Optional, Sequence, Union
+from typing import Literal, List
 
-from pydantic import AnyHttpUrl, field_validator
-from pydantic_core.core_schema import ValidationInfo
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 from pydantic import model_validator
@@ -21,7 +19,7 @@ class AppSettings(BaseSettings):
     mode: Literal["testing", "dev", "production"] = "dev"
     STORAGE_SERVICE: Literal["local", "cloud"] = "local"
 
-    BACKEND_CORS_ORIGINS: Sequence[str] = []
+    BACKEND_CORS_ORIGINS: List[str] | str = []
 
     DATABASE_URI: str | None = None
     POSTGRES_URL: str | None = None
@@ -36,7 +34,7 @@ class AppSettings(BaseSettings):
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v):
-        if isinstance(v, str) and not v.startswith("["):
+        if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
         return v
 
