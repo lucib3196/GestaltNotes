@@ -107,3 +107,4 @@ frontend/firebase-export*
 frontend/firebase
 frontend/firebase
 .env
+emulator-data
