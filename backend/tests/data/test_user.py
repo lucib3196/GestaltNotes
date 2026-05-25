@@ -1,6 +1,6 @@
 import pytest
 from sqlmodel import Session
-from src.data.user import UserDB
+from src.service.user import UserDB
 
 
 @pytest.fixture
