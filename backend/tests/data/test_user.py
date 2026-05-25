@@ -1,5 +1,6 @@
 import pytest
 from sqlmodel import Session
+
 from src.service.user import UserDB
 
 

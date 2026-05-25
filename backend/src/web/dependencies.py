@@ -4,7 +4,6 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin.auth import verify_id_token
-from src.data.user import UserDB
 from starlette import status
 
 from src.core.database_config import SessionDep
@@ -15,6 +14,7 @@ from src.data.message import MessageDB
 from src.data.thread import ThreadDB
 from src.model.user import User
 from src.service import FirebaseStorage
+from src.service.user import UserDB
 from src.service.user.user_manager import UserManager
 
 bearer_scheme = HTTPBearer(auto_error=False)

@@ -1,13 +1,15 @@
+from uuid import UUID
+
 from firebase_admin import auth
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
+from src.core import logger
 from src.data.role import RoleDB
 from src.model.user import VALID_ROLES, User, UserCreate
-from src.core import logger
+
 from .exceptions import UserCreationError, UserRoleLinkError, UserServiceException
 from .userdb import UserDB
-from uuid import UUID
 
 ID = str | UUID
 

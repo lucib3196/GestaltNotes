@@ -1,15 +1,15 @@
-from .chat import Thread, Message
-from .course import Course, StudentCourseLink, LectureNote
-from .user import UserRoleLink, UserCourseLink, User, Role
+from .chat import Message, Thread
+from .course import Course, LectureNote, StudentCourseLink
+from .user import Role, User, UserCourseLink, UserRoleLink
 
 __all__ = [
-    "Thread",
-    "Message",
     "Course",
-    "StudentCourseLink",
     "LectureNote",
-    "UserRoleLink",
-    "UserCourseLink",
-    "User",
+    "Message",
     "Role",
+    "StudentCourseLink",
+    "Thread",
+    "User",
+    "UserCourseLink",
+    "UserRoleLink",
 ]

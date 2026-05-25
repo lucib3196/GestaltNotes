@@ -7,28 +7,27 @@ from sqlmodel import Session, SQLModel, create_engine
 from src.core.logger import logger
 from src.core.settings import get_settings
 
+from .exceptions import DatabaseConfigError
+
 app_settings = get_settings()
 
 
 # Define choosing the settings
-if app_settings.mode == "testing":
+if app_settings.ENV == "testing":
     DATABASE_URL = "sqlite:///:memory:"
-elif app_settings.mode == "production":
-    DATABASE_URL = app_settings.POSTGRES_URL
-    if not DATABASE_URL:
-        raise RuntimeError("POSTGRES_URL must be set in production mode")
-elif app_settings.mode == "dev":
-    DATABASE_URL = f"sqlite:///{app_settings.SQLITE_DB_PATH}"
-
-    # raise NotImplementedError("Development database is not ready yet")
+elif app_settings.ENV == "production":
+    DATABASE_URL = app_settings.DATABASE_URL
+elif app_settings.ENV == "dev":
+    DATABASE_URL = f"sqlite:///{app_settings.DATABASE_URL}"
 else:
-    raise ValueError(f"Unknown environment: {app_settings.mode}")
-
+    raise ValueError(f"Unknown environment: {app_settings.ENV}")
 logger.debug(f"[DATABASE Intialization]: Database path set to {DATABASE_URL}")
 
 try:
+    if not DATABASE_URL:
+        raise DatabaseConfigError("Database url is not set")
     connect_args = {}
-    if app_settings.mode == "dev" and DATABASE_URL.startswith("sqlite"):
+    if app_settings.ENV == "dev" and DATABASE_URL.startswith("sqlite"):
         connect_args = {"check_same_thread": False}
     engine = create_engine(
         url=DATABASE_URL,

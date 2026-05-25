@@ -1,17 +1,21 @@
+from uuid import UUID
+
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from src.core import logger
 from src.model.user import User, UserCreate, UserUpdate
 from src.utils.utils import convert_uuid
-from uuid import UUID
+
 from .exceptions import (
     UserCreationError,
     UserNotFoundError,
     UserServiceException,
     UserUpdateError,
 )
+
 ID = str | UUID
+
 
 class UserDB:
     def __init__(self, session: Session) -> None:
