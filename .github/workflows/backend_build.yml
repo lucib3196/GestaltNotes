@@ -14,7 +14,7 @@ jobs:
         python-version: [3.11, 3.12, 3.13]
 
     env:
-      MODE: "dev"
+      MODE: "testing"
       STORAGE_BUCKET: ${{secrets.STORAGE_BUCKET}}
       FIREBASE_CRED: FIREBASE_CRED.json
       FIREBASE_AUTH_EMULATOR_HOST: 127.0.0.1:9099

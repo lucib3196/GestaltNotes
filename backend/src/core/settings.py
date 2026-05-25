@@ -89,7 +89,7 @@ class AppSettings(BaseSettings):
     # Database validation
     @model_validator(mode="after")
     def validate_database(self):
-        if not self.DATABASE_URL:
+        if not self.DATABASE_URL and self.ENV != "testing":
             raise ValueError("Database URL is not set")
         return self
 
