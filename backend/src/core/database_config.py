@@ -13,22 +13,23 @@ app_settings = get_settings()
 
 
 # Define choosing the settings
-if app_settings.ENV == "testing":
-    DATABASE_URL = "sqlite:///:memory:"
-elif app_settings.ENV == "production":
-    DATABASE_URL = app_settings.DATABASE_URL
-elif app_settings.ENV == "dev":
-    DATABASE_URL = f"sqlite:///{app_settings.DATABASE_URL}"
-else:
-    raise ValueError(f"Unknown environment: {app_settings.ENV}")
-logger.debug(f"[DATABASE Intialization]: Database path set to {DATABASE_URL}")
-
 try:
+    if app_settings.ENV == "testing":
+        DATABASE_URL = "sqlite:///:memory:"
+    else:
+        DATABASE_URL = app_settings.DATABASE_URL
+
     if not DATABASE_URL:
         raise DatabaseConfigError("Database url is not set")
+except Exception as e:
+    raise DatabaseConfigError(
+        f"Failed to initialized database with env set to: {app_settings.ENV}, {e}"
+    ) from e
+logger.info(f"[DATABASE Intialization]: Database path set to {DATABASE_URL}")
+
+try:
+
     connect_args = {}
-    if app_settings.ENV == "dev" and DATABASE_URL.startswith("sqlite"):
-        connect_args = {"check_same_thread": False}
     engine = create_engine(
         url=DATABASE_URL,
         echo=True,
