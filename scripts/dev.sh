@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 trap 'echo "❌ Script failed at line $LINENO"; read -p "Press enter to exit..."' ERR
 
 # Kills any firebase port
@@ -29,12 +30,13 @@ shutdown(){
         kill -INT "${FIREBASE_PID}" 2>/dev/null || true
         wait "$FIREBASE_PID" 2>/dev/null || true
     fi
+    docker compose -f compose.dev.yaml down || true
 }
 trap shutdown EXIT INT TERM
 
 # First clean up all firebase ports if they are open
 cleanup_firebase_ports
-printf "Starting Firebase emulators...\n"
+printf "\nStarting Firebase emulators...\n"
 
 # Starts a new process group
 setsid firebase emulators:start \
@@ -45,3 +47,4 @@ FIREBASE_PID=$!
 # Wait a bit for Firebase to bind ports
 sleep 10
 echo "Starting docker container container..."
+docker compose -f compose.dev.yaml up --build
