@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin.auth import verify_id_token
+from src.data.user import UserDB
 from starlette import status
 
 from src.core.database_config import SessionDep
@@ -12,7 +13,6 @@ from src.core.settings import get_settings
 from src.data.course import CourseDB
 from src.data.message import MessageDB
 from src.data.thread import ThreadDB
-from src.data.user import UserDB
 from src.model.user import User
 from src.service import FirebaseStorage
 from src.service.user.user_manager import UserManager

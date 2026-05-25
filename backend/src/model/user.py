@@ -24,6 +24,7 @@ class UserCourseLink(SQLModel, table=True):
 
 
 class UserCreate(BaseModel):
+    username: str | None = None
     first_name: str | None = None
     last_name: str | None = None
     password: str
@@ -37,9 +38,19 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserRead(BaseModel):
+class UserBase(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    username: str | None = None
+
+
+class UserRead(UserBase):
     email: str | None = None
     force_password_reset: bool = False
+
+
+class UserUpdate(UserBase):
+    email: str | None = None
 
 
 class User(SQLModel, table=True):

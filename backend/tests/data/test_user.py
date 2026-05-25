@@ -1,6 +1,5 @@
 import pytest
 from sqlmodel import Session
-
 from src.data.user import UserDB
 
 
