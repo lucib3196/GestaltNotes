@@ -1,21 +1,21 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .user import User
     from .course import Course
+    from .user import User
 
 
 class ThreadCreate(BaseModel):
-    thread_id: Optional[UUID | str] = None
-    user_id: Optional[UUID | str] = None
-    course_id: Optional[UUID | str] = None
-    title: Optional[str] = None
-    agent: Optional[str] = None
+    thread_id: UUID | str | None = None
+    user_id: UUID | str | None = None
+    course_id: UUID | str | None = None
+    title: str | None = None
+    agent: str | None = None
 
 
 class ThreadList(BaseModel):
@@ -29,24 +29,24 @@ class MessageCreate(BaseModel):
 
 
 class Thread(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
 
     user_id: UUID = Field(foreign_key="user.id")
-    course_id: Optional[UUID] = Field(default=None, foreign_key="course.id")
+    course_id: UUID | None = Field(default=None, foreign_key="course.id")
 
-    title: Optional[str] = None
-    agent: Optional[str] = None
+    title: str | None = None
+    agent: str | None = None
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     user: "User" = Relationship(back_populates="threads")
     course: "Course" = Relationship(back_populates="threads")
-    messages: List["Message"] = Relationship(back_populates="thread")
+    messages: list["Message"] = Relationship(back_populates="thread")
 
 
 class Message(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
 
     thread_id: UUID = Field(foreign_key="thread.id")
     role: str

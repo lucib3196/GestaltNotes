@@ -1,14 +1,15 @@
-from src.data.user import UserDB
-from src.model.user import User, UserCreate
 from firebase_admin import auth
 from sqlmodel import Session
-from src.model.user import User, UserCreate, VALID_ROLES
+
 from src.data.role import RoleDB
+from src.data.user import UserDB
+from src.model.user import VALID_ROLES, User, UserCreate
+
 from . import ID, logger
 
 
 class UserManager:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self.udb = UserDB(session)
         self.rm = RoleDB(session)
 
@@ -25,9 +26,9 @@ class UserManager:
             )
             user = await self.udb.create_user(data=user_orm)
             assert user
-            display_name = f"{user_orm.email.split("@")[0]}_{str(user_orm.id)[:4]}"
+            display_name = f"{user_orm.email.split('@')[0]}_{str(user_orm.id)[:4]}"
             # First create the user in the firebase auth
-            response = auth.create_user(
+            auth.create_user(
                 email=data.email,
                 display_name=display_name,
                 uid=str(user.id),

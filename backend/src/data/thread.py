@@ -1,16 +1,16 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError
+from sqlmodel import Session, select
 
-from src.model.chat import Thread, ThreadCreate
 from src.core.logger import logger
+from src.model.chat import Thread
 from src.utils.utils import convert_uuid
 
 
 class ThreadDB:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self.session = session
 
     async def create_thread(

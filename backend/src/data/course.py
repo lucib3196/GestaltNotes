@@ -1,12 +1,13 @@
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
+
 from src.model.course import Course, CourseData
 
-from sqlalchemy.exc import SQLAlchemyError
-from . import logger, ID, convert_uuid
+from . import ID, convert_uuid, logger
 
 
 class CourseDB:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self.session = session
 
     async def create_course(self, data: CourseData) -> Course:

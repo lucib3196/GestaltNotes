@@ -1,13 +1,15 @@
-from sqlmodel import SQLModel, Field as SqlField, Relationship as SQLMODELRelationship
-from typing import List, Optional, Literal, TYPE_CHECKING
-from uuid import uuid4, UUID
+from typing import TYPE_CHECKING, Literal
+from uuid import UUID, uuid4
+
 from pydantic import BaseModel
-from datetime import datetime
+from sqlmodel import Field as SqlField
+from sqlmodel import Relationship as SQLMODELRelationship
+from sqlmodel import SQLModel
 
 if TYPE_CHECKING:
     from .chat import Thread
     from .course import Course
-    
+
 VALID_ROLES = Literal["educator", "student", "admin"]
 
 
@@ -41,7 +43,7 @@ class UserRead(BaseModel):
 
 
 class User(SQLModel, table=True):
-    id: Optional[UUID] = SqlField(default_factory=uuid4, primary_key=True)
+    id: UUID | None = SqlField(default_factory=uuid4, primary_key=True)
     first_name: str | None = None
     last_name: str | None = None
     email: str
@@ -49,7 +51,7 @@ class User(SQLModel, table=True):
         back_populates="users",
         link_model=UserRoleLink,
     )
-    threads: List["Thread"] = SQLMODELRelationship(back_populates="user")
+    threads: list["Thread"] = SQLMODELRelationship(back_populates="user")
     courses: list["Course"] = SQLMODELRelationship(
         back_populates="educators",
         link_model=UserCourseLink,
@@ -64,6 +66,7 @@ class Role(SQLModel, table=True):
         back_populates="roles",
         link_model=UserRoleLink,
     )
+
 
 class StudentResponse(BaseModel):
     id: UUID

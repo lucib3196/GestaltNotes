@@ -1,12 +1,11 @@
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal, List
+from typing import Literal
 
-from pydantic import field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
 
@@ -19,7 +18,7 @@ class AppSettings(BaseSettings):
     mode: Literal["testing", "dev", "production"] = "dev"
     STORAGE_SERVICE: Literal["local", "cloud"] = "local"
 
-    BACKEND_CORS_ORIGINS: List[str] | str = []
+    BACKEND_CORS_ORIGINS: list[str] | str = []
 
     DATABASE_URI: str | None = None
     POSTGRES_URL: str | None = None
@@ -79,7 +78,7 @@ class AppSettings(BaseSettings):
                     raise ValueError(f"Cannot determine mode {self.mode}")
 
             return self
-        except Exception as e:
+        except Exception:
             raise
 
 
@@ -117,15 +116,14 @@ def get_settings() -> AppSettings:
     if env_mode == "dev" and not auth_emulator:
         raise ValueError("FIREBASE_AUTH_EMULATOR_HOST must be provided during dev env")
 
-    app_settings = AppSettings(
+    return AppSettings(
         PROJECT_NAME="GestaltQuestions",
-        BACKEND_CORS_ORIGINS=[] + allowed_origins,
+        BACKEND_CORS_ORIGINS=[*allowed_origins],
         SQLITE_DB_PATH=(ROOT_PATH / Path(os.getenv("SQLITE_DB_PATH", ":memory:")))
         .resolve()
         .as_posix(),
         PROJECT_ROOT=ROOT_PATH,
     )
-    return app_settings
 
 
 if __name__ == "__main__":

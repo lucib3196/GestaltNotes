@@ -1,10 +1,12 @@
-from fastapi.routing import APIRouter
 from uuid import UUID
 
-from .dependencies import ThreadDBDependency, MessageDBDependency, StudentDep
-from src.model.chat import Thread, Message, ThreadCreate, ThreadList, MessageCreate
 from fastapi.exceptions import HTTPException
+from fastapi.routing import APIRouter
 from starlette import status
+
+from src.model.chat import Message, MessageCreate, Thread, ThreadCreate, ThreadList
+
+from .dependencies import MessageDBDependency, StudentDep, ThreadDBDependency
 
 router = APIRouter(prefix="/threads", tags=["threads"])
 

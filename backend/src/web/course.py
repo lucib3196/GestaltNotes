@@ -1,12 +1,15 @@
-from .dependencies import CourseDBDependency, EducatorDep, FbStorageDependency
+from pathlib import Path
+from uuid import UUID
+
+from fastapi import File, HTTPException, UploadFile
+from fastapi.responses import Response
+from fastapi.routing import APIRouter
+from sqlmodel import select
+
 from src.core.database_config import SessionDep
 from src.model.course import Course, CourseData, LectureNote
-from fastapi.routing import APIRouter
-from uuid import UUID
-from sqlmodel import select
-from fastapi import HTTPException, UploadFile, File
-from fastapi.responses import Response
-from pathlib import Path
+
+from .dependencies import CourseDBDependency, EducatorDep, FbStorageDependency
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
@@ -24,6 +27,7 @@ def get_my_courses(educator: EducatorDep):
 @router.get("/{id}")
 async def get_course(cdb: CourseDBDependency, id: str | UUID):
     return await cdb.get_course(id)
+
 
 @router.post("/{course_id}")
 async def upload_lecture_note(
@@ -53,6 +57,7 @@ async def upload_lecture_note(
     session.commit()
     session.refresh(note)
     return note
+
 
 @router.delete("/{course_id}/notes/{note_id}")
 def delete_lecture_note(
