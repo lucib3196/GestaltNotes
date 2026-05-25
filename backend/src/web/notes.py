@@ -8,8 +8,8 @@ from fastapi.routing import APIRouter
 from sqlmodel import select
 
 from src.model.course import LectureNote
-from src.web.dependencies import EducatorDep, FbStorageDependency, SessionDep
-
+from src.web.dependencies import  FbStorageDependency, SessionDep
+from src.web.user.dependencies import EducatorDep
 router = APIRouter(prefix="/notes")
 
 exclude = "output.json"
