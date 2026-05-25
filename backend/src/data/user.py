@@ -1,14 +1,16 @@
-from src.model.user import User, UserCreate
-from sqlmodel import Session, select
-from src.core.logger import logger
-from src.utils.utils import convert_uuid
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
+from sqlmodel import Session, select
+
+from src.core.logger import logger
+from src.model.user import User, UserCreate
+from src.utils.utils import convert_uuid
+
 from . import ID
 
 
 class UserDB:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self.session = session
 
     async def create_user(self, data: UserCreate | User) -> User | None:
@@ -29,7 +31,9 @@ class UserDB:
     async def get_user(self, id: ID) -> User | None:
         try:
             return self.session.exec(
-                select(User).where(User.id == convert_uuid(id)).options(selectinload(User.roles))
+                select(User)
+                .where(User.id == convert_uuid(id))
+                .options(selectinload(User.roles))
             ).first()
         except SQLAlchemyError as e:
             self.session.rollback()

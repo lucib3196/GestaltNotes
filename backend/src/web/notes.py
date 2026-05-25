@@ -1,12 +1,14 @@
-from fastapi.routing import APIRouter
-from fastapi import UploadFile, File
-from fastapi.responses import Response
-from fastapi.exceptions import HTTPException
-from src.web.dependencies import FbStorageDependency, EducatorDep, SessionDep
-from src.model.course import LectureNote
-from sqlmodel import select
-from uuid import UUID
 from pathlib import Path
+from uuid import UUID
+
+from fastapi import File, UploadFile
+from fastapi.exceptions import HTTPException
+from fastapi.responses import Response
+from fastapi.routing import APIRouter
+from sqlmodel import select
+
+from src.model.course import LectureNote
+from src.web.dependencies import EducatorDep, FbStorageDependency, SessionDep
 
 router = APIRouter(prefix="/notes")
 
@@ -16,8 +18,7 @@ exclude = "output.json"
 @router.get("/")
 async def get_notes(storage: FbStorageDependency):
     files = storage.list_files("Notes/ME135/Lecture_9_26_25")
-    filtered = [f for f in files if f.endswith(".md") or f.endswith(".pdf")]
-    return filtered
+    return [f for f in files if f.endswith(".md") or f.endswith(".pdf")]
 
 
 @router.get("/test")
@@ -28,6 +29,7 @@ async def get_test_note(storage: FbStorageDependency):
         media_type="application/pdf",
         headers={"Content-Disposition": "inline; filename=lecture1.pdf"},
     )
+
 
 @router.post("/{course_id}")
 async def upload_lecture_note(
@@ -70,6 +72,7 @@ async def upload_lecture_note(
     session.refresh(note)
     return note
 
+
 @router.delete("/{course_id}/{note_id}")
 def delete_lecture_note(
     course_id: UUID,
@@ -86,11 +89,13 @@ def delete_lecture_note(
     session.commit()
     return Response(status_code=204)
 
+
 @router.get("/{course_id}")
 def get_course_notes(
     course_id: UUID,
     educator: EducatorDep,
     session: SessionDep,
 ):
-    notes = session.exec(select(LectureNote).where(LectureNote.course_id == course_id)).all()
-    return notes
+    return session.exec(
+        select(LectureNote).where(LectureNote.course_id == course_id)
+    ).all()

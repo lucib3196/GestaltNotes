@@ -1,10 +1,14 @@
-from src.data.user import UserDB
 import pytest
+from sqlmodel import Session
+
+from src.data.user import UserDB
+
 
 @pytest.fixture
-def user_db(db_session):
+def user_db(db_session: Session):
     return UserDB(db_session)
 
+
 @pytest.mark.asyncio
-async def test_user(user_db):
+async def test_user(user_db) -> None:
     print("Testing users")

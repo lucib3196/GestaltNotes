@@ -1,16 +1,18 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import List, Optional, TYPE_CHECKING
-from uuid import uuid4, UUID
-from pydantic import BaseModel
-from .user import UserCourseLink
 from datetime import datetime
+from typing import TYPE_CHECKING
+from uuid import UUID, uuid4
+
+from pydantic import BaseModel
+from sqlmodel import Field, Relationship, SQLModel
+
+from .user import UserCourseLink
 
 if TYPE_CHECKING:
-    from .user import User, Thread
+    from .user import Thread, User
 
 
 class Course(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     name: str
     discipline: str
     blob: str | None = Field(
@@ -20,8 +22,8 @@ class Course(SQLModel, table=True):
 
     owner: UUID | None = Field(default=None, foreign_key="user.id")
 
-    threads: List["Thread"] = Relationship(back_populates="course")
-    
+    threads: list["Thread"] = Relationship(back_populates="course")
+
     educators: list["User"] = Relationship(
         back_populates="courses",
         link_model=UserCourseLink,
@@ -45,8 +47,9 @@ class StudentCourseLink(SQLModel, table=True):
         default=None, foreign_key="course.id", primary_key=True
     )
 
+
 class LectureNote(SQLModel, table=True):
-    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     course_id: UUID = Field(foreign_key="course.id")
     title: str
     file_name: str

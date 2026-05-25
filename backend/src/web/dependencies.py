@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Annotated, Dict, Any
+from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -13,17 +13,16 @@ from src.data.course import CourseDB
 from src.data.message import MessageDB
 from src.data.thread import ThreadDB
 from src.data.user import UserDB
+from src.model.user import User
 from src.service import FirebaseStorage
 from src.service.user.user_manager import UserManager
-from src.model.user import User
-
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_firebase_user_from_token(
     token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
-) -> Dict[str, str] | None:
+) -> dict[str, str] | None:
     try:
         if not token:
             raise ValueError("No Token")
@@ -31,12 +30,12 @@ def get_firebase_user_from_token(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Not logged in or Invalid credentials {str(e)}",
+            detail=f"Not logged in or Invalid credentials {e!s}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
-FireBaseToken = Annotated[Dict[str, str], Depends(get_firebase_user_from_token)]
+FireBaseToken = Annotated[dict[str, str], Depends(get_firebase_user_from_token)]
 
 
 def get_current_user_id(
@@ -86,7 +85,7 @@ def get_user_manager(session: SessionDep) -> UserManager:
         logger.debug("Initializing UserDB")
 
         return UserManager(session)
-    except Exception as e:
+    except Exception:
         raise ValueError("Failed to initialize userdb")
 
 
@@ -98,7 +97,7 @@ def get_course_db(session: SessionDep) -> CourseDB:
     try:
         logger.debug("Initialized Course DB")
         return CourseDB(session)
-    except Exception as e:
+    except Exception:
         raise ValueError("Failed to initialize Course DB")
 
 
@@ -110,7 +109,7 @@ def get_thread_db(session: SessionDep) -> ThreadDB:
     try:
         logger.debug("Initialized Thread DB")
         return ThreadDB(session)
-    except Exception as e:
+    except Exception:
         raise ValueError("Failed to initialize Thread DB")
 
 
@@ -122,11 +121,12 @@ def get_message_db(session: SessionDep) -> MessageDB:
     try:
         logger.debug("Initialized Message DB")
         return MessageDB(session)
-    except Exception as e:
+    except Exception:
         raise ValueError("Failed to initialize Message DB")
 
 
 MessageDBDependency = Annotated[MessageDB, Depends(get_message_db)]
+
 
 async def get_current_user(
     user_id: CurrentUser,
@@ -135,10 +135,10 @@ async def get_current_user(
     user = await UserDB(session).get_user(user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return user
+
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
@@ -146,18 +146,18 @@ CurrentUserDep = Annotated[User, Depends(get_current_user)]
 def require_student(user: CurrentUserDep) -> User:
     if not any(r.name == "student" for r in user.roles):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Student access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Student access required"
         )
     return user
+
 
 def require_educator(user: CurrentUserDep) -> User:
     if not any(r.name == "educator" for r in user.roles):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Educator access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Educator access required"
         )
     return user
+
 
 StudentDep = Annotated[User, Depends(require_student)]
 EducatorDep = Annotated[User, Depends(require_educator)]

@@ -1,13 +1,17 @@
-import pytest
+from datetime import datetime
+from typing import Never
 from unittest.mock import MagicMock
 from uuid import uuid4
-from datetime import datetime
+
+import pytest
 from sqlalchemy.exc import SQLAlchemyError
+from sqlmodel import Session
+
 from src.data.thread import ThreadDB
 from src.model.chat import Thread
 
 
-def raise_error(*args, **kwargs):
+def raise_error(*args, **kwargs) -> Never:
     raise SQLAlchemyError("db error")
 
 
@@ -17,7 +21,7 @@ def mock_session():
 
 
 @pytest.fixture
-def db(mock_session):
+def db(mock_session: Session) -> ThreadDB:
     return ThreadDB(session=mock_session)
 
 
@@ -35,10 +39,10 @@ def sample_thread():
 
 
 @pytest.mark.asyncio
-async def test_create_thread(db, mock_session):
+async def test_create_thread(db: ThreadDB, mock_session: MagicMock) -> None:
     user_id = uuid4()
     course_id = uuid4()
-    thread_id = uuid4()
+    uuid4()
 
     result = await db.create_thread(
         user_id=user_id,
@@ -58,7 +62,7 @@ async def test_create_thread(db, mock_session):
 
 
 @pytest.mark.asyncio
-async def test_create_thread_optional_fields_blank(db):
+async def test_create_thread_optional_fields_blank(db: ThreadDB) -> None:
     result = await db.create_thread(user_id=uuid4(), course_id=uuid4())
 
     assert result.title is None
@@ -66,18 +70,18 @@ async def test_create_thread_optional_fields_blank(db):
 
 
 @pytest.mark.asyncio
-async def test_create_thread_error_and_rollback(db, mock_session):
+async def test_create_thread_error_and_rollback(db: ThreadDB, mock_session) -> None:
 
     mock_session.commit = raise_error
 
     with pytest.raises(ValueError, match=r"\[ThreadDB\] failed to create thread"):
-        await db.create_thread( user_id=uuid4(), course_id=uuid4())
+        await db.create_thread(user_id=uuid4(), course_id=uuid4())
 
     mock_session.rollback.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_get_thread(db, mock_session, sample_thread):
+async def test_get_thread(db: ThreadDB, mock_session, sample_thread) -> None:
     mock_session.exec.return_value.first.return_value = sample_thread
 
     result = await db.get_thread(sample_thread.id)
@@ -87,7 +91,7 @@ async def test_get_thread(db, mock_session, sample_thread):
 
 
 @pytest.mark.asyncio
-async def test_get_thread_not_found(db, mock_session):
+async def test_get_thread_not_found(db: ThreadDB, mock_session) -> None:
     mock_session.exec.return_value.first.return_value = None
     missing_id = uuid4()
 
@@ -96,7 +100,9 @@ async def test_get_thread_not_found(db, mock_session):
 
 
 @pytest.mark.asyncio
-async def test_get_thread_error_and_rollback(db, mock_session):
+async def test_get_thread_error_and_rollback(
+    db: ThreadDB, mock_session: MagicMock
+) -> None:
 
     mock_session.exec = raise_error
 
@@ -107,7 +113,9 @@ async def test_get_thread_error_and_rollback(db, mock_session):
 
 
 @pytest.mark.asyncio
-async def test_list_threads_returns_all_for_user(db, mock_session, sample_thread):
+async def test_list_threads_returns_all_for_user(
+    db: ThreadDB, mock_session, sample_thread
+) -> None:
     mock_session.exec.return_value.all.return_value = [sample_thread]
 
     result = await db.list_threads_for_user(user_id=sample_thread.user_id)
@@ -117,7 +125,9 @@ async def test_list_threads_returns_all_for_user(db, mock_session, sample_thread
 
 
 @pytest.mark.asyncio
-async def test_list_threads_filters(db, mock_session, sample_thread):
+async def test_list_threads_filters(
+    db: ThreadDB, mock_session: MagicMock, sample_thread
+) -> None:
     mock_session.exec.return_value.all.return_value = [sample_thread]
 
     result = await db.list_threads_for_user(
@@ -129,7 +139,9 @@ async def test_list_threads_filters(db, mock_session, sample_thread):
 
 
 @pytest.mark.asyncio
-async def test_list_threads_filters_by_course_id(db, mock_session, sample_thread):
+async def test_list_threads_filters_by_course_id(
+    db: ThreadDB, mock_session: MagicMock, sample_thread
+) -> None:
     mock_session.exec.return_value.all.return_value = [sample_thread]
 
     result = await db.list_threads_for_user(
@@ -145,7 +157,7 @@ async def test_list_threads_filters_by_course_id(db, mock_session, sample_thread
 
 
 @pytest.mark.asyncio
-async def test_list_threads_empty(db, mock_session):
+async def test_list_threads_empty(db: ThreadDB, mock_session: MagicMock) -> None:
     mock_session.exec.return_value.all.return_value = []
 
     result = await db.list_threads_for_user(user_id=uuid4())
@@ -154,7 +166,7 @@ async def test_list_threads_empty(db, mock_session):
 
 
 @pytest.mark.asyncio
-async def test_list_threads_no_course_id(db, mock_session):
+async def test_list_threads_no_course_id(db: ThreadDB, mock_session: MagicMock) -> None:
     mock_session.exec.return_value.all.return_value = []
 
     await db.list_threads_for_user(user_id=uuid4(), course_id=None)
@@ -167,7 +179,9 @@ async def test_list_threads_no_course_id(db, mock_session):
 
 
 @pytest.mark.asyncio
-async def test_list_threads_error_and_rollback(db, mock_session):
+async def test_list_threads_error_and_rollback(
+    db: ThreadDB, mock_session: MagicMock
+) -> None:
     mock_session.exec = raise_error
 
     with pytest.raises(ValueError, match=r"\[ThreadDB\] failed to list threads"):
@@ -177,7 +191,9 @@ async def test_list_threads_error_and_rollback(db, mock_session):
 
 
 @pytest.mark.asyncio
-async def test_touch_updated_at(db, mock_session, sample_thread):
+async def test_touch_updated_at(
+    db: ThreadDB, mock_session: MagicMock, sample_thread
+) -> None:
     original_time = sample_thread.updated_at
     mock_session.exec.return_value.first.return_value = sample_thread
 
@@ -190,7 +206,7 @@ async def test_touch_updated_at(db, mock_session, sample_thread):
 
 
 @pytest.mark.asyncio
-async def test_touch_updated_at_error(db, mock_session):
+async def test_touch_updated_at_error(db: ThreadDB, mock_session: MagicMock) -> None:
     mock_session.exec.return_value.first.return_value = None
 
     with pytest.raises(ValueError):
@@ -198,7 +214,9 @@ async def test_touch_updated_at_error(db, mock_session):
 
 
 @pytest.mark.asyncio
-async def test_touch_updated_at_rolls_back(db, mock_session, sample_thread):
+async def test_touch_updated_at_rolls_back(
+    db: ThreadDB, mock_session: MagicMock, sample_thread
+) -> None:
     mock_session.exec.return_value.first.return_value = sample_thread
     mock_session.commit = raise_error
 

@@ -1,10 +1,12 @@
-from pathlib import Path
 import json
-from firebase_admin import credentials
-import firebase_admin
-from functools import lru_cache
-from .settings import get_settings
 import os
+from functools import lru_cache
+from pathlib import Path
+
+import firebase_admin
+from firebase_admin import credentials
+
+from .settings import get_settings
 
 app_settings = get_settings()
 
@@ -38,7 +40,6 @@ def initialize_firebase_app():
         # Load credentials
         # -----------------------------
         cred_path = Path(app_settings.PROJECT_ROOT) / app_settings.FIREBASE_CRED
-
 
         if cred_path.exists():
             cred = credentials.Certificate(str(cred_path))

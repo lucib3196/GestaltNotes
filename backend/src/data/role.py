@@ -1,13 +1,13 @@
-from src.model.user import Role, VALID_ROLES
-import asyncio
-from typing import Literal, List
-from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError
-from . import ID, logger
+from sqlmodel import Session, select
+
+from src.model.user import VALID_ROLES, Role
+
+from . import logger
 
 
 class RoleDB:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self.session = session
 
     async def create_role(self, name: VALID_ROLES) -> Role:
@@ -23,19 +23,18 @@ class RoleDB:
             logger.error(message)
             raise ValueError(message)
 
-    async def get_role(self, name: VALID_ROLES) -> Role|None:
+    async def get_role(self, name: VALID_ROLES) -> Role | None:
         try:
             stmt = select(Role).where(Role.name == name)
-            role = self.session.exec(stmt).first()
-            return role
+            return self.session.exec(stmt).first()
         except SQLAlchemyError as e:
             self.session.rollback()
             message = f"[ROLEDB] Failed to get role {e}"
             logger.error(message)
             raise ValueError(message)
 
-    async def seed_roles(self) -> List[Role]:
-        roles: List[VALID_ROLES] = ["educator", "student", "admin"]
+    async def seed_roles(self) -> list[Role]:
+        roles: list[VALID_ROLES] = ["educator", "student", "admin"]
         created_roles = []
         for r in roles:
             r_exist = await self.get_role(r)
@@ -44,4 +43,3 @@ class RoleDB:
             else:
                 created_roles.append(await self.create_role(r))
         return created_roles
-        
