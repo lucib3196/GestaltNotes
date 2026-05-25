@@ -3,16 +3,7 @@ name: GestaltQuestions BACKEND DEV CI
 # Only triggers if there is a backend change
 on:
   push:
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend**"
-    branches: ["main", "dev"]
-
   pull_request:
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend**"
-    branches: ["dev", "main"]
 
 jobs:
   test:
