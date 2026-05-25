@@ -46,7 +46,7 @@ class UserBase(BaseModel):
 
 class UserRead(UserBase):
     email: str | None = None
-    force_password_reset: bool = False
+    # force_password_reset: bool = False
 
 
 class UserUpdate(UserBase):
@@ -57,6 +57,7 @@ class User(SQLModel, table=True):
     id: UUID | None = SqlField(default_factory=uuid4, primary_key=True)
     first_name: str | None = None
     last_name: str | None = None
+    username: str | None = None
     email: str
     roles: list["Role"] = SQLMODELRelationship(
         back_populates="users",

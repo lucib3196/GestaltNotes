@@ -2,7 +2,11 @@ from typing import Annotated, Any
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from firebase_admin.auth import ExpiredIdTokenError, InvalidIdTokenError, verify_id_token
+from firebase_admin.auth import (
+    ExpiredIdTokenError,
+    InvalidIdTokenError,
+    verify_id_token,
+)
 from starlette import status
 
 from src.core.database_config import SessionDep
@@ -74,7 +78,9 @@ async def get_current_user(
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception("Failed to load current user from database: user_id=%s", user_id)
+        logger.exception(
+            "Failed to load current user from database: user_id=%s", user_id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to load current user",
@@ -109,7 +115,9 @@ UserManagerDependency = Annotated[UserManager, Depends(get_user_manager)]
 def require_student(user: CurrentUserDep) -> User:
     """Ensure current user has student role."""
     if not any(r.name == "student" for r in user.roles):
-        logger.info("Authorization denied: student role required for user_id=%s", user.id)
+        logger.info(
+            "Authorization denied: student role required for user_id=%s", user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Student access required"
         )
@@ -119,7 +127,9 @@ def require_student(user: CurrentUserDep) -> User:
 def require_educator(user: CurrentUserDep) -> User:
     """Ensure current user has educator role."""
     if not any(r.name == "educator" for r in user.roles):
-        logger.info("Authorization denied: educator role required for user_id=%s", user.id)
+        logger.info(
+            "Authorization denied: educator role required for user_id=%s", user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Educator access required"
         )

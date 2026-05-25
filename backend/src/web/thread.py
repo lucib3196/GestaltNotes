@@ -6,7 +6,8 @@ from starlette import status
 
 from src.model.chat import Message, MessageCreate, Thread, ThreadCreate, ThreadList
 
-from .dependencies import MessageDBDependency, StudentDep, ThreadDBDependency
+from .dependencies import MessageDBDependency, ThreadDBDependency
+from src.web.user.dependencies import StudentDep
 
 router = APIRouter(prefix="/threads", tags=["threads"])
 

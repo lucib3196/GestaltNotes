@@ -18,13 +18,13 @@ from src.model.user import (
     UserRead,
     UserRoleLink,
 )
-from src.web.dependencies import (
+from .dependencies import (
     CurrentUser,
     CurrentUserDep,
     FireBaseToken,
     StudentDep,
-    ThreadDBDependency,
 )
+from src.web.dependencies import ThreadDBDependency
 
 from .dependencies import UserManagerDependency
 

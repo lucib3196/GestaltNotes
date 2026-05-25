@@ -4,14 +4,19 @@ from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from alembic import context
-
+from src.core.settings import get_settings
+from src.model import *
 # Database models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-from src.core.database_config import DATABASE_URL
 
+
+DATABASE_URL = get_settings().DATABASE_URL
+DATABASE_URL= "postgresql://postgres:password@localhost:5432/gestalt_notes"
+if not DATABASE_URL:
+    raise ValueError("Cannot complete migration database url is not set")
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # Interpret the config file for Python logging.

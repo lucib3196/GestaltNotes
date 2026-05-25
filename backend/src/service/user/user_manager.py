@@ -6,9 +6,15 @@ from sqlmodel import Session
 
 from src.core import logger
 from src.data.role import RoleDB
-from src.model.user import VALID_ROLES, User, UserCreate
+from src.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
+from typing import Union
 
-from .exceptions import UserCreationError, UserRoleLinkError, UserServiceException
+from .exceptions import (
+    UserCreationError,
+    UserRoleLinkError,
+    UserServiceException,
+    UserNotFoundError,
+)
 from .userdb import UserDB
 
 ID = str | UUID
@@ -58,7 +64,7 @@ class UserManager:
                 password=data.password,
             )
             if role:
-                await self._add_user_role(user_orm, role)
+                await self.add_user_role(user_orm, role)
 
             if force_password_reset:
                 auth.set_custom_user_claims(
@@ -73,7 +79,34 @@ class UserManager:
                 f"[UserManager] Failed to create user {e}"
             ) from e
 
-    async def _add_user_role(self, user: User, role: VALID_ROLES) -> None:
+    async def get_user(self, id: ID) -> UserRead:
+        """Fetch a user by identifier.
+
+        Args:
+            id: Internal user identifier.
+
+        Returns:
+            The user if found; otherwise `None`.
+        """
+        user = await self._udb.get_user(id)
+        if not user:
+            raise UserNotFoundError(user_id=str(id))
+        return UserRead(
+            first_name=user.first_name,
+            last_name=user.last_name,
+            username=user.username,
+            email=user.email,
+        )
+
+    async def update_user(self, id: ID, update: UserUpdate) -> UserRead:
+        await self._udb.update_user(id, update)
+        logger.debug("Update user ok")
+        return await self.get_user(id)
+
+    async def delete_user(self, id: ID) -> None:
+        await self._udb.delete_user(id)
+
+    async def add_user_role(self, user: Union["User", ID], role: VALID_ROLES) -> None:
         """Attach a role to an existing user and persist the relationship.
 
         Args:
@@ -83,6 +116,7 @@ class UserManager:
         Raises:
             UserRoleLinkError: If persisting the role link fails.
         """
+        user = await self._resolve_user(user)
         r = await self._rm.get_role(role)
         if not r:
             logger.error(
@@ -99,13 +133,11 @@ class UserManager:
             logger.error(message)
             raise UserRoleLinkError(message) from e
 
-    async def get_user(self, id: ID) -> User | None:
-        """Fetch a user by identifier.
-
-        Args:
-            id: Internal user identifier.
-
-        Returns:
-            The user if found; otherwise `None`.
-        """
-        return await self._udb.get_user(id)
+    async def _resolve_user(self, user: Union["User", ID]) -> User:
+        if isinstance(user, User):
+            return user
+        else:
+            u = await self._udb.get_user(user)
+            if not u:
+                raise UserNotFoundError(user_id=str(id))
+            return u
