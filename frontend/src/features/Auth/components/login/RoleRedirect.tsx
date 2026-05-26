@@ -1,15 +1,18 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../../../../context";
-
-export default function RoleRedirect() {
+import type { ValidRole } from "../../../../services";
+export default function RoleRedirect({ allow }: { allow: ValidRole[] }) {
     const { user, userData, loading } = useAuth();
     const userRoles = userData?.roles
-    const isStudent = userRoles?.some((r) => r === "student")
-    const isEducator = userRoles?.some((r) => r === "educator")
+    const location = useLocation();
 
     if (loading) return <div className="flex items-center justify-center py-20">Loading...</div>;
-    if (!user) return <Navigate to="/login" replace />;
-    if (isStudent) return <Navigate to="/student" replace />;
-    if (isEducator) return <Navigate to="/educator" replace />;
-    return <Navigate to="/unauthorized" replace />;
+
+
+    if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+
+    if (!allow.some((r) => userRoles?.includes(r))) {
+        return <Navigate to="/forbidden" replace />;
+    }
+    return <Outlet />;
 }

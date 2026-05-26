@@ -15,11 +15,11 @@ function App() {
                     <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                     {/* Student Only Roots */}
-                    <Route element={<RoleRedirect requiredRoles={["admin", "educator", "student"]} />}>
+                    <Route element={<RoleRedirect allow={["admin", "educator", "student"]} />}>
                         <Route path="/student" element={<StudentPage />} />
                     </Route>
 
-                    <Route element={<RoleRedirect requiredRoles={["educator"]} />}>
+                    <Route element={<RoleRedirect allow={["educator"]} />}>
                         <Route path="/educator" element={<EducatorPage />} />
                     </Route>
 

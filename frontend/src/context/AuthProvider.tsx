@@ -3,6 +3,7 @@ import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut,
+    getIdToken,
     type User,
     type UserCredential,
 } from "firebase/auth";
@@ -19,7 +20,6 @@ interface AuthContextType {
     setMode: (val: AuthMode) => void;
     login: (email: string, password: string) => Promise<UserCredential>;
     logout: () => void;
-    getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,25 +30,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [mode, setMode] = useState<AuthMode>("login");
 
-    useEffect(() =>
-        onAuthStateChanged(auth, async (fbuser) => {
-            if (fbuser) {
-                setUser(fbuser);
-                try {
-                    const token = await fbuser.getIdToken();
-                    const user = await UserManager.getCurrentUser(token);
-                    setUserData(user)
-                } catch (e) {
-                    console.error("Failed to fetch user role", e);
-                }
-                setLoading(false);
-            } else {
+    useEffect(() => {
+        const unSubscribe = onAuthStateChanged(auth, async (fbUser) => {
+            if (!fbUser) {
+                console.log("No User Logged In");
                 setUser(null);
-                setUserData(null)
+                setUserData(null);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const token = await getIdToken(fbUser);
+                const data = await UserManager.getCurrentUser(token);
+                setUser(fbUser);
+                setUserData(data);
+                console.log(fbUser)
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                setUser(null);
+                setUserData(null);
+            } finally {
                 setLoading(false);
             }
-        }),[user]
-    );
+        });
+
+        return () => unSubscribe();
+    }, []);
 
     async function login(email: string, password: string) {
         return await signInWithEmailAndPassword(auth, email, password);
@@ -59,13 +67,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.location.reload();
     }
 
-    async function getIdToken() {
-        if (!user) return null;
-        return await user.getIdToken();
-    }
 
     return (
-        <AuthContext.Provider value={{ user, userData, loading, login, logout, getIdToken, mode, setMode }}>
+        <AuthContext.Provider value={{ user, userData, loading, login, logout,  mode, setMode }}>
             {children}
         </AuthContext.Provider>
     );
