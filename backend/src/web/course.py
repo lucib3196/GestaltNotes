@@ -8,9 +8,9 @@ from sqlmodel import select
 
 from src.core.database_config import SessionDep
 from src.model.course import Course, CourseData, LectureNote
+from src.web.user.dependencies import EducatorDep
 
 from .dependencies import CourseDBDependency, FbStorageDependency
-from src.web.user.dependencies import EducatorDep
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 

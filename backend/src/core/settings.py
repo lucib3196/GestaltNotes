@@ -136,7 +136,7 @@ class AppSettings(BaseSettings):
     ## This is assuming that langchain stream url is running locally
     @model_validator(mode="after")
     def validate_langchain_deployment(self):
-        if self.ENV=="testing":
+        if self.ENV == "testing":
             return self
         # Checks based on production
         if self.ENV == "production" and not self.LANGSMITH_API_KEY:

@@ -5,9 +5,9 @@ from fastapi.routing import APIRouter
 from starlette import status
 
 from src.model.chat import Message, MessageCreate, Thread, ThreadCreate, ThreadList
+from src.web.user.dependencies import StudentDep
 
 from .dependencies import MessageDBDependency, ThreadDBDependency
-from src.web.user.dependencies import StudentDep
 
 router = APIRouter(prefix="/threads", tags=["threads"])
 

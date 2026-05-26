@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlmodel import Field as SqlField
 from sqlmodel import Relationship as SQLMODELRelationship
 from sqlmodel import SQLModel
-
+from pydantic import BaseModel, EmailStr
 if TYPE_CHECKING:
     from .chat import Thread
     from .course import Course
@@ -23,18 +23,11 @@ class UserCourseLink(SQLModel, table=True):
     course_id: UUID = SqlField(foreign_key="course.id", primary_key=True)
 
 
-class UserCreate(BaseModel):
-    username: str | None = None
-    first_name: str | None = None
-    last_name: str | None = None
-    password: str
-    email: str
-    role: VALID_ROLES = "student"
-    course_id: UUID | None = None
+
 
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -43,10 +36,15 @@ class UserBase(BaseModel):
     last_name: str | None = None
     username: str | None = None
 
+class UserCreate(UserBase):
+    password: str
+    email: EmailStr
+    role: VALID_ROLES = "student"
+    course_id: UUID | None = None
 
 class UserRead(UserBase):
     email: str | None = None
-    # force_password_reset: bool = False
+    force_password_reset: bool = False
 
 
 class UserUpdate(UserBase):

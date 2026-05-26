@@ -28,7 +28,6 @@ except Exception as e:
 logger.info(f"[DATABASE Intialization]: Database path set to {DATABASE_URL}")
 
 try:
-
     connect_args = {}
     engine = create_engine(
         url=DATABASE_URL,

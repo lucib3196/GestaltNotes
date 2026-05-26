@@ -1,10 +1,9 @@
-import json
 import os
 from functools import lru_cache
-from pathlib import Path
 
 import firebase_admin
 from firebase_admin import credentials
+
 from .exceptions import FirebaseInitializationError
 from .settings import get_settings
 

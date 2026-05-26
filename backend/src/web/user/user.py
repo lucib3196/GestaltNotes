@@ -1,4 +1,5 @@
-import requests
+from uuid import UUID
+
 from fastapi.exceptions import HTTPException
 from fastapi.responses import Response
 from fastapi.routing import APIRouter
@@ -7,6 +8,7 @@ from pydantic import BaseModel
 from sqlmodel import select
 from starlette import status
 
+from src.core import logger
 from src.core.database_config import SessionDep
 from src.model.chat import Thread, ThreadCreate
 from src.model.course import Course
@@ -18,22 +20,24 @@ from src.model.user import (
     UserRead,
     UserRoleLink,
 )
+from src.service.user.exceptions import UserNotFoundError, UserServiceException
+from src.web.dependencies import ThreadDBDependency
+
 from .dependencies import (
     CurrentUser,
     CurrentUserDep,
     FireBaseToken,
     StudentDep,
+    UserManagerDependency,
 )
-from src.web.dependencies import ThreadDBDependency
 
-from .dependencies import UserManagerDependency
+ID = UUID | str
+
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 class PasswordUpdate(BaseModel):
     new_password: str
-
-
-router = APIRouter(prefix="/users", tags=["users"])
 
 
 class LoginRequest(BaseModel):
@@ -51,20 +55,39 @@ async def create_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Unexpected Error User is None",
             )
+        # TODO eventually move this logic somewhere else
         if data.course_id and data.role == "educator":
             course = session.get(Course, data.course_id)
             if not course:
                 raise HTTPException(status_code=404, detail="Course not found")
             course.educators.append(user)
             session.commit()
-
         return user
+    except HTTPException:
+        raise
+    except UserServiceException as e:
+        raise HTTPException(status_code=400, detail=f"Failed to create user {e}") from e
     except Exception as e:
-        if "EMAIL_EXISTS" in str(e):
-            raise HTTPException(
-                status_code=400, detail="User with this email already exists."
-            )
-        raise HTTPException(status_code=400, detail=f"User creation failed. {e}")
+        raise HTTPException(status_code=500, detail=f"User creation failed. {e}")
+
+
+@router.post("/get_current_user")
+async def get_current_user(
+    current_user: CurrentUser,
+    user_manager: UserManagerDependency,
+) -> UserRead:
+    try:
+        return await user_manager.get_user(current_user)
+    except UserNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to retrieve user {e}",
+        ) from e
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve user information",
+        ) from None
 
 
 @router.post("/login")
@@ -76,14 +99,6 @@ async def login(payload: LoginRequest):
     )
 
 
-@router.post("/get_current_user")
-def get_current_user(
-    token: FireBaseToken,
-) -> UserRead:
-    decoded = token
-    return UserRead(email=decoded.get("email", None))
-
-
 @router.post("/password_reset/temp")
 async def password_reset(user_id: CurrentUser, update: PasswordUpdate) -> Response:
     try:
@@ -92,6 +107,68 @@ async def password_reset(user_id: CurrentUser, update: PasswordUpdate) -> Respon
         return Response(status_code=200, content="Updated password okay")
     except Exception:
         raise HTTPException(status_code=500, detail="Failed to update password")
+
+
+# ---------- ID-based user management
+# These endpoints operate directly on internal user IDs and are intended for
+# service/admin workflows rather than frontend token-based self-service paths.
+
+
+@router.get("/{id}")
+async def get_user_by_id(
+    user_manager: UserManagerDependency, id: ID
+) -> UserRead | None:
+    """
+    Retrieve a user by internal ID.
+
+    This endpoint is intended for backend/admin flows where user IDs are
+    already known.
+    """
+    try:
+        user = await user_manager.get_user(id)
+        return user
+
+    except UserServiceException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to retrieve user {e}",
+        ) from e
+    except Exception as e:
+        logger.exception("Failed to retrieve user by id='%s'", id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve user '{id}': {e}",
+        ) from e
+
+
+@router.delete("/{id}")
+async def delete_user_by_id(user_manager: UserManagerDependency, id: ID):
+    """
+    Delete a user by internal ID.
+
+    This endpoint is intended for backend/admin flows.
+    """
+    try:
+        user = await user_manager.get_user(id)
+        assert user
+        await user_manager.delete_user(id)
+        return {"detail": "user deleted"}
+    except UserServiceException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to retrieve user {e}",
+        ) from e
+    except Exception as e:
+        logger.exception("Failed to delete user id='%s'", id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete user '{id}': {e}",
+        ) from e
+
+
+# -----------------Other
+# These endpoints not sure if they are active or not
+#
 
 
 @router.get("/thread")
@@ -141,35 +218,7 @@ async def create_user_thread(
         raise HTTPException(status_code=500, detail=f"Failed to create thread {e}")
 
 
-# @router.post()
-@router.post("/login_test")
-def emulator_login(email: str, password: str):
-    """Testing endpoint for login using password and email
 
-    Args:
-        email (str):
-        password (str):
-
-    Returns:
-        _type_: _description_
-    """
-    url = "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=fake-key"
-
-    payload = {"email": email, "password": password, "returnSecureToken": True}
-
-    response = requests.post(url, json=payload)
-    return response.json()
-
-
-@router.get("/me")
-async def get_me(user: CurrentUserDep):
-    return {
-        "id": user.id,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "email": user.email,
-        "roles": [r.name for r in user.roles],
-    }
 
 
 @router.get("/students", response_model=list[StudentResponse])

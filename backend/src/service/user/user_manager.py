@@ -1,3 +1,4 @@
+from typing import Union
 from uuid import UUID
 
 from firebase_admin import auth
@@ -7,13 +8,12 @@ from sqlmodel import Session
 from src.core import logger
 from src.data.role import RoleDB
 from src.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
-from typing import Union
 
 from .exceptions import (
     UserCreationError,
+    UserNotFoundError,
     UserRoleLinkError,
     UserServiceException,
-    UserNotFoundError,
 )
 from .userdb import UserDB
 
@@ -75,6 +75,8 @@ class UserManager:
         except UserServiceException:
             raise
         except Exception as e:
+            if "EMAIL_EXISTS" in str(e):
+                raise UserCreationError("User with this email already exists.") from e
             raise UserServiceException(
                 f"[UserManager] Failed to create user {e}"
             ) from e
@@ -136,8 +138,7 @@ class UserManager:
     async def _resolve_user(self, user: Union["User", ID]) -> User:
         if isinstance(user, User):
             return user
-        else:
-            u = await self._udb.get_user(user)
-            if not u:
-                raise UserNotFoundError(user_id=str(id))
-            return u
+        u = await self._udb.get_user(user)
+        if not u:
+            raise UserNotFoundError(user_id=str(id))
+        return u
