@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import NavBar from "../../components/NavBar/NavBar";
+
 import { useEducatorData } from "../../services/useEducatorData";
 import { useNotes } from "../../services/useNotes";
 import StudentList from "./components/StudentList";
@@ -16,7 +16,7 @@ export default function EducatorPage() {
 
     return (
         <>
-            <NavBar />
+
             <div style={{ minHeight: "100vh", background: "#f9f7f4", fontFamily: "'Georgia', serif" }}>
                 <EducatorHeader course={course} />
                 <EducatorTabs tab={tab} setTab={setTab} />

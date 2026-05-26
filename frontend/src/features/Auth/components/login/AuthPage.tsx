@@ -1,8 +1,8 @@
-import { useAuth } from "../../../context";
+import { useAuth } from "../../../../context";
 import * as React from "react";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import type { AuthMode } from "../../../context";
+import type { AuthMode } from "../../../../context";
 import LogInForm, { LoginSuccess } from "./Login";
 import { SignUpForm } from "./SignUp";
 

@@ -1,9 +1,9 @@
 import AuthBase from "./AuthBase";
-import { useAuth } from "../../../context";
-import { UserManager } from "../../../services";
+import { useAuth } from "../../../../context";
+import { UserManager } from "../../../../services";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
-import { type UserRead } from "../../../services";
+import { type UserRead } from "../../../../services";
 import { useNavigate } from "react-router-dom";
 
 
