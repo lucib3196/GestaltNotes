@@ -218,9 +218,6 @@ async def create_user_thread(
         raise HTTPException(status_code=500, detail=f"Failed to create thread {e}")
 
 
-
-
-
 @router.get("/students", response_model=list[StudentResponse])
 def get_students(session: SessionDep):
     return session.exec(
