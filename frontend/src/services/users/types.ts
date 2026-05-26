@@ -1,8 +1,8 @@
 export type ValidRole = "educator" | "student" | "admin";
 
 export interface UserBase {
-  first_name: string | null;
-  last_name: string | null;
+  first_name: string;
+  last_name: string;
   username: string | null;
 }
 
