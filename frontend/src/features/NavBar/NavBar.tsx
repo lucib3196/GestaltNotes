@@ -14,6 +14,7 @@ import {
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Link, NavLink } from "react-router-dom";
+import { ThemeToggle } from "../ThemeToggle";
 interface NavBarProps {
   items: NavigationItem[];
 }
@@ -117,6 +118,7 @@ export default function NavBar({ items }: NavBarProps) {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <>
               <Link
