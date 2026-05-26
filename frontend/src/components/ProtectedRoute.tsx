@@ -1,14 +1,14 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context";
+import type { ValidRole } from "../services";
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    requiredRole: string;
+    requiredRoles: ValidRole[];
 }
 
-export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-    const { user, role, loading } = useAuth();
-
+export default function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
+    const { user, userData, loading } = useAuth();
     if (loading) {
         return <div className="flex items-center justify-center py-20">Loading...</div>;
     }
@@ -16,8 +16,10 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     if (!user) {
         return <Navigate to="/login" replace />;
     }
+    const userRoles = userData?.roles
+    console.log(userRoles)
 
-    if (role !== requiredRole) {
+    if (!requiredRoles.some((r) => userRoles?.includes(r))) {
         return <Navigate to="/unauthorized" replace />;
     }
 

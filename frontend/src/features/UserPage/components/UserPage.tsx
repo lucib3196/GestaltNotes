@@ -6,7 +6,8 @@ export default function UserPage() {
     const { user } = useAuth();
     const fetchData = async () => {
         const token = await user?.getIdToken();
-        const data = await UserManager.getUserInfo(token);
+        if (!token) return;
+        const data = await UserManager.getCurrentUser(token);
         console.log(data)
     };
 

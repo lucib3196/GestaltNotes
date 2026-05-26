@@ -13,6 +13,7 @@ from src.core.database_config import SessionDep
 from src.model.chat import Thread, ThreadCreate
 from src.model.course import Course
 from src.model.user import (
+    VALID_ROLES,
     Role,
     StudentResponse,
     User,
@@ -25,7 +26,6 @@ from src.web.dependencies import ThreadDBDependency
 
 from .dependencies import (
     CurrentUser,
-    CurrentUserDep,
     FireBaseToken,
     StudentDep,
     UserManagerDependency,
@@ -164,6 +164,25 @@ async def delete_user_by_id(user_manager: UserManagerDependency, id: ID):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete user '{id}': {e}",
         ) from e
+
+
+@router.post("/{id}/roles")
+async def set_user_role(
+    user_manager: UserManagerDependency, id: ID, role: VALID_ROLES
+) -> User:
+    try:
+        user = await user_manager.set_user_roles(id, role)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to add role, user is not defined",
+            )
+        return user
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to add role {e}",
+        )
 
 
 # -----------------Other

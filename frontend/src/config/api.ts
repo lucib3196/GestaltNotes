@@ -1,27 +1,14 @@
 import axios from "axios";
 
 const rawURL = import.meta.env.VITE_API_URL;
-const env = import.meta.env.VITE_ENV;
 
-const protocol = env === "dev" ? "http" : "https";
-
-function PrepareURL(raw: string): string {
-  if (!raw || raw.trim() === "") {
-    throw new Error("VITE_API_URL is not defined or empty");
+function PrepareURL(raw: string | undefined | null, id?: string | null) {
+  if (!raw) {
+    throw new Error(`Failed to load url ${id}`);
   }
-
-  let url = raw.trim();
-
-  // remove trailing slash
-  url = url.replace(/\/$/, "");
-
-  // remove existing protocol
-  url = url.replace(/^https?:\/\//, "");
-
-  // add correct protocol
-  url = `${protocol}://${url}`;
-
-  return url;
+  return raw.startsWith("http")
+    ? raw.replace(/\/$/, "")
+    : `https://${raw.replace(/\/$/, "")}`;
 }
 
 export const apiURL = PrepareURL(rawURL);

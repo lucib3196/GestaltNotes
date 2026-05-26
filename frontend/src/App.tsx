@@ -15,7 +15,7 @@ function App() {
                 <Route
                     path="/student"
                     element={
-                        <ProtectedRoute requiredRole="student">
+                        <ProtectedRoute requiredRoles={["student"]}>
                             <StudentPage />
                         </ProtectedRoute>
                     }
@@ -23,7 +23,7 @@ function App() {
                 <Route
                     path="/educator"
                     element={
-                        <ProtectedRoute requiredRole="educator">
+                        <ProtectedRoute requiredRoles={["educator"]}>
                             <EducatorPage />
                         </ProtectedRoute>
                     }

@@ -7,13 +7,13 @@ import {
     type UserCredential,
 } from "firebase/auth";
 import { auth } from "../config/firebase_init";
-import UserManager from "../services/userManager";
+import { UserManager, type UserRead } from "../services";
 
 export type AuthMode = "login" | "signup" | "authenticate" | "passwordReset" | "login-success"
 
 interface AuthContextType {
     user: User | null;
-    role: string | null;
+    userData: UserRead | null
     loading: boolean;
     mode: AuthMode;
     setMode: (val: AuthMode) => void;
@@ -26,7 +26,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [role, setRole] = useState<string | null>(null);
+    const [userData, setUserData] = useState<UserRead | null>(null)
     const [loading, setLoading] = useState(true);
     const [mode, setMode] = useState<AuthMode>("login");
 
@@ -36,20 +36,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setUser(fbuser);
                 try {
                     const token = await fbuser.getIdToken();
-                    const me = await UserManager.getMe(token);
-                    const userRole = me.roles?.[0] ?? null;
-                    setRole(userRole);
+                    const user = await UserManager.getCurrentUser(token);
+                    setUserData(user)
                 } catch (e) {
                     console.error("Failed to fetch user role", e);
-                    setRole(null);
                 }
                 setLoading(false);
             } else {
                 setUser(null);
-                setRole(null);
+                setUserData(null)
                 setLoading(false);
             }
-        })
+        }),[user]
     );
 
     async function login(email: string, password: string) {
@@ -58,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function logout() {
         await signOut(auth);
-        setRole(null);
         window.location.reload();
     }
 
@@ -68,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, role, loading, login, logout, getIdToken, mode, setMode }}>
+        <AuthContext.Provider value={{ user, userData, loading, login, logout, getIdToken, mode, setMode }}>
             {children}
         </AuthContext.Provider>
     );

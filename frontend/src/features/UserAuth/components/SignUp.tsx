@@ -15,9 +15,10 @@ export function SignUpForm() {
                 return;
             }
 
-            await UserManager.signUp({
+            await UserManager.createUser({
                 first_name: firstName,
                 last_name: lastName,
+                username: null,
                 email,
                 password,
             });

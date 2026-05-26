@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, cast
 from uuid import UUID
 
 from firebase_admin import auth
@@ -11,6 +11,7 @@ from src.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
 
 from .exceptions import (
     UserCreationError,
+    UserDeletionError,
     UserNotFoundError,
     UserRoleLinkError,
     UserServiceException,
@@ -21,6 +22,8 @@ ID = str | UUID
 
 
 class UserManager:
+    _VALIDE_ROLE_SET: set[VALID_ROLES] = {"educator", "student", "admin"}
+
     def __init__(self, session: Session) -> None:
         """Initialize user and role data access with a shared database session."""
         self._udb = UserDB(session)
@@ -64,7 +67,7 @@ class UserManager:
                 password=data.password,
             )
             if role:
-                await self.add_user_role(user_orm, role)
+                await self.set_user_roles(user_orm, role)
 
             if force_password_reset:
                 auth.set_custom_user_claims(
@@ -91,13 +94,20 @@ class UserManager:
             The user if found; otherwise `None`.
         """
         user = await self._udb.get_user(id)
+
         if not user:
             raise UserNotFoundError(user_id=str(id))
+        roles = user.roles
+        cleaned_roles: list[VALID_ROLES] = []
+        for r in roles:
+            if r.name in self._VALIDE_ROLE_SET:
+                cleaned_roles.append(cast(VALID_ROLES, r.name))
         return UserRead(
             first_name=user.first_name,
             last_name=user.last_name,
             username=user.username,
             email=user.email,
+            roles=cleaned_roles,
         )
 
     async def update_user(self, id: ID, update: UserUpdate) -> UserRead:
@@ -106,9 +116,14 @@ class UserManager:
         return await self.get_user(id)
 
     async def delete_user(self, id: ID) -> None:
-        await self._udb.delete_user(id)
+        try:
+            await self._udb.delete_user(id)
+        except Exception:
+            raise UserDeletionError("Failed to delete user")
 
-    async def add_user_role(self, user: Union["User", ID], role: VALID_ROLES) -> None:
+    async def set_user_roles(
+        self, user: Union["User", ID], role: VALID_ROLES
+    ) -> User | None:
         """Attach a role to an existing user and persist the relationship.
 
         Args:
@@ -121,19 +136,29 @@ class UserManager:
         user = await self._resolve_user(user)
         r = await self._rm.get_role(role)
         if not r:
-            logger.error(
-                "Failed to add role to user. Role may not be present in database"
-            )
-            return
-        user.roles.append(r)
+            raise ValueError(f"Role '{role}' not found")
+        # Avoid duplicates
+        if r not in user.roles:
+            user.roles.append(r)
         try:
+            self._session.add(user)
             self._session.commit()
             self._session.flush()
+            return user
         except SQLAlchemyError as e:
             self._session.rollback()
             message = f"[UserManager] failed to add role {role} to user. {e}"
             logger.error(message)
             raise UserRoleLinkError(message) from e
+
+    async def get_user_roles(self, user: Union["User", ID]) -> list[VALID_ROLES]:
+        user = await self._resolve_user(user)
+        roles = user.roles
+        cleaned_roles: list[VALID_ROLES] = []
+        for r in roles:
+            if r.name in self._VALIDE_ROLE_SET:
+                cleaned_roles.append(cast(VALID_ROLES, r.name))
+        return cleaned_roles
 
     async def _resolve_user(self, user: Union["User", ID]) -> User:
         if isinstance(user, User):

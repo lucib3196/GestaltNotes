@@ -1,11 +1,10 @@
 from typing import TYPE_CHECKING, Literal
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from sqlmodel import Field as SqlField
 from sqlmodel import Relationship as SQLMODELRelationship
 from sqlmodel import SQLModel
-from pydantic import BaseModel, EmailStr
 
 if TYPE_CHECKING:
     from .chat import Thread
@@ -45,6 +44,7 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     email: str | None = None
     force_password_reset: bool = False
+    roles: list[VALID_ROLES] = []
 
 
 class UserUpdate(UserBase):

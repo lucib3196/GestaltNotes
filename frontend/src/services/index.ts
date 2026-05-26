@@ -1,2 +1,10 @@
 export { default as NotesAPI } from "./NotesAPI";
-export {default as UserManager} from "./userManager";
+export { UserManager } from "./users";
+export type {
+  DeleteUserResponse,
+  UserBase,
+  UserCreate,
+  UserRead,
+  UserResponse,
+  ValidRole,
+} from "./users";

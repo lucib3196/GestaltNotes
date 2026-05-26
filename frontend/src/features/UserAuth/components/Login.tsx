@@ -3,8 +3,9 @@ import { useAuth } from "../../../context";
 import { UserManager } from "../../../services";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
-import { type UserRead } from "../../../services/userManager";
+import { type UserRead } from "../../../services";
 import { useNavigate } from "react-router-dom";
+
 
 export default function LogInForm() {
   const { login } = useAuth();
@@ -12,9 +13,7 @@ export default function LogInForm() {
 
   const handleSubmit = async (email: string, password: string) => {
     try {
-      const userCredential = await login(email, password);
-      const token = await userCredential.user.getIdToken();
-      await UserManager.logIn(token);
+      await login(email, password);
       navigate("/");  // this triggers RoleRedirect which sends to /student or /educator
     } catch (error: any) {
       toast.error(`Could not Log In ${error as string}`);
@@ -33,8 +32,9 @@ export function LoginSuccess() {
 
       try {
         const token = await user.getIdToken();
-        const data = await UserManager.getUserInfo(token);
+        const data = await UserManager.getCurrentUser(token);
         setUserData(data);
+        console.log("Set user data okay")
       } catch (error) {
         console.error("Failed to fetch user info:", error);
       }

@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context";
-import UserManager, { type Student } from "../services/userManager";
 import CourseManager, { type Course } from "../services/courseManager";
+
+export interface Student {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+}
 
 export function useEducatorData() {
     const [students, setStudents] = useState<Student[]>([]);
@@ -12,11 +18,8 @@ export function useEducatorData() {
         async function fetchData() {
             const token = await getIdToken();
             try {
-                const [studentsData, coursesData] = await Promise.all([
-                    UserManager.getStudents(token!),
-                    CourseManager.getProfCourses(token!),
-                ]);
-                setStudents(studentsData);
+                const coursesData = await CourseManager.getProfCourses(token!);
+                setStudents([]);
                 setCourse(coursesData[0] ?? null);
             } catch (e) {
                 console.error("Failed to fetch educator data", e);
