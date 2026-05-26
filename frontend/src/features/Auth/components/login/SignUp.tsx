@@ -6,6 +6,7 @@ export function SignUpForm() {
     const onSubmit = async (
         email: string,
         password: string,
+        username?: string,
         firstName?: string,
         lastName?: string
     ) => {
@@ -18,7 +19,7 @@ export function SignUpForm() {
             await UserManager.createUser({
                 first_name: firstName,
                 last_name: lastName,
-                username: null,
+                username: username ?? null,
                 email,
                 password,
             });

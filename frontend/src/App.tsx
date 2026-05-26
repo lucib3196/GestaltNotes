@@ -1,33 +1,30 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute";
 import StudentPage from "./features/StudentPage/StudentPage";
 import EducatorPage from "./features/EducatorPage/EducatorPage";
 import { AuthPage, RoleRedirect, UnauthorizedPage } from "./features/Auth";
+import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
+
 function App() {
     return (
         <BrowserRouter>
             <Routes>
                 <Route element={<AppLayout />}>
+                    {/* General roots */}
                     <Route path="/login" element={<AuthPage />} />
                     <Route path="/unauthorized" element={<UnauthorizedPage />} />
-                    <Route
-                        path="/student"
-                        element={
-                            <ProtectedRoute requiredRoles={["student"]}>
-                                <StudentPage />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/educator"
-                        element={
-                            <ProtectedRoute requiredRoles={["educator"]}>
-                                <EducatorPage />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route path="*" element={<RoleRedirect />} />
+
+                    {/* Student Only Roots */}
+                    <Route element={<RoleRedirect requiredRoles={["admin", "educator", "student"]} />}>
+                        <Route path="/student" element={<StudentPage />} />
+                    </Route>
+
+                    <Route element={<RoleRedirect requiredRoles={["educator"]} />}>
+                        <Route path="/educator" element={<EducatorPage />} />
+                    </Route>
+
+
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
             </Routes>
         </BrowserRouter>

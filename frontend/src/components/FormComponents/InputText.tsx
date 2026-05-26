@@ -1,12 +1,13 @@
 import clsx from "clsx";
 
 export type InputStyleVariant =
-    | "default"
-    | "outline"
-    | "filled"
-    | "hidden"
-    | "inline"
-    | "createQuestion";
+  | "default"
+  | "outline"
+  | "filled"
+  | "hidden"
+  | "inline"
+  | "createQuestion"
+  | "auth";
 
 type InputStyleConfig = {
     wrapper: string;
@@ -15,58 +16,65 @@ type InputStyleConfig = {
 };
 
 export const inputStyles: Record<InputStyleVariant, InputStyleConfig> = {
-    default: {
-        wrapper: "mt-2 w-1/2 min-w-[200px]",
-        label: "block text-sm font-medium text-black mb-1",
-        input:
-            "block w-full rounded-md bg-white/5 px-3 py-1.5 outline outline-1 outline-black placeholder:text-gray-500 focus:outline-indigo-500",
-    },
+  default: {
+    wrapper: "mt-2 w-1/2 min-w-[200px]",
+    label: "block text-sm font-medium text-black mb-1",
+    input:
+      "block w-full rounded-md bg-white/5 px-3 py-1.5 outline outline-1 outline-black placeholder:text-gray-500 focus:outline-indigo-500",
+  },
 
-    outline: {
-        wrapper: "mt-2 w-1/2 min-w-[200px]",
-        label: "block text-sm font-medium text-gray-700 mb-1",
-        input:
-            "block w-full rounded-md bg-transparent px-3 py-1.5 border border-gray-400 text-black placeholder:text-gray-500 focus:border-indigo-500",
-    },
+  outline: {
+    wrapper: "mt-2 w-1/2 min-w-[200px]",
+    label: "block text-sm font-medium text-gray-700 mb-1",
+    input:
+      "block w-full rounded-md bg-transparent px-3 py-1.5 border border-gray-400 text-black placeholder:text-gray-500 focus:border-indigo-500",
+  },
 
-    filled: {
-        wrapper: "mt-2 w-1/2 min-w-[200px]",
-        label: "block text-sm font-medium text-gray-700 mb-1",
-        input:
-            "block w-full rounded-md bg-gray-200 px-3 py-1.5 text-black placeholder:text-gray-600 focus:bg-white",
-    },
+  filled: {
+    wrapper: "mt-2 w-1/2 min-w-[200px]",
+    label: "block text-sm font-medium text-gray-700 mb-1",
+    input:
+      "block w-full rounded-md bg-gray-200 px-3 py-1.5 text-black placeholder:text-gray-600 focus:bg-white",
+  },
 
-    hidden: {
-        wrapper: "mt-0 w-full",
-        label: "sr-only",
-        input:
-            "block w-full bg-transparent px-0 py-0 text-black placeholder:text-gray-600 focus:bg-white",
-    },
+  hidden: {
+    wrapper: "mt-0 w-full",
+    label: "sr-only",
+    input:
+      "block w-full bg-transparent px-0 py-0 text-black placeholder:text-gray-600 focus:bg-white",
+  },
 
-    inline: {
-        wrapper: "w-1/2 min-w-[200px] flex flex-row justify-between",
-        label: "block text-sm font-medium text-gray-700 mb-1",
-        input:
-            "block w-full rounded-md bg-transparent px-3 py-1 border border-gray-400 text-black placeholder:text-gray-500 focus:border-indigo-500",
-    },
-    createQuestion: {
-        wrapper: "w-full flex flex-col gap-1",
-        label:
-            "text-xs font-semibold uppercase tracking-wide text-slate-600",
-        input:
-            "block w-full rounded-md bg-white px-3 py-2 text-sm text-slate-900 " +
-            "border border-slate-300 shadow-sm " +
-            "placeholder:text-slate-400 " +
-            "focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
-    },
+  inline: {
+    wrapper: "w-1/2 min-w-[200px] flex flex-row justify-between",
+    label: "block text-sm font-medium text-gray-700 mb-1",
+    input:
+      "block w-full rounded-md bg-transparent px-3 py-1 border border-gray-400 text-black placeholder:text-gray-500 focus:border-indigo-500",
+  },
+  createQuestion: {
+    wrapper: "w-full flex flex-col gap-1",
+    label: "text-xs font-semibold uppercase tracking-wide text-slate-600",
+    input:
+      "block w-full rounded-md bg-white px-3 py-2 text-sm text-slate-900 " +
+      "border border-slate-300 shadow-sm " +
+      "placeholder:text-slate-400 " +
+      "focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
+  },
+  auth: {
+    wrapper: "w-full",
+    label: "mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-soft",
+    input:
+      "block w-full rounded-lg border border-border bg-surface-strong px-3.5 py-2.5 text-sm text-text " +
+      "placeholder:text-text-soft shadow-sm transition-all duration-200 " +
+      "focus:outline-none focus:ring-2 focus:ring-accent/35 focus:border-accent",
+  },
 };
 
 export type InputComponentProps =
-    React.InputHTMLAttributes<HTMLInputElement> & {
-        label: string;
-        variant?: InputStyleVariant;
-        hint?: React.ReactNode;
-    };
+  React.InputHTMLAttributes<HTMLInputElement> & {
+    label: string;
+    variant?: InputStyleVariant;
+    hint?: React.ReactNode;
+  };
 
 export function InputTextForm({
     label,
