@@ -1,9 +1,7 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "../features/NavBar/NavBar";
-import type { NavigationItem } from "../features/NavBar/types";
-const navigationItems: NavigationItem[] = [
-    { label: "Home", to: "/", type: "route" },
-];
+import { navigationItems } from "../features/NavBar";
+
 
 export default function AppLayout() {
     return (

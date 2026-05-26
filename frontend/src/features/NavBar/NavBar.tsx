@@ -87,7 +87,7 @@ export default function NavBar({ items }: NavBarProps) {
       as="nav"
       className={clsx(
         "sticky top-0 z-40 border-b border-border/80 bg-surface/90 text-text backdrop-blur-xl",
-        "supports-[backdrop-filter]:bg-surface/70",
+        "supports-backdrop-filter:bg-surface/70",
       )}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center px-3 sm:px-6 lg:px-8">
