@@ -10,7 +10,6 @@ from starlette import status
 
 from src.core import logger
 from src.core.database_config import SessionDep
-from src.model.chat import Thread, ThreadCreate
 from src.model.course import Course
 from src.model.user import (
     VALID_ROLES,
@@ -22,12 +21,9 @@ from src.model.user import (
     UserRoleLink,
 )
 from src.service.user.exceptions import UserNotFoundError, UserServiceException
-from src.web.dependencies import ThreadDBDependency
 
 from .dependencies import (
     CurrentUser,
-    FireBaseToken,
-    StudentDep,
     UserManagerDependency,
 )
 
@@ -188,53 +184,6 @@ async def set_user_role(
 # -----------------Other
 # These endpoints not sure if they are active or not
 #
-
-
-@router.get("/thread")
-async def get_user_threads(
-    token: FireBaseToken, thread_db: ThreadDBDependency
-) -> list[Thread]:
-    try:
-        user_id = token.get("user_id", None)
-        if user_id is None:
-            raise HTTPException(
-                detail="Failed to retrieve signed in user",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-        return await thread_db.list_threads_for_user(user_id, None)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create user {e}")
-
-
-@router.post("/thread")
-async def create_user_thread(
-    token: FireBaseToken,
-    thread_db: ThreadDBDependency,
-    user: StudentDep,
-    data: ThreadCreate | None = None,
-) -> Thread:
-    try:
-        user_id = token.get("user_id", None)
-        if user_id is None:
-            raise HTTPException(
-                detail="Failed to retrieve signed in user",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-        if data:
-            thread = await thread_db.create_thread(
-                thread_id=data.thread_id,
-                course_id=data.course_id,
-                title=data.title,
-                agent=data.agent,
-                user_id=user_id,
-            )
-        else:
-            thread = await thread_db.create_thread(user_id=user_id)
-        return thread
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create thread {e}")
 
 
 @router.get("/students", response_model=list[StudentResponse])

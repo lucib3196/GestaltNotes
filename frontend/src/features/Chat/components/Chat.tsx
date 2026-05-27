@@ -1,5 +1,5 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
-
+import { streamURL } from "../../../config/api";
 import ChatMessage from "./ChatMessage";
 import ChatContainer from "./ChatContainer";
 import ChatSideBar from "./ChatSideBar";
@@ -30,7 +30,20 @@ export default function Chat() {
   const [chats, setChats] = useState<ChatThread[]>([]);
   const [created, setCreated] = useState<boolean>(false);
   const { getThreads } = useUserThreads();
+  const [token, setToken] = useState<string | undefined>("")
   const { user } = useAuth();
+
+  useEffect(() => {
+    const getToken = async () => {
+      const t = await user?.getIdToken()
+      setToken(t)
+
+    }
+    getToken()
+  }, [user]
+  )
+
+
 
   // Context
   const { sources, setSources, agent, setAgent, threadId, setThreadId } =
@@ -56,7 +69,7 @@ export default function Chat() {
 
   const stream = useStream({
     assistantId: agent,
-    apiUrl: import.meta.env.VITE_PRODUCTION_URL,
+    apiUrl: streamURL,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     threadId: threadId ?? undefined,
 

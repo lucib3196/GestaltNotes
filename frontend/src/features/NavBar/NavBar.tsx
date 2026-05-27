@@ -1,5 +1,5 @@
 import { useAuth } from "../../context";
-import type { NavigationItem, DropDownNavRoute,Base } from "./types";
+import type { NavigationItem, DropDownNavRoute, Base } from "./types";
 import clsx from "clsx";
 import { canAccessRoute } from "./utils";
 import {

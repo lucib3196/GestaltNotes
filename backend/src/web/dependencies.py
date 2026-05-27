@@ -8,7 +8,6 @@ from src.core.logger import logger
 from src.core.settings import get_settings
 from src.data.course import CourseDB
 from src.data.message import MessageDB
-from src.data.thread import ThreadDB
 from src.service import FirebaseStorage
 
 
@@ -42,16 +41,7 @@ def get_course_db(session: SessionDep) -> CourseDB:
 CourseDBDependency = Annotated[CourseDB, Depends(get_course_db)]
 
 
-@lru_cache
-def get_thread_db(session: SessionDep) -> ThreadDB:
-    try:
-        logger.debug("Initialized Thread DB")
-        return ThreadDB(session)
-    except Exception:
-        raise ValueError("Failed to initialize Thread DB")
 
-
-ThreadDBDependency = Annotated[ThreadDB, Depends(get_thread_db)]
 
 
 @lru_cache

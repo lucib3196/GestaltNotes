@@ -1,6 +1,9 @@
 import axios from "axios";
 
 const rawURL = import.meta.env.VITE_API_URL;
+const rawStreamURL = import.meta.env.VITE_LANGSMITH_STREAM
+
+console.log("Raw stream", rawStreamURL)
 
 function PrepareURL(raw: string | undefined | null, id?: string | null) {
   if (!raw) {
@@ -12,6 +15,7 @@ function PrepareURL(raw: string | undefined | null, id?: string | null) {
 }
 
 export const apiURL = PrepareURL(rawURL);
+export const streamURL = PrepareURL(rawStreamURL)
 
 axios.defaults.withCredentials = true;
 
