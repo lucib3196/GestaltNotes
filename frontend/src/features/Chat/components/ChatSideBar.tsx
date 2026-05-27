@@ -1,24 +1,21 @@
 import clsx from "clsx";
-
-export type ChatThread = {
-  id: string | null;
-  title: string;
-};
+import type { Thread } from "../../../services";
 
 export type ChatSideBarProps = React.HTMLAttributes<HTMLDivElement> & {
-  chats: ChatThread[];
+  chats: Thread[];
   activeChatId?: string | null;
   onSelectChat: (id: string | null) => void;
   onNewChat?: () => Promise<void>;
 };
 
 const sidebarBaseStyle =
-  "flex flex-col h-full w-64 bg-slate-50 border-r border-slate-200 shrink-0";
+  "flex h-full m-2 flex-col rounded-lg border border-border bg-surface-strong p-2";
 
 const chatItemStyle =
-  "w-full text-left px-4 py-3 rounded-lg transition-colors duration-150 hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400";
+  "w-full rounded-md border border-transparent px-3 py-2.5 text-left transition-all duration-base ease-base hover:border-border hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60";
 
-const chatItemActiveStyle = "bg-slate-200 font-medium";
+const chatItemActiveStyle =
+  "border-border bg-surface text-text shadow-soft";
 
 export default function ChatSideBar({
   chats,
@@ -33,14 +30,15 @@ export default function ChatSideBar({
     <div className={clsx(sidebarBaseStyle, className)} {...rest}>
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200">
-        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
+      <div className="mb-2 flex items-center justify-between  px-2 pb-3 pt-2">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-text-soft">
           Chats
         </h2>
         {onNewChat && (
           <button
+            type="button"
             onClick={onNewChat}
-            className="text-slate-500 hover:text-slate-900 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-slate-400 rounded"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-text-muted transition-all duration-base ease-base hover:border-border-strong hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
             aria-label="New chat"
           >
             {/* Pencil / compose icon */}
@@ -63,9 +61,9 @@ export default function ChatSideBar({
       </div>
 
       {/* Chat List */}
-      <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-1 pb-1">
         {chats.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-slate-400 text-center">
+          <p className="px-3 py-8 text-center text-sm text-text-soft">
             No chats yet
           </p>
         ) : (
@@ -81,7 +79,7 @@ export default function ChatSideBar({
             >
               {/* Title row */}
               <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm text-slate-800">
+                <span className="truncate text-sm text-text">
                   {chat.title ?? "New Chat"}
                 </span>
               </div>

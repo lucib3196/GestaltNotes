@@ -3,12 +3,12 @@ import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from "@mui/material/styles";
 import { AuthProvider } from './context/AuthProvider.tsx';
 import { MathJaxContext } from "better-react-mathjax";
-
+import { ChatProvider } from "./features/Chat/instance";
 import { ToastContainer } from "react-toastify";
 import './index.css'
 import App from './App.tsx'
 import { theme } from './theme';
-import { LectureChatProvider } from './context/ChatContext.tsx';
+
 const mathJaxConfig = {
   tex: {
     inlineMath: [["$", "$"]],
@@ -18,7 +18,7 @@ const mathJaxConfig = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <LectureChatProvider>
+    <ChatProvider>
 
       <MathJaxContext config={mathJaxConfig}>
         <AuthProvider>
@@ -30,7 +30,7 @@ createRoot(document.getElementById('root')!).render(
         </AuthProvider>
       </MathJaxContext>
 
-    </LectureChatProvider>
+    </ChatProvider>
 
   </StrictMode>,
 )
