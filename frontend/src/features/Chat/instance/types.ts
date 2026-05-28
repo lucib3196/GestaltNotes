@@ -35,6 +35,20 @@ export type CleanableContent = ContentBlock[] | string;
 
 export type UnknownRecord = Record<string, unknown>;
 
+export type ConversationStarter = {
+  id: string;
+  label: string;
+  message: string;
+  description?: string;
+  disabled?: boolean;
+};
+
+export interface ConversationStartersProps {
+  starters: ConversationStarter[];
+  disabled?: boolean;
+  onSelectStarter: (starter: ConversationStarter) => void;
+}
+
 // Workspace item
 export type WorkspaceItem = {
   id: string;

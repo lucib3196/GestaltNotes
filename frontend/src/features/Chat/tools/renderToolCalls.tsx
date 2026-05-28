@@ -36,6 +36,7 @@ export default function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     if (!payload || dismissed) return null;
 
     const onApprove = async (approvedPayload: unknown) => {
+        console.log("Approving payload", approvedPayload)
         setError(undefined);
         setLoading(true);
         try {
@@ -55,28 +56,19 @@ export default function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     const onCancel = () => setDismissed(true);
     const Preview = tool.Preview;
     if (!dismissed) return (
-        <div className="rounded-md border p-3">
-            <div className="mb-2 flex justify-end">
-                <button
-                    type="button"
-                    onClick={() => setShow((prev) => !prev)}
-                    aria-expanded={show}
-                    aria-label={show ? "Hide tool details" : "Show tool details"}
-                    className="text-xs font-medium text-gray-600 underline underline-offset-2 hover:text-gray-300"
-                >
-                    {show ? "Hide details" : "Show details"}
-                </button>
-            </div>
-            {show && (
-                <Preview
-                    payload={payload}
-                    onApprove={onApprove}
-                    onCancel={onCancel}
-                    loading={loading}
-                    error={error}
-                />
-            )}
-        </div>
-    );
+
+
+
+
+        <Preview
+            payload={payload}
+            onApprove={onApprove}
+            onCancel={onCancel}
+            loading={loading}
+            error={error}
+        />
+    )
+
+
 
 }

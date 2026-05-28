@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, type JSX } from "react";
 import { IoCloseCircle } from "react-icons/io5";
 import { UploadImagesChat } from "./UploadImagesChat";
 
@@ -45,6 +45,7 @@ export interface ChatInputProps {
   disabled: boolean;
   multiModal?: boolean;
   variant?: ChatInputVariant;
+  toolbar?: React.ReactNode | JSX.Element;
 }
 
 export default function ChatInput({
@@ -52,6 +53,7 @@ export default function ChatInput({
   disabled,
   multiModal = true,
   variant = "default",
+  toolbar
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -129,14 +131,28 @@ export default function ChatInput({
             }
           }}
         />
-        <button
-          type="button"
-          onClick={submit}
-          disabled={disabled || !message.trim()}
-          className={styles.sendButton}
-        >
-          Send
-        </button>
+        <div className="flex items-center justify-between gap-3 p-2">
+
+
+          <button
+            type="button"
+            onClick={submit}
+            disabled={disabled || !message.trim()}
+            className={clsx(
+              styles.sendButton,
+              "min-w-22 rounded-lg px-4 py-2 text-sm font-semibold transition-all",
+              "enabled:hover:-translate-y-0.5 enabled:hover:shadow-sm",
+              "disabled:cursor-not-allowed disabled:opacity-50"
+            )}
+          >
+            Send
+          </button>
+          {toolbar ? (
+            <div className="flex items-center gap-2 text-sm text-text-muted">{toolbar}</div>
+          ) : (
+            <div />
+          )}
+        </div>
       </div>
     </div>
   );

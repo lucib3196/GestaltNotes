@@ -52,7 +52,7 @@ function LecturePdfFrame({ src }: { src: string }) {
   return (
     <iframe
       src={`${src}#toolbar=0`}
-      className="h-90 w-full rounded-md border border-border bg-surface"
+      className="h-full w-full rounded-md border border-border bg-surface"
     />
   );
 }
@@ -154,7 +154,7 @@ export function LecturePreview({
   }
 
   return (
-    <section className="space-y-4 rounded-xl border border-border bg-surface-strong p-4 shadow-soft">
+    <section className="h-full space-y-4 rounded-xl border border-border bg-surface-strong p-4 shadow-soft">
       <div className="space-y-1">
         <h4 className="text-sm font-semibold text-text">Source PDFs</h4>
         <p className="text-xs text-text-muted">
@@ -168,11 +168,10 @@ export function LecturePreview({
             key={title}
             type="button"
             onClick={() => setSelectedLectureTitle(title)}
-            className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-all duration-base ease-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
-              selectedLectureTitle === title
+            className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-all duration-base ease-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${selectedLectureTitle === title
                 ? "border-border-strong bg-surface text-text shadow-soft"
                 : "border-border bg-surface-strong text-text-muted hover:bg-surface-muted hover:text-text"
-            }`}
+              }`}
           >
             {title}
           </button>

@@ -21,6 +21,7 @@ const SizeClasses: Record<Sizes, string> = {
 
 interface ChatContainerProps {
   input: React.ReactNode;
+  starters?: React.ReactNode;
   children: React.ReactNode;
   variant?: ChatContainerVariant;
   size?: Sizes;
@@ -31,6 +32,7 @@ interface ChatContainerProps {
 
 export default function ChatContainer({
   input,
+  starters,
   children,
   variant = "main",
   size = "med",
@@ -69,11 +71,12 @@ export default function ChatContainer({
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto pr-1 scroll-smooth sm:pr-2">
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto pr-1 scroll-smooth scrollbar-hide sm:pr-2">
         {children}
         <div ref={bottomRef} />
       </div>
 
+      {starters ? <div className="mt-3">{starters}</div> : null}
       <div className="mt-3  pt-3">{input}</div>
     </section>
   );

@@ -100,9 +100,17 @@ export default function ChatSideBar({
             const isEditing = chat.id === editingChatId;
 
             return (
-              <button
+              <div
                 key={chat.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => !isEditing && onSelectChat(chat.id, null)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (!isEditing) onSelectChat(chat.id, null);
+                  }
+                }}
                 className={clsx(chatItemStyle, isActive && chatItemActiveStyle)}
                 aria-current={isActive ? "page" : undefined}
               >
@@ -151,7 +159,7 @@ export default function ChatSideBar({
                     <MdOutlineDriveFileRenameOutline />
                   </button>
                 </div>
-              </button>
+              </div>
             );
           })
         )}

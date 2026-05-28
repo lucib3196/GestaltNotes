@@ -7,9 +7,10 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { streamURL } from "../../config/api";
 import { useAuth } from "../../context";
 import type { Thread, ThreadCreate } from "../../services";
-import { ChatContainer, ChatInput } from "./components";
+import { ChatContainer, ChatInput, ConversationStarters } from "./components";
 import { AIBubble, HumanBubble } from "./components/ChatMessage";
 import { useChatContext } from "./instance";
+import type { ConversationStarter } from "./instance/types";
 import RenderToolCalls from "./tools/renderToolCalls";
 import { blobURLtoBase64 } from "./utils";
 import { ChatSessionHeader } from "./components/ChatSessionHeader";
@@ -205,7 +206,26 @@ type ChatSessionProps = {
   token: string;
 };
 
-
+const starters: ConversationStarter[] = [
+  {
+    id: "ht-quiz",
+    label: "Generate Heat Transfer Quiz",
+    message: "Generate Heat Transfer Quiz",
+    description: "Create a concise MCQ set from current heat transfer context.",
+  },
+  {
+    id: "ht-summary",
+    label: "Summarize Heat Transfer Concepts",
+    message: "Summarize Heat Transfer Concepts",
+    description: "Summarize key heat transfer ideas discussed so far.",
+  },
+  {
+    id: "ht-fourier",
+    label: "Explain Fourier’s Law",
+    message: "Explain Fourier’s Law",
+    description: "Give a concise explanation of Fourier’s law of heat conduction with a simple example.",
+  },
+];
 
 export default function ChatSession({ token }: ChatSessionProps) {
   const threadId = useChatContext((s) => s.theadId);
@@ -260,7 +280,20 @@ export default function ChatSession({ token }: ChatSessionProps) {
     });
   }, [stream.messages, appendToolMessage]);
 
-
+  const generateQuizToolBar = (
+    <div className="flex items-center">
+      <button
+        type="button"
+        onClick={() => {
+          void handleSubmit("Generated a mcq_question with 3 questions");
+        }}
+        disabled={stream.isLoading || stream.messages.length < 1}
+        className="rounded-md bg-blue-300 px-3.5 py-2.5 text-sm font-semibold text-bg transition-all duration-base ease-base hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Generate Quiz
+      </button>
+    </div>
+  );
   return (
     <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
       <div className="shrink-0  border-border px-3 py-2 sm:px-4">
@@ -271,16 +304,30 @@ export default function ChatSession({ token }: ChatSessionProps) {
           size="lg"
           bordered={false}
           scrollTrigger={stream.messages.length}
+          starters={
+            stream.messages.length === 0 ? (
+              <ConversationStarters
+                starters={starters}
+                disabled={stream.isLoading}
+                onSelectStarter={(starter) => {
+                  void handleSubmit(starter.message);
+                }}
+              />
+            ) : null
+          }
           input={
             <ChatInput
               handleSubmit={handleSubmit}
               disabled={stream.isLoading}
               multiModal={true}
+              toolbar={generateQuizToolBar}
             />
+
           }
         >
           <MathJax dynamic>
             {stream.messages.map((msg) => {
+              console.log(msg)
               if (msg.type === "human") {
                 return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
               }

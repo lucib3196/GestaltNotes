@@ -1,6 +1,6 @@
 
 import { ChatSession } from "../features/Chat"
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useAuth } from "../context";
 import type { Thread } from "../services";
@@ -12,6 +12,7 @@ import type { ThreadUpdate } from "../services/chat/types";
 
 import clsx from "clsx";
 type SectionTab = "resource" | "practice";
+
 
 function ChatSideBarComponent() {
     const { user } = useAuth();
@@ -125,9 +126,9 @@ export function ResourceSection() {
                 </button>
             </div>
 
-            <div className="rounded-md p-3 text-sm text-text">
+            <div className="h-full rounded-md p-3 text-sm text-text">
                 {activeTab === "resource" ? (
-                    <div className="max-h-[72vh] space-y-3 overflow-y-auto pr-1">
+                    <div className="h-full space-y-3 overflow-y-auto pr-1">
                         {sources.length === 0 ? (
                             <p className="text-text-soft">No resources yet.</p>
                         ) : (
@@ -199,8 +200,8 @@ export default function ChatPage() {
                     panelRef={leftPanelRef}
                     id="chat-panel"
                     collapsible
-                    collapsedSize={5}
-                    minSize={14}
+                    collapsedSize={100}
+
                     defaultSize={20}
                     onResize={() => setShowSideBar(true)}
                     className="min-h-0 overflow-hidden rounded-lg bg-surface-strong p-2"
@@ -237,10 +238,10 @@ export default function ChatPage() {
                     panelRef={rightPanelRef}
                     id="chat-resources"
                     collapsible
-                    collapsedSize={4}
+                    collapsedSize={100}
                     minSize={18}
                     defaultSize={28}
-                    className="min-h-0 overflow-hidden rounded-lg bg-surface-strong p-2"
+                    className="min-h-0 overflow-hidden rounded-lg bg-surface-strong p-2 scrollbar-hide"
                     onResize={() => setShowResources(true)}
                 >
                     <button
