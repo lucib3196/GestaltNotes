@@ -6,7 +6,7 @@ trap 'echo "❌ Script failed at line $LINENO"; read -p "Press enter to exit..."
 cleanup_firebase_ports() {
     echo "Cleaning up old firebase processes...."
 
-    firebase emulators:export ./emulator-data
+    
 
     # Kill ALL firebase processes
     pkill -f "firebase" 2>/dev/null || true
@@ -21,6 +21,7 @@ cleanup_firebase_ports() {
 
 shutdown() {
     printf "\nStopping services...\n"
+    firebase emulators:export ./emulator-data
 
     if [[ -n "${FIREBASE_PID:-}" ]]; then
         kill -INT "${FIREBASE_PID}" 2>/dev/null || true
@@ -43,4 +44,4 @@ FIREBASE_PID=$!
 sleep 10
 
 echo "Starting docker containers..."
-docker compose -f compose.dev.yaml up --build
+docker compose -f compose.dev.yaml up --build 

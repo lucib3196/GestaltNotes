@@ -12,8 +12,7 @@ import { AIBubble, HumanBubble } from "./components/ChatMessage";
 import { useChatContext } from "./instance";
 import RenderToolCalls from "./tools/renderToolCalls";
 import { blobURLtoBase64 } from "./utils";
-import { ChatSideBar } from "./components";
-
+import { ChatSessionHeader } from "./components/ChatSessionHeader";
 
 // export default function Chat() {
 //   const [message, setMessage] = useState<string>("");
@@ -203,26 +202,25 @@ import { ChatSideBar } from "./components";
 
 
 type ChatSessionProps = {
-  onNewChat: () => void;
   token: string;
 };
 
-export function ChatSession({ onNewChat, token }: ChatSessionProps) {
+
+
+export default function ChatSession({ token }: ChatSessionProps) {
   const threadId = useChatContext((s) => s.theadId);
-  const createThread = useChatContext((s) => s.createdThread);
-  const setThreadId = useChatContext((s) => s.setThreadId);
+  const assistantId = useChatContext((s) => s.assistantId)
+  const onThreadId = useChatContext((s) => s.onThreadId)
+  const appendToolMessage = useChatContext((s) => s.appendToolMessage)
+
 
   const stream = useStream({
     threadId: threadId || null,
     apiUrl: streamURL,
-    assistantId: "agent_me116",
+    assistantId: assistantId,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     onThreadId: async (id: string) => {
-      const data: ThreadCreate = {
-        thread_id: id
-      };
-      const created = await createThread(token, data);
-      setThreadId(created.id);
+      await onThreadId(id, token)
     },
   });
 
@@ -243,7 +241,6 @@ export function ChatSession({ onNewChat, token }: ChatSessionProps) {
         image_url: { url: b64 },
       });
     }
-
     stream.submit({
       messages: [
         {
@@ -254,112 +251,46 @@ export function ChatSession({ onNewChat, token }: ChatSessionProps) {
     });
   };
 
-  return (
-    <ChatContainer
-      size="lg"
-      onNewChat={onNewChat}
-      scrollTrigger={stream.messages.length}
-      input={
-        <ChatInput
-          handleSubmit={handleSubmit}
-          disabled={stream.isLoading}
-          multiModal={true}
-        />
-      }
-    >
-      <MathJax dynamic>
-        {stream.messages.map((msg) => {
-          if (msg.type === "human") {
-            return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
-          }
-          if (msg.type === "ai") {
-            return <AIBubble key={msg.id} msg={msg as AIMessage}></AIBubble>;
-          }
-          if (msg.type === "tool") {
-            return <RenderToolCalls key={msg.id} msg={msg as ToolMessage} />;
-          }
-
-          return null;
-        })}
-      </MathJax>
-    </ChatContainer>
-  );
-}
-
-export default function Chat() {
-  const { user } = useAuth();
-  const threadId = useChatContext((s) => s.theadId);
-  const setThreadId = useChatContext((s) => s.setThreadId);
-  const getUserThreads = useChatContext((s) => s.getUserThreads);
-  const [token, setToken] = useState<string>("");
-  const [showSideBar, setShowSideBar] = useState<boolean>(true);
-  const [sessionKey, setSessionKey] = useState(0);
-  const [threads, setThreads] = useState<Thread[]>([]);
-  const [selectedThreadId, setSelectedThreadId] = useState<string>("");
-
-  const loadUserThreads = useCallback(
-    async (authToken: string) => {
-      const res = await getUserThreads(authToken);
-      setThreads(res);
-    },
-    [getUserThreads],
-  );
 
   useEffect(() => {
-    let isMounted = true;
+    stream.messages.forEach((msg) => {
+      if (msg.type === "tool") {
+        appendToolMessage(msg as ToolMessage);
+      }
+    });
+  }, [stream.messages, appendToolMessage]);
 
-    const bootstrap = async () => {
-      if (!user) return;
-      const authToken = await user.getIdToken();
-      if (!isMounted) return;
-
-      setToken(authToken);
-      await loadUserThreads(authToken);
-    };
-
-    void bootstrap();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user, loadUserThreads]);
-
-
-  const handleNewChat = () => {
-    setSelectedThreadId("");
-    setThreadId(null);
-    setSessionKey((k) => k + 1);
-  };
-
-  if (!token) {
-    return (
-      <div className="w-full rounded-lg border border-border bg-surface p-4 text-sm text-text-muted shadow-soft">
-        Loading chat...
-      </div>
-    );
-  }
 
   return (
-    <section className="mx-auto flex w-full max-w-7xl gap-3 rounded-xl border border-border bg-surface p-3 shadow-soft backdrop-blur">
-      <aside
-        className={`flex flex-col border-r overflow-x-clip border-border pr-3 transition-all duration-base ease-base ${showSideBar ? "w-72 gap-3" : "w-11 gap-0"
-          }`}
-      >
-        <button
-          type="button"
-          aria-label={showSideBar ? "Close sidebar" : "Open sidebar"}
-          onClick={() => setShowSideBar((prev) => !prev)}
-          className="self-end rounded-md border border-border bg-surface p-2 text-text-muted transition-colors duration-base ease-base hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+    <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
+      <div className="shrink-0  border-border px-3 py-2 sm:px-4">
+        <ChatSessionHeader />
+      </div>
+      <div className="min-h-0 flex-1">
+        <ChatContainer
+          size="lg"
+          bordered={false}
+          scrollTrigger={stream.messages.length}
+          input={
+            <ChatInput
+              handleSubmit={handleSubmit}
+              disabled={stream.isLoading}
+              multiModal={true}
+            />
+          }
         >
-          <GiHamburgerMenu />
-        </button>
-
-        {showSideBar && <ChatSideBar chats={threads} activeChatId={threadId} onSelectChat={setThreadId} />}
-
-      </aside>
-
-      <div className="min-w-0 flex-1 pl-1 sm:pl-2">
-        <ChatSession key={sessionKey} onNewChat={handleNewChat} token={token} />
+          <MathJax dynamic>
+            {stream.messages.map((msg) => {
+              if (msg.type === "human") {
+                return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
+              }
+              if (msg.type === "ai") {
+                return <AIBubble key={msg.id} msg={msg as AIMessage}></AIBubble>;
+              }
+              return null;
+            })}
+          </MathJax>
+        </ChatContainer>
       </div>
     </section>
   );

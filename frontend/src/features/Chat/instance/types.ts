@@ -1,4 +1,4 @@
-import type { ContentBlock } from "langchain";
+import type { ContentBlock, ToolMessage } from "langchain";
 import type { Thread } from "../../../services";
 import {
   AIMessage,
@@ -6,7 +6,8 @@ import {
   ToolMessageChunk,
 } from "@langchain/core/messages";
 import type { ThreadCreate } from "../../../services";
-
+import type { ToolName } from "../tools";
+import type { ThreadUpdate } from "../../../services/chat/types";
 
 export type ToolType = "invokation" | "tool_result";
 export type MessageType = "ai" | "human" | "tool";
@@ -34,18 +35,40 @@ export type CleanableContent = ContentBlock[] | string;
 
 export type UnknownRecord = Record<string, unknown>;
 
+// Workspace item
+export type WorkspaceItem = {
+  id: string;
+  tool: ToolName;
+  rawMsg: ToolMessage;
+};
+
+type AssistantID = "agent_me116";
 
 // Context types
 export type ChatState = {
+  assistantId: AssistantID;
   theadId: string | null;
+  thread: Thread | null;
+  workspaceItems: WorkspaceItem[];
+  sessionKey: number;
 };
 export type ChatActions = {
+  // Assistant Management
+  setAssistant: (val: AssistantID) => void;
+
+  // General refresh
+  setSessionKey: () => void;
+  // Thread management
   setThreadId: (threadId: string | null) => void;
+  setThread: (threadId: string, token: string | null | undefined) => void;
+  selectThread: (threadId: string|null, token: string | null) => void;
   createdThread: (token: string, data: ThreadCreate) => Promise<Thread>;
+  updateThread: (threadId: string, update: ThreadUpdate) => Promise<void>;
   getUserThreads: (token: string) => Promise<Thread[]>;
-  onThreadId: (val: string) => void;
+  onThreadId: (val: string, token: string) => Promise<void>;
+  // Tool management
+  setWorkspaceItems: (item: WorkspaceItem) => void;
+  appendToolMessage: (msg: ToolMessage) => void;
 };
 
 export type ChatStore = ChatState & ChatActions;
-
-

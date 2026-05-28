@@ -8,9 +8,9 @@ type Sizes = "sm" | "med" | "lg";
 
 const Variants: Record<ChatContainerVariant, string> = {
   demo:
-    "relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface text-text shadow-soft backdrop-blur",
+    "relative flex flex-col overflow-hidden rounded-xl bg-surface text-text backdrop-blur",
   main:
-    "relative mx-auto flex flex-col overflow-hidden rounded-xl border border-border bg-surface-strong p-4 text-text shadow-soft backdrop-blur",
+    "relative mx-auto flex flex-col overflow-hidden rounded-xl bg-surface-strong p-4 text-text backdrop-blur",
 };
 
 const SizeClasses: Record<Sizes, string> = {
@@ -26,6 +26,7 @@ interface ChatContainerProps {
   size?: Sizes;
   onNewChat?: () => void;
   scrollTrigger?: number;
+  bordered?: boolean;
 }
 
 export default function ChatContainer({
@@ -35,6 +36,7 @@ export default function ChatContainer({
   size = "med",
   onNewChat,
   scrollTrigger = 0,
+  bordered = true,
 }: ChatContainerProps) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,11 +48,14 @@ export default function ChatContainer({
   }, [scrollTrigger]);
 
   return (
-    <section className={clsx(Variants[variant], SizeClasses[size])}>
-      <div className="mb-3 flex items-center justify-between border-b border-border pb-3">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-text-soft">
-          Conversation
-        </p>
+    <section
+      className={clsx(
+        Variants[variant],
+        SizeClasses[size],
+        bordered ? "border border-border shadow-soft" : "border-0 shadow-none",
+      )}
+    >
+      <div className="mb-3 flex items-center justify-between r pb-3">
         {onNewChat ? (
           <button
             type="button"
@@ -69,7 +74,7 @@ export default function ChatContainer({
         <div ref={bottomRef} />
       </div>
 
-      <div className="mt-3 border-t border-border pt-3">{input}</div>
+      <div className="mt-3  pt-3">{input}</div>
     </section>
   );
 }

@@ -11,5 +11,4 @@ export const tools: Partial<Record<ToolName, ToolDefinition<any>>> = {
         parse: parseMultipleChoice,
         Preview: RenderMCQ
     }
-
 }

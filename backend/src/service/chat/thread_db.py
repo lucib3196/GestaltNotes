@@ -5,11 +5,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from src.core.logger import logger
-from src.model.chat import Thread
+from src.model.chat import Thread, ThreadUpdate
 from src.utils.utils import convert_uuid
 from .exceptions import (
-    ThreadNotFound,
+    ThreadBaseException,
     ThreadCreateError,
+    ThreadNotFound,
     ThreadRetrievalError,
     ThreadUpdateError,
 )
@@ -87,6 +88,25 @@ class ThreadDB:
             message = f"[ThreadDB] failed to get thread {e}"
             logger.error(message)
             raise ThreadRetrievalError(message)
+
+    async def update_thread(
+        self, thread_id: str | UUID, thread_update: ThreadUpdate
+    ) -> Thread:
+        try:
+            thread = await self.get_thread(thread_id)
+            if thread_update.title:
+                thread.title = thread_update.title
+            self.session.add(thread)
+            self.session.commit()
+            self.session.flush()
+            return thread
+        except ThreadBaseException:
+            raise
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            message = f"[ThreadDB] failed to update thread {e}"
+            logger.error(message)
+            raise ThreadUpdateError(message) from e
 
     async def get_thread_for_user(
         self, user_id: UUID | str, thread_id: UUID | str

@@ -28,3 +28,8 @@ export interface Message {
   content: string;
   created_at: string;
 }
+
+
+export interface ThreadUpdate{
+  title: string
+}

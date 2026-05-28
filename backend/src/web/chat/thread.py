@@ -4,12 +4,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRouter
 from starlette import status
 from langgraph_sdk import get_client
-from src.model.chat import (
-    Message,
-    MessageCreate,
-    Thread,
-    ThreadCreate,
-)
+from src.model.chat import Message, MessageCreate, Thread, ThreadCreate, ThreadUpdate
 from src.service.chat import ThreadBaseException
 from src.web.user.dependencies import CurrentUser
 from .dependencies import ThreadDBDependency
@@ -56,6 +51,7 @@ async def list_my_threads(
         user_id=user,
     )
 
+
 @router.post("/{thread_id}/messages", response_model=Message)
 async def create_message(
     thread_id: UUID | str,
@@ -77,6 +73,7 @@ async def create_message(
             detail=f"Failed to create the message {e}",
         )
 
+
 @router.get("/{thread_id}/messages", response_model=Thread)
 async def get_messages(
     thread_id: UUID | str,
@@ -87,7 +84,7 @@ async def get_messages(
 
         data = await client.threads.get(str(thread_id))
         values = data.get("values", {}) if isinstance(data, dict) else {}
-        messages = values.get("messages", []) # type: ignore
+        messages = values.get("messages", [])  # type: ignore
         return messages if isinstance(messages, list) else []
     except ThreadBaseException as e:
         raise HTTPException(
@@ -101,6 +98,38 @@ async def get_messages(
         ) from e
 
 
+@router.get("/{thread_id}")
+async def get_thread(thread_id: str | UUID, tdb: ThreadDBDependency) -> Thread:
+    try:
+        return await tdb.get_thread(thread_id)
+    except ThreadBaseException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to get thread  {thread_id} {e}",
+        ) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Thread error internal: {e}",
+        ) from e
+
+
+@router.put("/{thread_id}")
+async def update_thread(
+    thread_id: str | UUID, tdb: ThreadDBDependency, thread_update: ThreadUpdate
+) -> Thread:
+    try:
+        return await tdb.update_thread(thread_id, thread_update)
+    except ThreadBaseException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to update thread  {thread_id} {e}",
+        ) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Thread error internal: {e}",
+        ) from e
 
 
 # @router.get("/{thread_id}/messages", response_model=list[Message])

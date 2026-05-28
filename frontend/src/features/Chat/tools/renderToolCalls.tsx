@@ -1,7 +1,7 @@
 import type { ToolName } from "./types";
 import { useAuth } from "../../../context";
 import type { BaseMessage } from "langchain";
-import { isToolMessage } from "../utils";
+import { isToolMessage } from "./utils";
 import { tools } from "./tools";
 import { useState, useMemo } from "react";
 
@@ -12,6 +12,7 @@ export default function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>();
     const [dismissed, setDismissed] = useState(false);
+    const [show, setShow] = useState<boolean>(true)
 
     // Basics checks
     const isTool = isToolMessage(msg);
@@ -53,12 +54,29 @@ export default function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     };
     const onCancel = () => setDismissed(true);
     const Preview = tool.Preview;
-    if (!dismissed) return <Preview
-        payload={payload}
-        onApprove={onApprove}
-        onCancel={onCancel}
-        loading={loading}
-        error={error}
-    />;
+    if (!dismissed) return (
+        <div className="rounded-md border p-3">
+            <div className="mb-2 flex justify-end">
+                <button
+                    type="button"
+                    onClick={() => setShow((prev) => !prev)}
+                    aria-expanded={show}
+                    aria-label={show ? "Hide tool details" : "Show tool details"}
+                    className="text-xs font-medium text-gray-600 underline underline-offset-2 hover:text-gray-300"
+                >
+                    {show ? "Hide details" : "Show details"}
+                </button>
+            </div>
+            {show && (
+                <Preview
+                    payload={payload}
+                    onApprove={onApprove}
+                    onCancel={onCancel}
+                    loading={loading}
+                    error={error}
+                />
+            )}
+        </div>
+    );
 
 }

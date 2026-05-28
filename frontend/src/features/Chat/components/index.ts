@@ -1,7 +1,6 @@
 export { default as ChatContainer } from "./ChatContainer";
 export { default as ChatInput } from "./ChatInput";
 export { default as ChatSideBar } from "./ChatSideBar";
-export { default as SourceSection } from "./Sources";
 export { ToolBubble, ToolInvocation } from "./Tools";
 export {
   UploadImagesChat,

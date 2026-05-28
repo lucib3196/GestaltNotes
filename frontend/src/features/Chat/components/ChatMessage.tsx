@@ -74,7 +74,7 @@ export function HumanBubble({ msg, type = "human" }: HumanBubbleProps) {
 export function AIBubble({
     msg,
     type = "ai",
-    showTools = false,
+    showTools = true,
 }: AIMessageBubbleProps) {
     const content = renderBubbleContent({ bubble: "ai", msg, showTools })
     if (!content) return

@@ -18,6 +18,10 @@ class ThreadCreate(BaseModel):
     agent: str | None = None
 
 
+class ThreadUpdate(BaseModel):
+    title: str | None = None
+
+
 class ThreadList(BaseModel):
     user_id: UUID
     course_id: UUID | None = None
