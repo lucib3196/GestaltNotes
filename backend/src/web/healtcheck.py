@@ -2,7 +2,7 @@ from fastapi.routing import APIRouter
 
 from src.core.settings import get_settings
 
-router = APIRouter(prefix="/health", tags=["healt"])
+router = APIRouter(prefix="/health", tags=["health"])
 
 settings = get_settings()
 

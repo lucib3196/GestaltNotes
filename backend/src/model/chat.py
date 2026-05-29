@@ -8,6 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel
 if TYPE_CHECKING:
     from .course import Course
     from .user import User
+    
 
 
 class ThreadCreate(BaseModel):

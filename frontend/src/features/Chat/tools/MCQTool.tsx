@@ -1,36 +1,19 @@
 import type { ToolMessage } from "langchain";
-import type { RenderPreviewProps } from "./types";
+import type { RenderPreviewProps, ToolExecute } from "./types";
 import { extractToolPayload } from "../utils";
 import { MathJax } from "better-react-mathjax";
 import { Button } from "../../../components/Button";
 import { useState } from "react";
-export type DifficultyLevel = string;
-export type LearningObjective = string;
-
-export type Option = {
-  option: string;
-  correct: boolean;
-};
-
-export type MultipleChoiceQuestionBase = {
-  question: string;
-  options: Option[];
-};
-type MCQSubmission = {
-  qid: number;
-  selected: string;
-  is_correct: boolean;
-};
-export type MultipleChoiceQuestion = MultipleChoiceQuestionBase & {
-  topic: string;
-  difficulty: DifficultyLevel;
-  learning_objective: LearningObjective;
-};
-
-export type MultipleChoiceQuestionToolResponse = {
-  payload: MultipleChoiceQuestion[];
-};
-
+import { toast } from "react-toastify";
+import type {
+  MultipleChoiceQuestionToolResponse,
+  MultipleChoiceQuestion,
+  MCQSubmission,
+  Option,
+  GeneratedContentSaveRequest,
+} from "../../../services/generated_content";
+import { useRef } from "react";
+import MCQ from "../../../services/generated_content/mcq";
 export function parseMultipleChoice(
   msg: ToolMessage,
 ): MultipleChoiceQuestionToolResponse {
@@ -64,7 +47,7 @@ function RenderMCQSingle({
     submitted && selectedAnswer
       ? selectedAnswer.is_correct
       : effectiveSelectedIndex !== null &&
-        effectiveSelectedIndex === correctIndex;
+      effectiveSelectedIndex === correctIndex;
 
   const handleClick = (
     option: Option,
@@ -93,11 +76,10 @@ function RenderMCQSingle({
           </p>
           {submitted ? (
             <span
-              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                selectedIsCorrect
-                  ? "border-accent-strong bg-surface-muted text-text"
-                  : "border-border-strong bg-button-secondary text-text-muted"
-              }`}
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${selectedIsCorrect
+                ? "border-accent-strong bg-surface-muted text-text"
+                : "border-border-strong bg-button-secondary text-text-muted"
+                }`}
             >
               {selectedIsCorrect ? "Correct" : "Incorrect"}
             </span>
@@ -115,15 +97,14 @@ function RenderMCQSingle({
               <button
                 key={`${idx}`}
                 type="button"
-                className={`group w-full rounded-md border px-3 py-2.5 text-left text-sm transition duration-base ease-base ${
-                  showCorrect
-                    ? "border-accent-strong bg-surface-muted text-text"
-                    : showWrong
-                      ? "border-border-strong bg-button-secondary text-text"
-                      : isSelected
-                        ? "border-accent bg-surface text-text"
-                        : "border-border bg-surface-strong text-text-muted hover:border-accent/60 hover:text-text"
-                }`}
+                className={`group w-full rounded-md border px-3 py-2.5 text-left text-sm transition duration-base ease-base ${showCorrect
+                  ? "border-accent-strong bg-surface-muted text-text"
+                  : showWrong
+                    ? "border-border-strong bg-button-secondary text-text"
+                    : isSelected
+                      ? "border-accent bg-surface text-text"
+                      : "border-border bg-surface-strong text-text-muted hover:border-accent/60 hover:text-text"
+                  }`}
                 onClick={() => handleClick(v, idx, isCorrect)}
                 disabled={submitted}
               >
@@ -160,12 +141,22 @@ function RenderMCQSingle({
   );
 }
 
+export const saveResponse: ToolExecute<
+  MultipleChoiceQuestionToolResponse
+> = async (args) => {
+
+  const payload: GeneratedContentSaveRequest
+    = {
+    qpayload: args.payload,
+    thread_id: args.ctx?.threadId
+  }
+  await MCQ.saveQuestions(payload, args.ctx?.token)
+  toast.success(`Saving to backend`);
+};
+
 export function RenderMCQ({
   payload,
   onApprove,
-  onCancel,
-  loading,
-  error,
 }: RenderPreviewProps<MultipleChoiceQuestionToolResponse>) {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [answersByQuestion, setAnswersByQuestion] = useState<
@@ -185,7 +176,6 @@ export function RenderMCQ({
   };
 
   const handleSubmit = async () => {
-    setIsSubmitted(true);
     const payloadWithAnswers = {
       ...payload,
       payload: Qpayload.map((q, idx) => ({
@@ -193,7 +183,6 @@ export function RenderMCQ({
         user_submission: answersByQuestion[idx] ?? null,
       })),
     };
-    console.log("Sending payload", payloadWithAnswers);
     onApprove?.(payloadWithAnswers);
   };
 
@@ -213,7 +202,8 @@ export function RenderMCQ({
         />
       ))}
       <div>
-        <Button onClick={handleSubmit}>Check Answers</Button>
+        <Button onClick={() => setIsSubmitted(prev => !prev)}>Show Answers</Button>
+        <Button onClick={handleSubmit}>Save Questions</Button>
       </div>
     </div>
   );

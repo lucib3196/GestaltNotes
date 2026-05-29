@@ -1,6 +1,6 @@
 import type { ToolName, ToolDefinition } from "./types"
 import { parseLectureTool, LecturePreview } from "./LectureTool"
-import { parseMultipleChoice, RenderMCQ, } from "./MCQTool"
+import { parseMultipleChoice, RenderMCQ,saveResponse } from "./MCQTool"
 
 export const tools: Partial<Record<ToolName, ToolDefinition<any>>> = {
     retrieve_me116_lecture: {
@@ -9,6 +9,7 @@ export const tools: Partial<Record<ToolName, ToolDefinition<any>>> = {
     },
     generate_mcq: {
         parse: parseMultipleChoice,
-        Preview: RenderMCQ
+        Preview: RenderMCQ,
+        execute: saveResponse
     }
 }

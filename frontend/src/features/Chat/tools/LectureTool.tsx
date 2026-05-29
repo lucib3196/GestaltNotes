@@ -169,8 +169,8 @@ export function LecturePreview({
             type="button"
             onClick={() => setSelectedLectureTitle(title)}
             className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-all duration-base ease-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${selectedLectureTitle === title
-                ? "border-border-strong bg-surface text-text shadow-soft"
-                : "border-border bg-surface-strong text-text-muted hover:bg-surface-muted hover:text-text"
+              ? "border-border-strong bg-surface text-text shadow-soft"
+              : "border-border bg-surface-strong text-text-muted hover:bg-surface-muted hover:text-text"
               }`}
           >
             {title}

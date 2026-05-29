@@ -1,0 +1,40 @@
+{
+  "payload": [
+    {
+      "question": "What is the primary conceptual difference in the *mechanism* of heat transfer between conduction and convection?",
+      "topic": "Heat Transfer Concepts",
+      "difficulty": "medium",
+      "learning_objective": "conceptual_understanding",
+      "options": [],
+      "user_submission": {
+        "qid": 0,
+        "selected": "Conduction involves energy transfer through fluid motion, while convection involves direct molecular interaction.",
+        "is_correct": false
+      }
+    },
+    {
+      "question": "In Newton's Law of Cooling, $q = h A (T_s - T_\\infty)$, what does the heat transfer coefficient, $h$, primarily represent conceptually?",
+      "topic": "Heat Transfer Concepts",
+      "difficulty": "medium",
+      "learning_objective": "conceptual_understanding",
+      "options": [],
+      "user_submission": {
+        "qid": 1,
+        "selected": "The thermal conductivity of the fluid in contact with the surface.",
+        "is_correct": false
+      }
+    },
+    {
+      "question": "Consider heat transfer from a hot object to its surroundings in a perfect vacuum. Which mode(s) of heat transfer would be significant in this specific scenario?",
+      "topic": "Heat Transfer Concepts",
+      "difficulty": "medium",
+      "learning_objective": "conceptual_understanding",
+      "options": [],
+      "user_submission": {
+        "qid": 2,
+        "selected": "Only conduction, because temperature gradients always exist.",
+        "is_correct": false
+      }
+    }
+  ]
+}

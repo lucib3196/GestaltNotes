@@ -11,7 +11,7 @@ import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import type { ThreadUpdate } from "../services/chat/types";
 
 import clsx from "clsx";
-type SectionTab = "resource" | "practice";
+type SectionTab = "resource" | "practice" | "final_review";
 
 
 function ChatSideBarComponent() {
@@ -59,7 +59,9 @@ function ChatSideBarComponent() {
         };
     }, [user, loadUserThreads,]);
 
-    return <ChatSideBar chats={threads} activeChatId={selectedId} onSelectChat={setSelectedThread} onNewChat={handleNewChat} onThreadUpdate={handleThreadUpdate} />
+    return <div>
+        <ChatSideBar chats={threads} activeChatId={selectedId} onSelectChat={setSelectedThread} onNewChat={handleNewChat} onThreadUpdate={handleThreadUpdate} />
+    </div>
 
 }
 
@@ -74,6 +76,7 @@ export function ResourceSection() {
 
     const sources = workspaceItems.filter((v) => v.tool === "retrieve_me116_lecture");
     const practice = workspaceItems.filter((v) => v.tool === "generate_mcq");
+
     const practiceCount = practice.length;
     const hasPractice = practiceCount > 0;
     const clampedPracticeIndex = hasPractice ? Math.min(practiceIndex, practiceCount - 1) : 0;

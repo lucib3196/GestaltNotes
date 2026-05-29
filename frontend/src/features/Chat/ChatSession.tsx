@@ -225,6 +225,7 @@ const starters: ConversationStarter[] = [
     message: "Explain Fourier’s Law",
     description: "Give a concise explanation of Fourier’s law of heat conduction with a simple example.",
   },
+
 ];
 
 export default function ChatSession({ token }: ChatSessionProps) {
@@ -327,7 +328,6 @@ export default function ChatSession({ token }: ChatSessionProps) {
         >
           <MathJax dynamic>
             {stream.messages.map((msg) => {
-              console.log(msg)
               if (msg.type === "human") {
                 return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
               }
