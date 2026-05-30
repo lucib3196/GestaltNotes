@@ -40,7 +40,8 @@ except Exception as e:
 
 
 def create_db_and_tables(engine=engine):
-    Base.metadata.create_all(engine)
+    # Causes issues may be disabled if needed but may drift database schemas
+    # Base.metadata.create_all(engine)
     return engine
 
 
