@@ -17,7 +17,6 @@ export default function ProtectedRoute({ children, requiredRoles }: ProtectedRou
         return <Navigate to="/login" replace />;
     }
     const userRoles = userData?.roles
-    console.log(userRoles)
 
     if (!requiredRoles.some((r) => userRoles?.includes(r))) {
         return <Navigate to="/unauthorized" replace />;

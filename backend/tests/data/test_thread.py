@@ -6,9 +6,9 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
-from src.data.thread import ThreadDB
 
 from src.model.chat import Thread
+from src.service.chat import ThreadDB
 
 
 def raise_error(*args, **kwargs) -> Never:

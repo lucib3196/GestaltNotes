@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from sqlmodel import select
 from starlette import status
 
-
 from src.core import logger
 from src.core.database_config import SessionDep
 from src.model.course import Course

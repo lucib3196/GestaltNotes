@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const data = await UserManager.getCurrentUser(token);
                 setUser(fbUser);
                 setUserData(data);
-                console.log(fbUser)
+          
             } catch (error) {
                 console.error("Error fetching user data:", error);
                 setUser(null);
