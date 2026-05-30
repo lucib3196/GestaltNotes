@@ -13,10 +13,6 @@ type MCQSingleProps = {
     submitted?: boolean;
     selectedIndex?: number | null;
     onSelectedIndexChange?: (next: number) => void;
-    // kept optional for compatibility with existing call sites
-    showSubmitButton?: boolean;
-    submitLabel?: string;
-    questionIndex?: number;
 };
 
 export default function RenderMCQSingle({
