@@ -1,22 +1,12 @@
-from sqlmodel import SQLModel, Field, Relationship
-from uuid import UUID, uuid4
-from typing import Any, TYPE_CHECKING
 from datetime import datetime
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy import Column
-from enum import Enum
-from pydantic import BaseModel
-from typing import Annotated, List
-from pydantic import ConfigDict
-from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from enum import StrEnum
+from typing import Annotated, Any
 from uuid import UUID, uuid4
-from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import JSON, Column
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, SQLModel
 
 JSONType = JSON().with_variant(JSONB, "postgresql")
 
@@ -43,13 +33,13 @@ class GeneratedMCQ(SQLModel, table=True):
 # Generated Content
 
 
-class DifficultyLevel(str, Enum):
+class DifficultyLevel(StrEnum):
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
 
 
-class LearningObjective(str, Enum):
+class LearningObjective(StrEnum):
     CONCEPTUAL_UNDERSTANDING = "conceptual_understanding"
     PROBLEM_SOLVING = "problem_solving"
     EQUATION_APPLICATION = "equation_application"
@@ -150,7 +140,7 @@ class MultipleChoiceQuestionBase(BaseModel):
         ),
     ]
     options: Annotated[
-        List[Option],
+        list[Option],
         Field(
             description=(
                 "List of answer options for the question. Should contain plausible "
@@ -162,7 +152,7 @@ class MultipleChoiceQuestionBase(BaseModel):
 
 class MultipleChoiceQuestionResponse(BaseModel):
     questions: Annotated[
-        List[MultipleChoiceQuestionBase],
+        list[MultipleChoiceQuestionBase],
         Field(
             description=(
                 "Generated set of multiple-choice questions matching the requested "
@@ -208,9 +198,9 @@ class UserSubmission(BaseModel):
 
 
 class MCQV1(MultipleChoiceQuestion):
-    user_submission: Optional[UserSubmission] = None
+    user_submission: UserSubmission | None = None
     model_config = ConfigDict(extra="allow")
 
 
 class MCQResponseV1(BaseModel):
-    payload: List[MCQV1]
+    payload: list[MCQV1]

@@ -2,6 +2,8 @@ import { useAuth } from "../../../context";
 import { Section } from "../../../components/Section";
 import { UserManager } from "../../../services";
 import { Button } from "../../../components/Button";
+
+
 export default function UserPage() {
     const { user } = useAuth();
     const fetchData = async () => {

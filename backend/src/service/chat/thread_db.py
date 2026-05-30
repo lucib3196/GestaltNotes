@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 from src.core.logger import logger
 from src.model.chat import Thread, ThreadUpdate
 from src.utils.utils import convert_uuid
+
 from .exceptions import (
     ThreadBaseException,
     ThreadCreateError,

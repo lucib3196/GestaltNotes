@@ -1,18 +1,21 @@
-from pydantic import BaseModel
-from .dependencies import GenMCQDependency
-from src.web.user.dependencies import CurrentUser, CurrentUserDep
+from collections.abc import Sequence
+from uuid import UUID
+
 from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRouter
-from uuid import UUID
-from src.model.generated_content import MCQResponseV1, MCQV1, GeneratedMCQ
-from typing import Sequence
+from pydantic import BaseModel
+
+from src.model.generated_content import MCQV1, GeneratedMCQ, MCQResponseV1
 from src.service.generated_content.exceptions import (
+    GeneratedContentBatchSaveError,
+    GeneratedContentPersistenceError,
+    GeneratedContentRetrievalError,
     GeneratedContentValidationError,
     UnsupportedSchemaVersionError,
-    GeneratedContentPersistenceError,
-    GeneratedContentBatchSaveError,
-    GeneratedContentRetrievalError,
 )
+from src.web.user.dependencies import CurrentUser
+
+from .dependencies import GenMCQDependency
 
 ID = UUID | str
 

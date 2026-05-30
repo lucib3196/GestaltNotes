@@ -11,7 +11,6 @@ export type MultipleChoiceQuestionBase = {
   options: Option[];
 };
 export type MCQSubmission = {
-  qid: number;
   selected: string;
   is_correct: boolean;
 };
@@ -20,6 +19,10 @@ export type MultipleChoiceQuestion = MultipleChoiceQuestionBase & {
   difficulty: DifficultyLevel;
   learning_objective: LearningObjective;
 };
+
+export type MultipleChoiceQuestionSubmitted = MultipleChoiceQuestion & {
+  submission: MCQSubmission
+}
 
 export type MultipleChoiceQuestionToolResponse = {
   payload: MultipleChoiceQuestion[];

@@ -6,8 +6,8 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
-
 from src.data.thread import ThreadDB
+
 from src.model.chat import Thread
 
 

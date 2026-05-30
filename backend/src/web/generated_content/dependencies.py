@@ -1,9 +1,11 @@
+from typing import Annotated
+
+from fastapi import Depends, HTTPException
+from starlette import status
+
+from src.core import logger
 from src.service.generated_content import GeneratedMCQService
 from src.web.dependencies import SessionDep
-from typing import Annotated
-from fastapi import HTTPException, Depends
-from starlette import status
-from src.core import logger
 
 
 def get_mcq_service(session: SessionDep) -> GeneratedMCQService:

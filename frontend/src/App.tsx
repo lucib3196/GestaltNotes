@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HomePage, ChatPage, MyAccount } from "./pages";
+import { HomePage, ChatPage, MyAccount, MyGeneratedContentPage } from "./pages";
 import EducatorPage from "./features/EducatorPage/EducatorPage";
 import { AuthPage, RoleRedirect, UnauthorizedPage } from "./features/Auth";
+
 import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 
@@ -20,6 +21,7 @@ function App() {
                     {/* Student Only Roots */}
                     <Route element={<RoleRedirect allow={["admin", "educator", "student"]} />}>
                         <Route path="/chat" element={<ChatPage />} />
+                        <Route path="/my_content" element={<MyGeneratedContentPage />} />
                     </Route>
 
                     <Route element={<RoleRedirect allow={["educator"]} />}>

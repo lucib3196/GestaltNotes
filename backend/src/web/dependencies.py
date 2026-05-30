@@ -41,9 +41,6 @@ def get_course_db(session: SessionDep) -> CourseDB:
 CourseDBDependency = Annotated[CourseDB, Depends(get_course_db)]
 
 
-
-
-
 @lru_cache
 def get_message_db(session: SessionDep) -> MessageDB:
     try:

@@ -1,26 +1,28 @@
-from sqlmodel import Session
-from src.model import GeneratedMCQ, MCQResponseV1, MCQV1
-from uuid import UUID, uuid4
-from typing import List, Any, Sequence
 import asyncio
-from sqlmodel import select
+from collections.abc import Sequence
+from typing import Any
+from uuid import UUID, uuid4
 
 from sqlalchemy.exc import SQLAlchemyError
-from src.utils import to_serializable, convert_uuid
+from sqlmodel import Session, select
+
+from src.model import MCQV1, GeneratedMCQ, MCQResponseV1
 from src.service.generated_content.exceptions import (
-    GeneratedContentValidationError,
-    GeneratedContentPersistenceError,
     GeneratedContentBatchSaveError,
-    UnsupportedSchemaVersionError,
-    GeneratedContentRetrievalError,
-    GeneratedContentNotFoundError,
     GeneratedContentDeletionError,
+    GeneratedContentNotFoundError,
+    GeneratedContentPersistenceError,
+    GeneratedContentRetrievalError,
+    GeneratedContentValidationError,
+    UnsupportedSchemaVersionError,
 )
+from src.utils import convert_uuid, to_serializable
 
 ID = str | UUID
 
+
 class GeneratedMCQService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         """Initialize the generated MCQ service with a database session."""
         self._session = session
 
@@ -29,8 +31,7 @@ class GeneratedMCQService:
         """Retrieve a generated MCQ by quiz ID."""
         try:
             query = select(GeneratedMCQ).where(GeneratedMCQ.id == convert_uuid(quiz_id))
-            quiz = self._session.exec(query).first()
-            return quiz
+            return self._session.exec(query).first()
         except SQLAlchemyError as e:
             self._session.rollback()
             raise GeneratedContentRetrievalError(
@@ -43,8 +44,7 @@ class GeneratedMCQService:
             query = select(GeneratedMCQ).where(
                 GeneratedMCQ.user_id == convert_uuid(user_id)
             )
-            quizzes = self._session.exec(query).all()
-            return quizzes
+            return self._session.exec(query).all()
         except SQLAlchemyError as e:
             self._session.rollback()
             raise GeneratedContentRetrievalError(
@@ -73,8 +73,7 @@ class GeneratedMCQService:
             query = select(GeneratedMCQ).where(
                 GeneratedMCQ.thread_id == convert_uuid(thread_id)
             )
-            quizzes = self._session.exec(query).all()
-            return quizzes
+            return self._session.exec(query).all()
         except SQLAlchemyError as e:
             self._session.rollback()
             raise GeneratedContentRetrievalError(
@@ -133,7 +132,7 @@ class GeneratedMCQService:
 
     def batch_add_mcq(
         self, data: Any, user_id: ID, thread_id: ID, schema_version: int = 1
-    ) -> List[GeneratedMCQ]:
+    ) -> list[GeneratedMCQ]:
         """Validate and save a batch of generated MCQs for a user/thread."""
         try:
             quiz_data = self._validate_quiz_payload(data, schema_version)
@@ -153,7 +152,7 @@ class GeneratedMCQService:
 
     async def async_batch_add_mcq(
         self, data: Any, user_id: ID, thread_id: ID, schema_version: int = 1
-    ) -> List[GeneratedMCQ]:
+    ) -> list[GeneratedMCQ]:
         """Asynchronously validate and save a batch of generated MCQs."""
         return await asyncio.to_thread(
             self.batch_add_mcq, data, user_id, thread_id, schema_version
@@ -195,9 +194,10 @@ GeneratedContentDb = GeneratedMCQService
 
 
 if __name__ == "__main__":
-    from pathlib import Path
     import json
-    from sqlmodel import SQLModel, Session, create_engine
+    from pathlib import Path
+
+    from sqlmodel import Session, SQLModel, create_engine
 
     data = json.loads(Path("src/service/generated_content/test.json").read_text())
     result = GeneratedMCQService._validate_quiz_payload(data, schema_version=1)

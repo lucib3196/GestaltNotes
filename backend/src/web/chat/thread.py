@@ -2,14 +2,16 @@ from uuid import UUID
 
 from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRouter
-from starlette import status
 from langgraph_sdk import get_client
+from starlette import status
+
+from src.core.settings import get_settings
 from src.model.chat import Message, MessageCreate, Thread, ThreadCreate, ThreadUpdate
 from src.service.chat import ThreadBaseException
-from src.web.user.dependencies import CurrentUser
-from .dependencies import ThreadDBDependency
 from src.web.dependencies import MessageDBDependency
-from src.core.settings import get_settings
+from src.web.user.dependencies import CurrentUser
+
+from .dependencies import ThreadDBDependency
 
 router = APIRouter(prefix="/threads", tags=["threads"])
 
@@ -26,9 +28,7 @@ async def create_thread(
     user: CurrentUser,
 ) -> Thread:
     user_id = None
-    if user:
-        user_id = user
-    elif data.user_id:
+    if user or data.user_id:
         user_id = user
 
     if user_id is None:

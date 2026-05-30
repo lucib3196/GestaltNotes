@@ -121,8 +121,7 @@ async def get_user_by_id(
     already known.
     """
     try:
-        user = await user_manager.get_user(id)
-        return user
+        return await user_manager.get_user(id)
 
     except UserServiceException as e:
         raise HTTPException(

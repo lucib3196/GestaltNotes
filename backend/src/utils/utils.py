@@ -1,10 +1,11 @@
-from uuid import UUID
 from datetime import date, datetime, time
+from enum import Enum
 from pathlib import Path
 from typing import Any
 from uuid import UUID
+
 from pydantic import BaseModel
-from enum import Enum
+
 ID = str | UUID
 
 
@@ -36,5 +37,5 @@ def to_serializable(obj: Any) -> Any:
         return obj.as_posix()
     if isinstance(obj, (list, tuple, set)):
         return [to_serializable(value) for value in obj]
-    
+
     return obj

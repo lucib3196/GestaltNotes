@@ -7,6 +7,7 @@ from src.core.database_config import SessionDep
 from src.core.logger import logger
 from src.service.chat import ThreadDB
 
+
 @lru_cache
 def get_thread_db(session: SessionDep) -> ThreadDB:
     try:

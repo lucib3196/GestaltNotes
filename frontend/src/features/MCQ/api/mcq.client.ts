@@ -3,8 +3,8 @@ import type {
   GeneratedContentSaveRequest,
   MCQDB,
   MultipleChoiceQuestion,
-} from "./types";
-import { api } from "../../config";
+} from "./mcq.types";
+import { api } from "../../../config";
 
 export default class MCQ {
   private static readonly base = "generated_content/mcq";
@@ -17,7 +17,9 @@ export default class MCQ {
 
   private static extractErrorMessage(error: unknown, fallback: string): string {
     const axiosError = error as AxiosError<{ detail?: string }>;
-    return axiosError?.response?.data?.detail || axiosError?.message || fallback;
+    return (
+      axiosError?.response?.data?.detail || axiosError?.message || fallback
+    );
   }
 
   static async saveQuestions(
@@ -59,7 +61,9 @@ export default class MCQ {
     }
   }
 
-  static async getAllQuizzes(token?: string): Promise<MultipleChoiceQuestion[]> {
+  static async getAllQuizzes(
+    token?: string,
+  ): Promise<MultipleChoiceQuestion[]> {
     try {
       const response = await api.get(
         `${this.base}/v1/all/quiz`,
