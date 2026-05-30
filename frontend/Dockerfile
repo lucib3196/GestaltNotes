@@ -42,6 +42,8 @@ FROM nginx:alpine
 # Copy build output from previous stage to Nginx’s static directory
 COPY --from=front-end-build /app/dist /usr/share/nginx/html
 
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Expose port 80 so you can access it in the browser
 EXPOSE 80
 
