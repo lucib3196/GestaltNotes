@@ -16,7 +16,6 @@ config = context.config
 
 DATABASE_URL = get_settings().DATABASE_URL
 # DATABASE_URL = "postgresql://postgres:password@localhost:5432/gestalt_notes"
-DATABASE_URL="postgresql://postgres:AvXVOhsLPfldDHUlAsJwhtAdKxoFJCnQ@shuttle.proxy.rlwy.net:55819/railway"
 if not DATABASE_URL:
     raise ValueError("Cannot complete migration database url is not set")
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
