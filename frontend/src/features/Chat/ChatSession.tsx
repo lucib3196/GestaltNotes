@@ -1,17 +1,13 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
 import { AIMessage, HumanMessage, ToolMessage } from "langchain";
-import { useCallback, useEffect, useState } from "react";
-import { GiHamburgerMenu } from "react-icons/gi";
+import { useEffect } from "react";
 
 import { streamURL } from "../../config/api";
-import { useAuth } from "../../context";
-import type { Thread, ThreadCreate } from "../../services";
 import { ChatContainer, ChatInput, ConversationStarters } from "./components";
 import { AIBubble, HumanBubble } from "./components/ChatMessage";
 import { useChatContext } from "./instance";
 import type { ConversationStarter } from "./instance/types";
-import RenderToolCalls from "./tools/renderToolCalls";
 import { blobURLtoBase64 } from "./utils";
 import { ChatSessionHeader } from "./components/ChatSessionHeader";
 

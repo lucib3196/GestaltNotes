@@ -12,11 +12,11 @@ export interface Student {
 export function useEducatorData() {
     const [students, setStudents] = useState<Student[]>([]);
     const [course, setCourse] = useState<Course | null>(null);
-    const { getIdToken } = useAuth();
+    const { user } = useAuth();
 
     useEffect(() => {
         async function fetchData() {
-            const token = await getIdToken();
+            const token = await user?.getIdToken();
             try {
                 const coursesData = await CourseManager.getProfCourses(token!);
                 setStudents([]);

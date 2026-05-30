@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ContentBlock, BaseMessage, ToolMessage } from "langchain";
+import type { ContentBlock, ToolMessage } from "langchain";
 import type { CleanableContent } from "./instance/types";
 
 type ImageUrl = {

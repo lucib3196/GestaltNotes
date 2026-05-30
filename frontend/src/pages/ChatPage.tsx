@@ -1,6 +1,6 @@
 
 import { ChatSession } from "../features/Chat"
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useAuth } from "../context";
 import type { Thread } from "../services";

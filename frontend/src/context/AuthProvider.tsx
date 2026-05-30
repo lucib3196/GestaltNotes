@@ -20,6 +20,7 @@ interface AuthContextType {
     setMode: (val: AuthMode) => void;
     login: (email: string, password: string) => Promise<UserCredential>;
     logout: () => void;
+
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
