@@ -50,7 +50,12 @@ class AppSettings(BaseSettings):
     STORAGE_SERVICE: Literal["local", "cloud"] = "local"
     PROJECT_ROOT: Path | str
 
-    BACKEND_CORS_ORIGINS: list[str] | str = []
+    BACKEND_CORS_ORIGINS: list[str] | str = Field(
+        default=[],
+        validation_alias=AliasChoices(
+            "ALLOWED_ORIGINS", "allowed_origins"
+        ),
+    )
 
     # Database settings
     DATABASE_URL: str | None = Field(
