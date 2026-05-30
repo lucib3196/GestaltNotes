@@ -1,4 +1,4 @@
-import { type MessageType } from "./config";
+import type { MessageType } from "../instance";
 import { type ToolMessage } from "@langchain/langgraph-sdk";
 
 export function isMessageType(value: string): value is MessageType {
