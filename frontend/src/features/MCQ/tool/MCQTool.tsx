@@ -2,8 +2,6 @@ import type { ToolMessage } from "langchain";
 import type { RenderPreviewProps, ToolExecute } from "../../Chat/tools";
 
 import { extractToolPayload } from "../../Chat/utils";
-import { RenderMCQSingle } from "../index";
-import { Button } from "../../../components/Button";
 import { RenderMCQList } from "../components/MCQ";
 
 import { toast } from "react-toastify";
@@ -25,43 +23,50 @@ export function parseMultipleChoice(
     return raw;
 }
 
-
-
 export const saveResponse: ToolExecute<
     MultipleChoiceQuestionToolResponse
 > = async (args) => {
-
-    const payload: GeneratedContentSaveRequest
-        = {
-        qpayload: args.payload,
-        thread_id: args.ctx?.threadId
+    try {
+        const payload: GeneratedContentSaveRequest = {
+            qpayload: args.payload,
+            thread_id: args.ctx?.threadId,
+        };
+        await MCQClient.saveQuestions(payload, args.ctx?.token);
+        toast.success("Saving Response");
+    } catch (error) {
+        const message =
+            error instanceof Error ? error.message : "Failed to save questions";
+        toast.error(message);
+        throw error;
     }
-    await MCQClient.saveQuestions(payload, args.ctx?.token)
-    toast.success(`Saving to backend`);
 };
 
 export function RenderMCQ({
     payload,
     onApprove,
 }: RenderPreviewProps<MultipleChoiceQuestionToolResponse>) {
-    const Qpayload = payload.payload;
+    const Qpayload = payload?.payload ?? [];
 
-    if (!Qpayload) {
+    if (!Qpayload.length) {
         return "Loading";
-    }
-    const saveQuestions = () => {
-        console.log("Saving Questions")
     }
 
     const onSubmit = (submission: MultipleChoiceQuestionSubmitted[]) => {
-        // Prepare final payload for submission
-        console.log("Submitted in tool")
-        console.log(submission, "Final payload")
-    }
+        try {
+            const data = {
+                payload: submission
+            };
+            onApprove?.(data);
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Failed to submit MCQ responses";
+            toast.error(message);
+        }
+    };
 
 
     return (
-        <div className="w-full space-y-3 rounded-xl border border-border bg-surface p-3">
+        <div className="w-full space-y-5 rounded-xl border border-border bg-surface p-3">
             <h4 className="text-sm font-semibold text-text">
                 Practice Your Understanding
             </h4>
