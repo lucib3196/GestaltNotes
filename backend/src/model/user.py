@@ -1,13 +1,15 @@
-from sqlmodel import SQLModel, Field as SqlField, Relationship as SQLMODELRelationship
-from typing import List, Optional, Literal, TYPE_CHECKING
-from uuid import uuid4, UUID
-from pydantic import BaseModel
-from datetime import datetime
+from typing import TYPE_CHECKING, Literal
+from uuid import UUID, uuid4
+
+from pydantic import BaseModel, EmailStr
+from sqlmodel import Field as SqlField
+from sqlmodel import Relationship as SQLMODELRelationship
+from sqlmodel import SQLModel
 
 if TYPE_CHECKING:
     from .chat import Thread
     from .course import Course
-    
+
 VALID_ROLES = Literal["educator", "student", "admin"]
 
 
@@ -21,35 +23,45 @@ class UserCourseLink(SQLModel, table=True):
     course_id: UUID = SqlField(foreign_key="course.id", primary_key=True)
 
 
-class UserCreate(BaseModel):
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserBase(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
+    username: str | None = None
+
+
+class UserCreate(UserBase):
     password: str
-    email: str
+    email: EmailStr
     role: VALID_ROLES = "student"
     course_id: UUID | None = None
 
 
-class UserLogin(BaseModel):
-    email: str
-    password: str
-
-
-class UserRead(BaseModel):
+class UserRead(UserBase):
     email: str | None = None
     force_password_reset: bool = False
+    roles: list[VALID_ROLES] = []
+
+
+class UserUpdate(UserBase):
+    email: str | None = None
 
 
 class User(SQLModel, table=True):
-    id: Optional[UUID] = SqlField(default_factory=uuid4, primary_key=True)
+    id: UUID | None = SqlField(default_factory=uuid4, primary_key=True)
     first_name: str | None = None
     last_name: str | None = None
+    username: str | None = None
     email: str
     roles: list["Role"] = SQLMODELRelationship(
         back_populates="users",
         link_model=UserRoleLink,
     )
-    threads: List["Thread"] = SQLMODELRelationship(back_populates="user")
+    threads: list["Thread"] = SQLMODELRelationship(back_populates="user")
     courses: list["Course"] = SQLMODELRelationship(
         back_populates="educators",
         link_model=UserCourseLink,
@@ -64,6 +76,7 @@ class Role(SQLModel, table=True):
         back_populates="roles",
         link_model=UserRoleLink,
     )
+
 
 class StudentResponse(BaseModel):
     id: UUID

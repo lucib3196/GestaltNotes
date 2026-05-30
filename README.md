@@ -17,6 +17,7 @@ Needs a .env file for both frontend and backend folders
 Open three terminal windows:
 
 **Terminal 1 — Backend API**
+
 ```bash
 cd backend
 poetry install
@@ -24,12 +25,14 @@ poetry run python src/main.py
 ```
 
 **Terminal 2 — Firebase Emulators**
+
 ```bash
 cd frontend
 firebase emulators:start --project gestaltnotes
 ```
 
 **Terminal 3 — Frontend**
+
 ```bash
 cd frontend
 npm install
@@ -45,6 +48,7 @@ The Firebase Emulator UI will be available at `http://localhost:4000`.
 With the backend and emulators running, use the Swagger UI at `http://localhost:8000/docs` to create test accounts.
 
 **Create a student:**
+
 ```json
 POST /users/
 {
@@ -57,6 +61,7 @@ POST /users/
 ```
 
 **Create an educator:**
+
 ```json
 POST /users/
 {

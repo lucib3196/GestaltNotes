@@ -1,10 +1,11 @@
-from pathlib import Path
-import json
-from firebase_admin import credentials
-import firebase_admin
-from functools import lru_cache
-from .settings import get_settings
 import os
+from functools import lru_cache
+
+import firebase_admin
+from firebase_admin import credentials
+
+from .exceptions import FirebaseInitializationError
+from .settings import get_settings
 
 app_settings = get_settings()
 
@@ -22,28 +23,26 @@ def initialize_firebase_app():
         # -----------------------------
         # Handle Emulator Mode
         # -----------------------------
-        if app_settings.mode == "production":
+        if app_settings.ENV == "production":
             os.environ.pop("FIREBASE_AUTH_EMULATOR_HOST", None)
             os.environ.pop("STORAGE_EMULATOR_HOST", None)
 
         else:
             # ensure dev env vars exist
             if not app_settings.FIREBASE_AUTH_EMULATOR_HOST:
-                raise RuntimeError("FIREBASE_AUTH_EMULATOR_HOST must be set in dev")
+                raise FirebaseInitializationError(
+                    "FIREBASE_AUTH_EMULATOR_HOST must be set in dev"
+                )
 
             if not app_settings.STORAGE_EMULATOR_HOST:
-                raise RuntimeError("STORAGE_EMULATOR_HOST must be set in dev")
+                raise FirebaseInitializationError(
+                    "STORAGE_EMULATOR_HOST must be set in dev"
+                )
 
         # -----------------------------
         # Load credentials
         # -----------------------------
-        cred_path = Path(app_settings.PROJECT_ROOT) / app_settings.FIREBASE_CRED
-
-        if cred_path.exists():
-            cred = credentials.Certificate(str(cred_path))
-        else:
-            # support JSON string credentials
-            cred = credentials.Certificate(json.loads(app_settings.FIREBASE_CRED))
+        cred = credentials.Certificate(app_settings.FIREBASE_CRED)
 
         # -----------------------------
         # Initialize Firebase

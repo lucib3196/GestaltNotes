@@ -19,7 +19,7 @@ __pycache__/
 
 # Virtual environments
 .env
-.env.*
+.env.
 venv/
 .venv/
 env/
@@ -79,6 +79,7 @@ out/
 *.key
 credentials.json
 serviceAccountKey.json
+.env.dev.docker
 
 # =====================
 # Uploads / generated content
@@ -107,3 +108,6 @@ frontend/firebase-export*
 frontend/firebase
 frontend/firebase
 .env
+emulator-data
+firebase-export-**
+# 

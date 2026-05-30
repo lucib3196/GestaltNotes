@@ -1,3 +1,5 @@
+import type { MessageType, ToolType } from "../instance";
+
 export const MessageBaseStyle = `
   px-4 py-2.5
   my-2
@@ -13,8 +15,7 @@ export const MessageBaseStyle = `
   animate-[fadeIn_0.2s_ease]
   `;
 
-export type ToolType = "invokation" | "tool_result";
-export type MessageType = "ai" | "human" | "tool";
+
 
 export const MessageStyle: Partial<Record<MessageType | ToolType , string>> = {
   ai: `

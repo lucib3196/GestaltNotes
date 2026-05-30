@@ -3,12 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from "@mui/material/styles";
 import { AuthProvider } from './context/AuthProvider.tsx';
 import { MathJaxContext } from "better-react-mathjax";
-
+import { ChatProvider } from "./features/Chat/instance";
 import { ToastContainer } from "react-toastify";
+import { GenContentProvider } from './features/GeneratedContent/instance/context.tsx';
 import './index.css'
 import App from './App.tsx'
 import { theme } from './theme';
-import { LectureChatProvider } from './context/ChatContext.tsx';
+
 const mathJaxConfig = {
   tex: {
     inlineMath: [["$", "$"]],
@@ -18,19 +19,18 @@ const mathJaxConfig = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <LectureChatProvider>
-
-      <MathJaxContext config={mathJaxConfig}>
-        <AuthProvider>
-          <ThemeProvider theme={theme}>
-            <ToastContainer position="top-right" autoClose={3000} />
-            <App />
-
-          </ThemeProvider>
-        </AuthProvider>
-      </MathJaxContext>
-
-    </LectureChatProvider>
+    <ChatProvider>
+      <GenContentProvider>
+        <MathJaxContext config={mathJaxConfig}>
+          <AuthProvider>
+            <ThemeProvider theme={theme}>
+              <ToastContainer position="top-right" autoClose={3000} />
+              <App />
+            </ThemeProvider>
+          </AuthProvider>
+        </MathJaxContext>
+      </GenContentProvider>
+    </ChatProvider>
 
   </StrictMode>,
 )

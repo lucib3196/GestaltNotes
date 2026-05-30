@@ -1,9 +1,10 @@
-from src.core.settings import get_settings
-from src.web.dependencies import get_user_manager, SessionDep
-from src.service.user.user_manager import UserCreate
-from src.core.database_config import engine, Session
-from pathlib import Path
 import asyncio
+from pathlib import Path
+
+from src.core.database_config import Session, engine
+from src.core.settings import get_settings
+from src.service.user.user_manager import UserCreate
+from src.web.dependencies import SessionDep, get_user_manager
 
 settings = get_settings()
 print(settings.MODE)

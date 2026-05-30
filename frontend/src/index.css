@@ -1,4 +1,158 @@
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme {
+  --font-sans: "Space Grotesk", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --radius-xl: 30px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+
+  --shadow-soft: 0 28px 90px rgba(0, 0, 0, 0.34);
+  --ease-base: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-base: 180ms;
+  --transition-base: var(--ease-base);
+
+  --color-bg: #07131c;
+  --color-surface: rgba(9, 25, 37, 0.8);
+  --color-surface-strong: rgba(13, 31, 47, 0.92);
+  --color-surface-muted: rgba(255, 255, 255, 0.04);
+  --color-border: rgba(122, 189, 224, 0.18);
+  --color-border-strong: rgba(122, 189, 224, 0.28);
+  --color-text: #eff8ff;
+  --color-text-muted: #a7c0cf;
+  --color-text-soft: #7f9aaa;
+  --color-accent: #69d2e7;
+  --color-accent-strong: #c7f36b;
+  --color-button-secondary: rgba(255, 255, 255, 0.05);
+  --color-code: #08141d;
+
+  /* Runtime aliases for app code and Tailwind config */
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-strong: var(--color-surface-strong);
+  --surface-muted: var(--color-surface-muted);
+  --border: var(--color-border);
+  --border-strong: var(--color-border-strong);
+  --text: var(--color-text);
+  --text-muted: var(--color-text-muted);
+  --text-soft: var(--color-text-soft);
+  --accent: var(--color-accent);
+  --accent-strong: var(--color-accent-strong);
+  --button-secondary: var(--color-button-secondary);
+  --code-bg: var(--color-code);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+
+    --bg:
+      radial-gradient(
+        circle at 15% 20%,
+        rgba(105, 210, 231, 0.22),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at 88% 12%,
+        rgba(199, 243, 107, 0.18),
+        transparent 16%
+      ),
+      linear-gradient(160deg, #061018 0%, #0a1a26 45%, #102737 100%);
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-bg: #07131c;
+    --color-surface: rgba(9, 25, 37, 0.8);
+    --color-surface-strong: rgba(13, 31, 47, 0.92);
+    --color-surface-muted: rgba(255, 255, 255, 0.04);
+    --color-border: rgba(122, 189, 224, 0.18);
+    --color-border-strong: rgba(122, 189, 224, 0.28);
+    --color-text: #eff8ff;
+    --color-text-muted: #a7c0cf;
+    --color-text-soft: #7f9aaa;
+    --color-accent: #69d2e7;
+    --color-accent-strong: #c7f36b;
+    --color-button-secondary: rgba(255, 255, 255, 0.05);
+    --color-code: #08141d;
+
+    --surface: var(--color-surface);
+    --surface-strong: var(--color-surface-strong);
+    --surface-muted: var(--color-surface-muted);
+    --border: var(--color-border);
+    --border-strong: var(--color-border-strong);
+    --text: var(--color-text);
+    --text-muted: var(--color-text-muted);
+    --text-soft: var(--color-text-soft);
+    --accent: var(--color-accent);
+    --accent-strong: var(--color-accent-strong);
+    --button-secondary: var(--color-button-secondary);
+    --code-bg: var(--color-code);
+
+    --bg-accent:
+      radial-gradient(
+        circle at 15% 20%,
+        rgba(105, 210, 231, 0.22),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at 88% 12%,
+        rgba(199, 243, 107, 0.18),
+        transparent 16%
+      ),
+      linear-gradient(160deg, #061018 0%, #0a1a26 45%, #102737 100%);
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+
+    --color-bg: #eef6fb;
+    --color-surface: rgba(255, 255, 255, 0.82);
+    --color-surface-strong: rgba(255, 255, 255, 0.96);
+    --color-surface-muted: rgba(7, 19, 28, 0.05);
+    --color-border: rgba(58, 109, 138, 0.14);
+    --color-border-strong: rgba(58, 109, 138, 0.22);
+    --color-text: #10212d;
+    --color-text-muted: #506879;
+    --color-text-soft: #71889a;
+    --color-accent: #1d90aa;
+    --color-accent-strong: #7cad1d;
+    --color-button-secondary: rgba(16, 33, 45, 0.05);
+    --color-code: #f4fbff;
+
+    --surface: var(--color-surface);
+    --surface-strong: var(--color-surface-strong);
+    --surface-muted: var(--color-surface-muted);
+    --border: var(--color-border);
+    --border-strong: var(--color-border-strong);
+    --text: var(--color-text);
+    --text-muted: var(--color-text-muted);
+    --text-soft: var(--color-text-soft);
+    --accent: var(--color-accent);
+    --accent-strong: var(--color-accent-strong);
+    --button-secondary: var(--color-button-secondary);
+    --code-bg: var(--color-code);
+
+    --bg-accent:
+      radial-gradient(
+        circle at 14% 18%,
+        rgba(105, 210, 231, 0.14),
+        transparent 20%
+      ),
+      radial-gradient(
+        circle at 86% 10%,
+        rgba(199, 243, 107, 0.16),
+        transparent 14%
+      ),
+      linear-gradient(160deg, #f5fbff 0%, #e8f4fb 52%, #dcecf6 100%);
+  }
+}
 
 @keyframes fadeIn {
   from {
@@ -8,5 +162,15 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

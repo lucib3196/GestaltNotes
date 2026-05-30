@@ -4,7 +4,9 @@ export type ButtonColor =
   | "danger"
   | "success"
   | "warning"
-  | "neutral";
+  | "neutral"
+  | "authPrimary"
+  | "authGhost";
 
 export const colorClasses: Partial<Record<ButtonColor, string>> = {
   primary:
@@ -24,6 +26,12 @@ export const colorClasses: Partial<Record<ButtonColor, string>> = {
 
   neutral:
     "bg-transparent border border-gray-400 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800",
+
+  authPrimary:
+    "border border-accent/25 bg-accent text-bg hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45",
+
+  authGhost:
+    "border border-border-strong bg-button-secondary text-text hover:bg-surface-muted hover:border-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35",
 };
 
 export type ButtonSize = "sm" | "md" | "lg";

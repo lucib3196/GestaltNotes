@@ -3,54 +3,61 @@ import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut,
+    getIdToken,
     type User,
     type UserCredential,
 } from "firebase/auth";
 import { auth } from "../config/firebase_init";
-import UserManager from "../services/userManager";
+import { UserManager, type UserRead } from "../services";
 
 export type AuthMode = "login" | "signup" | "authenticate" | "passwordReset" | "login-success"
 
 interface AuthContextType {
     user: User | null;
-    role: string | null;
+    userData: UserRead | null
     loading: boolean;
     mode: AuthMode;
     setMode: (val: AuthMode) => void;
     login: (email: string, password: string) => Promise<UserCredential>;
     logout: () => void;
-    getIdToken: () => Promise<string | null>;
+
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [role, setRole] = useState<string | null>(null);
+    const [userData, setUserData] = useState<UserRead | null>(null)
     const [loading, setLoading] = useState(true);
     const [mode, setMode] = useState<AuthMode>("login");
 
-    useEffect(() =>
-        onAuthStateChanged(auth, async (fbuser) => {
-            if (fbuser) {
-                setUser(fbuser);
-                try {
-                    const token = await fbuser.getIdToken();
-                    const me = await UserManager.getMe(token);
-                    const userRole = me.roles?.[0] ?? null;
-                    setRole(userRole);
-                } catch (e) {
-                    console.error("Failed to fetch user role", e);
-                    setRole(null);
-                }
-                setLoading(false);
-            } else {
+    useEffect(() => {
+        const unSubscribe = onAuthStateChanged(auth, async (fbUser) => {
+            if (!fbUser) {
+                console.log("No User Logged In");
                 setUser(null);
-                setRole(null);
+                setUserData(null);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const token = await getIdToken(fbUser);
+                const data = await UserManager.getCurrentUser(token);
+                setUser(fbUser);
+                setUserData(data);
+          
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                setUser(null);
+                setUserData(null);
+            } finally {
                 setLoading(false);
             }
-        })
-    );
+        });
+
+        return () => unSubscribe();
+    }, []);
 
     async function login(email: string, password: string) {
         return await signInWithEmailAndPassword(auth, email, password);
@@ -58,17 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function logout() {
         await signOut(auth);
-        setRole(null);
         window.location.reload();
     }
 
-    async function getIdToken() {
-        if (!user) return null;
-        return await user.getIdToken();
-    }
 
     return (
-        <AuthContext.Provider value={{ user, role, loading, login, logout, getIdToken, mode, setMode }}>
+        <AuthContext.Provider value={{ user, userData, loading, login, logout,  mode, setMode }}>
             {children}
         </AuthContext.Provider>
     );

@@ -6,12 +6,12 @@ import api from "../config/api";
 export function useNotes(courseId: string | undefined) {
     const [notes, setNotes] = useState<LectureNote[]>([]);
     const [uploading, setUploading] = useState(false);
-    const { getIdToken } = useAuth();
+    const { user } = useAuth();
 
     async function fetchNotes() {
         if (!courseId) return;
         try {
-            const token = await getIdToken();
+            const token = await user?.getIdToken();
             const res = await api.get(`/notes/${courseId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -36,7 +36,7 @@ export function useNotes(courseId: string | undefined) {
         if (!files || files.length === 0 || !courseId) return;
         setUploading(true);
         try {
-            const token = await getIdToken();
+            const token = await user?.getIdToken();
             for (const file of Array.from(files)) {
                 const formData = new FormData();
                 formData.append("file", file);
@@ -54,7 +54,7 @@ export function useNotes(courseId: string | undefined) {
 
     async function handleDelete(id: string) {
         try {
-            const token = await getIdToken();
+            const token = await user?.getIdToken();
             await api.delete(`/notes/${courseId}/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });

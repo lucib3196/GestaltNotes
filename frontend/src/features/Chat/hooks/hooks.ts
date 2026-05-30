@@ -1,6 +1,6 @@
 import { useAuth } from "../../../context";
 import { UseLectureChatContext } from "../../../context/ChatContext";
-import { type ThreadCreate } from "../components/Chat";
+import type { ThreadCreate } from "../../../services";
 import { api } from "../../../config";
 
 type Thread = {

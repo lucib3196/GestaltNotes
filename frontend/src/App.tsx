@@ -1,34 +1,38 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute";
-import StudentPage from "./features/StudentPage/StudentPage";
+import { HomePage, ChatPage, MyAccount, MyGeneratedContentPage } from "./pages";
 import EducatorPage from "./features/EducatorPage/EducatorPage";
-import AuthPage from "./features/UserAuth/components/AuthPage";
-import UnauthorizedPage from "./features/UserAuth/components/UnauthorizedPage";
-import RoleRedirect from "./features/UserAuth/components/RoleRedirect";
+import { AuthPage, PasswordResetGuard, RoleRedirect, UnauthorizedPage } from "./features/Auth";
+
+import { Navigate } from "react-router-dom";
+import AppLayout from "./layout/AppLayout";
+
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/login" element={<AuthPage />} />
-                <Route path="/unauthorized" element={<UnauthorizedPage />} />
-                <Route
-                    path="/student"
-                    element={
-                        <ProtectedRoute requiredRole="student">
-                            <StudentPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/educator"
-                    element={
-                        <ProtectedRoute requiredRole="educator">
-                            <EducatorPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route path="*" element={<RoleRedirect />} />
+                <Route element={<AppLayout />}>
+                    {/* General roots */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/login" element={<AuthPage />} />
+                    <Route path="/account" element={<MyAccount />} />
+                    <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+                    <Route element={<PasswordResetGuard />}>
+                        {/* Student Only Roots */}
+                        <Route element={<RoleRedirect allow={["admin", "educator", "student"]} />}>
+                            <Route path="/chat" element={<ChatPage />} />
+                            <Route path="/my_content" element={<MyGeneratedContentPage />} />
+                        </Route>
+
+                        <Route element={<RoleRedirect allow={["educator"]} />}>
+                            <Route path="/educator" element={<EducatorPage />} />
+                        </Route>
+                    </Route>
+
+
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
             </Routes>
         </BrowserRouter>
     );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type Student } from "../../../services/userManager";
+import { type Student } from "../../../services/useEducatorData";
 
 interface StudentListProps {
     students: Student[];

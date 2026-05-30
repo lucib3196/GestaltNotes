@@ -1,7 +1,15 @@
-from .notes import router
-from .user import router as user_router
+from .chat.thread import router as thread_router
 from .course import router as course_router
-from .thread import router as thread_router
+from .generated_content.mcq import router as mcq_router
 from .healtcheck import router as health_router
+from .notes import router
+from .user import user_routes
 
-ALL_ROUTES = [router, user_router, course_router, thread_router, health_router]
+ALL_ROUTES = [
+    router,
+    course_router,
+    thread_router,
+    health_router,
+    mcq_router,
+    *user_routes,
+]

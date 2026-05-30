@@ -3,15 +3,7 @@ name: Node.js CI
 # Only runs if there changes to the frontend
 on:
   push:
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend_build.yml"
-    branches: ["main", "dev"]
   pull_request:
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend_build.yml"
-    branches: ["main", "dev"]
 
 jobs:
   build:
@@ -36,8 +28,8 @@ jobs:
           rm -rf node_modules package-lock.json
           npm install
 
-      - name: List repo contents
-        run: ls -R
+      # - name: List repo contents
+      #   run: ls -R
 
       - name: Install dependencies
         run: npm ci
