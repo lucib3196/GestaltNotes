@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
 from src.model.chat import Thread
-from src.service.chat import ThreadDB
+from src.service.chat import ThreadDB, ThreadCreateError, ThreadRetrievalError, ThreadNotFound, ThreadUpdateError
 
 
 def raise_error(*args, **kwargs) -> Never:
@@ -74,7 +74,7 @@ async def test_create_thread_error_and_rollback(db: ThreadDB, mock_session) -> N
 
     mock_session.commit = raise_error
 
-    with pytest.raises(ValueError, match=r"\[ThreadDB\] failed to create thread"):
+    with pytest.raises(ThreadCreateError, match=r"\[ThreadDB\] failed to create thread"):
         await db.create_thread(user_id=uuid4(), course_id=uuid4())
 
     mock_session.rollback.assert_called_once()
@@ -95,7 +95,7 @@ async def test_get_thread_not_found(db: ThreadDB, mock_session) -> None:
     mock_session.exec.return_value.first.return_value = None
     missing_id = uuid4()
 
-    with pytest.raises(ValueError, match=str(missing_id)):
+    with pytest.raises(ThreadNotFound, match=str(missing_id)):
         await db.get_thread(missing_id)
 
 
@@ -106,7 +106,7 @@ async def test_get_thread_error_and_rollback(
 
     mock_session.exec = raise_error
 
-    with pytest.raises(ValueError, match=r"\[ThreadDB\] failed to get thread"):
+    with pytest.raises(ThreadRetrievalError, match=r"\[ThreadDB\] failed to get thread"):
         await db.get_thread(uuid4())
 
     mock_session.rollback.assert_called_once()
@@ -184,7 +184,7 @@ async def test_list_threads_error_and_rollback(
 ) -> None:
     mock_session.exec = raise_error
 
-    with pytest.raises(ValueError, match=r"\[ThreadDB\] failed to list threads"):
+    with pytest.raises(ThreadRetrievalError, match=r"\[ThreadDB\] failed to list threads"):
         await db.list_threads_for_user(user_id=uuid4())
 
     mock_session.rollback.assert_called_once()
@@ -209,7 +209,7 @@ async def test_touch_updated_at(
 async def test_touch_updated_at_error(db: ThreadDB, mock_session: MagicMock) -> None:
     mock_session.exec.return_value.first.return_value = None
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ThreadNotFound):
         await db.touch_updated_at(uuid4())
 
 
@@ -221,7 +221,7 @@ async def test_touch_updated_at_rolls_back(
     mock_session.commit = raise_error
 
     with pytest.raises(
-        ValueError, match=r"\[ThreadDB\] failed to update thread timestamp"
+        ThreadUpdateError, match=r"\[ThreadDB\] failed to update thread timestamp"
     ):
         await db.touch_updated_at(sample_thread.id)
 

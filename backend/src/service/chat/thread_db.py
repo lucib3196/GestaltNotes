@@ -184,6 +184,8 @@ class ThreadDB:
             self.session.commit()
             self.session.flush()
             return thread
+        except ThreadBaseException:
+            raise
         except SQLAlchemyError as e:
             self.session.rollback()
             message = f"[ThreadDB] failed to update thread timestamp {e}"
