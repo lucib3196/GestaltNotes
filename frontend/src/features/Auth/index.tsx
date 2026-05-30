@@ -3,6 +3,7 @@ export {
   AuthBase,
   AuthPage,
   LogInForm,
+  PasswordResetGuard,
   RoleRedirect,
   SignUpForm,
   UnauthorizedPage,

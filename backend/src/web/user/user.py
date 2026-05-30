@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlmodel import select
 from starlette import status
 
+
 from src.core import logger
 from src.core.database_config import SessionDep
 from src.model.course import Course
@@ -22,10 +23,7 @@ from src.model.user import (
 )
 from src.service.user.exceptions import UserNotFoundError, UserServiceException
 
-from .dependencies import (
-    CurrentUser,
-    UserManagerDependency,
-)
+from .dependencies import CurrentUser, FireBaseToken, UserManagerDependency
 
 ID = UUID | str
 
@@ -70,19 +68,25 @@ async def create_user(
 @router.post("/get_current_user")
 async def get_current_user(
     current_user: CurrentUser,
+    token: FireBaseToken,
     user_manager: UserManagerDependency,
 ) -> UserRead:
     try:
-        return await user_manager.get_user(current_user)
+        user = await user_manager.get_user(current_user)
+        user.force_password_reset = token.get(
+            "force_password_reset",
+            False,
+        )
+        return user
     except UserNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to retrieve user {e}",
         ) from e
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve user information",
+            detail=f"Failed to retrieve user information {e}",
         ) from None
 
 

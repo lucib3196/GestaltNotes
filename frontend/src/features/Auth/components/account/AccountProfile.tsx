@@ -50,6 +50,8 @@ function ProfileAvatar({ firstName, lastName, src }: ProfileAvatarProps) {
 export default function AccountProfile() {
     const { user, userData } = useAuth();
 
+    console.log(user)
+
     const [editMode, setEditMode] = useState(false);
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");

@@ -33,4 +33,15 @@ export default class UserManager {
     });
     return response.data;
   }
+
+  static async resetTempPassword(newPassword: string, token: string): Promise<string> {
+    const response = await api.post(
+      `${this.base}/password_reset/temp`,
+      { new_password: newPassword },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data;
+  }
 }
