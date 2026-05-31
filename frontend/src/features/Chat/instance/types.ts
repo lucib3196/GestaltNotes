@@ -1,53 +1,8 @@
-import type { ContentBlock, ToolMessage } from "langchain";
+import type { ToolMessage } from "langchain";
 import type { Thread } from "../../../services";
-import {
-  AIMessage,
-  HumanMessage,
-  ToolMessageChunk,
-} from "@langchain/core/messages";
 import type { ThreadCreate } from "../../../services";
 import type { ToolName } from "../tools";
 import type { ThreadUpdate } from "../../../services/chat/types";
-
-export type ToolType = "invokation" | "tool_result";
-export type MessageType = "ai" | "human" | "tool";
-
-export type ChatBubbleRender =
-  | { bubble: "human"; msg: HumanMessage }
-  | { bubble: "ai"; msg: AIMessage; showTools?: boolean }
-  | { bubble: "tool"; msg: ToolMessageChunk };
-
-export interface AIMessageBubbleProps {
-  type?: "ai";
-  msg: AIMessage;
-  showTools?: boolean;
-}
-export interface HumanBubbleProps {
-  type?: "human";
-  msg: HumanMessage;
-}
-export interface ToolBubbleProps {
-  type?: "tool";
-  msg: ToolMessageChunk;
-}
-
-export type CleanableContent = ContentBlock[] | string;
-
-export type UnknownRecord = Record<string, unknown>;
-
-export type ConversationStarter = {
-  id: string;
-  label: string;
-  message: string;
-  description?: string;
-  disabled?: boolean;
-};
-
-export interface ConversationStartersProps {
-  starters: ConversationStarter[];
-  disabled?: boolean;
-  onSelectStarter: (starter: ConversationStarter) => void;
-}
 
 // Workspace item
 export type WorkspaceItem = {
@@ -59,12 +14,55 @@ export type WorkspaceItem = {
 type AssistantID = "agent_me116";
 
 // Context types
+
+export type ThreadState = {
+  threadId: string | null;
+  thread: Thread | null;
+  threads: Thread[];
+};
+
+export type ThreadActions = {
+  setThreadId: (threadId: string | null) => void;
+
+  setThread: (thread: Thread | null) => void;
+
+  setThreads: (threads: Thread[]) => void;
+
+  updateThread: (update: Thread) => void;
+
+  clearThread: () => void;
+};
+export type ThreadStore = ThreadState & ThreadActions;
+
+export type WorkspaceState = {
+  workspaceItems: WorkspaceItem[];
+};
+export type WorkspaceActions = {
+  addWorkspaceItem: (item: WorkspaceItem) => void;
+  clearWorkspace: () => void;
+  appendToolMessage: (msg: ToolMessage) => void;
+};
+
+export type WorkspaceStore = WorkspaceState & WorkspaceActions;
+
+export type AssistantState = {
+  assistantId: AssistantID;
+};
+
+export type AssistantActions = {
+  setAssistant: (assistant: AssistantID) => void;
+};
+
+export type AssistantStore = AssistantState & AssistantActions;
+
 export type ChatState = {
   assistantId: AssistantID;
   theadId: string | null;
   thread: Thread | null;
   workspaceItems: WorkspaceItem[];
   sessionKey: number;
+  loading: boolean;
+  error: string | null;
 };
 export type ChatActions = {
   // Assistant Management

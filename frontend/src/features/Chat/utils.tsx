@@ -1,23 +1,8 @@
 import type { ReactNode } from "react";
 import type { ContentBlock, ToolMessage } from "langchain";
-import type { CleanableContent } from "./instance/types";
+import type { TextPayload, ImagePayload, MessagePayload, ChildChunk, CleanableContent } from "./models/chat.types";
 
-type ImageUrl = {
-  url: string;
-};
 
-type TextPayload = {
-  type: "text";
-  text: string;
-};
-
-type ImagePayload = {
-  type: "image_url";
-  image_url: ImageUrl;
-};
-
-type MessagePayload = TextPayload | ImagePayload;
-type ChildChunk = ContentBlock | MessagePayload | string;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -172,12 +157,10 @@ export async function blobURLtoBase64(blobUrl: string): Promise<string> {
 
 
 export function extractToolPayload(msg: ToolMessage): unknown {
-  console.log("Tool message", msg)
-
   // First try with the artifact
   const artifact = msg.artifact
-  if (artifact){
-    if (typeof artifact==="object")
+  if (artifact) {
+    if (typeof artifact === "object")
       return artifact
     else if (typeof artifact === "string")
       return JSON.parse(artifact)

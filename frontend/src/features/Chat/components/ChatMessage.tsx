@@ -8,7 +8,7 @@ import type {
     HumanBubbleProps,
     AIMessageBubbleProps,
     ToolBubbleProps,
-} from "../instance/types";
+} from "../models/chat.types";
 import { cleanChildren } from "../utils";
 
 const ChatBubbleBase =

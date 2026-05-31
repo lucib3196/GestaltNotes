@@ -2,7 +2,10 @@ import { useAuth } from "../../../context";
 import { UseLectureChatContext } from "../../../context/ChatContext";
 import type { ThreadCreate } from "../../../services";
 import { api } from "../../../config";
-
+import { ChatAPI } from "../../../services";
+import { useThreadStore } from "../instance/store";
+import { useState, useCallback } from "react";
+import type { ThreadUpdate } from "../../../services/chat/types";
 type Thread = {
   id: string;
   user_id: string;
@@ -40,25 +43,90 @@ export const useGenerateThread = () => {
   return generateThread;
 };
 
-export const useUserThreads = () => {
+export const useGetThreads = () => {
   const { user } = useAuth();
 
-  const getThreads = async (): Promise<Thread[]> => {
-    try {
-      const token = await user?.getIdToken();
-      const response = await api.get<Thread[]>("/users/thread/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  const [loading, setLoading] = useState(false);
 
-      if (!response.data) {
-        throw new Error("Failed to generate thread id");
+  const [error, setError] = useState<string | null>(null);
+
+  const setThreads = useThreadStore((s) => s.setThreads);
+
+  const getThreads = useCallback(async () => {
+    if (!user) {
+      setError("User not authenticated");
+
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = await user.getIdToken();
+
+      const threads = await ChatAPI.listMyThreads(token);
+
+      setThreads(threads);
+    } catch (error) {
+      setError(`Error getting threads: ${String(error)}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, setThreads]);
+
+  return {
+    getThreads,
+    loading,
+    error,
+  };
+};
+
+export function useUpdateThread() {
+  const { user } = useAuth();
+
+  const updateThreadInStore = useThreadStore((s) => s.updateThread);
+
+  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
+
+  const updateThread = useCallback(
+    async (threadId: string, update: ThreadUpdate) => {
+      if (!user) {
+        setError("User not authenticated");
+        return;
       }
 
-      return response.data;
-    } catch (error) {
-      console.error("Error generating thread:", error);
-      throw error;
-    }
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = await user.getIdToken();
+
+        const updatedThread = await ChatAPI.updateThread(
+          threadId,
+          update,
+          token,
+        );
+
+        updateThreadInStore(updatedThread);
+
+        return updatedThread;
+      } catch (error) {
+        setError(`Failed to update thread: ${String(error)}`);
+
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, updateThreadInStore],
+  );
+
+  return {
+    updateThread,
+    loading,
+    error,
   };
-  return { getThreads };
-};
+}
