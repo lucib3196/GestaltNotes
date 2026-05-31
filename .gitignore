@@ -111,3 +111,4 @@ frontend/firebase
 emulator-data
 firebase-export-**
 # 
+cors.json
