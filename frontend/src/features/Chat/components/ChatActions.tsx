@@ -1,12 +1,13 @@
-
+import { useThreadStore } from "../instance/store";
 
 
 export default function ChatActions() {
+    const clearThread = useThreadStore((s) => s.clearThread)
     return (
-        <div>
+        <div className="flex flex-row w-full">
             <button
                 type="button"
-                onClick={() => console.log("New Chat")}
+                onClick={() => clearThread()}
                 className="relative flex h-9 w-full items-center rounded-md border border-border bg-surface px-3 text-text-muted transition-all duration-base ease-base hover:border-border-strong hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
                 aria-label="New chat"
             >

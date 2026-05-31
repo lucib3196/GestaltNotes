@@ -20,11 +20,12 @@ export const useThreadStore = create<ThreadStore>()((set) => ({
       threadId,
     }),
 
-  setThread: (thread) =>
+  setThread: (thread) => {
     set({
       thread,
       threadId: thread?.id ?? null,
-    }),
+    });
+  },
 
   setThreads: (threads) =>
     set({

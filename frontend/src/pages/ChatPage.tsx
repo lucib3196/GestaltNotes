@@ -9,7 +9,7 @@ import { RenderToolCalls } from "../features/Chat/tools";
 import { ChatSideBar } from "../features/Chat";
 import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import type { ThreadUpdate } from "../services/chat/types";
-
+import StarterView from "../features/ConversationStarters/components/StarterView";
 import clsx from "clsx";
 type SectionTab = "resource" | "practice" | "final_review";
 
@@ -199,6 +199,8 @@ export default function ChatPage() {
     }, [user])
     return (
         <div className="h-[calc(100vh-1rem)] w-full p-2 sm:p-3">
+
+            <StarterView />
             <Group className="h-full">
                 <Panel
                     panelRef={leftPanelRef}
@@ -233,7 +235,7 @@ export default function ChatPage() {
                 <Separator className="mx-2 w-2 bg-border   rounded-full hover:bg-blue-500" />
 
                 <Panel id="chat-main" minSize={40} defaultSize={52} className="min-h-0 overflow-hidden rounded-lg bg-surface-strong">
-                    <ChatSession token={token}></ChatSession>
+                    <ChatSession ></ChatSession>
                 </Panel>
 
                 <Separator className="mx-2 w-2 bg-border   rounded-full hover:bg-blue-500" />

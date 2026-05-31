@@ -1,6 +1,5 @@
 import React from "react";
 import clsx from "clsx";
-import { RiChatNewLine } from "react-icons/ri";
 import { useEffect, useRef } from "react";
 
 type ChatContainerVariant = "demo" | "main";
@@ -25,7 +24,6 @@ interface ChatContainerProps {
   children: React.ReactNode;
   variant?: ChatContainerVariant;
   size?: Sizes;
-  onNewChat?: () => void;
   scrollTrigger?: number;
   bordered?: boolean;
 }
@@ -36,7 +34,6 @@ export default function ChatContainer({
   children,
   variant = "main",
   size = "med",
-  onNewChat,
   scrollTrigger = 0,
   bordered = true,
 }: ChatContainerProps) {
@@ -57,20 +54,6 @@ export default function ChatContainer({
         bordered ? "border border-border shadow-soft" : "border-0 shadow-none",
       )}
     >
-      <div className="mb-3 flex items-center justify-between r pb-3">
-        {onNewChat ? (
-          <button
-            type="button"
-            onClick={onNewChat}
-            aria-label="Start new chat"
-            title="New chat"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border bg-surface text-text-muted transition-all duration-base ease-base hover:border-border-strong hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
-          >
-            <RiChatNewLine size={19} />
-          </button>
-        ) : null}
-      </div>
-
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto pr-1 scroll-smooth scrollbar-hide sm:pr-2">
         {children}
         <div ref={bottomRef} />
