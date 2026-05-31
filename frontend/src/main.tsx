@@ -6,6 +6,7 @@ import { MathJaxContext } from "better-react-mathjax";
 import { ChatProvider } from "./features/Chat/instance";
 import { ToastContainer } from "react-toastify";
 import { GenContentProvider } from './features/GeneratedContent/instance/context.tsx';
+import { LectureProvider } from './features/Lectures/index.ts';
 import './index.css'
 import App from './App.tsx'
 import { theme } from './theme';
@@ -20,6 +21,7 @@ const mathJaxConfig = {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ChatProvider>
+      <LectureProvider>
       <GenContentProvider>
         <MathJaxContext config={mathJaxConfig}>
           <AuthProvider>
@@ -30,6 +32,7 @@ createRoot(document.getElementById('root')!).render(
           </AuthProvider>
         </MathJaxContext>
       </GenContentProvider>
+      </LectureProvider>
     </ChatProvider>
 
   </StrictMode>,

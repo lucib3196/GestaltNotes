@@ -1,6 +1,5 @@
-
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap");
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
@@ -173,4 +172,510 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+.container .markdown-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+
+  line-height: 1.55;
+  font-size: 0.95rem;
+
+  color: #e5e7eb;
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* ----------------------------- */
+/* Typography */
+/* ----------------------------- */
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  font-weight: 700;
+  line-height: 1.2;
+
+  margin-top: 0.9rem;
+  margin-bottom: 0.25rem;
+
+  color: #ffffff;
+}
+
+.markdown-content h1 {
+  font-size: 1.55rem;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  padding-bottom: 0.3rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.3rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.12rem;
+}
+
+.markdown-content h4 {
+  font-size: 1rem;
+}
+
+.markdown-content h5,
+.markdown-content h6 {
+  font-size: 0.92rem;
+  opacity: 0.92;
+}
+
+.markdown-content p {
+  margin: 0.15rem 0;
+}
+
+.markdown-content strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.markdown-content em {
+  opacity: 0.96;
+}
+
+/* ----------------------------- */
+/* Lists */
+/* ----------------------------- */
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.15rem 0;
+
+  padding-left: 1.35rem;
+}
+
+.markdown-content ol {
+  list-style-type: decimal;
+}
+
+.markdown-content ul {
+  list-style-type: disc;
+}
+
+.markdown-content li {
+  margin: 0.12rem 0;
+  padding-left: 0.15rem;
+}
+
+.markdown-content li > p {
+  margin: 0;
+}
+
+/* Nested lists */
+
+.markdown-content li ul,
+.markdown-content li ol {
+  margin-top: 0.15rem;
+}
+
+/* ----------------------------- */
+/* Links */
+/* ----------------------------- */
+
+.markdown-content a {
+  color: #60a5fa;
+
+  text-decoration: none;
+
+  transition: color 0.15s ease;
+}
+
+.markdown-content a:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+/* ----------------------------- */
+/* Inline Code */
+/* ----------------------------- */
+
+.markdown-content code {
+  border-radius: 0.35rem;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  padding: 0.08rem 0.35rem;
+
+  font-size: 0.84em;
+
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  color: #f9fafb;
+}
+
+/* ----------------------------- */
+/* Code Blocks */
+/* ----------------------------- */
+
+.markdown-content pre {
+  overflow-x: auto;
+
+  border-radius: 0.75rem;
+
+  background: #111827;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  padding: 0.8rem;
+
+  font-size: 0.83rem;
+  line-height: 1.5;
+
+  margin: 0.25rem 0;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* ----------------------------- */
+/* Blockquotes */
+/* ----------------------------- */
+
+.markdown-content blockquote {
+  margin: 0.25rem 0;
+
+  padding: 0.65rem 0.85rem;
+
+  border-left: 4px solid #60a5fa;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  border-radius: 0.45rem;
+
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ----------------------------- */
+/* Tables */
+/* ----------------------------- */
+
+.markdown-content table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  overflow: hidden;
+
+  border-radius: 0.65rem;
+
+  background: rgba(255, 255, 255, 0.03);
+
+  margin: 0.35rem 0;
+}
+
+.markdown-content thead {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  text-align: left;
+
+  padding: 0.6rem 0.75rem;
+}
+
+.markdown-content th {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.markdown-content td {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ----------------------------- */
+/* Horizontal Rule */
+/* ----------------------------- */
+
+.markdown-content hr {
+  width: 100%;
+
+  border: none;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  margin: 0.75rem 0;
+}
+
+/* ----------------------------- */
+/* Images */
+/* ----------------------------- */
+
+.markdown-content img {
+  max-width: 100%;
+
+  border-radius: 0.7rem;
+
+  margin: 0.3rem 0;
+}
+
+/* ----------------------------- */
+/* Math / KaTeX */
+/* ----------------------------- */
+
+.markdown-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding: 0.15rem 0;
+}
+
+/*  Lecuture styles */
+.documentation-markdown {
+  max-width: 900px;
+
+  color: #e5e7eb;
+
+  font-size: 1rem;
+  line-height: 1.8;
+
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* ================================= */
+/* Headings */
+/* ================================= */
+
+.documentation-markdown h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+
+  margin-top: 0;
+  margin-bottom: 1rem;
+
+  padding-bottom: 0.75rem;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.documentation-markdown h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+.documentation-markdown h3 {
+  font-size: 1.4rem;
+  font-weight: 650;
+
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.documentation-markdown h4 {
+  font-size: 1.15rem;
+  font-weight: 600;
+
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.documentation-markdown h5,
+.documentation-markdown h6 {
+  font-size: 1rem;
+  font-weight: 600;
+
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ================================= */
+/* Paragraphs */
+/* ================================= */
+
+.documentation-markdown p {
+  margin: 1rem 0;
+}
+
+/* ================================= */
+/* Lists */
+/* ================================= */
+
+.documentation-markdown ul,
+.documentation-markdown ol {
+  padding-left: 2rem;
+  margin: 1rem 0;
+}
+
+.documentation-markdown li {
+  margin: 0.4rem 0;
+}
+
+.documentation-markdown li > p {
+  margin: 0.25rem 0;
+}
+
+/* ================================= */
+/* Links */
+/* ================================= */
+
+.documentation-markdown a {
+  color: #60a5fa;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.documentation-markdown a:hover {
+  color: #93c5fd;
+}
+
+/* ================================= */
+/* Inline Code */
+/* ================================= */
+
+.documentation-markdown :not(pre) > code {
+  background: rgba(255, 255, 255, 0.08);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 0.35rem;
+
+  padding: 0.15rem 0.4rem;
+
+  font-size: 0.9em;
+
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* ================================= */
+/* Code Blocks */
+/* ================================= */
+
+.documentation-markdown pre {
+  overflow-x: auto;
+
+  margin: 1.5rem 0;
+
+  padding: 1rem 1.25rem;
+
+  background: #111827;
+
+  border-radius: 0.75rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.documentation-markdown pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* ================================= */
+/* Blockquotes */
+/* ================================= */
+
+.documentation-markdown blockquote {
+  margin: 1.5rem 0;
+
+  padding-left: 1rem;
+
+  border-left: 4px solid #60a5fa;
+
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ================================= */
+/* Tables */
+/* ================================= */
+
+.documentation-markdown table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  margin: 1.5rem 0;
+}
+
+.documentation-markdown th {
+  text-align: left;
+
+  font-weight: 600;
+
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+
+  padding: 0.75rem;
+}
+
+.documentation-markdown td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  padding: 0.75rem;
+}
+
+/* ================================= */
+/* Horizontal Rules */
+/* ================================= */
+
+.documentation-markdown hr {
+  border: none;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  margin: 3rem 0;
+}
+
+/* ================================= */
+/* Images */
+/* ================================= */
+
+.documentation-markdown img {
+  display: block;
+
+  max-width: 100%;
+
+  margin: 2rem auto;
+
+  border-radius: 0.75rem;
+}
+
+/* ================================= */
+/* KaTeX */
+/* ================================= */
+
+.documentation-markdown .katex-display {
+  overflow-x: auto;
+
+  margin: 1.5rem 0;
+
+  padding: 0.5rem 0;
+}
+
+/* ================================= */
+/* Definition Lists */
+/* ================================= */
+
+.documentation-markdown h3 + p,
+.documentation-markdown h4 + p {
+  margin-top: 0.5rem;
+}
+
+.documentation-markdown p:has(.katex) {
+  margin: 1.5rem 0;
+  text-align: center;
 }

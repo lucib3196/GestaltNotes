@@ -53,7 +53,7 @@ class AppSettings(BaseSettings):
     BACKEND_CORS_ORIGINS: list[str] | str = Field(
         default=[],
         validation_alias=AliasChoices(
-            "ALLOWED_ORIGINS", "allowed_origins"
+            "ALLOWED_ORIGINS", "allowed_origins", "backend_cors_origins", "BACKEND_CORS_ORIGINS"
         ),
     )
 
