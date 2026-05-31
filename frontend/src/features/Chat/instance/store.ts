@@ -26,7 +26,6 @@ export function createChatStore(preloaded?: Partial<ChatState>) {
         workspaceItems: val === state.theadId ? state.workspaceItems : [],
       })),
     setThread: async (id, token) => {
-      
       try {
         const t = await ChatAPI.getThread(id, token);
         set(() => ({ thread: t }));

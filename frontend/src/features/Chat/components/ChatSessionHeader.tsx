@@ -5,6 +5,7 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 
 export function ChatSessionHeader() {
   const currentThread = useChatContext((s) => s.thread);
+  
   const updateThread = useChatContext((s) => s.updateThread);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -31,6 +32,8 @@ export function ChatSessionHeader() {
     await updateThread(currentThread.id, { title: nextTitle });
     cancelEditing();
   };
+
+  // Refrehs 
 
   return (
     <div className="sticky top-0 z-10 -mx-1 mb-3 border-b border-border bg-surface/95 px-1 pb-2 pt-1 backdrop-blur">

@@ -22,8 +22,11 @@ function ChatSideBarComponent() {
     const getUserThreads = useChatContext((s) => s.getUserThreads);
     const setSessionKey = useChatContext((s) => s.setSessionKey)
     const updateThread = useChatContext((s) => s.updateThread)
+    const createNewThread = useChatContext((s) => s.setThreadId)
+
     const handleNewChat = async () => {
         setSelectedThread(null, null);
+        createNewThread(null)
         setSessionKey();
     };
 
@@ -179,8 +182,6 @@ export function ResourceSection() {
 }
 export default function ChatPage() {
     const { user } = useAuth();
-
-
     const [token, setToken] = useState<string>("");
     const [showSideBar, setShowSideBar] = useState<boolean>(true);
     const [showResources, setShowResources] = useState<boolean>(true);
@@ -203,7 +204,7 @@ export default function ChatPage() {
                     panelRef={leftPanelRef}
                     id="chat-panel"
                     collapsible
-                    collapsedSize={100}
+                    collapsedSize={5}
 
                     defaultSize={20}
                     onResize={() => setShowSideBar(true)}
@@ -241,7 +242,7 @@ export default function ChatPage() {
                     panelRef={rightPanelRef}
                     id="chat-resources"
                     collapsible
-                    collapsedSize={100}
+                    collapsedSize={10}
                     minSize={18}
                     defaultSize={28}
                     className="min-h-0 overflow-hidden rounded-lg bg-surface-strong p-2 scrollbar-hide"

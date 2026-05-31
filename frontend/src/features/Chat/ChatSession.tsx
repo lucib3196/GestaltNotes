@@ -241,6 +241,7 @@ export default function ChatSession({ token }: ChatSessionProps) {
     },
   });
 
+
   const handleSubmit = async (
     text: string,
     images?: string[] | null | undefined,
@@ -267,7 +268,6 @@ export default function ChatSession({ token }: ChatSessionProps) {
       ],
     });
   };
-
 
   useEffect(() => {
     stream.messages.forEach((msg) => {
@@ -324,7 +324,6 @@ export default function ChatSession({ token }: ChatSessionProps) {
         >
           <MathJax dynamic>
             {stream.messages.map((msg) => {
-              console.log("Message from backend", msg)
               if (msg.type === "human") {
                 return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
               }

@@ -74,8 +74,11 @@ export type ChatActions = {
   setSessionKey: () => void;
   // Thread management
   setThreadId: (threadId: string | null) => void;
-  setThread: (threadId: string, token: string | null | undefined) => void;
-  selectThread: (threadId: string|null, token: string | null) => void;
+  setThread: (
+    threadId: string,
+    token: string | null | undefined,
+  ) => Promise<void>;
+  selectThread: (threadId: string | null, token: string | null) => void;
   createdThread: (token: string, data: ThreadCreate) => Promise<Thread>;
   updateThread: (threadId: string, update: ThreadUpdate) => Promise<void>;
   getUserThreads: (token: string) => Promise<Thread[]>;

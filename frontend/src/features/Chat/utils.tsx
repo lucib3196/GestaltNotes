@@ -171,10 +171,18 @@ export async function blobURLtoBase64(blobUrl: string): Promise<string> {
 }
 
 
-
-
-
 export function extractToolPayload(msg: ToolMessage): unknown {
+  console.log("Tool message", msg)
+
+  // First try with the artifact
+  const artifact = msg.artifact
+  if (artifact){
+    if (typeof artifact==="object")
+      return artifact
+    else if (typeof artifact === "string")
+      return JSON.parse(artifact)
+    else return artifact
+  }
   const c = msg.content;
   const cleaned = normalizeContent(c);
   let text: string | null = null;
