@@ -131,6 +131,7 @@ class Option(BaseModel):
 
 
 class MultipleChoiceQuestionBase(BaseModel):
+    id: UUID | None = None
     question: Annotated[
         str,
         Field(

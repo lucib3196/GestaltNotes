@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
-
+from src.core.logger import logger
 from src.model import MCQV1, GeneratedMCQ, MCQResponseV1
 from src.service.generated_content.exceptions import (
     GeneratedContentBatchSaveError,
@@ -27,7 +27,7 @@ class GeneratedMCQService:
         self._session = session
 
     # Retrieval
-    async def retrieve_mcq(self, quiz_id: ID) -> GeneratedMCQ | None:
+    def retrieve_mcq(self, quiz_id: ID) -> GeneratedMCQ | None:
         """Retrieve a generated MCQ by quiz ID."""
         try:
             query = select(GeneratedMCQ).where(GeneratedMCQ.id == convert_uuid(quiz_id))
@@ -37,6 +37,9 @@ class GeneratedMCQService:
             raise GeneratedContentRetrievalError(
                 f"Failed to retrieve generated MCQ by quiz id '{quiz_id}'."
             ) from e
+
+    async def aretrieve_mcq(self, quiz_id: ID) -> GeneratedMCQ | None:
+        return await asyncio.to_thread(self.retrieve_mcq, quiz_id)
 
     async def retrieve_all_mcq_user(self, user_id: ID) -> Sequence[GeneratedMCQ]:
         """Retrieve all generated MCQs for a user ID."""
@@ -83,7 +86,7 @@ class GeneratedMCQService:
     async def delete_mcq(self, quiz_id: ID) -> bool:
         """Delete a generated MCQ by quiz ID."""
         try:
-            quiz = await self.retrieve_mcq(quiz_id)
+            quiz = await self.aretrieve_mcq(quiz_id)
             if not quiz:
                 raise GeneratedContentNotFoundError(str(quiz_id))
             self._session.delete(quiz)
@@ -104,11 +107,21 @@ class GeneratedMCQService:
         """Validate and save a generated MCQ for a user/thread."""
         try:
             quiz_data = self._validate_quiz(quiz, schema_version)
+            if quiz_data.id:
+                existing = self.retrieve_mcq(quiz_id=quiz_data.id)
+
+                if existing:
+                    logger.debug(
+                        f"Question with id already exists {quiz_data.id}",
+                    )
+                    return existing
+
             gen_mcq = GeneratedMCQ(
                 quiz_data=to_serializable(quiz_data),
                 schema_version=schema_version,
                 user_id=convert_uuid(user_id),
                 thread_id=convert_uuid(thread_id),
+                id=quiz_data.id,
             )
             self._session.add(gen_mcq)
             self._session.commit()

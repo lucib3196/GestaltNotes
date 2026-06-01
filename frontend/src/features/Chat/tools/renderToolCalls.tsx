@@ -5,12 +5,12 @@ import { isToolMessage } from "./utils";
 import { tools } from "./tools";
 import { useState, useMemo } from "react";
 import { useRef } from "react";
-import { useChatContext } from "../instance";
+import { useThreadStore } from "../instance/store";
 
 // This is meant to only render the tool call once it is succesful
 export default function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     const { user } = useAuth();
-    const threadId = useChatContext((s) => s.theadId);
+    const threadId = useThreadStore((s) => s.threadId);
     const requestIdRef = useRef<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>();
