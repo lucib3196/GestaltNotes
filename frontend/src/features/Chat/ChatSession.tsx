@@ -48,7 +48,8 @@ export default function ChatSession() {
     text: string,
     images?: string[],
   ) => {
-    const content = prepareMessage(text, images)
+    const content = await prepareMessage(text, images)
+
     stream.submit({
       messages: [
         {

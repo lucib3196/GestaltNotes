@@ -175,7 +175,8 @@ export async function prepareMessage(
       type: "image_url",
       image_url: { url },
     }));
-    content.concat(imagePayload);
+
+    content.push(...imagePayload);
   }
   return content;
 }
