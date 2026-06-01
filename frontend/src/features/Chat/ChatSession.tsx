@@ -1,7 +1,7 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
 import { AIMessage, HumanMessage, ToolMessage } from "langchain";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { streamURL } from "../../config/api";
 import ConversationStarters from "../ConversationStarters/components/ConverstationStarter";
 import { useWorkspaceStore } from "../Tools/instance/store";
