@@ -9,12 +9,13 @@ import { TabButton } from "../components/Button";
 import { WorkspaceItemsCarousel } from "../features/Tools";
 import WorkspaceInfo from "../features/Tools/components/WorkspaceInfo";
 import { useWorkspaceStore } from "../features/Tools/instance/store";
-type SectionTab = "resource" | "practice" | "final_review" | "info";
+export type SectionTab = "resource" | "practice" | "final_review" | "info";
+
 
 export function ResourceSection() {
-    const [activeTab, setActiveTab] = useState<SectionTab>("resource");
-
     const workspaceItems = useWorkspaceStore((s) => s.workspaceItems);
+    const currentTab = useWorkspaceStore((s)=>s.currentSection)
+    const setTab = useWorkspaceStore((s)=>s.setCurrentSection)
 
     const sources = workspaceItems.filter(
         (v) => v.tool === "retrieve_me116_lecture",
@@ -25,26 +26,26 @@ export function ResourceSection() {
         <section className="flex h-full min-h-0 flex-col rounded-lg  p-3">
             <div className="mb-3 flex gap-2">
                 <TabButton
-                    onClick={() => setActiveTab("info")}
-                    active={activeTab === "info"}
+                    onClick={() => setTab("info")}
+                    active={currentTab === "info"}
                 >
                     Info
                 </TabButton>
                 <TabButton
-                    onClick={() => setActiveTab("resource")}
-                    active={activeTab === "resource"}
+                    onClick={() => setTab("resource")}
+                    active={currentTab === "resource"}
                 >
                     Resource
                 </TabButton>
                 <TabButton
-                    onClick={() => setActiveTab("practice")}
-                    active={activeTab === "practice"}
+                    onClick={() => setTab("practice")}
+                    active={currentTab === "practice"}
                 >
                     Practice
                 </TabButton>
                 <TabButton
-                    onClick={() => setActiveTab("final_review")}
-                    active={activeTab === "final_review"}
+                    onClick={() => setTab("final_review")}
+                    active={currentTab === "final_review"}
                 >
                     Final Review Outline
                 </TabButton>
@@ -52,7 +53,7 @@ export function ResourceSection() {
             </div>
 
             <div className="h-full rounded-md p-3 text-sm text-text">
-                {activeTab === "practice" && (
+                {currentTab === "practice" && (
                     <WorkspaceItemsCarousel
                         items={practice}
                         sectionLabel="Practice"
@@ -62,7 +63,7 @@ export function ResourceSection() {
                     />
                 )}
 
-                {activeTab === "resource" && (
+                {currentTab === "resource" && (
                     <WorkspaceItemsCarousel
                         items={sources}
                         sectionLabel="Resources"
@@ -71,13 +72,13 @@ export function ResourceSection() {
                         variant="subtle"
                     />
                 )}
-                {activeTab === "final_review" && <StarterView />}
-                {activeTab === "info" && <WorkspaceInfo />}
+                {currentTab === "final_review" && <StarterView />}
+                {currentTab === "info" && <WorkspaceInfo />}
             </div>
         </section>
     );
 }
-// TODO lets imporve the style for the chatside bar where there is collapse version 
+
 export default function ChatPage() {
     const [showResources, setShowResources] = useState<boolean>(true);
 

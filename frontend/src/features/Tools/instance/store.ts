@@ -4,13 +4,14 @@ import type { WorkspaceState, WorkspaceStore } from "./types";
 import { getSupportedToolMessage } from "../utils";
 import { TOOL_POLICY } from "../models/tools.types";
 
-
 const initialState: WorkspaceState = {
   workspaceItems: [],
+  currentSection: "info",
 };
 
 export const useWorkspaceStore = create<WorkspaceStore>()((set) => ({
   ...initialState,
+  setCurrentSection: (val) => set({ currentSection: val }),
   clearWorkspace: () => set(() => ({ workspaceItems: [] })),
   addWorkspaceItem: (item) =>
     set((state) => ({ workspaceItems: [...state.workspaceItems, item] })),

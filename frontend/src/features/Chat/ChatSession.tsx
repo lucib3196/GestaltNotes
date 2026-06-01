@@ -25,9 +25,6 @@ export default function ChatSession() {
   const { generateThread } = useGenerateThread();
   const { loading, error } = useGetThread();
 
-
-
-
   const stream = useStream({
     threadId: currentThread?.id || null,
     apiUrl: streamURL,
