@@ -25,6 +25,8 @@ export default function ChatSession() {
 
   const assistantId = useChatContext((s) => s.assistantId);
   const appendToolMessage = useChatContext((s) => s.appendToolMessage);
+  const clearWorkspaceItems = useChatContext((s) => s.clearWorkspaceItems)
+
 
   // Hooks
   const { generateThread } = useGenerateThread();
@@ -36,6 +38,7 @@ export default function ChatSession() {
     assistantId: assistantId,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     onThreadId: async (id: string) => {
+      if (currentThread?.id === id) return;
       generateThread({
         thread_id: id,
       });
@@ -68,6 +71,12 @@ export default function ChatSession() {
       ],
     });
   };
+  useEffect(() => {
+    if (!currentThread) return;
+    if (currentThread) {
+      clearWorkspaceItems()
+    }
+  }, [currentThread?.id])
 
   useEffect(() => {
     stream.messages.forEach((msg) => {
@@ -75,7 +84,7 @@ export default function ChatSession() {
         appendToolMessage(msg as ToolMessage);
       }
     });
-  }, [stream.messages, appendToolMessage]);
+  }, [stream.messages, appendToolMessage, currentThread?.id]);
 
   const generateQuizToolBar = (
     <div className="flex items-center">
