@@ -1,5 +1,5 @@
 
-import type { MessageType } from "../instance";
+import type { MessageType } from "../models/chat.types";
 import Markdown from "./MardownRender";
 import { formatArgs } from "../utils";
 import { normalizeContent } from "../utils";
@@ -8,7 +8,7 @@ import type {
     HumanBubbleProps,
     AIMessageBubbleProps,
     ToolBubbleProps,
-} from "../instance/types";
+} from "../models/chat.types";
 import { cleanChildren } from "../utils";
 
 const ChatBubbleBase =

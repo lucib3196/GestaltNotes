@@ -1,4 +1,4 @@
-import type { MessageType } from "../instance";
+import type { MessageType } from "../models/chat.types";
 import { type ToolMessage } from "@langchain/langgraph-sdk";
 
 export function isMessageType(value: string): value is MessageType {

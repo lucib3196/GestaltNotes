@@ -40,3 +40,10 @@ export const sizeClasses: Record<ButtonSize, string> = {
   md: "px-4 py-2 text-sm",
   lg: "px-6 py-3 text-base",
 };
+
+export const tabToggleBaseClasses =
+  "rounded-md px-3 py-1.5 text-sm transition-colors";
+export const tabToggleStateClasses = {
+  active: "bg-accent text-bg",
+  inactive: "bg-surface-muted text-text-muted hover:text-text",
+} as const;

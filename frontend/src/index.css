@@ -311,7 +311,11 @@
 
   font-size: 0.84em;
 
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
 
   color: #f9fafb;
 }
@@ -336,7 +340,8 @@
 
   margin: 0.25rem 0;
 
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .markdown-content pre code {
@@ -436,6 +441,16 @@
 /* ----------------------------- */
 
 .markdown-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding: 0.15rem 0;
+}
+/* ----------------------------- */
+/* Math / KaTeX */
+/* ----------------------------- */
+
+.documentation-markdown .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
 

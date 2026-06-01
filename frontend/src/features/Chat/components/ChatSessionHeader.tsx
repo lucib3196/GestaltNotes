@@ -1,36 +1,62 @@
 import { useState } from "react";
-
-import { useChatContext } from "../instance";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
+import type { Thread } from "../../../services";
+import { useUpdateThread } from "../hooks/hooks";
+import { useCallback } from "react";
+import { toast } from "react-toastify"
 
-export function ChatSessionHeader() {
-  const currentThread = useChatContext((s) => s.thread);
-  const updateThread = useChatContext((s) => s.updateThread);
-
+type HeaderProps = {
+  thread: Thread | null
+}
+export function ChatSessionHeader({ thread }: HeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  const startEditing = () => {
-    setDraftTitle(currentThread?.title ?? "New Chat");
+
+  const { updateThread } = useUpdateThread()
+
+  const displayTitle = thread?.title?.trim() || "New Chat";
+
+  const startEditing = useCallback(() => {
+    setDraftTitle(displayTitle);
     setIsEditing(true);
-  };
+  }, [displayTitle]);
 
-  const cancelEditing = () => {
+  const cancelEditing = useCallback(() => {
+    setDraftTitle(displayTitle);
     setIsEditing(false);
-    setDraftTitle("");
-  };
+  }, [displayTitle]);
 
   const confirmEditing = async () => {
-    if (!currentThread?.id) return cancelEditing;
+    if (!thread?.id || isSaving) return;
 
     const nextTitle = draftTitle.trim();
-    if (!nextTitle || nextTitle === (currentThread.title ?? "").trim()) {
-      return cancelEditing();
+    const fallbackTitle = "New Chat";
+    const titleToSave = nextTitle || fallbackTitle;
+
+    // No-op if nothing changed.
+    if (titleToSave === displayTitle) {
+      setIsEditing(false);
+      return;
     }
 
-    await updateThread(currentThread.id, { title: nextTitle });
-    cancelEditing();
-  };
+    try {
+      setIsSaving(true);
+      await updateThread(thread.id, {
+        title: draftTitle
+      })
+      setIsEditing(false);
+    } catch {
+      toast.error(
+        "Could not rename thread"
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  // Refrehs 
 
   return (
     <div className="sticky top-0 z-10 -mx-1 mb-3 border-b border-border bg-surface/95 px-1 pb-2 pt-1 backdrop-blur">
@@ -55,7 +81,7 @@ export function ChatSessionHeader() {
           />
         ) : (
           <h1 className="truncate text-base font-semibold text-text sm:text-lg">
-            {currentThread?.title ?? "New Chat"}
+            {thread?.title ?? "New Chat"}
           </h1>
         )}
 

@@ -19,7 +19,7 @@ const VariantClasses: Record<
   default: {
     root: "rounded-xl border border-border bg-surface p-2",
     preview: "mb-2 w-full rounded-xl border border-border bg-surface-muted p-2",
-    toolbar: "mt-0 flex w-full items-end gap-2 border-t border-border pt-3",
+    toolbar: "mt-0 flex w-full flex-wrap items-end gap-2  pt-3 md:flex-nowrap",
     newButton:
       "rounded-md border border-border px-3 py-2 text-sm text-text-muted transition-colors duration-base ease-base hover:bg-surface-muted hover:text-text",
     input:
@@ -30,7 +30,7 @@ const VariantClasses: Record<
   subtle: {
     root: "rounded-xl border border-border bg-surface-muted p-2",
     preview: "mb-2 w-full rounded-xl border border-border bg-surface p-2",
-    toolbar: "mt-0 flex w-full items-end gap-2 pt-3",
+    toolbar: "mt-0 flex w-full flex-wrap items-end gap-2 pt-3 md:flex-nowrap",
     newButton:
       "rounded-md border border-border px-3 py-2 text-sm text-text-muted transition-colors duration-base ease-base hover:bg-surface hover:text-text",
     input:
@@ -87,7 +87,7 @@ export default function ChatInput({
   }
 
   return (
-    <div className={clsx("flex flex-col", styles.root)}>
+    <div className={clsx("flex flex-col ", styles.root)}>
       {previews.length > 0 ? (
         <div className={clsx(styles.preview, "grid w-full grid-cols-2 gap-2 sm:grid-cols-3")}>
           {previews.map(({ file: f, url }) => (
@@ -131,29 +131,26 @@ export default function ChatInput({
             }
           }}
         />
-        <div className="flex items-center justify-between gap-3 p-2">
-
-
-          <button
-            type="button"
-            onClick={submit}
-            disabled={disabled || !message.trim()}
-            className={clsx(
-              styles.sendButton,
-              "min-w-22 rounded-lg px-4 py-2 text-sm font-semibold transition-all",
-              "enabled:hover:-translate-y-0.5 enabled:hover:shadow-sm",
-              "disabled:cursor-not-allowed disabled:opacity-50"
-            )}
-          >
-            Send
-          </button>
-          {toolbar ? (
-            <div className="flex items-center gap-2 text-sm text-text-muted">{toolbar}</div>
-          ) : (
-            <div />
+        <button
+          type="button"
+          onClick={submit}
+          disabled={disabled || !message.trim()}
+          className={clsx(
+            styles.sendButton,
+            "min-w-22 rounded-lg px-4 py-2 text-sm font-semibold transition-all",
+            "enabled:hover:-translate-y-0.5 enabled:hover:shadow-sm",
+            "disabled:cursor-not-allowed disabled:opacity-50"
           )}
-        </div>
+        >
+          Send
+        </button>
+        {toolbar ? (
+          <div className="flex items-center justify-end gap-2 text-sm text-text-muted">{toolbar}</div>
+        ) : (
+          <div />
+        )}
       </div>
     </div>
+
   );
 }

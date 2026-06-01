@@ -20,20 +20,21 @@ const mathJaxConfig = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ChatProvider>
-      <LectureProvider>
-      <GenContentProvider>
-        <MathJaxContext config={mathJaxConfig}>
-          <AuthProvider>
-            <ThemeProvider theme={theme}>
-              <ToastContainer position="top-right" autoClose={3000} />
-              <App />
-            </ThemeProvider>
-          </AuthProvider>
-        </MathJaxContext>
-      </GenContentProvider>
-      </LectureProvider>
-    </ChatProvider>
+    <MathJaxContext config={mathJaxConfig}>
+      <ChatProvider>
+        <LectureProvider>
+          <GenContentProvider>
+
+            <AuthProvider>
+              <ThemeProvider theme={theme}>
+                <ToastContainer position="top-right" autoClose={3000} />
+                <App />
+              </ThemeProvider>
+            </AuthProvider>
+
+          </GenContentProvider>
+        </LectureProvider>
+      </ChatProvider></MathJaxContext>
 
   </StrictMode>,
 )

@@ -4,6 +4,49 @@ import { ChatAPI } from "../../../services";
 import type { ThreadCreate } from "../../../services";
 import { getSupportedToolMessage } from "../tools/utils";
 import { TOOL_POLICY } from "../tools/types";
+import type { ThreadStore, ThreadState } from "./types";
+import { create } from "zustand";
+
+const initialThreadState: ThreadState = {
+  threadId: null,
+  thread: null,
+  threads: [],
+};
+export const useThreadStore = create<ThreadStore>()((set) => ({
+  ...initialThreadState,
+
+  setThreadId: (threadId) =>
+    set({
+      threadId,
+    }),
+
+  setThread: (thread) => {
+    set({
+      thread,
+      threadId: thread?.id ?? null,
+    });
+  },
+
+  setThreads: (threads) =>
+    set({
+      threads,
+    }),
+
+  clearThread: () =>
+    set({
+      threadId: null,
+      thread: null,
+    }),
+
+  updateThread: (update) =>
+    set((state) => ({
+      thread: state.thread?.id === update.id ? update : state.thread,
+
+      threads: state.threads.map((thread) =>
+        thread.id === update.id ? update : thread,
+      ),
+    })),
+}));
 
 const initialState: ChatState = {
   assistantId: "agent_me116",
@@ -11,6 +54,8 @@ const initialState: ChatState = {
   thread: null,
   workspaceItems: [],
   sessionKey: 0,
+  loading: false,
+  error: null,
 };
 
 export function createChatStore(preloaded?: Partial<ChatState>) {
@@ -26,7 +71,6 @@ export function createChatStore(preloaded?: Partial<ChatState>) {
         workspaceItems: val === state.theadId ? state.workspaceItems : [],
       })),
     setThread: async (id, token) => {
-      
       try {
         const t = await ChatAPI.getThread(id, token);
         set(() => ({ thread: t }));
