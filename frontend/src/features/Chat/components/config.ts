@@ -1,4 +1,4 @@
-import type { MessageType, ToolType } from "../instance";
+import type { MessageType, ToolType } from "../models/chat.types";
 
 export const MessageBaseStyle = `
   px-4 py-2.5
