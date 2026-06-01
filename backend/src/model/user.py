@@ -56,7 +56,7 @@ class User(SQLModel, table=True):
     first_name: str | None = None
     last_name: str | None = None
     username: str | None = None
-    email: str
+    email: EmailStr = SqlField(unique=True)
     roles: list["Role"] = SQLMODELRelationship(
         back_populates="users",
         link_model=UserRoleLink,

@@ -6,6 +6,8 @@ export default function RoleRedirect({ allow }: { allow: ValidRole[] }) {
     const userRoles = userData?.roles
     const location = useLocation();
 
+    console.log("User roles", userRoles)
+
 
 
     if (loading) return <div className="flex items-center justify-center py-20">Loading...</div>;
