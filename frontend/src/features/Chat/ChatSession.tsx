@@ -2,14 +2,13 @@ import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
 import { AIMessage, HumanMessage, ToolMessage } from "langchain";
 import { useEffect } from "react";
-
+import { prepareMessage } from "./utils";
 import { streamURL } from "../../config/api";
 import { ChatContainer, ChatInput, } from "./components";
 import { AIBubble, HumanBubble } from "./components/ChatMessage";
 import { useChatContext } from "./instance";
 import ConversationStarters from "../ConversationStarters/components/ConverstationStarter";
 import { useThreadStore } from "./instance/store";
-import { blobURLtoBase64 } from "./utils";
 import { ChatSessionHeader } from "./components/ChatSessionHeader";
 import { useGetThread } from "./hooks/hooks";
 
@@ -47,21 +46,9 @@ export default function ChatSession() {
 
   const handleSubmit = async (
     text: string,
-    images?: string[] | null | undefined,
+    images?: string[],
   ) => {
-    type ContentItem =
-      | { type: "text"; text: string }
-      | { type: "image_url"; image_url: { url: string } };
-
-    const content: ContentItem[] = [{ type: "text", text }];
-
-    if (images && images.length > 0) {
-      const b64 = await blobURLtoBase64(images[0]);
-      content.push({
-        type: "image_url",
-        image_url: { url: b64 },
-      });
-    }
+    const content = prepareMessage(text, images)
     stream.submit({
       messages: [
         {

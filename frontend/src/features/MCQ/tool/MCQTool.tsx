@@ -1,7 +1,8 @@
 import type { ToolMessage } from "langchain";
-import type { RenderPreviewProps, ToolExecute } from "../../Chat/tools";
+import type { RenderPreviewProps, ToolExecute } from "../../Tools";
 
-import { extractToolPayload } from "../../Chat/utils";
+
+import { extractToolPayload } from "../../Tools/utils";
 import { RenderMCQList } from "../components/MCQ";
 
 import { toast } from "react-toastify";

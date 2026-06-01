@@ -2,8 +2,8 @@ import { createStore } from "zustand";
 import type { ChatState, ChatStore, WorkspaceItem } from "./types";
 import { ChatAPI } from "../../../services";
 import type { ThreadCreate } from "../../../services";
-import { getSupportedToolMessage } from "../tools/utils";
-import { TOOL_POLICY } from "../tools/types";
+import { getSupportedToolMessage } from "../../Tools/utils";
+import { TOOL_POLICY } from "../../Tools";
 import type { ThreadStore, ThreadState } from "./types";
 import { create } from "zustand";
 

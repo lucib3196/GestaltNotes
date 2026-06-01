@@ -1,15 +1,21 @@
 import type { ReactNode } from "react";
-import type { ContentBlock, ToolMessage } from "langchain";
-import type { TextPayload, ImagePayload, MessagePayload, ChildChunk, CleanableContent } from "./models/chat.types";
-
-
+import type { ContentBlock } from "langchain";
+import type {
+  TextPayload,
+  ImagePayload,
+  MessagePayload,
+  ChildChunk,
+  CleanableContent,
+} from "./models/chat.types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
 function isTextPayload(value: unknown): value is TextPayload {
-  return isRecord(value) && value.type === "text" && typeof value.text === "string";
+  return (
+    isRecord(value) && value.type === "text" && typeof value.text === "string"
+  );
 }
 
 function isImagePayload(value: unknown): value is ImagePayload {
@@ -121,9 +127,7 @@ export function cleanChildren(
   if (isChildChunkArray(content)) {
     const hasImage = content.some(
       (item) =>
-        typeof item !== "string" &&
-        "type" in item &&
-        item.type === "image_url",
+        typeof item !== "string" && "type" in item && item.type === "image_url",
     );
 
     if (!hasImage) {
@@ -133,7 +137,11 @@ export function cleanChildren(
     return content.map((item, index) => {
       if (typeof item === "string") return <div key={index}>{item}</div>;
       if (isMessagePayload(item)) return renderMessagePayload(item, index);
-      if ("type" in item && item.type === "text" && typeof item.text === "string") {
+      if (
+        "type" in item &&
+        item.type === "text" &&
+        typeof item.text === "string"
+      ) {
         return <div key={index}>{item.text}</div>;
       }
       return null;
@@ -155,34 +163,19 @@ export async function blobURLtoBase64(blobUrl: string): Promise<string> {
   });
 }
 
-
-export function extractToolPayload(msg: ToolMessage): unknown {
-  // First try with the artifact
-  const artifact = msg.artifact
-  if (artifact) {
-    if (typeof artifact === "object")
-      return artifact
-    else if (typeof artifact === "string")
-      return JSON.parse(artifact)
-    else return artifact
+export async function prepareMessage(
+  text: string,
+  images?: string[],
+): Promise<MessagePayload[]> {
+  // Append text to send to llm
+  const content: MessagePayload[] = [{ type: "text", text }];
+  if (images && images.length > 0) {
+    const urls = await Promise.all(images.map(async (v) => blobURLtoBase64(v)));
+    const imagePayload: ImagePayload[] = urls.map((url) => ({
+      type: "image_url",
+      image_url: { url },
+    }));
+    content.concat(imagePayload);
   }
-  const c = msg.content;
-  const cleaned = normalizeContent(c);
-  let text: string | null = null;
-
-  try {
-    if (Array.isArray(cleaned)) {
-      text = cleaned
-        .map((b: any) => (typeof b?.text === "string" ? b.text : ""))
-        .join("")
-        .trim();
-    } else if (typeof cleaned === "string") {
-      text = cleaned;
-    }
-
-    if (!text) return c;
-    return JSON.parse(text);
-  } catch {
-    return c;
-  }
+  return content;
 }

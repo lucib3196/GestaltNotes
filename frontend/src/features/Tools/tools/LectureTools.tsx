@@ -1,5 +1,5 @@
 import type { ToolMessage } from "langchain";
-import type { RenderPreviewProps } from "./types";
+import type { RenderPreviewProps } from "../models/tools.types";
 import { getDownloadURL } from "firebase/storage";
 import { useEffect, useMemo, useState } from "react";
 import { getStorage, ref } from "firebase/storage";
