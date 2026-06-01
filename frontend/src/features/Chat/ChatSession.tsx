@@ -93,6 +93,7 @@ export default function ChatSession() {
   );
   if (loading) return <div>Loading</div>;
   if (error) return <div>Error</div>;
+
   return (
     <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
       <div className="shrink-0  border-border px-3 py-2 sm:px-4">
@@ -117,6 +118,7 @@ export default function ChatSession() {
         >
           <MathJax dynamic>
             {stream.messages.map((msg) => {
+              console.log("msg",msg)
               if (msg.type === "human") {
                 return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
               }
