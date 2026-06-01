@@ -128,6 +128,7 @@ export default function MyGeneratedContentPage() {
                                 >
                                     Reset
                                 </button>
+
                             </div>
                         </section>
                     );

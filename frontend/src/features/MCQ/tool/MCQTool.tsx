@@ -19,8 +19,9 @@ export function parseMultipleChoice(
     msg: ToolMessage,
 ): MultipleChoiceQuestionToolResponse {
     // Eventually add tigher guard railes for this
-    console.log("Parsing multiple choice")
+    console.log("Parsing multiple choice",)
     const raw = extractToolPayload(msg) as MultipleChoiceQuestionToolResponse;
+    console.log("Parsed", raw)
     return raw;
 }
 

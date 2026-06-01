@@ -118,7 +118,6 @@ export default function ChatSession() {
         >
           <MathJax dynamic>
             {stream.messages.map((msg) => {
-              console.log("msg",msg)
               if (msg.type === "human") {
                 return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
               }
