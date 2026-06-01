@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from "@mui/material/styles";
 import { AuthProvider } from './context/AuthProvider.tsx';
 import { MathJaxContext } from "better-react-mathjax";
-import { ChatProvider } from "./features/Chat/instance";
 import { ToastContainer } from "react-toastify";
 import { GenContentProvider } from './features/GeneratedContent/instance/context.tsx';
 import { LectureProvider } from './features/Lectures/index.ts';
@@ -21,20 +20,20 @@ const mathJaxConfig = {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <MathJaxContext config={mathJaxConfig}>
-      <ChatProvider>
-        <LectureProvider>
-          <GenContentProvider>
 
-            <AuthProvider>
-              <ThemeProvider theme={theme}>
-                <ToastContainer position="top-right" autoClose={3000} />
-                <App />
-              </ThemeProvider>
-            </AuthProvider>
+      <LectureProvider>
+        <GenContentProvider>
 
-          </GenContentProvider>
-        </LectureProvider>
-      </ChatProvider></MathJaxContext>
+          <AuthProvider>
+            <ThemeProvider theme={theme}>
+              <ToastContainer position="top-right" autoClose={3000} />
+              <App />
+            </ThemeProvider>
+          </AuthProvider>
+
+        </GenContentProvider>
+      </LectureProvider>
+    </MathJaxContext>
 
   </StrictMode>,
 )

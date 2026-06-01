@@ -52,7 +52,6 @@ export function MarkdownFile({ f }: { f: FileEntry }) {
         );
     }
 
-    console.log("Formatted content", content)
 
     return (
         <article className="rounded-lg border border-border bg-surface-strong p-6 shadow-soft">

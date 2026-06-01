@@ -31,11 +31,13 @@ export type CleanableContent = ContentBlock[] | string;
 
 export type UnknownRecord = Record<string, unknown>;
 
-
-
 export type ImageUrl = {
   url: string;
 };
+
+export type ChildChunk = ContentBlock | MessagePayload | string;
+
+// Payloads for sending messages
 
 export type TextPayload = {
   type: "text";
@@ -48,4 +50,3 @@ export type ImagePayload = {
 };
 
 export type MessagePayload = TextPayload | ImagePayload;
-export type ChildChunk = ContentBlock | MessagePayload | string;

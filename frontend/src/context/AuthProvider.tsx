@@ -43,7 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             try {
                 const token = await getIdToken(fbUser);
-                console.log(token)
                 const data = await UserManager.getCurrentUser(token);
                 setUser(fbUser);
                 setUserData(data);

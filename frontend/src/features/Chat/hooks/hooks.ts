@@ -11,20 +11,21 @@ export const useGenerateThread = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const setThread = useThreadStore((s) => s.setThread);
 
   const generateThread = async (data: ThreadCreate) => {
     setLoading(true);
     setError(null);
     if (!user) {
       setError("User not authenticated");
-
       return;
     }
 
     try {
       const token = await user?.getIdToken();
       const thread = await ChatAPI.createThread(data, token);
-      const setThread = useThreadStore((s) => s.setThread);
+
+      
       setThread(thread);
     } catch (error) {
       let errMsg = `Error generating thread: ${error}`;

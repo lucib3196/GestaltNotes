@@ -1,14 +1,14 @@
-import type { ToolName } from "./types";
+import type { ToolName } from "../models/tools.types";
 import { useAuth } from "../../../context";
 import type { BaseMessage } from "langchain";
-import { isToolMessage } from "./utils";
-import { tools } from "./tools";
+import { isToolMessage } from "../utils";
+import { tools } from "../toolDefinition";
 import { useState, useMemo } from "react";
 import { useRef } from "react";
-import { useThreadStore } from "../instance/store";
+import { useThreadStore } from "../../Chat/instance/store";
 
 // This is meant to only render the tool call once it is succesful
-export default function RenderToolCalls({ msg }: { msg: BaseMessage }) {
+export function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     const { user } = useAuth();
     const threadId = useThreadStore((s) => s.threadId);
     const requestIdRef = useRef<string | null>(null);

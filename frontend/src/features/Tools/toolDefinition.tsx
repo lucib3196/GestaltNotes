@@ -1,6 +1,6 @@
-import type { ToolName, ToolDefinition } from "./types"
-import { parseLectureTool, LecturePreview } from "./LectureTool"
-import { parseMultipleChoice, RenderMCQ, saveResponse } from "../../MCQ"
+import type { ToolName, ToolDefinition } from "./models/tools.types"
+import { parseLectureTool, LecturePreview } from "./tools/LectureTools"
+import { parseMultipleChoice, RenderMCQ, saveResponse } from "../MCQ"
 
 
 export const tools: Partial<Record<ToolName, ToolDefinition<any>>> = {

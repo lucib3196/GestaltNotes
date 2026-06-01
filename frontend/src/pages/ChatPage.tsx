@@ -2,18 +2,19 @@ import { ChatSession } from "../features/Chat";
 import { useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 
-import { useChatContext } from "../features/Chat/instance";
 import { ChatSideBar } from "../features/Chat";
 import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import StarterView from "../features/ConversationStarters/components/StarterView";
 import { TabButton } from "../components/Button";
 import { WorkspaceItemsCarousel } from "../features/Tools";
-type SectionTab = "resource" | "practice" | "final_review";
+import WorkspaceInfo from "../features/Tools/components/WorkspaceInfo";
+import { useWorkspaceStore } from "../features/Tools/instance/store";
+type SectionTab = "resource" | "practice" | "final_review" | "info";
 
 export function ResourceSection() {
     const [activeTab, setActiveTab] = useState<SectionTab>("resource");
 
-    const workspaceItems = useChatContext((s) => s.workspaceItems);
+    const workspaceItems = useWorkspaceStore((s) => s.workspaceItems);
 
     const sources = workspaceItems.filter(
         (v) => v.tool === "retrieve_me116_lecture",
@@ -23,6 +24,12 @@ export function ResourceSection() {
     return (
         <section className="flex h-full min-h-0 flex-col rounded-lg  p-3">
             <div className="mb-3 flex gap-2">
+                <TabButton
+                    onClick={() => setActiveTab("info")}
+                    active={activeTab === "info"}
+                >
+                    Info
+                </TabButton>
                 <TabButton
                     onClick={() => setActiveTab("resource")}
                     active={activeTab === "resource"}
@@ -41,6 +48,7 @@ export function ResourceSection() {
                 >
                     Final Review Outline
                 </TabButton>
+
             </div>
 
             <div className="h-full rounded-md p-3 text-sm text-text">
@@ -64,6 +72,7 @@ export function ResourceSection() {
                     />
                 )}
                 {activeTab === "final_review" && <StarterView />}
+                {activeTab === "info" && <WorkspaceInfo />}
             </div>
         </section>
     );
