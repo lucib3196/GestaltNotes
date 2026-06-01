@@ -1,7 +1,4 @@
 import type { Thread } from "../../../services";
-import type { ThreadCreate } from "../../../services";
-
-import type { ThreadUpdate } from "../../../services/chat/types";
 
 // Workspace item
 
@@ -40,10 +37,12 @@ export type AssistantStore = AssistantState & AssistantActions;
 
 export type ChatState = {
   assistantId: AssistantID;
+  externalMessage?: string | null;
 };
 export type ChatActions = {
   // Assistant Management
   setAssistant: (val: AssistantID) => void;
+  setExternalMessage: (val: string | null) => void;
 };
 
 export type ChatStore = ChatState & ChatActions;

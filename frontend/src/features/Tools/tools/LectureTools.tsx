@@ -1,19 +1,9 @@
 import type { ToolMessage } from "langchain";
 import type { RenderPreviewProps } from "../models/tools.types";
+import type { LectureArtifact } from "../models/lecture.types";
 import { getDownloadURL } from "firebase/storage";
 import { useEffect, useMemo, useState } from "react";
 import { getStorage, ref } from "firebase/storage";
-
-type MinimalLecturePayload = {
-  lecture_title: string;
-  source_markdown?: string;
-  source_pdf?: string;
-};
-
-type LectureArtifact = {
-  id?: string;
-  metadata: MinimalLecturePayload;
-};
 
 function isLectureArtifact(value: unknown): value is LectureArtifact {
   if (!value || typeof value !== "object") return false;

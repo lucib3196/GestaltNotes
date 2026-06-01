@@ -6,7 +6,6 @@ export default function RoleRedirect({ allow }: { allow: ValidRole[] }) {
     const userRoles = userData?.roles
     const location = useLocation();
 
-    console.log("User roles", userRoles)
 
 
 

@@ -1,8 +1,7 @@
-
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
 import { AIMessage, HumanMessage, ToolMessage } from "langchain";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { streamURL } from "../../config/api";
 import ConversationStarters from "../ConversationStarters/components/ConverstationStarter";
 import { useWorkspaceStore } from "../Tools/instance/store";
@@ -10,21 +9,24 @@ import { AIBubble, HumanBubble } from "./components/ChatMessage";
 import { ChatSessionHeader } from "./components/ChatSessionHeader";
 import { ChatContainer, ChatInput } from "./components";
 import { useGenerateThread, useGetThread } from "./hooks/hooks";
-import { useChatContext } from "./instance";
-import { useThreadStore } from "./instance/store";
+
+import { useThreadStore, useChatStore } from "./instance/store";
 import { prepareMessage } from "./utils";
-
-
 
 export default function ChatSession() {
   // State
   const currentThread = useThreadStore((s) => s.thread);
-  const assistantId = useChatContext((s) => s.assistantId);
+  const assistantId = useChatStore((s) => s.assistantId);
+  const externalMessage = useChatStore((s) => s.externalMessage);
+  const setExternalMessage = useChatStore((s) => s.setExternalMessage)
   const appendToolMessage = useWorkspaceStore((s) => s.appendToolMessage);
-  const clearWorkspaceItems = useWorkspaceStore((s) => s.clearWorkspace)
+  const clearWorkspaceItems = useWorkspaceStore((s) => s.clearWorkspace);
   // Hooks
   const { generateThread } = useGenerateThread();
   const { loading, error } = useGetThread();
+
+
+
 
   const stream = useStream({
     threadId: currentThread?.id || null,
@@ -32,18 +34,15 @@ export default function ChatSession() {
     assistantId: assistantId,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     onThreadId: async (id: string) => {
-      if (currentThread?.id === id) return;
-      generateThread({
+      await generateThread({
         thread_id: id,
       });
+
     },
   });
 
-  const handleSubmit = async (
-    text: string,
-    images?: string[],
-  ) => {
-    const content = await prepareMessage(text, images)
+  const handleSubmit = async (text: string, images?: string[]) => {
+    const content = await prepareMessage(text, images);
 
     stream.submit({
       messages: [
@@ -57,9 +56,9 @@ export default function ChatSession() {
   useEffect(() => {
     if (!currentThread) return;
     if (currentThread) {
-      clearWorkspaceItems()
+      clearWorkspaceItems();
     }
-  }, [currentThread?.id])
+  }, [currentThread?.id]);
 
   useEffect(() => {
     stream.messages.forEach((msg) => {
@@ -69,20 +68,14 @@ export default function ChatSession() {
     });
   }, [stream.messages, appendToolMessage, currentThread?.id]);
 
-  const generateQuizToolBar = (
-    <div className="flex items-center">
-      <button
-        type="button"
-        onClick={() => {
-          void handleSubmit("Generated a mcq_question with 3 questions");
-        }}
-        disabled={stream.isLoading || stream.messages.length < 1}
-        className="rounded-md bg-blue-300 px-3.5 py-2.5 text-sm font-semibold text-bg transition-all duration-base ease-base hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Generate Quiz
-      </button>
-    </div>
-  );
+  useEffect(() => {
+    if (!externalMessage) return;
+    handleSubmit(externalMessage)
+    setExternalMessage(null)
+    // handleSubmit(externalMessage);
+  }, [externalMessage]);
+
+
   if (loading) return <div>Loading</div>;
   if (error) return <div>Error</div>;
 
@@ -97,14 +90,15 @@ export default function ChatSession() {
           bordered={false}
           scrollTrigger={stream.messages.length}
           starters={
-            stream.messages.length === 0 ? <ConversationStarters onSelect={(v) => handleSubmit(v)} /> : null
+            stream.messages.length === 0 ? (
+              <ConversationStarters onSelect={(v) => handleSubmit(v)} />
+            ) : null
           }
           input={
             <ChatInput
               handleSubmit={handleSubmit}
               disabled={stream.isLoading}
               multiModal={true}
-              toolbar={generateQuizToolBar}
             />
           }
         >

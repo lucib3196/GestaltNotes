@@ -1,4 +1,3 @@
-import { createStore } from "zustand";
 import type { ChatState, ChatStore } from "./types";
 
 import type { ThreadStore, ThreadState } from "./types";
@@ -45,14 +44,16 @@ export const useThreadStore = create<ThreadStore>()((set) => ({
     })),
 }));
 
-const initialState: ChatState = {
+const initialChatState: ChatState = {
   assistantId: "agent_me116",
 };
 
-export function createChatStore(preloaded?: Partial<ChatState>) {
-  return createStore<ChatStore>()((set) => ({
-    ...preloaded,
-    ...initialState,
-    setAssistant: (agent) => set({ assistantId: agent }),
-  }));
-}
+export const useChatStore = create<ChatStore>()((set) => ({
+  ...initialChatState,
+
+  setAssistant: (assistant) =>
+    set({
+      assistantId: assistant,
+    }),
+  setExternalMessage: (val) => set({ externalMessage: val }),
+}));
