@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
-import type { WorkspaceItem } from "../../Chat/instance/types";
+import type { WorkspaceItem } from "../models/workspace.types";
 import { RenderToolCalls } from "./RenderToolCalls";
 import { NavStepButton } from "../../../components/Button";
 

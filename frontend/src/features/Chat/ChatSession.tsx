@@ -1,32 +1,27 @@
+
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
 import { AIMessage, HumanMessage, ToolMessage } from "langchain";
 import { useEffect } from "react";
-import { prepareMessage } from "./utils";
 import { streamURL } from "../../config/api";
-import { ChatContainer, ChatInput, } from "./components";
-import { AIBubble, HumanBubble } from "./components/ChatMessage";
-import { useChatContext } from "./instance";
 import ConversationStarters from "../ConversationStarters/components/ConverstationStarter";
-import { useThreadStore } from "./instance/store";
+import { useWorkspaceStore } from "../Tools/instance/store";
+import { AIBubble, HumanBubble } from "./components/ChatMessage";
 import { ChatSessionHeader } from "./components/ChatSessionHeader";
-import { useGetThread } from "./hooks/hooks";
-
-import { useGenerateThread } from "./hooks/hooks";
+import { ChatContainer, ChatInput } from "./components";
+import { useGenerateThread, useGetThread } from "./hooks/hooks";
+import { useChatContext } from "./instance";
+import { useThreadStore } from "./instance/store";
+import { prepareMessage } from "./utils";
 
 
 
 export default function ChatSession() {
-
-
   // State
   const currentThread = useThreadStore((s) => s.thread);
-
   const assistantId = useChatContext((s) => s.assistantId);
-  const appendToolMessage = useChatContext((s) => s.appendToolMessage);
-  const clearWorkspaceItems = useChatContext((s) => s.clearWorkspaceItems)
-
-
+  const appendToolMessage = useWorkspaceStore((s) => s.appendToolMessage);
+  const clearWorkspaceItems = useWorkspaceStore((s) => s.clearWorkspace)
   // Hooks
   const { generateThread } = useGenerateThread();
   const { loading, error } = useGetThread();
