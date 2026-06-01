@@ -82,6 +82,7 @@ export type ChatActions = {
   getUserThreads: (token: string) => Promise<Thread[]>;
   onThreadId: (val: string, token: string) => Promise<void>;
   // Tool management
+  clearWorkspaceItems: ()=>void;
   setWorkspaceItems: (item: WorkspaceItem) => void;
   appendToolMessage: (msg: ToolMessage) => void;
 };

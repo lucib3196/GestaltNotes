@@ -136,6 +136,8 @@ export function createChatStore(preloaded?: Partial<ChatState>) {
     // Future would be to add more comprehensive logic
     setWorkspaceItems: (item) =>
       set((state) => ({ workspaceItems: [...state.workspaceItems, item] })),
+
+    clearWorkspaceItems: ()=>set(()=>({workspaceItems: []})), 
     appendToolMessage: (msg) => {
       // Validate message and ensure that it is what i want to capture
       const parsed = getSupportedToolMessage(msg);

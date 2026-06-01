@@ -3,7 +3,7 @@ import { HEAT_TRANSFER_CONVERSATION_STARTERS } from "../constants/heatTransferSt
 import type { StarterStore, StarterState } from "./types";
 
 const initialState: StarterState = {
-  selectedState: null,
+  selectedState: HEAT_TRANSFER_CONVERSATION_STARTERS.at(-1) ?? null,
   validStates: HEAT_TRANSFER_CONVERSATION_STARTERS,
 };
 
