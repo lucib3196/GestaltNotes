@@ -36,7 +36,7 @@ export default function ChatSideBar() {
 
       {!collapsed && (
         <>
-          <div className="mb-2 flex items-center justify-between px-1">
+          <div className="mb-2 flex flex-col items-center justify-between px-1">
             <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-text-soft">
               Chats
             </h2>
