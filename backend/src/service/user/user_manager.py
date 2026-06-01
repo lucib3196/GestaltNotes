@@ -58,16 +58,26 @@ class UserManager:
             if not user:
                 raise UserCreationError("[DB] Failed to create user")
 
-            display_name = f"{user_orm.email.split('@')[0]}_{str(user_orm.id)[:4]}"
+            display_name = f"{user_orm.email.split('@')[0]}_{str(user.id)[:4]}"
+            
+            print(f"Created user with {user.id}")
+            if not user.id:
+                raise UserCreationError(f"DB Failed to create user no id present")
             # First create the user in the firebase auth
-            auth.create_user(
+            u = auth.create_user(
                 email=data.email,
                 display_name=display_name,
                 uid=str(user.id),
                 password=data.password,
             )
+            print ("Got u", u)
+            print(f"Adding role to user {role}")
             if role:
                 await self.set_user_roles(user_orm, role)
+            elif not role:
+                # By default users should be of student
+                print("Added role student")
+                await self.set_user_roles(user_orm, "student")
 
             if force_password_reset:
                 auth.set_custom_user_claims(
@@ -98,6 +108,7 @@ class UserManager:
         if not user:
             raise UserNotFoundError(user_id=str(id))
         roles = user.roles
+
         cleaned_roles: list[VALID_ROLES] = []
         for r in roles:
             if r.name in self._VALIDE_ROLE_SET:
@@ -141,7 +152,6 @@ class UserManager:
         if r not in user.roles:
             user.roles.append(r)
         try:
-            self._session.add(user)
             self._session.commit()
             self._session.flush()
             return user
