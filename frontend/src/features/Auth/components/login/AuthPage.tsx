@@ -4,9 +4,8 @@ import LogInForm from "./Login";
 import { SignUpForm } from "./SignUp";
 import PasswordResetForm from "./PasswordResetForm";
 import { Navigate } from "react-router-dom";
-
 export default function AuthPage() {
-    const { mode, user, userData, setMode } = useAuth();
+    const { mode,userData, setMode, user } = useAuth();
 
     useEffect(() => {
         if (userData?.force_password_reset) {
@@ -14,9 +13,9 @@ export default function AuthPage() {
         }
     }, [userData?.force_password_reset, setMode]);
 
+    if (user && mode !=="passwordReset"){
+        return <Navigate to="/home" replace />;
 
-    if (user && mode !== "passwordReset") {
-        return <Navigate to="/login" replace />;
     }
 
     return (

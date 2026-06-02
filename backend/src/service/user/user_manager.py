@@ -9,6 +9,7 @@ from src.core import logger
 from src.data.role import RoleDB
 from src.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
 
+
 from .exceptions import (
     UserCreationError,
     UserDeletionError,
@@ -59,7 +60,7 @@ class UserManager:
                 raise UserCreationError("[DB] Failed to create user")
 
             display_name = f"{user_orm.email.split('@')[0]}_{str(user.id)[:4]}"
-            
+
             print(f"Created user with {user.id}")
             if not user.id:
                 raise UserCreationError(f"DB Failed to create user no id present")
@@ -70,8 +71,6 @@ class UserManager:
                 uid=str(user.id),
                 password=data.password,
             )
-            print ("Got u", u)
-            print(f"Adding role to user {role}")
             if role:
                 await self.set_user_roles(user_orm, role)
             elif not role:
@@ -85,6 +84,49 @@ class UserManager:
                 )
 
             return user
+        except UserServiceException:
+            raise
+        except Exception as e:
+            if "EMAIL_EXISTS" in str(e):
+                raise UserCreationError("User with this email already exists.") from e
+            raise UserServiceException(
+                f"[UserManager] Failed to create user {e}"
+            ) from e
+
+    async def safe_create(
+        self,
+        data: UserCreate,
+        role: VALID_ROLES | None = "student",
+        force_password_reset: bool = True,
+    ):
+        try:
+            user = await self._udb.get_user_by_email(data.email)
+
+            if not user:
+                return self.create_user(data, role, force_password_reset)
+            else:
+                print("Safe Adding")
+                display_name = f"{user.email.split('@')[0]}_{str(user.id)[:4]}"
+
+                u = auth.create_user(
+                    email=data.email,
+                    display_name=display_name,
+                    uid=str(user.id),
+                    password=data.password,
+                )
+                assert u
+                if role:
+                    await self.set_user_roles(user, role)
+                elif not role:
+                    # By default users should be of student
+                    print("Added role student")
+                    await self.set_user_roles(user, "student")
+
+                if force_password_reset:
+                    auth.set_custom_user_claims(
+                        str(user.id), {"force_password_reset": True}
+                    )
+                return user
         except UserServiceException:
             raise
         except Exception as e:
