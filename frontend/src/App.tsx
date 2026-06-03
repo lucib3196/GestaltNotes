@@ -5,7 +5,7 @@ import { AuthPage, PasswordResetGuard, RoleRedirect, UnauthorizedPage } from "./
 import LectureNotes from "./pages/LectureNotes";
 import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
-import LectureJson from "./features/Lectures/components/JsonParser";
+
 
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
                             <Route path="/chat" element={<ChatPage />} />
                             <Route path="/my_content" element={<MyGeneratedContentPage />} />
                             <Route path="/lecture" element={<LectureNotes />} />
-                            <Route path="/lecture_test" element={<LectureJson />} />
+                           
                         </Route>
 
                         <Route element={<RoleRedirect allow={["educator"]} />}>
