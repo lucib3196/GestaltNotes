@@ -16,15 +16,15 @@ export function groupByParent(files: FileEntry[]) {
 
 export async function listFilesRecursive(
   folderRef: StorageReference,
+  excludedExt?: string[],
 ): Promise<FileEntry[]> {
   const result = await listAll(folderRef);
-  const excludedExt = ["json"];
   const filesHere = await Promise.all(
     result.items
       .filter((item) => {
         const name = item.fullPath.split("/").at(-1) ?? "";
         const ext = name.includes(".") ? name.split(".").pop() : "";
-        return !excludedExt.includes(ext ?? "");
+        return !excludedExt?.includes(ext ?? "");
       })
       .map(async (item) => {
         return {
