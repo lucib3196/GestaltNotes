@@ -53,7 +53,7 @@ export default function LectureJson({ file }: { file?: FileEntry | null }) {
 
     return [
       {
-        type: "analysis",
+        type: "analysis" as const,
         item: lecture.lecture_summary,
       },
       ...lecture.derivations.map((item) => ({
