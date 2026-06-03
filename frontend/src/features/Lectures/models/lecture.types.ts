@@ -28,7 +28,8 @@ export const ExtractedQuestionSchema = z.object({
   topics: z.array(z.string()).default([]),
   options: z.array(OptionSchema).nullable().default(null),
   reference: PageRangeSchema.nullable().default(null),
-  solution: z.array(z.string()).default([]),
+
+  solution: z.union([z.string(), z.array(z.string())]).default([])
 });
 
 export const ConceptualQuestionSchema = z.object({
@@ -54,6 +55,7 @@ export const LecturePayloadSchema = z.object({
   derivations: z.array(DerivationSchema).default([]),
   extracted_questions: z.array(ExtractedQuestionSchema).default([]),
   conceptual_questions: z.array(ConceptualQuestionSchema).default([]),
+  questions: z.array(ExtractedQuestionSchema).default([]),
 });
 
 export type PageRange = z.infer<typeof PageRangeSchema>;

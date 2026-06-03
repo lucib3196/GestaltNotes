@@ -5,7 +5,7 @@ import { AuthPage, PasswordResetGuard, RoleRedirect, UnauthorizedPage } from "./
 import LectureNotes from "./pages/LectureNotes";
 import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
-
+import { HomeworkNotes } from "./pages/LectureNotes";
 
 
 function App() {
@@ -25,6 +25,8 @@ function App() {
                             <Route path="/chat" element={<ChatPage />} />
                             <Route path="/my_content" element={<MyGeneratedContentPage />} />
                             <Route path="/lecture" element={<LectureNotes />} />
+                            <Route path="/homework" element={<HomeworkNotes />} />
+                           
                            
                         </Route>
 
