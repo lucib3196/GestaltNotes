@@ -60,7 +60,6 @@ export function useParsedLecture(target?: FileEntry|null) {
             try {
                 const text = await (await fetch(target.url)).text();
                 const parsed = JSON.parse(text);
-                console.log("Parsing")
                 const lectureParsed = LecturePayloadSchema.parse(parsed);
                 setLecture(lectureParsed);
 

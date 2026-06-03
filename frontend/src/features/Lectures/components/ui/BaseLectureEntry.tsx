@@ -1,12 +1,16 @@
 import type { ReactNode } from "react";
 import type { PageRange } from "../../models/lecture.types";
 import { MathJax } from "better-react-mathjax";
+
+type BaseLectureEntryVariant = "bordered" | "borderless";
+
 type BaseLectureEntryProps = {
   title: string;
   eyebrow?: string;
   subtitle?: string;
   reference?: PageRange | null;
   tags?: string[];
+  variant?: BaseLectureEntryVariant;
   children?: ReactNode;
 };
 
@@ -16,11 +20,17 @@ export default function BaseLectureEntry({
   subtitle,
   reference,
   tags = [],
+  variant = "bordered",
   children,
 }: BaseLectureEntryProps) {
+  const cardClassName =
+    variant === "bordered"
+      ? "rounded-lg border border-border bg-surface p-4 text-text"
+      : "rounded-lg bg-surface p-4 text-text";
+
   return (
     <MathJax>
-    <article className="rounded-lg border border-border bg-surface p-4 text-text">
+    <article className={cardClassName}>
       <div className="flex flex-col gap-2">
         {eyebrow && (
           <p className="text-xs font-semibold uppercase text-accent">

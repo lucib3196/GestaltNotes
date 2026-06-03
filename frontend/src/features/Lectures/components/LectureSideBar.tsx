@@ -11,7 +11,6 @@ type LectureSideBarProps = {
     selected: FileEntry | null,
     setSelected: (val: FileEntry) => void;
 };
-
 function LectureDropDown({
     parent,
     files,
@@ -82,10 +81,16 @@ export default function LectureSideBar({
             <div className="flex h-full min-h-0 flex-col">
                 <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
                     {sidebarOpen && (
-                        <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
-                            Course Notes
-                        </h2>
+                        <div>
+                            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
+                                Course Notes
+                            </h2>
+
+                        </div>
                     )}
+
+                    {/* Info */}
+
                     <button
                         type="button"
                         aria-label={buttonLabel}
