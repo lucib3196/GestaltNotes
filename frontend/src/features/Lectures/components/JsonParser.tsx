@@ -10,21 +10,21 @@ import type { ParsedLecture } from "../models/lecture.types";
 
 type NormalizedLectureItem =
   | {
-      type: "analysis";
-      item: ParsedLecture["lecture_analysis"];
-    }
+    type: "analysis";
+    item: ParsedLecture["lecture_analysis"];
+  }
   | {
-      type: "derivation";
-      item: ParsedLecture["derivations"][number];
-    }
+    type: "derivation";
+    item: ParsedLecture["derivations"][number];
+  }
   | {
-      type: "conceptualQuestion";
-      item: ParsedLecture["conceptual_questions"][number];
-    }
+    type: "conceptualQuestion";
+    item: ParsedLecture["conceptual_questions"][number];
+  }
   | {
-      type: "extractedQuestion";
-      item: ParsedLecture["extracted_questions"][number];
-    };
+    type: "extractedQuestion";
+    item: ParsedLecture["extracted_questions"][number];
+  };
 
 const renderItem = (entry: NormalizedLectureItem | null, index: number) => {
   if (!entry) return;
@@ -68,13 +68,18 @@ export default function LectureJson({ file }: { file?: FileEntry | null }) {
         type: "extractedQuestion" as const,
         item,
       })),
-    ];
+      ...lecture.questions.map((item) => ({
+        type: "extractedQuestion" as const,
+        item,
+      })),
+    ].filter((v) => v.item);
   }, [lecture]);
   const totalItems = normalizedItems.length;
 
   const hasItem = totalItems > 0;
   const clampedIndex = hasItem ? Math.min(index, totalItems - 1) : 0;
   const currentItem = hasItem ? normalizedItems[clampedIndex] : null;
+
 
   useEffect(() => {
     if (!hasItem) {

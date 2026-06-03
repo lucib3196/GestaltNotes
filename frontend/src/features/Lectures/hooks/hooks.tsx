@@ -8,7 +8,7 @@ import {
     type ParsedLecture,
 } from "../models/lecture.types";
 
-export function useCourseFiles() {
+export function useCourseFiles(path?: string) {
     const [files, setFiles] = useState<FileEntry[]>([]);
 
     const [loading, setLoading] = useState(true);
@@ -17,8 +17,8 @@ export function useCourseFiles() {
     const storage = getStorage();
 
     const rootRef = useMemo(() => {
-        return ref(storage, "me116_spring_2026/lectures/");
-    }, []);
+        return ref(storage, path);
+    }, [path]);
 
     // Load up the files on entry
 
@@ -45,7 +45,7 @@ export function useCourseFiles() {
 }
 
 
-export function useParsedLecture(target?: FileEntry|null) {
+export function useParsedLecture(target?: FileEntry | null) {
     const [lecture, setLecture] = useState<ParsedLecture | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -53,7 +53,7 @@ export function useParsedLecture(target?: FileEntry|null) {
     useEffect(() => {
         let cancelled = false;
         const loadTarget = async () => {
-            
+
             if (!target) return;
             if (getFileName(target) !== "output.json") return;
 

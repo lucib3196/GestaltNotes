@@ -9,8 +9,15 @@ export default function ExtractedQuestions({
   question,
 }: ExtractedQuestionsProps) {
 
+  let formatted = ""
+  if (Array.isArray(question.solution)) {
+    formatted = question.solution.join("\n\n").replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  }
+  else if (typeof question.solution === "string") {
+    formatted = question.solution.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 
-  const formatted = question.solution.join("\n\n").replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  }
+
 
   return (
     <BaseLectureEntry
