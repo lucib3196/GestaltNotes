@@ -1,4 +1,4 @@
-type ToolActionCardVariant = "sky" | "emerald" | "amber" | "rose" | "slate";
+export type ToolActionCardVariant = "sky" | "emerald" | "amber" | "rose" | "slate";
 
 type ToolActionCardProps = {
     title: string;

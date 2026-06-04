@@ -60,6 +60,7 @@ export default function ChatSession() {
   useEffect(() => {
     stream.messages.forEach((msg) => {
       if (msg.type === "tool") {
+      
         appendToolMessage(msg as ToolMessage);
       }
     });
@@ -100,7 +101,9 @@ export default function ChatSession() {
           }
         >
           <MathJax dynamic>
+            
             {stream.messages.map((msg) => {
+  
               if (msg.type === "human") {
                 return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
               }

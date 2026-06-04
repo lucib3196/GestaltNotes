@@ -14,12 +14,13 @@ export type SectionTab = "resource" | "practice" | "final_review" | "info";
 
 export function ResourceSection() {
     const workspaceItems = useWorkspaceStore((s) => s.workspaceItems);
-    const currentTab = useWorkspaceStore((s)=>s.currentSection)
-    const setTab = useWorkspaceStore((s)=>s.setCurrentSection)
+    const currentTab = useWorkspaceStore((s) => s.currentSection)
+    const setTab = useWorkspaceStore((s) => s.setCurrentSection)
 
     const sources = workspaceItems.filter(
-        (v) => v.tool === "retrieve_me116_lecture",
+        (v) => v.tool === "retrieve_me116_lecture" || "retrieve_me116_homework",
     );
+
     const practice = workspaceItems.filter((v) => v.tool === "generate_mcq");
 
     return (
