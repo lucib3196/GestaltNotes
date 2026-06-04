@@ -7,12 +7,12 @@ Create Date: 2026-02-17 15:26:46.799374
 """
 
 from collections.abc import Sequence
-from sqlalchemy import inspect
-from alembic import context
+
 import sqlalchemy as sa
 import sqlmodel
+from sqlalchemy import inspect
 
-from alembic import op
+from alembic import context, op
 
 # revision identifiers, used by Alembic.
 revision: str = "9c3d7f290ef2"
@@ -42,7 +42,6 @@ def upgrade() -> None:
     )
 
     if "ix_role_name" not in existing_indexes:
-
         with op.batch_alter_table("role", schema=None) as batch_op:
             batch_op.create_index(batch_op.f("ix_role_name"), ["name"], unique=True)
 

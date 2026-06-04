@@ -10,7 +10,7 @@ from src.core.settings import get_settings
 from .exceptions import DatabaseConfigError
 
 app_settings = get_settings()
-
+print(app_settings.ENV)
 
 # Define choosing the settings
 try:

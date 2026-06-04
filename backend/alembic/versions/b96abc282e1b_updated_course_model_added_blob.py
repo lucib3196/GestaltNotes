@@ -9,10 +9,9 @@ Create Date: 2026-02-17 13:51:15.381262
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-import sqlmodel
-from alembic import context
-from alembic import op
 from sqlalchemy import inspect
+
+from alembic import context, op
 
 # revision identifiers, used by Alembic.
 revision: str = "b96abc282e1b"
@@ -22,7 +21,7 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    
+
     if context.is_offline_mode():
         print("Skipping inspection in offline mode")
         return

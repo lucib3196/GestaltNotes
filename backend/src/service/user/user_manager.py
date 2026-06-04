@@ -2,6 +2,7 @@ from typing import Union, cast
 from uuid import UUID
 
 from firebase_admin import auth
+from firebase_admin.auth import UserNotFoundError as FBUserNotFoundError, UserRecord
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
@@ -9,8 +10,9 @@ from src.core import logger
 from src.data.role import RoleDB
 from src.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
 
-
 from .exceptions import (
+    AuthDrift,
+    FirebaseAuthError,
     UserCreationError,
     UserDeletionError,
     UserNotFoundError,
@@ -51,85 +53,44 @@ class UserManager:
             UserCreationError: If the database user cannot be created.
             UserServiceException: If any part of the creation workflow fails.
         """
+        user_id: ID | None = None
         try:
             user_orm = User(
                 first_name=data.first_name, last_name=data.last_name, email=data.email
             )
             user = await self._udb.create_user(data=user_orm)
-            if not user:
+            if not user or not user.id:
                 raise UserCreationError("[DB] Failed to create user")
 
-            display_name = f"{user_orm.email.split('@')[0]}_{str(user.id)[:4]}"
+            user_id = user.id
+            display_name = f"{data.email.split('@')[0]}_{str(user_id)[:4]}"
 
-            print(f"Created user with {user.id}")
-            if not user.id:
-                raise UserCreationError(f"DB Failed to create user no id present")
-            # First create the user in the firebase auth
-            u = auth.create_user(
+            logger.debug(f"Created user with {user_id}")
+            fb_user: UserRecord = auth.create_user(
                 email=data.email,
                 display_name=display_name,
-                uid=str(user.id),
+                uid=str(user_id),
                 password=data.password,
             )
+
+            if fb_user.uid != str(user_id):
+                raise AuthDrift(
+                    f"Internal database user and firebase user do not contain matching id fb: {fb_user.uid} db: {user_id}"
+                )
             if role:
-                await self.set_user_roles(user_orm, role)
-            elif not role:
-                # By default users should be of student
-                print("Added role student")
-                await self.set_user_roles(user_orm, "student")
+                await self.set_user_roles(user, role)
 
             if force_password_reset:
                 auth.set_custom_user_claims(
-                    str(user.id), {"force_password_reset": True}
+                    str(user_id), {"force_password_reset": True}
                 )
 
             return user
-        except UserServiceException:
-            raise
         except Exception as e:
-            if "EMAIL_EXISTS" in str(e):
-                raise UserCreationError("User with this email already exists.") from e
-            raise UserServiceException(
-                f"[UserManager] Failed to create user {e}"
-            ) from e
+            if user_id is not None:
+                await self.rollback_user(user_id)
+                await self.ensure_user_rolled_back(user_id)
 
-    async def safe_create(
-        self,
-        data: UserCreate,
-        role: VALID_ROLES | None = "student",
-        force_password_reset: bool = True,
-    ):
-        try:
-            user = await self._udb.get_user_by_email(data.email)
-
-            if not user:
-                return self.create_user(data, role, force_password_reset)
-            else:
-                print("Safe Adding")
-                display_name = f"{user.email.split('@')[0]}_{str(user.id)[:4]}"
-
-                u = auth.create_user(
-                    email=data.email,
-                    display_name=display_name,
-                    uid=str(user.id),
-                    password=data.password,
-                )
-                assert u
-                if role:
-                    await self.set_user_roles(user, role)
-                elif not role:
-                    # By default users should be of student
-                    print("Added role student")
-                    await self.set_user_roles(user, "student")
-
-                if force_password_reset:
-                    auth.set_custom_user_claims(
-                        str(user.id), {"force_password_reset": True}
-                    )
-                return user
-        except UserServiceException:
-            raise
-        except Exception as e:
             if "EMAIL_EXISTS" in str(e):
                 raise UserCreationError("User with this email already exists.") from e
             raise UserServiceException(
@@ -171,8 +132,65 @@ class UserManager:
     async def delete_user(self, id: ID) -> None:
         try:
             await self._udb.delete_user(id)
-        except Exception:
-            raise UserDeletionError("Failed to delete user")
+        except Exception as e:
+            raise UserDeletionError(f"Failed to delete user {e}") from e
+
+    async def rollback_user(self, id: ID) -> None:
+        errors: list[Exception] = []
+
+        try:
+            await self.rollback_db(id)
+        except Exception as e:
+            errors.append(e)
+
+        try:
+            await self.rollback_fb(id)
+        except Exception as e:
+            errors.append(e)
+
+        if errors:
+            raise UserDeletionError(
+                f"Failed to rollback user {id}: {'; '.join(str(e) for e in errors)}"
+            )
+
+    async def ensure_user_rolled_back(self, id: ID) -> None:
+        db_user = await self._udb.get_user(id)
+        if db_user:
+            raise UserDeletionError(f"Rollback failed: database user {id} still exists")
+
+        try:
+            auth.get_user(str(id))
+        except FBUserNotFoundError:
+            return
+        except Exception as e:
+            raise FirebaseAuthError(
+                f"Failed to verify firebase rollback for user {id}: {e}"
+            ) from e
+
+        raise UserDeletionError(f"Rollback failed: firebase user {id} still exists")
+
+    async def rollback_db(self, id: ID) -> bool:
+        try:
+            await self._udb.delete_user(id)
+            return True
+        except UserNotFoundError:
+            return True
+        except Exception as e:
+            raise UserDeletionError(f"Failed to delete user {e}")
+
+    async def rollback_fb(self, id: ID) -> bool:
+        try:
+            user: UserRecord = auth.get_user(str(id))
+            auth.delete_user(user.uid)
+            logger.info("Rolledback firebase user ok")
+            return True
+        except FBUserNotFoundError as e:
+            logger.info(
+                f"Attempted to delete firebase user. Firebase user with {id} does not exist"
+            )
+            return True
+        except Exception as e:
+            raise FirebaseAuthError(f"Failed to delete firebase user {e}") from e
 
     async def set_user_roles(
         self, user: Union["User", ID], role: VALID_ROLES

@@ -57,6 +57,11 @@ class UserReadError(UserServiceException):
     """Raised when user data cannot be read."""
 
 
+class FirebaseAuthError(UserServiceException):
+    """base exception for fb related auth"""
+class AuthDrift(FirebaseAuthError):
+    """base exception for fb related auth"""
+
 class DeveloperAccessDeniedError(UserServiceException, PermissionError):
     """Raised when a user is not allowed to perform a developer action."""
 

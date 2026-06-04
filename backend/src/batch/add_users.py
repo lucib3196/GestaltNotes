@@ -1,19 +1,20 @@
 import asyncio
 from pathlib import Path
 
+from sqlmodel import create_engine
+
 from src.core.database_config import Session, engine
 from src.core.settings import get_settings
-from src.service.user.user_manager import UserCreate
-from src.service.user.user_manager import UserManager
-from sqlmodel import create_engine
+from src.service.user.user_manager import UserCreate, UserManager
+
 settings = get_settings()
 print(settings.ENV)
 print(settings.DATABASE_URL)
 engine = create_engine(
-        url=settings.DATABASE_URL,
-        echo=True,
-        connect_args={},  # always a dict, never None
-    )
+    url=settings.DATABASE_URL,
+    echo=True,
+    connect_args={},  # always a dict, never None
+)
 
 data = Path(r"src/batch/batch_emails.txt").resolve().read_text()
 with Session(engine, expire_on_commit=False) as session:
