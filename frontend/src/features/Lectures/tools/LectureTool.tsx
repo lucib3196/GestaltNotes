@@ -3,7 +3,7 @@ import type { RenderPreviewProps } from "../../Tools";
 import type { HomeworkArtifact, LectureArtifact } from "../models/tool.types";
 import { LecturePdfFrame } from "../../Lectures/components/ui/PDFFrame";
 import { useEffect, useMemo, useState } from "react";
-import { getFileName } from "../utils";
+
 import { useLoadPdfs } from "../../Lectures/hooks/hooks";
 
 type SourcePdfArtifact = {
