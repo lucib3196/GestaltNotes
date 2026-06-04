@@ -5,7 +5,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from dotenv import load_dotenv
 from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -18,7 +17,7 @@ from src.core.exceptions import (
     MissingStreamURl,
 )
 
-load_dotenv()
+from .logger import logger
 
 # Points to the root directory adjust as needed
 ROOT_PATH = Path(__file__).parents[2]
@@ -33,7 +32,8 @@ class Environment(StrEnum):
 APP_ENV = os.getenv("APP_ENV", "dev").lower()
 ENV_FILES: dict[str, str] = {
     "dev": ".env.dev",
-    "testing": ".env.test",
+    "test": ".env.testing",
+    "testing": ".env.testing",
     "production": ".env.production",
     "docker": ".env.dev.docker",
 }
@@ -45,15 +45,18 @@ class AppSettings(BaseSettings):
     # Core settings
     PROJECT_NAME: str = "GestaltNotes_backend"
     ENV: Environment = Field(
-        default=Environment.DEV, validation_alias=AliasChoices("MODE", "mode")
+        default=Environment.DEV,
+        validation_alias=AliasChoices("MODE", "mode", "env", "ENV"),
     )
-    STORAGE_SERVICE: Literal["local", "cloud"] = "local"
     PROJECT_ROOT: Path | str
 
     BACKEND_CORS_ORIGINS: list[str] | str = Field(
         default=[],
         validation_alias=AliasChoices(
-            "ALLOWED_ORIGINS", "allowed_origins", "backend_cors_origins", "BACKEND_CORS_ORIGINS"
+            "ALLOWED_ORIGINS",
+            "allowed_origins",
+            "backend_cors_origins",
+            "BACKEND_CORS_ORIGINS",
         ),
     )
 
@@ -104,16 +107,18 @@ class AppSettings(BaseSettings):
         try:
             if self.FIREBASE_CRED is None:
                 raise MissingConfigError("FIREBASE_CRED must be set")
-            # If set to production the env file contains the firebase credential as a string dump
-            if self.ENV == "production":
-                self.FIREBASE_CRED = json.loads(self.FIREBASE_CRED)
-                return self
-            # In development the credential path is set
+
+            # First try loading from file
             cred_path = (Path(self.PROJECT_ROOT) / self.FIREBASE_CRED).resolve()
             if not cred_path.exists():
-                raise CredentialConfigError(f"Credential file not found: {cred_path}")
+                logger.warning(
+                    f"Credential Path not found {cred_path} attempting to resolve directly"
+                )
+                self.FIREBASE_CRED = json.loads(self.FIREBASE_CRED)
+                return self
             self.FIREBASE_CRED = json.loads(cred_path.read_text())
             return self
+
         except (MissingConfigError, CredentialConfigError):
             raise
         except json.JSONDecodeError as e:
@@ -176,7 +181,6 @@ def get_settings_pretty_print(mode: Literal["str", "json"] = "json") -> str:
     safe_settings = {
         "project_name": app_settings.PROJECT_NAME,
         "environment": app_settings.ENV.value,
-        "storage_service": app_settings.STORAGE_SERVICE,
         "deployment": {
             "is_production": app_settings.ENV == Environment.PRODUCTION,
             "uses_emulators": bool(
@@ -207,3 +211,4 @@ def get_settings_pretty_print(mode: Literal["str", "json"] = "json") -> str:
 
 if __name__ == "__main__":
     print(get_settings_pretty_print())
+    print(get_settings().DATABASE_URL)

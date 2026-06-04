@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
+
 from src.core.logger import logger
 from src.model import MCQV1, GeneratedMCQ, MCQResponseV1
 from src.service.generated_content.exceptions import (
