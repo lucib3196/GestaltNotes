@@ -107,18 +107,16 @@ class AppSettings(BaseSettings):
         try:
             if self.FIREBASE_CRED is None:
                 raise MissingConfigError("FIREBASE_CRED must be set")
-
-            # First try loading from file
-            cred_path = (Path(self.PROJECT_ROOT) / self.FIREBASE_CRED).resolve()
-            if not cred_path.exists():
-                logger.warning(
-                    f"Credential Path not found {cred_path} attempting to resolve directly"
-                )
+            # If set to production the env file contains the firebase credential as a string dump
+            if self.ENV == "production":
                 self.FIREBASE_CRED = json.loads(self.FIREBASE_CRED)
                 return self
+            # In development the credential path is set
+            cred_path = (Path(self.PROJECT_ROOT) / self.FIREBASE_CRED).resolve()
+            if not cred_path.exists():
+                raise CredentialConfigError(f"Credential file not found: {cred_path}")
             self.FIREBASE_CRED = json.loads(cred_path.read_text())
             return self
-
         except (MissingConfigError, CredentialConfigError):
             raise
         except json.JSONDecodeError as e:
