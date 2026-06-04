@@ -3,6 +3,8 @@ import {
   listAll,
   getDownloadURL,
 } from "firebase/storage";
+import { ToolMessage } from "langchain";
+import type { LectureArtifact, HomeworkArtifact } from "./models/tool.types";
 import type { FileEntry } from "./models/lecture.types";
 
 export function groupByParent(files: FileEntry[]) {
@@ -51,4 +53,60 @@ export function getFileExt(file: FileEntry) {
     ? filename.split(".").pop()?.toLowerCase()
     : "";
   return ext;
+}
+
+
+function isLectureArtifact(value: unknown): value is LectureArtifact {
+  if (!value || typeof value !== "object") return false;
+
+  const v = value as { id?: unknown; metadata?: unknown };
+  if (!v.metadata || typeof v.metadata !== "object") return false;
+
+  const m = v.metadata as {
+    lecture_title?: unknown;
+    source_markdown?: unknown;
+    source_pdf?: unknown;
+  };
+
+  return (
+    typeof m.lecture_title === "string" &&
+    (m.source_markdown === undefined ||
+      typeof m.source_markdown === "string") &&
+    (m.source_pdf === undefined || typeof m.source_pdf === "string")
+  );
+}
+function isHomeworkArtifact(value: unknown): value is HomeworkArtifact {
+  if (!value || typeof value !== "object") return false;
+
+  const v = value as { id?: unknown; metadata?: unknown };
+  if (!v.metadata || typeof v.metadata !== "object") return false;
+
+  const m = v.metadata as {
+    course?: unknown;
+    source_markdown?: unknown;
+    source_pdf?: unknown;
+  };
+
+  return (
+    typeof m.course === "string" &&
+    (m.source_markdown === undefined ||
+      typeof m.source_markdown === "string") &&
+    (m.source_pdf === undefined || typeof m.source_pdf === "string")
+  );
+}
+
+export function parseLectureTool(msg: ToolMessage): LectureArtifact[] {
+  const artifacts = Array.isArray(msg.artifact)
+    ? msg.artifact.filter(isLectureArtifact)
+    : [];
+
+  return artifacts;
+}
+
+export function parseHomeworkTool(msg: ToolMessage): HomeworkArtifact[] {
+  const artifacts = Array.isArray(msg.artifact)
+    ? msg.artifact.filter(isHomeworkArtifact)
+    : [];
+
+  return artifacts;
 }

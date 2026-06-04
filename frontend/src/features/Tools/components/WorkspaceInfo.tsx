@@ -4,14 +4,38 @@ import type { ToolConfig } from "../models/workspaceInfo.types";
 import { useState } from "react";
 import { useWorkspaceStore } from "../instance/store";
 import type { SectionTab } from "../../../pages/ChatPage";
-
+import type { ToolActionCardVariant } from "./ui/ToolActionCard";
 const availableTools: ToolConfig[] = [
     {
         id: "generate_quiz",
-        title: "Generate Quiz",
-        hoverLabel: "Create a quiz from the current session context",
-        prompt: "Generat a medium difficulty quiz of about 3 questions based on the current session ",
-        section: "practice"
+        title: "Build a Practice Quiz",
+        hoverLabel: "Generate focused quiz questions from the current chat and study context",
+        prompt: "Create a medium-difficulty practice quiz with about 3 questions based on the current session. Include answers and brief explanations for each question.",
+        section: "practice",
+        color: "emerald"
+    },
+    {
+        id: "explain_previous_homework",
+        title: "Explain Homework Concepts",
+        hoverLabel: "Use AI to break down previous homework topics and connect them to core concepts",
+        prompt: "Explain Homework 1 and the core concepts it covers. Highlight the key ideas, common mistakes, and how the problems connect to the current topic.",
+        section: "resource",
+        color: "amber"
+    },
+    {
+        id: "explain_previous_homework",
+        title: "Find Related Practice",
+        hoverLabel: "Ask AI to locate homework-style questions for a specific concept",
+        prompt: "Find homework-style questions that cover conduction. Include the relevant source or context when available, then summarize what each question is testing.",
+        section: "resource",
+        color: "rose"
+    },
+    {
+        id: "retrieve_lecture",
+        title: "Retrieve Relevant Lectures",
+        hoverLabel: "Search lecture notes and explain the most relevant material with AI",
+        prompt: "Retrieve the most relevant lecture material about the main modes of heat transfer, then explain the key ideas and how they relate to each other.",
+        section: "resource"
     },
 ];
 
@@ -40,7 +64,7 @@ export default function WorkspaceInfo() {
                         title={tool.title}
                         label={tool.hoverLabel}
                         value={tool.prompt}
-                        variant="rose"
+                        variant={tool.color as ToolActionCardVariant}
                         onClick={() => handleClick(tool.prompt, tool.section)}
                     />
                 ))}

@@ -19,6 +19,8 @@ export function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     // Basics checks
     const isTool = isToolMessage(msg);
     const toolName = isTool ? msg.name : undefined;
+
+
     const tool =
         toolName && toolName in tools ? tools[toolName as ToolName] : null;
 

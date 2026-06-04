@@ -1,16 +1,21 @@
 import type { ToolMessage } from "langchain";
 
 // Tools that are specific and we want to render and get some sorth of output from
-export type ToolName = "retrieve_me116_lecture" | "generate_mcq";
+export type ToolName =
+  | "retrieve_me116_lecture"
+  | "retrieve_me116_homework"
+  | "generate_mcq";
 export const TOOL_NAMES: ToolName[] = [
   "retrieve_me116_lecture",
   "generate_mcq",
+  "retrieve_me116_homework"
 ] as const;
 export const TOOL_POLICY: Record<
   ToolName,
   "replace" | "append" | "replace_and_push"
 > = {
   retrieve_me116_lecture: "replace_and_push",
+  retrieve_me116_homework: "replace_and_push",
   generate_mcq: "append",
 };
 
