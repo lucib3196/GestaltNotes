@@ -23,7 +23,6 @@ def initialize_firebase_app():
         # -----------------------------
         # Handle Emulator Mode
         # -----------------------------
-
         if app_settings.ENV == "production":
             os.environ.pop("FIREBASE_AUTH_EMULATOR_HOST", None)
             os.environ.pop("STORAGE_EMULATOR_HOST", None)
@@ -39,10 +38,6 @@ def initialize_firebase_app():
                 raise FirebaseInitializationError(
                     "STORAGE_EMULATOR_HOST must be set in dev"
                 )
-        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = (
-            app_settings.FIREBASE_AUTH_EMULATOR_HOST
-        )  # type: ignore
-        os.environ["STORAGE_EMULATOR_HOST"] = app_settings.STORAGE_EMULATOR_HOST  # type: ignore
 
         # -----------------------------
         # Load credentials
@@ -65,6 +60,8 @@ def initialize_firebase_app():
         raise RuntimeError(f"Failed to initialize Firebase: {e}")
 
 
+if __name__ == "__main__":
+    fb = initialize_firebase_app()
 if __name__ == "__main__":
     fb = initialize_firebase_app()
     print(fb)
