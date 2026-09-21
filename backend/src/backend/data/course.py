@@ -1,7 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from src.model.course import Course, CourseData
+from backend.model.course import Course, CourseData
 
 from . import ID, convert_uuid, logger
 

@@ -5,15 +5,15 @@ from fastapi.exceptions import HTTPException
 from fastapi.routing import APIRouter
 from pydantic import BaseModel
 
-from src.model.generated_content import MCQV1, GeneratedMCQ, MCQResponseV1
-from src.service.generated_content.exceptions import (
+from backend.model.generated_content import MCQV1, GeneratedMCQ, MCQResponseV1
+from backend.service.generated_content.exceptions import (
     GeneratedContentBatchSaveError,
     GeneratedContentPersistenceError,
     GeneratedContentRetrievalError,
     GeneratedContentValidationError,
     UnsupportedSchemaVersionError,
 )
-from src.web.user.dependencies import CurrentUser
+from backend.web.user.dependencies import CurrentUser
 
 from .dependencies import GenMCQDependency
 

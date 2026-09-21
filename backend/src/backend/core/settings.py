@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from src.core.exceptions import (
+from backend.core.exceptions import (
     CredentialConfigError,
     EmulatorConfigError,
     InvalidConfigError,
@@ -17,7 +17,7 @@ from src.core.exceptions import (
 )
 
 # Points to the root directory adjust as needed
-ROOT_PATH = Path(__file__).parents[2]
+ROOT_PATH = Path(__file__).parents[3]
 
 
 class Environment(StrEnum):
@@ -33,6 +33,7 @@ ENV_FILES: dict[str, str] = {
     "testing": ".env.testing",
 }
 env_file = ROOT_PATH / ENV_FILES.get(APP_ENV, ".env.dev")
+print("Env file", env_file)
 load_dotenv(env_file, override=False)
 
 

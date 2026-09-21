@@ -1,6 +1,6 @@
 from firebase_admin import auth
 
-from src.core import initialize_firebase_app
+from backend.core import initialize_firebase_app
 
 initialize_firebase_app()
 

@@ -3,9 +3,9 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from starlette import status
 
-from src.core import logger
-from src.service.generated_content import GeneratedMCQService
-from src.web.dependencies import SessionDep
+from backend.core import logger
+from backend.service.generated_content import GeneratedMCQService
+from backend.web.dependencies import SessionDep
 
 
 def get_mcq_service(session: SessionDep) -> GeneratedMCQService:

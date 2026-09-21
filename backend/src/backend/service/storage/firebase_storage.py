@@ -3,7 +3,7 @@ from pathlib import Path
 
 from firebase_admin import storage
 
-from src.core.firebase import initialize_firebase_app
+from backend.core.firebase import initialize_firebase_app
 
 Target = str | Path
 

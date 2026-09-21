@@ -6,9 +6,9 @@ from uuid import UUID, uuid4
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from src.core.logger import logger
-from src.model import MCQV1, GeneratedMCQ, MCQResponseV1
-from src.service.generated_content.exceptions import (
+from backend.core.logger import logger
+from backend.model import MCQV1, GeneratedMCQ, MCQResponseV1
+from backend.service.generated_content.exceptions import (
     GeneratedContentBatchSaveError,
     GeneratedContentDeletionError,
     GeneratedContentNotFoundError,
@@ -17,7 +17,7 @@ from src.service.generated_content.exceptions import (
     GeneratedContentValidationError,
     UnsupportedSchemaVersionError,
 )
-from src.utils import convert_uuid, to_serializable
+from backend.utils import convert_uuid, to_serializable
 
 ID = str | UUID
 

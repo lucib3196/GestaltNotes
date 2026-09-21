@@ -3,12 +3,12 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.core.database_config import SessionDep
-from src.core.logger import logger
-from src.core.settings import get_settings
-from src.data.course import CourseDB
-from src.data.message import MessageDB
-from src.service import FirebaseStorage
+from backend.database import SessionDep
+from backend.core.logger import logger
+from backend.core.settings import get_settings
+from backend.data.course import CourseDB
+from backend.data.message import MessageDB
+from backend.service import FirebaseStorage
 
 
 @lru_cache

@@ -1,1 +1,1 @@
-from src.service.storage.firebase_storage import FirebaseStorage
+from backend.service.storage.firebase_storage import FirebaseStorage

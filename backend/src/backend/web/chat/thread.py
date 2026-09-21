@@ -5,11 +5,11 @@ from fastapi.routing import APIRouter
 from langgraph_sdk import get_client
 from starlette import status
 
-from src.core.settings import get_settings
-from src.model.chat import Message, MessageCreate, Thread, ThreadCreate, ThreadUpdate
-from src.service.chat import ThreadBaseException
-from src.web.dependencies import MessageDBDependency
-from src.web.user.dependencies import CurrentUser
+from backend.core.settings import get_settings
+from backend.model.chat import Message, MessageCreate, Thread, ThreadCreate, ThreadUpdate
+from backend.service.chat import ThreadBaseException
+from backend.web.dependencies import MessageDBDependency
+from backend.web.user.dependencies import CurrentUser
 
 from .dependencies import ThreadDBDependency
 

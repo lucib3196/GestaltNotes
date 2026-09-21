@@ -5,13 +5,13 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
-
-from src.core.database_config import Session, create_db_and_tables
-from src.core.firebase import initialize_firebase_app
-from src.core.logger import logger
-from src.core.settings import get_settings
-from src.data.role import RoleDB
-from src.web import ALL_ROUTES
+from sqlmodel import Session
+from backend.database.config import initialize_database_engine
+from backend.core.firebase import initialize_firebase_app
+from backend.core.logger import logger
+from backend.core.settings import get_settings
+from backend.data.role import RoleDB
+from backend.web import ALL_ROUTES
 
 settings = get_settings()
 
@@ -19,7 +19,7 @@ settings = get_settings()
 ## Intializes the database
 @asynccontextmanager
 async def on_startup(app: FastAPI):
-    engine = create_db_and_tables()
+    engine = initialize_database_engine()
     initialize_firebase_app()
     logger.info("Created database successfully")
 
@@ -61,7 +61,7 @@ app = get_app()
 
 def main() -> None:
     uvicorn.run(
-        "src.main:app",
+        "main:app",
         host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", 8000)),
         reload=True,

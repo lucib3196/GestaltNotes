@@ -8,10 +8,10 @@ from pydantic import BaseModel
 from sqlmodel import select
 from starlette import status
 
-from src.core import logger
-from src.core.database_config import SessionDep
-from src.model.course import Course
-from src.model.user import (
+from backend.core import logger
+from backend.database import SessionDep
+from backend.model.course import Course
+from backend.model.user import (
     VALID_ROLES,
     Role,
     StudentResponse,
@@ -20,7 +20,7 @@ from src.model.user import (
     UserRead,
     UserRoleLink,
 )
-from src.service.user.exceptions import UserNotFoundError, UserServiceException
+from backend.service.user.exceptions import UserNotFoundError, UserServiceException
 
 from .dependencies import CurrentUser, FireBaseToken, UserManagerDependency
 

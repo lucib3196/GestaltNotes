@@ -6,9 +6,9 @@ from firebase_admin.auth import UserNotFoundError as FBUserNotFoundError, UserRe
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
-from src.core import logger
-from src.data.role import RoleDB
-from src.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
+from backend.core import logger
+from backend.data.role import RoleDB
+from backend.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
 
 from .exceptions import (
     AuthDrift,

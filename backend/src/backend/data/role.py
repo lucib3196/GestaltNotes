@@ -1,7 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from src.model.user import VALID_ROLES, Role
+from backend.model.user import VALID_ROLES, Role
 
 from . import logger
 

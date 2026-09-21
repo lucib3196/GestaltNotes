@@ -4,8 +4,8 @@ from typing import Annotated
 from fastapi import Depends
 from sqlmodel import Session, create_engine
 
-from src.core.logger import logger
-from src.core.settings import get_settings
+from backend.core.logger import logger
+from backend.core.settings import get_settings
 
 
 from .exceptions import DatabaseConfigError, DatabaseInitializationError

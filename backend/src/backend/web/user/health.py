@@ -2,7 +2,7 @@ import requests
 from fastapi import APIRouter, Body
 from pydantic import BaseModel
 
-from src.core import get_settings
+from backend.core import get_settings
 
 router = APIRouter(prefix="/users", tags=["health"])
 

@@ -1,4 +1,4 @@
 from uuid import UUID
 
-from src.core.logger import logger
-from src.utils.utils import ID, convert_uuid
+from backend.core.logger import logger
+from backend.utils.utils import ID, convert_uuid

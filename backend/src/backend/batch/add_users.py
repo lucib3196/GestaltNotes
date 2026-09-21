@@ -3,9 +3,9 @@ from pathlib import Path
 
 from sqlmodel import create_engine
 
-from src.core.database_config import Session, engine
-from src.core.settings import get_settings
-from src.service.user.user_manager import UserCreate, UserManager
+from backend.database import Session, engine
+from backend.core.settings import get_settings
+from backend.service.user.user_manager import UserCreate, UserManager
 
 settings = get_settings()
 print(settings.ENV)

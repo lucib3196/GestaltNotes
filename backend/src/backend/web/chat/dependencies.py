@@ -3,9 +3,9 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.core.database_config import SessionDep
-from src.core.logger import logger
-from src.service.chat import ThreadDB
+from backend.database import SessionDep
+from backend.core.logger import logger
+from backend.service.chat import ThreadDB
 
 
 @lru_cache

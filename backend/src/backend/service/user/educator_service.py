@@ -1,7 +1,7 @@
 from sqlmodel import Session
 
-from src.model.user import User, UserCreate
-from src.service.user.user_manager import UserManager
+from backend.model.user import User, UserCreate
+from backend.service.user.user_manager import UserManager
 
 
 class EducatorServer:

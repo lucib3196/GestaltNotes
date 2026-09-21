@@ -3,9 +3,9 @@ from uuid import UUID
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from src.core.logger import logger
-from src.model.chat import Message
-from src.utils.utils import convert_uuid
+from backend.core.logger import logger
+from backend.model.chat import Message
+from backend.utils.utils import convert_uuid
 
 
 class MessageDB:
