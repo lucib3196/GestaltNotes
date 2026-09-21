@@ -44,7 +44,7 @@ jobs:
       - uses: ./.github/actions/firebase-credentials
         with:
           firebase-json: ${{ secrets.FIREBASE_JSON }}
-          credentials-path: ${{ vars.FIREBASE_JSON_PATH }}
+          credentials-path: FIREBASE_CRED.json
 
       # Start the emulator
       - uses: ./.github/actions/firebase-emulator-start
