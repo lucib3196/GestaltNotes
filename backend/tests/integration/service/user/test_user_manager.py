@@ -14,7 +14,7 @@ from tests.integration.service.user.user_examples import USERS, ROLES
 
 
 @pytest_asyncio.fixture
-async def user_manager(db_session: Session, verify_firebase_emulator) -> UserManager:
+async def user_manager(db_session: Session,firebase_app_for_tests) -> UserManager:
     await RoleDB(db_session).seed_roles()
     return UserManager(db_session)
 
