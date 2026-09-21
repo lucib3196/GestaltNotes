@@ -24,8 +24,6 @@ export const useGenerateThread = () => {
     try {
       const token = await user?.getIdToken();
       const thread = await ChatAPI.createThread(data, token);
-
-      
       setThread(thread);
     } catch (error) {
       let errMsg = `Error generating thread: ${error}`;
