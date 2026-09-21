@@ -25,21 +25,59 @@ def upgrade() -> None:
     if context.is_offline_mode():
         print("Skipping inspection in offline mode")
         return
+
     bind = op.get_bind()
     inspector = inspect(bind)
+    table_names = inspector.get_table_names()
 
-    columns = [c["name"] for c in inspector.get_columns("user")]
+    if "user" not in table_names:
+        op.create_table(
+            "user",
+            sa.Column("id", sa.Uuid(), nullable=False),
+            sa.Column("first_name", sa.String(), nullable=True),
+            sa.Column("last_name", sa.String(), nullable=True),
+            sa.Column("email", sa.String(), nullable=False),
+            sa.PrimaryKeyConstraint("id"),
+            if_not_exists=True,
+        )
+
+    if "course" not in table_names:
+        op.create_table(
+            "course",
+            sa.Column("id", sa.Uuid(), nullable=False),
+            sa.Column("name", sa.String(), nullable=False),
+            sa.Column("discipline", sa.String(), nullable=False),
+            sa.Column("blob", sa.String(), nullable=True),
+            sa.Column("description", sa.String(), nullable=True),
+            sa.Column("owner", sa.Uuid(), nullable=True),
+            sa.PrimaryKeyConstraint("id"),
+            if_not_exists=True,
+        )
+
+    inspector = inspect(bind)
+
+    user_columns = [c["name"] for c in inspector.get_columns("user")]
+    course_columns = [c["name"] for c in inspector.get_columns("course")]
 
     print("\n=== USER COLUMNS ===")
     for col in inspector.get_columns("user"):
         print(col["name"], col["type"])
 
-    if "username" not in columns:
+    print("\n=== COURSE COLUMNS ===")
+    for col in inspector.get_columns("course"):
+        print(col["name"], col["type"])
+
+    if "username" not in user_columns:
         op.add_column(
             "user",
             sa.Column("username", sa.String(), nullable=True),
         )
 
+    if "blob" not in course_columns:
+        op.add_column(
+            "course",
+            sa.Column("blob", sa.String(), nullable=True),
+        )
 
 def downgrade() -> None:
     """Downgrade schema."""
