@@ -4,7 +4,7 @@ from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
-
+from dotenv import load_dotenv
 from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,10 +14,7 @@ from src.core.exceptions import (
     InvalidConfigError,
     MissingConfigError,
     MissingLangchainAPIKey,
-    MissingStreamURl,
 )
-
-from .logger import logger
 
 # Points to the root directory adjust as needed
 ROOT_PATH = Path(__file__).parents[2]
@@ -34,11 +31,9 @@ ENV_FILES: dict[str, str] = {
     "dev": ".env.dev",
     "test": ".env.testing",
     "testing": ".env.testing",
-    "production": ".env.production",
-    "docker": ".env.dev.docker",
 }
-env_file = ENV_FILES.get(APP_ENV, ".env.dev")
-env_file = ROOT_PATH / env_file
+env_file = ROOT_PATH / ENV_FILES.get(APP_ENV, ".env.dev")
+load_dotenv(env_file, override=False)
 
 
 class AppSettings(BaseSettings):
@@ -46,7 +41,7 @@ class AppSettings(BaseSettings):
     PROJECT_NAME: str = "GestaltNotes_backend"
     ENV: Environment = Field(
         default=Environment.DEV,
-        validation_alias=AliasChoices("MODE", "mode", "env", "ENV"),
+        validation_alias=AliasChoices("ENV", "env", "MODE", "mode", "APPENV", "appenv"),
     )
     PROJECT_ROOT: Path | str
 
@@ -97,7 +92,7 @@ class AppSettings(BaseSettings):
     # Database validation
     @model_validator(mode="after")
     def validate_database(self):
-        if not self.DATABASE_URL and self.ENV != "testing":
+        if not self.DATABASE_URL:
             raise ValueError("Database URL is not set")
         return self
 
@@ -107,11 +102,9 @@ class AppSettings(BaseSettings):
         try:
             if self.FIREBASE_CRED is None:
                 raise MissingConfigError("FIREBASE_CRED must be set")
-            # If set to production the env file contains the firebase credential as a string dump
             if self.ENV == "production":
                 self.FIREBASE_CRED = json.loads(self.FIREBASE_CRED)
                 return self
-            # In development the credential path is set
             cred_path = (Path(self.PROJECT_ROOT) / self.FIREBASE_CRED).resolve()
             if not cred_path.exists():
                 raise CredentialConfigError(f"Credential file not found: {cred_path}")
@@ -144,18 +137,11 @@ class AppSettings(BaseSettings):
     ## This is assuming that langchain stream url is running locally
     @model_validator(mode="after")
     def validate_langchain_deployment(self):
-        if self.ENV == "testing":
-            return self
         # Checks based on production
         if self.ENV == "production" and not self.LANGSMITH_API_KEY:
             raise MissingLangchainAPIKey(
                 "LANGSMITH_API_KEY is required when ENV=production."
             )
-        if not self.LANGGRAPH_STREAM_URL:
-            raise MissingStreamURl(
-                f"LANGGRAPH_STREAM_URL is required but missing (ENV={self.ENV})."
-            )
-
         return self
 
     # Model configuration
@@ -194,6 +180,7 @@ def get_settings_pretty_print(mode: Literal["str", "json"] = "json") -> str:
             "database": bool(app_settings.DATABASE_URL),
             "firebase_credentials": bool(app_settings.FIREBASE_CRED),
             "storage_bucket": bool(app_settings.STORAGE_BUCKET),
+            "Langsmith Agents": bool(app_settings.LANGGRAPH_STREAM_URL) and bool(app_settings.LANGSMITH_API_KEY) 
         },
     }
 
@@ -209,4 +196,3 @@ def get_settings_pretty_print(mode: Literal["str", "json"] = "json") -> str:
 
 if __name__ == "__main__":
     print(get_settings_pretty_print())
-    print(get_settings().DATABASE_URL)

@@ -26,19 +26,6 @@ class EmulatorConfigError(ConfigError):
     """Raised when emulator config is required but missing/invalid."""
 
 
-# Database exceptions
-class DatabaseConfigError(GestaltCoreError):
-    """Raised when database configuration is invalid for the current environment."""
-
-
-class DatabaseInitializationError(GestaltCoreError):
-    """Raised when creating the database engine/session setup fails."""
-
-
-class DatabaseSessionError(GestaltCoreError):
-    """Raised for unexpected database session lifecycle failures."""
-
-
 # Firebase exceptions
 class FirebaseError(GestaltCoreError):
     """Base exception for Firebase-related failures."""

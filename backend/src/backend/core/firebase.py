@@ -62,6 +62,3 @@ def initialize_firebase_app():
 
 if __name__ == "__main__":
     fb = initialize_firebase_app()
-if __name__ == "__main__":
-    fb = initialize_firebase_app()
-    print(fb)
