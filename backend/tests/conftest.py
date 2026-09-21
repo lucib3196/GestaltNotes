@@ -4,8 +4,8 @@ import pytest
 import requests
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.core.firebase import initialize_firebase_app
-from src.core.logger import logger
+from backend.core.firebase import initialize_firebase_app
+from backend.core.logger import logger
 
 initialize_firebase_app()
 

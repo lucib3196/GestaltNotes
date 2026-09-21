@@ -1,9 +1,9 @@
 import pytest
 import pytest_asyncio
 
-from src.model.user import User, UserCreate, UserUpdate
-from src.service.user import UserDB
-from src.service.user.exceptions import UserCreationError, UserNotFoundError
+from backend.model.user import User, UserCreate, UserUpdate
+from backend.service.user import UserDB
+from backend.service.user.exceptions import UserCreationError, UserNotFoundError
 
 from user_examples import USERS
 
