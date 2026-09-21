@@ -1,0 +1,29 @@
+name: Setup Python Project
+description: Setup Python and uv
+
+inputs:
+  python-version:
+    description: Python version
+    required: false
+    default: "3.13"
+  working-dir: 
+    description: Directory to build package from
+    required: false
+    default: "."
+
+
+runs:
+  using: composite
+  steps:
+  # Installs uv for path
+    - uses: astral-sh/setup-uv@v6
+
+# Define the python version to use
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install app dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-dir }}
+      run: uv sync --locked --all-extras

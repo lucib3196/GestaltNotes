@@ -1,0 +1,60 @@
+name: Firebase Emulator
+description: Setup firebase emulator including installing java and starting emulator
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Java 21 (Temurin)
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "21"
+    - name: Verify Java installation
+      shell: bash
+      run: java -version
+    - name: Install Firebase CLI
+      shell: bash
+      run: npm install -g firebase-tools
+    - name: Create firebase.json
+      shell: bash
+      run: |
+        cat <<EOF > firebase.json
+        {
+          "emulators": {
+            "singleProjectMode": true,
+            "auth": {
+              "port": 9099
+            },
+            "storage": {
+              "port": 9199
+            },
+            "ui": {
+              "enabled": true,
+              "port": 4000
+            }
+          },
+          "storage": {
+            "rules": "storage.rules"
+          }
+        }
+        EOF
+    - name: Write firebase rules
+      shell: bash
+      run: |
+        cat <<EOF > storage.rules
+        rules_version = '2';
+
+        // Craft rules based on data in your Firestore database
+        // allow write: if firestore.get(
+        //    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+        service firebase.storage {
+          match /b/{bucket}/o {
+            match /{allPaths=**} {
+              allow read, write: if false;
+            }
+          }
+        }
+        EOF
+    - name: Start firebase emulator
+      shell: bash
+      run: firebase emulators:start --only auth,storage --project demo-test & sleep 10
