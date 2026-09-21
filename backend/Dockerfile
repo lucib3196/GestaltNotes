@@ -14,7 +14,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_PROJECT_ENVIRONMENT=/opt/venv
-
+ENV PATH="/opt/venv/bin:${PATH}"
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
