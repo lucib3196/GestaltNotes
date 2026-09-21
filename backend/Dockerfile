@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y \
 # Copy the source code into the container.
 COPY . /app
 WORKDIR /app/backend
-
+RUN uv sync --frozen --no-dev
 # Expose the port that the application listens on.
 EXPOSE 8000
 
