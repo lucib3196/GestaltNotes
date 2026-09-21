@@ -1,4 +1,4 @@
-from src.model.user import UserCreate, VALID_ROLES
+from backend.model.user import UserCreate, VALID_ROLES
 
 
 ROLES: list[VALID_ROLES] = ["admin","educator","student"]

@@ -5,16 +5,16 @@ from firebase_admin.auth import UserRecord
 from firebase_admin.auth import UserNotFoundError as FBUserNotFoundError
 from sqlmodel import Session
 
-from src.data.role import RoleDB
-from src.model.user import User, UserCreate, UserUpdate
-from src.service.user import UserManager
-from src.service.user.exceptions import UserNotFoundError
+from backend.data.role import RoleDB
+from backend.model.user import User, UserCreate, UserUpdate
+from backend.service.user import UserManager
+from backend.service.user.exceptions import UserNotFoundError
 
 from tests.integration.service.user.user_examples import USERS, ROLES
 
 
 @pytest_asyncio.fixture
-async def user_manager(db_session: Session, verify_firebase_emulator) -> UserManager:
+async def user_manager(db_session: Session,firebase_app_for_tests) -> UserManager:
     await RoleDB(db_session).seed_roles()
     return UserManager(db_session)
 

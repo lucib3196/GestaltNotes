@@ -6,8 +6,8 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.data.message import MessageDB
-from src.model.chat import Message
+from backend.data.message import MessageDB
+from backend.model.chat import Message
 
 
 def raise_error(*args, **kwargs) -> Never:

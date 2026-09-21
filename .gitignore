@@ -117,3 +117,4 @@ data_analysis/src/eda_outputs
 data_analysis/src/data_analysis/**.ipynb
 data_analysis/src/data_analysis/**.md
 
+*.env**

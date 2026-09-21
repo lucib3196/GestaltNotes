@@ -2,18 +2,19 @@ name: gestalt notes dev
 services:
   gestalt_notes_backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: backend/Dockerfile.dev
     depends_on:
       - db
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
+      ENV: dev
     env_file:
-      - ./backend/.env.dev.docker
+      - ./backend/.env.docker
     ports:
       - 8000:8000
     volumes:
-      - ./backend:/app # mount project allows for reloading
+      - ./backend:/app/backend # mount project allows for reloading
 
   # Frontend 
   gestalt_notes_frontend:
@@ -31,7 +32,7 @@ services:
   # POSTGRES DB as a volume
   db:
     image: postgres:18
-    container_name: postgres_db
+    container_name: gestalt_notes_db
     restart: always
     environment:
       POSTGRES_USER: postgres

@@ -7,8 +7,8 @@ import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
-from src.model.chat import Thread
-from src.service.chat import (
+from backend.model.chat import Thread
+from backend.service.chat import (
     ThreadCreateError,
     ThreadDB,
     ThreadNotFound,

@@ -1,0 +1,25 @@
+name: Firebase Credentials
+description: Write Firebase credentials to a file
+
+inputs:
+  firebase-json:
+    description: Firebase service account JSON
+    required: true
+
+  credentials-path:
+    description: Path where credentials should be written
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Write credentials
+      shell: bash
+      working-directory: ./backend
+      run: |
+        mkdir -p secrets
+          echo '${{ inputs.firebase-json }}' > ${{inputs.credentials-path}}
+          cd secrets
+          ls -l
+

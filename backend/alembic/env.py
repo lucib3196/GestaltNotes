@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from alembic import context
-from src.core.settings import get_settings
+from backend.settings import get_settings
 from src.model import *
 
 # Database models

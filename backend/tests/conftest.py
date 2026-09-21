@@ -4,8 +4,8 @@ import pytest
 import requests
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.core.firebase import initialize_firebase_app
-from src.core.logger import logger
+from backend.core.firebase import initialize_firebase_app
+from backend.core.logger import logger
 
 initialize_firebase_app()
 
@@ -40,21 +40,6 @@ def _clean_db(db_session, test_engine) -> None:
     SQLModel.metadata.create_all(test_engine)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def verify_firebase_emulator():
-    host = os.getenv("FIREBASE_AUTH_EMULATOR_HOST")
-
-    if not host:
-        pytest.fail(
-            "FIREBASE_AUTH_EMULATOR_HOST is not set. "
-            "Refusing to run tests against production Firebase."
-        )
-    assert "localhost" in host or "127.0.0.1" in host
-    try:
-        response = requests.get(
-            f"http://{host}/",
-            timeout=2,
-        )
-        assert response.status_code == 200
-    except Exception as exc:
-        pytest.fail(f"Firebase Auth Emulator is not reachable at {host}: {exc}")
+pytest_plugins = [
+    "tests.support.firebase"
+]
