@@ -30,8 +30,12 @@ def upgrade() -> None:
         return
     bind = op.get_bind()
     inspector = inspect(bind)
-
-    existing_indexes = {idx["name"] for idx in inspector.get_indexes("role")}
+    table_names = inspector.get_table_names()
+    existing_indexes = (
+        {idx["name"] for idx in inspector.get_indexes("role")}
+        if "role" in table_names
+        else set()
+    )
 
     op.create_table(
         "role",
