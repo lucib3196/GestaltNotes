@@ -22,12 +22,11 @@ dependencies = [
     "ruff (>=0.15.14,<0.16.0)",
     "langgraph-sdk (>=0.3.15,<0.4.0)"
 ]
-
-
+[tool.poetry]
+packages = [{ include = "backend", from = "src" }]
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
 
 [tool.ruff.lint.per-file-ignores]
 "alembic/env.py" = ["F401"]
