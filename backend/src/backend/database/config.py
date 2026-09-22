@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends
 from sqlmodel import Session, create_engine
-
+from functools import lru_cache
 from backend.core.logger import logger
 from backend.core.settings import get_settings
 
@@ -36,8 +36,12 @@ def initialize_database_engine():
             f"Error initializing database engine {e}"
         ) from e
 
+@lru_cache
+def session_cache():
+    return initialize_database_engine()
 
 def get_session() -> Generator[Session, None, None]:
+    engine = initialize_database_engine()
     """Yield a SQLModel session per request."""
     with Session(engine, expire_on_commit=False) as session:
         yield session

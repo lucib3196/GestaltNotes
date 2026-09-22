@@ -45,7 +45,7 @@ export const useThreadStore = create<ThreadStore>()((set) => ({
 }));
 
 const initialChatState: ChatState = {
-  assistantId: "agent_me116",
+  assistantId: "agent",
 };
 
 export const useChatStore = create<ChatStore>()((set) => ({

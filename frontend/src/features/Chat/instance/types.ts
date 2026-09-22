@@ -2,7 +2,7 @@ import type { Thread } from "../../../services";
 
 // Workspace item
 
-type AssistantID = "agent_me116";
+type AssistantID = "agent_me116"|"agent";
 
 // Context types
 
