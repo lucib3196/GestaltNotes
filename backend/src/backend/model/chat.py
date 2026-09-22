@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .course import Course
+    from backend.courses.models import Course
 
 
 class ThreadCreate(BaseModel):

@@ -64,6 +64,39 @@ class CourseEnrollmentService:
         await self._course_service.assert_course_owner(course_id, educator)
         return await self.enroll_student(course_id, student)
 
+    async def enroll_student_by_id_by_educator(
+        self,
+        course_id: ID,
+        student_id: ID,
+        educator: User,
+    ) -> CourseEnrollment:
+        course = await self._course_service.assert_course_owner(course_id, educator)
+        if not course.id:
+            raise CourseEnrollmentCreationError("Cannot enroll in course without id")
+
+        try:
+            enrollment = CourseEnrollment(
+                student_id=convert_uuid(student_id),
+                course_id=course.id,
+            )
+            self._session.add(enrollment)
+            self._session.commit()
+            self._session.refresh(enrollment)
+            return enrollment
+        except IntegrityError as e:
+            self._session.rollback()
+            message = (
+                f"[CourseEnrollmentService] student '{student_id}' is already "
+                f"enrolled in course '{course_id}'"
+            )
+            logger.error(message)
+            raise CourseEnrollmentAlreadyExistsError(message) from e
+        except SQLAlchemyError as e:
+            self._session.rollback()
+            message = f"[CourseEnrollmentService] failed to enroll student {e}"
+            logger.error(message)
+            raise CourseEnrollmentCreationError(message) from e
+
     async def unenroll_student(
         self,
         course_id: ID,
