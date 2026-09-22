@@ -7,8 +7,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
 from backend.core import logger
+from backend.accounts.models import User
+from backend.accounts.schema import VALID_ROLES, UserCreate, UserRead, UserUpdate
+from backend.accounts.services.user import UserDB
 from backend.data.role import RoleDB
-from backend.model.user import VALID_ROLES, User, UserCreate, UserRead, UserUpdate
 
 from .exceptions import (
     AuthDrift,
@@ -19,7 +21,6 @@ from .exceptions import (
     UserRoleLinkError,
     UserServiceException,
 )
-from .userdb import UserDB
 
 ID = str | UUID
 

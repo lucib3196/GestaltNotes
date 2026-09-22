@@ -1,6 +1,7 @@
 from uuid import UUID
 
+from backend.accounts.services.user import UserDB
+
 from .user_manager import UserManager
-from .userdb import UserDB
 
 __all__ = ["UserDB", "UserManager"]

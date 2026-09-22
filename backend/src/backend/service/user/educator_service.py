@@ -1,6 +1,7 @@
 from sqlmodel import Session
 
-from backend.model.user import User, UserCreate
+from backend.accounts.models import User
+from backend.accounts.schema import UserCreate
 from backend.service.user.user_manager import UserManager
 
 

@@ -9,10 +9,10 @@ from firebase_admin.auth import (
 )
 from starlette import status
 
+from backend.accounts.models import User
+from backend.accounts.services.user import UserDB
 from backend.database import SessionDep
 from backend.core.logger import logger
-from backend.model.user import User
-from backend.service.user import UserDB
 from backend.service.user.user_manager import UserManager
 
 bearer_scheme = HTTPBearer(auto_error=False)
