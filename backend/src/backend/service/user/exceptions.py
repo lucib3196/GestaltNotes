@@ -1,32 +1,17 @@
-class UserServiceException(Exception):
-    """Base exception for user service operations."""
-
-
-class UserUpdateError(UserServiceException):
-    """Exception when failed to update user"""
+from backend.accounts.exceptions import (
+    UserCreationError,
+    UserNotFoundError,
+    UserServiceException,
+    UserUpdateError,
+)
 
 
 class UserValidationError(UserServiceException, ValueError):
     """Raised when user input fails validation."""
 
 
-class UserNotFoundError(UserServiceException, LookupError):
-    """Raised when a user cannot be found."""
-
-    def __init__(self, user_id: str | None = None, message: str | None = None) -> None:
-        detail = message or "User not found"
-        if user_id:
-            detail = f"User '{user_id}' not found"
-        super().__init__(detail)
-        self.user_id = user_id
-
-
 class UserAlreadyExistsError(UserServiceException):
     """Raised when attempting to create a user that already exists."""
-
-
-class UserCreationError(UserServiceException):
-    """Raised when user creation fails."""
 
 
 class UserRoleLinkError(UserServiceException):

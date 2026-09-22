@@ -3,18 +3,17 @@ from uuid import UUID
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from backend.accounts.models import User
-from backend.accounts.schema import UserCreate, UserUpdate
-from backend.core import logger
-from backend.service.user.exceptions import (
+from backend.accounts.exceptions import (
     UserCreationError,
     UserNotFoundError,
     UserServiceException,
     UserUpdateError,
 )
+from backend.accounts.models import User
+from backend.accounts.schema import UserCreate, UserUpdate
+from backend.core import logger
 from backend.utils.utils import convert_uuid
-
-ID = str | UUID
+from backend.shared import ID
 
 
 class UserDB:
