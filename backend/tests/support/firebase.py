@@ -55,6 +55,8 @@ def is_firebase_enabled() -> bool:
         is_local_emulator_host(storage_emulator_host)
         and normalize_storage_emulator_host()
     )
+    
+    print("Settings", auth_emulator_configured, storage_emulator_configured)
 
     return (
         test_environment

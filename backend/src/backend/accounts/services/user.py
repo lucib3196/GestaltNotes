@@ -1,7 +1,7 @@
 from typing import cast
 from uuid import UUID
 
-from backend.data.role import RoleDB
+from backend.accounts.services.role import RoleDB
 from firebase_admin import auth
 from firebase_admin.auth import UserNotFoundError as FBUserNotFoundError
 from firebase_admin.auth import UserRecord
@@ -13,29 +13,17 @@ from backend.accounts.exceptions import (
     UserNotFoundError,
     UserServiceException,
     UserUpdateError,
+    UserDeletionError,
+    UserRoleLinkError,
+    AuthDrift,
+    FirebaseAuthError,
 )
 from backend.accounts.models import User, UserRole
 from backend.accounts.schema import UserCreate, UserRead, UserUpdate
 from backend.core import logger
 from backend.utils.utils import convert_uuid
 
-ID = str | UUID
-
-
-class UserDeletionError(UserServiceException):
-    """Raised when account deletion or rollback fails."""
-
-
-class UserRoleLinkError(UserServiceException):
-    """Raised when assigning a role to an account fails."""
-
-
-class FirebaseAuthError(UserServiceException):
-    """Raised when Firebase account operations fail."""
-
-
-class AuthDrift(FirebaseAuthError):
-    """Raised when database and Firebase user ids do not match."""
+from backend.shared.types import ID
 
 
 class AccountService:

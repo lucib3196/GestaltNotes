@@ -19,3 +19,18 @@ class UserNotFoundError(UserServiceException, LookupError):
 
 class UserCreationError(UserServiceException):
     """Raised when user creation fails."""
+
+class UserDeletionError(UserServiceException):
+    """Raised when account deletion or rollback fails."""
+
+
+class UserRoleLinkError(UserServiceException):
+    """Raised when assigning a role to an account fails."""
+
+
+class FirebaseAuthError(UserServiceException):
+    """Raised when Firebase account operations fail."""
+
+
+class AuthDrift(FirebaseAuthError):
+    """Raised when database and Firebase user ids do not match."""

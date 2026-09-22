@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 
 from backend.accounts.models import Role, UserRole
 
-from . import logger
+from backend.core import logger
 
 
 class RoleDB:
