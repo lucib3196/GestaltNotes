@@ -48,7 +48,7 @@ class Course(SQLModel, table=True):
 
 
 class CourseAccessCode(SQLModel, table=True):
-    __tablename__="course_access_code" # type: ignore
+    __tablename__ = "course_access_code"  # type: ignore
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     course_id: UUID = Field(foreign_key="course.id", index=True)
     code_hash: str = Field(unique=True, index=True)
@@ -56,6 +56,8 @@ class CourseAccessCode(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     expires_at: datetime | None = None
     uses: int = 0
+
+    course: "Course" = Relationship(back_populates="access_codes")
 
 
 class LectureNote(SQLModel, table=True):
