@@ -1,7 +1,4 @@
-import os
-
 import pytest
-import requests
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.core.firebase import initialize_firebase_app
@@ -40,6 +37,4 @@ def _clean_db(db_session, test_engine) -> None:
     SQLModel.metadata.create_all(test_engine)
 
 
-pytest_plugins = [
-    "tests.support.firebase"
-]
+pytest_plugins = ["tests.support.firebase"]

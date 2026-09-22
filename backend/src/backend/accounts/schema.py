@@ -4,8 +4,6 @@ from pydantic import BaseModel, EmailStr
 
 from backend.accounts.models import UserRole
 
-VALID_ROLES = UserRole
-
 
 class UserLogin(BaseModel):
     email: EmailStr

@@ -6,7 +6,6 @@ from .exceptions import (
 )
 from .models import Role, User, UserRole, UserRoleLink
 from .schema import (
-    VALID_ROLES,
     StudentResponse,
     UserCreate,
     UserLogin,
@@ -28,5 +27,4 @@ __all__ = [
     "UserServiceException",
     "UserUpdate",
     "UserUpdateError",
-    "VALID_ROLES",
 ]

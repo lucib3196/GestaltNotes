@@ -65,8 +65,6 @@ def is_firebase_enabled() -> bool:
     )
 
 
-
-
 @pytest.fixture(scope="session")
 def firebase_app_for_tests() -> Generator[Any]:
     if not is_firebase_enabled():

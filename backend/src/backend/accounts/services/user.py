@@ -1,6 +1,7 @@
 from typing import cast
 from uuid import UUID
 
+from backend.data.role import RoleDB
 from firebase_admin import auth
 from firebase_admin.auth import UserNotFoundError as FBUserNotFoundError
 from firebase_admin.auth import UserRecord
@@ -16,7 +17,6 @@ from backend.accounts.exceptions import (
 from backend.accounts.models import User, UserRole
 from backend.accounts.schema import UserCreate, UserRead, UserUpdate
 from backend.core import logger
-from backend.data.role import RoleDB
 from backend.utils.utils import convert_uuid
 
 ID = str | UUID

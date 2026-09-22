@@ -1,8 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from backend.accounts.models import Role
-from backend.accounts.schema import VALID_ROLES
+from backend.accounts.models import Role, UserRole
 
 from . import logger
 
@@ -11,7 +10,7 @@ class RoleDB:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    async def create_role(self, name: VALID_ROLES) -> Role:
+    async def create_role(self, name: UserRole) -> Role:
         try:
             role_orm = Role(name=name)
             self.session.add(role_orm)
@@ -24,7 +23,7 @@ class RoleDB:
             logger.error(message)
             raise ValueError(message)
 
-    async def get_role(self, name: VALID_ROLES) -> Role | None:
+    async def get_role(self, name: UserRole) -> Role | None:
         try:
             stmt = select(Role).where(Role.name == name)
             return self.session.exec(stmt).first()
@@ -35,7 +34,7 @@ class RoleDB:
             raise ValueError(message)
 
     async def seed_roles(self) -> list[Role]:
-        roles: list[VALID_ROLES] = ["educator", "student", "admin"]
+        roles: list[UserRole] = [UserRole.STUDENT, UserRole.EDUCATOR, UserRole.ADMIN]
         created_roles = []
         for r in roles:
             r_exist = await self.get_role(r)

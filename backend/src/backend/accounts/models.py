@@ -1,10 +1,9 @@
-from uuid import UUID, uuid4
-from pydantic import EmailStr
-from sqlmodel import Field
-from sqlmodel import Relationship
-from sqlmodel import SQLModel
 from enum import StrEnum
+from uuid import UUID, uuid4
+
+from pydantic import EmailStr
 from sqlalchemy import Column, Enum
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class UserRole(StrEnum):

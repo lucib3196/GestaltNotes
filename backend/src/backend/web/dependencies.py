@@ -3,11 +3,11 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from backend.database import SessionDep
 from backend.core.logger import logger
 from backend.core.settings import get_settings
 from backend.data.course import CourseDB
 from backend.data.message import MessageDB
+from backend.database import SessionDep
 from backend.service import FirebaseStorage
 
 

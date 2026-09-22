@@ -1,5 +1,6 @@
 from typing import Annotated, Any
 
+from backend.service.user.user_manager import UserManager
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin.auth import (
@@ -11,9 +12,8 @@ from starlette import status
 
 from backend.accounts.models import User
 from backend.accounts.services.user import UserDB
-from backend.database import SessionDep
 from backend.core.logger import logger
-from backend.service.user.user_manager import UserManager
+from backend.database import SessionDep
 
 bearer_scheme = HTTPBearer(auto_error=False)
 

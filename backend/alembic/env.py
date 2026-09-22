@@ -5,8 +5,8 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from backend.core.settings import get_settings
-
 from backend.database.models import *
+
 # Database models
 
 # this is the Alembic Config object, which provides

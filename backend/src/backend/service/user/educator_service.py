@@ -1,8 +1,8 @@
+from backend.service.user.user_manager import UserManager
 from sqlmodel import Session
 
 from backend.accounts.models import User
 from backend.accounts.schema import UserCreate
-from backend.service.user.user_manager import UserManager
 
 
 class EducatorServer:
