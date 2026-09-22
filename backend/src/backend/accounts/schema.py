@@ -22,7 +22,6 @@ class UserCreate(UserBase):
     password: str
     email: EmailStr
     role: UserRole = UserRole.STUDENT
-    course_id: UUID | None = None
 
 
 class UserRead(UserBase):
