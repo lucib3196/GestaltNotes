@@ -7,7 +7,6 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .course import Course
-    from .user import User
 
 
 class ThreadCreate(BaseModel):
@@ -44,8 +43,6 @@ class Thread(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    user: "User" = Relationship(back_populates="threads")
-    course: "Course" = Relationship(back_populates="threads")
     messages: list["Message"] = Relationship(back_populates="thread")
 
 

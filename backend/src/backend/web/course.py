@@ -8,7 +8,7 @@ from sqlmodel import select
 
 from backend.database import SessionDep
 from backend.model.course import Course, CourseData, LectureNote
-from backend.web.user.dependencies import EducatorDep
+from backend.web.accounts.dependencies import EducatorDep
 
 from .dependencies import CourseDBDependency, FbStorageDependency
 

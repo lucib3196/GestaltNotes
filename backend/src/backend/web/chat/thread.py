@@ -14,8 +14,8 @@ from backend.model.chat import (
     ThreadUpdate,
 )
 from backend.service.chat import ThreadBaseException
+from backend.web.accounts.dependencies import CurrentUser
 from backend.web.dependencies import MessageDBDependency
-from backend.web.user.dependencies import CurrentUser
 
 from .dependencies import ThreadDBDependency
 

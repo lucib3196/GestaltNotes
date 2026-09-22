@@ -1,7 +1,5 @@
-from typing import cast
-from uuid import UUID
+from typing import ClassVar, cast
 
-from backend.accounts.services.role import RoleDB
 from firebase_admin import auth
 from firebase_admin.auth import UserNotFoundError as FBUserNotFoundError
 from firebase_admin.auth import UserRecord
@@ -9,25 +7,25 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from backend.accounts.exceptions import (
-    UserCreationError,
-    UserNotFoundError,
-    UserServiceException,
-    UserUpdateError,
-    UserDeletionError,
-    UserRoleLinkError,
     AuthDrift,
     FirebaseAuthError,
+    UserCreationError,
+    UserDeletionError,
+    UserNotFoundError,
+    UserRoleLinkError,
+    UserServiceException,
+    UserUpdateError,
 )
 from backend.accounts.models import User, UserRole
 from backend.accounts.schema import UserCreate, UserRead, UserUpdate
+from backend.accounts.services.role import RoleDB
 from backend.core import logger
-from backend.utils.utils import convert_uuid
-
 from backend.shared.types import ID
+from backend.utils.utils import convert_uuid
 
 
 class AccountService:
-    _VALID_ROLE_SET: set[UserRole] = {
+    _VALID_ROLE_SET: ClassVar[set[UserRole]] = {
         UserRole.EDUCATOR,
         UserRole.STUDENT,
         UserRole.ADMIN,
@@ -243,12 +241,20 @@ class AccountService:
             return True
         except FBUserNotFoundError:
             logger.info(
-                "Attempted to delete firebase user. Firebase user with %s does not exist",
+                "Attempted to delete firebase user. "
+                "Firebase user with %s does not exist",
                 user_id,
             )
             return True
         except Exception as e:
             raise FirebaseAuthError(f"Failed to delete firebase user {e}") from e
+
+    def reset_password(self, user_id: ID, new_password: str) -> None:
+        try:
+            auth.update_user(uid=str(user_id), password=new_password)
+            auth.set_custom_user_claims(str(user_id), {"force_password_reset": False})
+        except Exception as e:
+            raise FirebaseAuthError(f"Failed to reset Firebase password {e}") from e
 
     async def _rollback_account_creation(self, user_id: ID) -> None:
         errors: list[Exception] = []
@@ -266,9 +272,8 @@ class AccountService:
             errors.append(e)
 
         if errors:
-            raise UserDeletionError(
-                f"Failed to rollback user {user_id}: {'; '.join(str(e) for e in errors)}"
-            )
+            message = "; ".join(str(e) for e in errors)
+            raise UserDeletionError(f"Failed to rollback user {user_id}: {message}")
 
     async def _resolve_user(self, user: User | ID) -> User:
         if isinstance(user, User):

@@ -5,22 +5,17 @@ from fastapi.responses import Response
 from fastapi.routing import APIRouter
 from firebase_admin import auth
 from pydantic import BaseModel
-from sqlmodel import select
 from starlette import status
 
-from backend.accounts.models import Role, User, UserRoleLink
+from backend.accounts.exceptions import UserNotFoundError, UserServiceException
+from backend.accounts.models import User, UserRole
 from backend.accounts.schema import (
-    VALID_ROLES,
-    StudentResponse,
     UserCreate,
     UserRead,
 )
 from backend.core import logger
-from backend.database import SessionDep
-from backend.model.course import Course
-from backend.service.user.exceptions import UserNotFoundError, UserServiceException
 
-from .dependencies import CurrentUser, FireBaseToken, UserManagerDependency
+from .dependencies import AccountServiceDependency, CurrentUser, FireBaseToken
 
 ID = UUID | str
 
@@ -37,39 +32,26 @@ class LoginRequest(BaseModel):
 
 @router.post("/")
 async def create_user(
-    user_manager: UserManagerDependency, data: UserCreate, session: SessionDep
+    account_service: AccountServiceDependency, data: UserCreate
 ) -> User:
     try:
-        user = await user_manager.create_user(data, role=data.role)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Unexpected Error User is None",
-            )
-        # TODO eventually move this logic somewhere else
-        if data.course_id and data.role == "educator":
-            course = session.get(Course, data.course_id)
-            if not course:
-                raise HTTPException(status_code=404, detail="Course not found")
-            course.educators.append(user)
-            session.commit()
-        return user
+        return await account_service.create_account(data, role=data.role)
     except HTTPException:
         raise
     except UserServiceException as e:
         raise HTTPException(status_code=400, detail=f"Failed to create user {e}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"User creation failed. {e}")
+        raise HTTPException(status_code=500, detail=f"User creation failed. {e}") from e
 
 
 @router.post("/get_current_user")
 async def get_current_user(
     current_user: CurrentUser,
     token: FireBaseToken,
-    user_manager: UserManagerDependency,
+    account_service: AccountServiceDependency,
 ) -> UserRead:
     try:
-        user = await user_manager.get_user(current_user)
+        user = await account_service.get_account(current_user)
         user.force_password_reset = token.get(
             "force_password_reset",
             False,
@@ -88,7 +70,7 @@ async def get_current_user(
 
 
 @router.post("/login")
-async def login(payload: LoginRequest):
+async def login(payload: LoginRequest) -> UserRead:
     decoded = auth.verify_id_token(payload.id_token)
     return UserRead(
         email=decoded.get("email", None),
@@ -97,13 +79,16 @@ async def login(payload: LoginRequest):
 
 
 @router.post("/password_reset/temp")
-async def password_reset(user_id: CurrentUser, update: PasswordUpdate) -> Response:
+async def password_reset(
+    account_service: AccountServiceDependency,
+    user_id: CurrentUser,
+    update: PasswordUpdate,
+) -> Response:
     try:
-        auth.update_user(uid=user_id, password=update.new_password)
-        auth.set_custom_user_claims(str(user_id), {"force_password_reset": False})
+        account_service.reset_password(user_id, update.new_password)
         return Response(status_code=200, content="Updated password okay")
-    except Exception:
-        raise HTTPException(status_code=500, detail="Failed to update password")
+    except UserServiceException as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ---------- ID-based user management
@@ -112,9 +97,7 @@ async def password_reset(user_id: CurrentUser, update: PasswordUpdate) -> Respon
 
 
 @router.get("/{id}")
-async def get_user_by_id(
-    user_manager: UserManagerDependency, id: ID
-) -> UserRead | None:
+async def get_user_by_id(account_service: AccountServiceDependency, id: ID) -> UserRead:
     """
     Retrieve a user by internal ID.
 
@@ -122,7 +105,7 @@ async def get_user_by_id(
     already known.
     """
     try:
-        return await user_manager.get_user(id)
+        return await account_service.get_account(id)
 
     except UserServiceException as e:
         raise HTTPException(
@@ -138,21 +121,21 @@ async def get_user_by_id(
 
 
 @router.delete("/{id}")
-async def delete_user_by_id(user_manager: UserManagerDependency, id: ID):
+async def delete_user_by_id(
+    account_service: AccountServiceDependency, id: ID
+) -> dict[str, str]:
     """
     Delete a user by internal ID.
 
     This endpoint is intended for backend/admin flows.
     """
     try:
-        user = await user_manager.get_user(id)
-        assert user
-        await user_manager.delete_user(id)
+        await account_service.delete_account(id)
         return {"detail": "user deleted"}
     except UserServiceException as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to retrieve user {e}",
+            detail=f"Failed to delete user {e}",
         ) from e
     except Exception as e:
         logger.exception("Failed to delete user id='%s'", id)
@@ -164,33 +147,12 @@ async def delete_user_by_id(user_manager: UserManagerDependency, id: ID):
 
 @router.post("/{id}/roles")
 async def set_user_role(
-    user_manager: UserManagerDependency, id: ID, role: VALID_ROLES
+    account_service: AccountServiceDependency, id: ID, role: UserRole
 ) -> User:
     try:
-        user = await user_manager.set_user_roles(id, role)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to add role, user is not defined",
-            )
-        return user
+        return await account_service.assign_role(id, role)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to add role {e}",
-        )
-
-
-# -----------------Other
-# These endpoints not sure if they are active or not
-#
-
-
-@router.get("/students", response_model=list[StudentResponse])
-def get_students(session: SessionDep):
-    return session.exec(
-        select(User)
-        .join(UserRoleLink, UserRoleLink.user_id == User.id)
-        .join(Role, Role.id == UserRoleLink.role_id)
-        .where(Role.name == "student")
-    ).all()
+        ) from e

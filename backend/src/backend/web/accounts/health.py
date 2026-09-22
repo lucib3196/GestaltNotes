@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import requests
 from fastapi import APIRouter, Body
 from pydantic import BaseModel
@@ -12,15 +14,21 @@ class LogInPayload(BaseModel):
     password: str
 
 
-@router.post("/login_test")
-def emulator_login(
-    login: LogInPayload = Body(
-        example={
-            "email": "user@example.com",
-            "password": "string",
-        }
+LoginBody = Annotated[
+    LogInPayload,
+    Body(
+        examples=[
+            {
+                "email": "user@example.com",
+                "password": "string",
+            }
+        ]
     ),
-):
+]
+
+
+@router.post("/login_test")
+def emulator_login(login: LoginBody) -> object:
     """Testing endpoint for login using password and email
 
     Args:
@@ -35,7 +43,10 @@ def emulator_login(
     if not emulator_host.startswith(("http://", "https://")):
         emulator_host = f"http://{emulator_host}"
     emulator_host = emulator_host.rstrip("/")
-    url = f"{emulator_host}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=fake-key"
+    url = (
+        f"{emulator_host}/identitytoolkit.googleapis.com/v1/"
+        "accounts:signInWithPassword?key=fake-key"
+    )
 
     payload = {
         "email": login.email,

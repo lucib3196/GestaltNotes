@@ -1,6 +1,5 @@
 from typing import Annotated, Any
 
-from backend.service.user.user_manager import UserManager
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin.auth import (
@@ -10,8 +9,9 @@ from firebase_admin.auth import (
 )
 from starlette import status
 
-from backend.accounts.models import User
-from backend.accounts.services.user import UserDB
+from backend.accounts.exceptions import UserNotFoundError
+from backend.accounts.models import User, UserRole
+from backend.accounts.services.user import AccountService
 from backend.core.logger import logger
 from backend.database import SessionDep
 
@@ -68,15 +68,33 @@ def get_current_user_id(
 CurrentUser = Annotated[str, Depends(get_current_user_id)]
 
 
+def get_account_service(session: SessionDep) -> AccountService:
+    """Create an AccountService scoped to the current request session."""
+    try:
+        return AccountService(session)
+    except Exception as e:
+        logger.exception("Failed to initialize AccountService")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to initialize account service",
+        ) from e
+
+
+AccountServiceDependency = Annotated[AccountService, Depends(get_account_service)]
+
+
 async def get_current_user(
     user_id: CurrentUser,
-    session: SessionDep,
+    account_service: AccountServiceDependency,
 ) -> User:
     """Load current user record from the database."""
     try:
-        user = await UserDB(session).get_user(user_id)
-    except HTTPException:
-        raise
+        return await account_service.get_account_orm(user_id)
+    except UserNotFoundError as e:
+        logger.info("Authenticated user not found in database: user_id=%s", user_id)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        ) from e
     except Exception as e:
         logger.exception(
             "Failed to load current user from database: user_id=%s", user_id
@@ -86,35 +104,13 @@ async def get_current_user(
             detail="Failed to load current user",
         ) from e
 
-    if not user:
-        logger.info("Authenticated user not found in database: user_id=%s", user_id)
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
-    return user
-
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 
-def get_user_manager(session: SessionDep) -> UserManager:
-    """Create a UserManager scoped to the current request session."""
-    try:
-        return UserManager(session)
-    except Exception as e:
-        logger.exception("Failed to initialize UserManager")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to initialize user service",
-        ) from e
-
-
-UserManagerDependency = Annotated[UserManager, Depends(get_user_manager)]
-
-
 def require_student(user: CurrentUserDep) -> User:
     """Ensure current user has student role."""
-    if not any(r.name == "student" for r in user.roles):
+    if not any(r.name == UserRole.STUDENT for r in user.roles):
         logger.info(
             "Authorization denied: student role required for user_id=%s", user.id
         )
@@ -126,7 +122,7 @@ def require_student(user: CurrentUserDep) -> User:
 
 def require_educator(user: CurrentUserDep) -> User:
     """Ensure current user has educator role."""
-    if not any(r.name == "educator" for r in user.roles):
+    if not any(r.name == UserRole.EDUCATOR for r in user.roles):
         logger.info(
             "Authorization denied: educator role required for user_id=%s", user.id
         )

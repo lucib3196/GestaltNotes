@@ -7,8 +7,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 from .user import UserCourseLink
 
-if TYPE_CHECKING:
-    from .user import Thread, User
+
 
 
 class Course(SQLModel, table=True):
@@ -21,14 +20,6 @@ class Course(SQLModel, table=True):
     description: str | None = Field(default=None)
 
     owner: UUID | None = Field(default=None, foreign_key="user.id")
-
-    threads: list["Thread"] = Relationship(back_populates="course")
-
-    educators: list["User"] = Relationship(
-        back_populates="courses",
-        link_model=UserCourseLink,
-    )
-
     lecture_notes: list["LectureNote"] = Relationship()
 
 

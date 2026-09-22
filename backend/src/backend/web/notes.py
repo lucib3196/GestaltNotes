@@ -8,8 +8,8 @@ from fastapi.routing import APIRouter
 from sqlmodel import select
 
 from backend.model.course import LectureNote
+from backend.web.accounts.dependencies import EducatorDep
 from backend.web.dependencies import FbStorageDependency, SessionDep
-from backend.web.user.dependencies import EducatorDep
 
 router = APIRouter(prefix="/notes")
 

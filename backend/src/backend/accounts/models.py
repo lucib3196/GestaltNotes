@@ -29,7 +29,7 @@ class Role(SQLModel, table=True):
         )
     )
 
-    users: list[User] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="roles",
         link_model=UserRoleLink,
     )

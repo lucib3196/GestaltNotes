@@ -13,7 +13,7 @@ from backend.service.generated_content.exceptions import (
     GeneratedContentValidationError,
     UnsupportedSchemaVersionError,
 )
-from backend.web.user.dependencies import CurrentUser
+from backend.web.accounts.dependencies import CurrentUser
 
 from .dependencies import GenMCQDependency
 
