@@ -45,7 +45,7 @@ def is_safe_firebase_project() -> bool:
 
 def is_firebase_enabled() -> bool:
     storage_tests_enabled = os.environ.get("RUN_FIREBASE_STORAGE_TESTS") == "1"
-    test_environment = os.environ.get("APP_ENV") == "test"
+    test_environment = os.environ.get("ENV") in ("test", "testing")
 
     auth_emulator_host = os.environ.get("FIREBASE_AUTH_EMULATOR_HOST")
     storage_emulator_host = os.environ.get("STORAGE_EMULATOR_HOST")
@@ -55,9 +55,16 @@ def is_firebase_enabled() -> bool:
         is_local_emulator_host(storage_emulator_host)
         and normalize_storage_emulator_host()
     )
-    
-    print("Settings", auth_emulator_configured, storage_emulator_configured)
-
+    print(
+        "Testing FB",
+        auth_emulator_configured,
+        storage_emulator_configured,
+        auth_emulator_host,
+        storage_emulator_host,
+        storage_tests_enabled,
+        test_environment,
+    )
+    print(os.environ.get("ENV"))
     return (
         test_environment
         and storage_tests_enabled
@@ -65,6 +72,11 @@ def is_firebase_enabled() -> bool:
         and storage_emulator_configured
         and is_safe_firebase_project()
     )
+
+
+@pytest.fixture
+def firebase_enabled():
+    return is_firebase_enabled()
 
 
 @pytest.fixture(scope="session")

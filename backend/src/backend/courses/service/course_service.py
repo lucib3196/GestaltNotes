@@ -16,11 +16,14 @@ from backend.courses.models import Course
 from backend.courses.schema import CourseCreate, CourseDelete, CourseUpdate
 from backend.shared.types import ID
 from backend.utils.utils import convert_uuid
+from google.cloud.storage import Bucket
+from .storage_service import CourseStorageService
 
 
 class CourseService:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, storage: CourseStorageService) -> None:
         self._session = session
+        self._storage = storage
 
     async def create_course(self, data: CourseCreate, educator: User) -> Course:
         self._assert_educator(educator)
@@ -34,11 +37,12 @@ class CourseService:
                 discipline=data.discipline,
                 description=data.description,
                 owner_id=educator.id,
-                storage_prefix=data.storage_prefix,
             )
             self._session.add(course)
             self._session.commit()
             self._session.refresh(course)
+
+            course = self._set_course_prefix(course)
             return course
         except SQLAlchemyError as e:
             self._session.rollback()
@@ -132,3 +136,26 @@ class CourseService:
     def _assert_educator(self, user: User) -> None:
         if not any(role.name == UserRole.EDUCATOR for role in user.roles):
             raise CoursePermissionError("Educator role required")
+
+
+    def _generate_course_prefix(self, course: Course):
+        try:
+            course_id = course.id
+            if not course_id:
+                raise ValueError("Cannot determine course id")
+            return self._storage.course_prefix(str(course_id))
+        except Exception as e:
+            raise ValueError("Failed", e)
+
+    def _set_course_prefix(self, course: Course):
+        try:
+            course.storage_prefix = self._generate_course_prefix(course)
+            self._session.add(course)
+            self._session.commit()
+            self._session.flush()
+            return course
+        except SQLAlchemyError as e:
+            self._session.rollback()
+            message = f"[CourseService] failed to add course storage {e}"
+            logger.error(message)
+            raise CourseCreationError(message) from e

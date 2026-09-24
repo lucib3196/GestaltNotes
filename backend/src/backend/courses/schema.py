@@ -7,14 +7,11 @@ class CourseCreate(BaseModel):
     name: str = Field(min_length=1)
     discipline: str | None = None
     description: str | None = None
-    storage_prefix: str | None = None
-
 
 class CourseUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1)
     discipline: str | None = None
     description: str | None = None
-    storage_prefix: str | None = None
 
 
 class CourseRead(BaseModel):

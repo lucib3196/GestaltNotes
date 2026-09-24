@@ -42,13 +42,7 @@ USERS: list[UserCreate] = [
 ]
 
 
-@pytest_asyncio.fixture
-async def account_service(
-    db_session: Session,
-    firebase_app_for_tests,
-) -> AccountService:
-    await RoleDB(db_session).seed_roles()
-    return AccountService(db_session)
+
 
 
 @pytest.fixture
