@@ -133,6 +133,7 @@ class FirebaseBlobStorage(BlobStorage):
             ) from e
 
     def _to_metadata(self, blob: Blob) -> BlobMetadata:
+        assert blob.name
         return BlobMetadata(
             key=blob.name,
             size=blob.size,
