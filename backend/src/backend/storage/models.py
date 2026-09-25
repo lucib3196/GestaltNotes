@@ -1,3 +1,4 @@
+from pydantic import BaseModel, Field as PydanticField
 from sqlmodel import SQLModel, Field
 from uuid import uuid4, UUID
 from enum import StrEnum
@@ -14,6 +15,11 @@ class File(SQLModel, table=True):
     size_bytes: int | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class FileUpdate(BaseModel):
+    content_type: str | None = None
+    size_bytes: int | None = PydanticField(default=None, ge=0)
 
 
 @dataclass
