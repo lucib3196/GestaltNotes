@@ -4,8 +4,8 @@ from uuid import uuid4
 import pytest
 
 from backend.accounts.models import User
-from backend.storage.models import File, FileUpdate
-from backend.storage.services.file_repository import FileRepository
+from backend.storage.repo.file_repository import FileRepository
+from backend.storage.repo.schema import File, FileUpdate
 
 
 def storage_key(name: str) -> str:

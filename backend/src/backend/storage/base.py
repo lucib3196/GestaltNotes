@@ -1,8 +1,6 @@
 from typing import Protocol
 
+
 class Storage(Protocol):
-    def __init__(self):
+    def __init__(self) -> None:
         return None
-    
-    
-    

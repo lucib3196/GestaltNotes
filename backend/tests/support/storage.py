@@ -1,6 +1,7 @@
 from pytest import fixture
-from backend.storage.services.firebase_blob import FirebaseBlobStorage
+
 from backend.core.settings import get_settings
+from backend.storage.blob.firebase import FirebaseBlobStorage
 
 
 @fixture

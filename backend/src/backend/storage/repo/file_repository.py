@@ -6,24 +6,25 @@ from sqlmodel import Session, col, select
 
 from backend.accounts.models import User
 from backend.core import logger
-from backend.storage.exceptions import (
+from backend.storage.blob.base import BlobStorage
+from backend.storage.repo.base import Repository
+from backend.storage.repo.exceptions import (
     FileCreationError,
     FileDeletionError,
     FileNotFoundError,
     FileRetrievalError,
     FileUpdateError,
 )
-from backend.storage.models import File, FileUpdate
-
-from .blob_storage import BlobStorage
+from backend.storage.repo.schema import File, FileUpdate
 
 
-class FileRepository:
-    def __init__(self, session: Session, storage: BlobStorage):
+class FileRepository(Repository[File, FileUpdate, User]):
+    def __init__(self, session: Session, storage: BlobStorage) -> None:
         self._session = session
         self._storage = storage
 
     async def create(self, file: File) -> File:
+        """Persist a file metadata record."""
         try:
             self._session.add(file)
             self._session.commit()
@@ -36,6 +37,7 @@ class FileRepository:
             raise FileCreationError(message) from e
 
     async def get(self, file_id: UUID) -> File | None:
+        """Fetch a file metadata record by id."""
         try:
             return self._session.exec(select(File).where(File.id == file_id)).first()
         except SQLAlchemyError as e:
@@ -45,6 +47,7 @@ class FileRepository:
             raise FileRetrievalError(message) from e
 
     async def update(self, file: File, update: FileUpdate) -> File:
+        """Apply allowed metadata updates and bump updated_at."""
         try:
             for key, value in update.model_dump(exclude_unset=True).items():
                 setattr(file, key, value)
@@ -62,6 +65,7 @@ class FileRepository:
             raise FileUpdateError(message) from e
 
     async def update_by_id(self, file_id: UUID, update: FileUpdate) -> File:
+        """Fetch a file metadata record by id and update it."""
         file = await self.get(file_id)
 
         if file is None:
@@ -70,6 +74,7 @@ class FileRepository:
         return await self.update(file, update)
 
     async def delete(self, file_id: UUID) -> None:
+        """Delete a file metadata record by id."""
         try:
             file = await self.get(file_id)
 
@@ -87,6 +92,7 @@ class FileRepository:
             raise FileDeletionError(message) from e
 
     async def list_by_owner(self, owner: User) -> list[File]:
+        """List file metadata records for an owner, newest first."""
         try:
             statement = (
                 select(File)

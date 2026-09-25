@@ -1,4 +1,8 @@
-from backend.storage.exceptions import (
+from firebase_admin import storage
+from google.cloud.storage.blob import Blob
+
+from backend.storage.blob.base import BlobStorage, BlobUploadData
+from backend.storage.blob.exceptions import (
     BlobDirectoryNotFoundError,
     BlobNotFoundError,
     BlobStorageDeleteError,
@@ -8,23 +12,21 @@ from backend.storage.exceptions import (
     BlobStorageUploadError,
     InvalidBlobKeyError,
 )
-from backend.storage.models import BlobMetadata
-from firebase_admin import storage
-from google.cloud.storage.blob import Blob
-
-from .blob_storage import BlobStorage, BlobUploadData
+from backend.storage.blob.schema import BlobMetadata
 
 
 class FirebaseBlobStorage(BlobStorage):
-    def __init__(self, bucket: str):
+    def __init__(self, bucket: str) -> None:
         self._bucket = storage.bucket(bucket)
 
     async def exists(self, key: str) -> bool:
+        """Return whether an exact Firebase blob exists."""
         return bool(self._bucket.get_blob(self._to_blob_key(key)))
 
     async def upload(
         self, key: str, data: BlobUploadData, content_type: str | None = None
     ) -> None:
+        """Upload data to Firebase Storage."""
         blob_key = self._to_blob_key(key)
         try:
             blob: Blob = self._bucket.blob(blob_key)
@@ -36,6 +38,7 @@ class FirebaseBlobStorage(BlobStorage):
             raise BlobStorageUploadError(f"Failed to upload blob '{blob_key}'") from e
 
     async def read(self, key: str) -> bytes:
+        """Read a Firebase blob as bytes."""
         blob_key = self._to_blob_key(key)
         try:
             blob = self._bucket.get_blob(blob_key)
@@ -48,9 +51,11 @@ class FirebaseBlobStorage(BlobStorage):
             raise BlobStorageReadError(f"Failed to read blob '{blob_key}'") from e
 
     async def download(self, key: str) -> bytes:
+        """Download a Firebase blob as bytes."""
         return await self.read(key)
 
     async def delete(self, key: str) -> None:
+        """Delete a Firebase blob when it exists."""
         blob_key = self._to_blob_key(key)
         try:
             blob = self._bucket.blob(blob_key)
@@ -60,6 +65,7 @@ class FirebaseBlobStorage(BlobStorage):
             raise BlobStorageDeleteError(f"Failed to delete blob '{blob_key}'") from e
 
     async def directory_exists(self, key: str) -> bool:
+        """Return whether a directory-like Firebase prefix has blobs."""
         directory_key = self._to_directory_key(key)
         try:
             blobs = self._bucket.list_blobs(prefix=directory_key, max_results=1)
@@ -70,6 +76,7 @@ class FirebaseBlobStorage(BlobStorage):
             ) from e
 
     async def create_directory(self, key: str) -> None:
+        """Create a Firebase placeholder blob for a directory-like prefix."""
         directory_key = self._to_directory_key(key)
         try:
             blob = self._bucket.blob(directory_key)
@@ -84,6 +91,7 @@ class FirebaseBlobStorage(BlobStorage):
         key: str,
         recursive: bool = False,
     ) -> list[BlobMetadata]:
+        """List blobs under a directory-like Firebase prefix."""
         directory_key = self._to_directory_key(key)
         try:
             blobs = self._bucket.list_blobs(
@@ -91,9 +99,7 @@ class FirebaseBlobStorage(BlobStorage):
                 delimiter=None if recursive else "/",
             )
             return [
-                self._to_metadata(blob)
-                for blob in blobs
-                if blob.name != directory_key
+                self._to_metadata(blob) for blob in blobs if blob.name != directory_key
             ]
         except Exception as e:
             raise BlobStorageDirectoryError(
@@ -101,6 +107,7 @@ class FirebaseBlobStorage(BlobStorage):
             ) from e
 
     async def delete_directory(self, key: str) -> None:
+        """Delete all Firebase blobs under a directory-like prefix."""
         directory_key = self._to_directory_key(key)
         try:
             if not await self.directory_exists(directory_key):
@@ -117,6 +124,7 @@ class FirebaseBlobStorage(BlobStorage):
             ) from e
 
     async def get_metadata(self, key: str) -> BlobMetadata:
+        """Return metadata for an exact Firebase blob."""
         blob_key = self._to_blob_key(key)
         try:
             blob = self._bucket.get_blob(blob_key)
@@ -131,6 +139,7 @@ class FirebaseBlobStorage(BlobStorage):
             ) from e
 
     async def get_download_url(self, key: str) -> str:
+        """Return Firebase's public URL for an exact blob."""
         blob_key = self._to_blob_key(key)
         try:
             blob = self._bucket.get_blob(blob_key)

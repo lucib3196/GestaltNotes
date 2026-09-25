@@ -1,9 +1,12 @@
+import contextlib
 from pathlib import Path
 from uuid import UUID
 
 from backend.accounts.models import User
+from backend.storage.blob.base import BlobStorage, BlobUploadData
+from backend.storage.blob.exceptions import BlobStorageDeleteError
+from backend.storage.blob.schema import BlobMetadata
 from backend.storage.exceptions import (
-    BlobStorageDeleteError,
     FileNotFoundError,
     FileRetrievalError,
     FileServiceCreateError,
@@ -11,14 +14,12 @@ from backend.storage.exceptions import (
     FileServiceRetrievalError,
     FileServiceUpdateError,
 )
-from backend.storage.models import BlobMetadata, File, FileUpdate
-
-from .blob_storage import BlobStorage, BlobUploadData
-from .file_repository import FileRepository
+from backend.storage.repo.file_repository import FileRepository
+from backend.storage.repo.schema import File, FileUpdate
 
 
 class FileService:
-    def __init__(self, storage: BlobStorage, repo: FileRepository):
+    def __init__(self, storage: BlobStorage, repo: FileRepository) -> None:
         self._storage = storage
         self._repo = repo
 
@@ -29,6 +30,7 @@ class FileService:
         data: BlobUploadData,
         content_type: str | None = None,
     ) -> File:
+        """Upload blob data and persist the matching file metadata."""
         file_id = None
         try:
             await self._storage.upload(filename, data, content_type)
@@ -50,6 +52,7 @@ class FileService:
         self,
         file_id: UUID,
     ) -> File:
+        """Return file metadata by id."""
         try:
             file = await self._repo.get(file_id)
             if file is None:
@@ -64,6 +67,7 @@ class FileService:
         self,
         file_id: UUID,
     ) -> BlobMetadata:
+        """Return blob metadata for a persisted file."""
         try:
             file = await self.get_file(file_id)
             return await self._storage.get_metadata(file.storage_key)
@@ -78,6 +82,7 @@ class FileService:
         self,
         file_id: UUID,
     ) -> str:
+        """Return a downloadable URL for a persisted file."""
         try:
             file = await self.get_file(file_id)
             return await self._storage.get_download_url(file.storage_key)
@@ -94,6 +99,7 @@ class FileService:
         data: BlobUploadData,
         content_type: str | None = None,
     ) -> File:
+        """Replace blob contents and refresh file metadata."""
         try:
             file = await self.get_file(file_id)
             await self._storage.upload(file.storage_key, data, content_type)
@@ -115,6 +121,7 @@ class FileService:
         file_id: UUID,
         name: str,
     ) -> File:
+        """Move a blob to a new name and update file metadata."""
         try:
             file = await self.get_file(file_id)
             new_key = self._rename_storage_key(file.storage_key, name)
@@ -136,6 +143,7 @@ class FileService:
         self,
         file_id: UUID,
     ) -> None:
+        """Delete both blob data and file metadata."""
         try:
             file = await self.get_file(file_id)
             await self._storage.delete(file.storage_key)
@@ -146,10 +154,8 @@ class FileService:
             raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
 
     async def _rollback(self, filename: str, file_id: UUID | None) -> None:
-        try:
+        with contextlib.suppress(BlobStorageDeleteError):
             await self._storage.delete(filename)
-        except BlobStorageDeleteError:
-            pass
         try:
             if not file_id:
                 return
@@ -162,8 +168,7 @@ class FileService:
             if not (user.id):
                 raise ValueError("Failed to resolve user, missing id")
             return user.id
-        else:
-            return user
+        return user
 
     def _resolve_filename(self, filename: str) -> str:
         return Path(filename).name
