@@ -51,7 +51,7 @@ class User(SQLModel, table=True):
     )
     owned_courses: list["Course"] = Relationship(
         back_populates="owner",
-        sa_relationship_kwargs={"foreign_keys": "Course.owner_id"},
+        sa_relationship_kwargs={"foreign_keys": "Course.owner_id","cascade": "all, delete-orphan","passive_deletes": True,},
     )
 
     enrolled_courses: list["Course"] = Relationship(

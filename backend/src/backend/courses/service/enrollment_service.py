@@ -18,9 +18,9 @@ from backend.utils.utils import convert_uuid
 
 
 class CourseEnrollmentService:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, course_service: CourseService, session: Session) -> None:
+        self._course_service = course_service
         self._session = session
-        self._course_service = CourseService(session)
 
     async def enroll_student(self, course_id: ID, student: User) -> CourseEnrollment:
         self._assert_student(student)

@@ -2,7 +2,8 @@ import contextlib
 import os
 from collections.abc import Generator
 from typing import Any
-
+import firebase_admin
+from firebase_admin import credentials
 import firebase_admin
 import pytest
 
@@ -91,3 +92,4 @@ def firebase_app_for_tests() -> Generator[Any]:
         firebase_admin.delete_app(app)
 
     initialize_firebase_app.cache_clear()
+    

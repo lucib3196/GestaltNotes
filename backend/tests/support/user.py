@@ -24,6 +24,9 @@ class FakeAccountService:
     def _resolve_role(self, role: UserRole) -> Role:
         return Role(name=role)
 
+    async def delete_account(self, user_id: str):
+        return None
+
 
 @fixture
 def fake_account_service():
@@ -71,8 +74,10 @@ class MakeUser(Protocol):
     ) -> User: ...
 
 
-@fixture
-def make_user(account_service) -> MakeUser:
+@pytest_asyncio.fixture
+async def make_user(account_service) -> MakeUser:
+    created_users: list[User] = []
+
     async def make(*, role: UserRole = UserRole.STUDENT, **overrides):
         default_user = {
             "first_name": "luci",
@@ -82,9 +87,14 @@ def make_user(account_service) -> MakeUser:
             "email": "lberm@email.com",
             "role": role,
         }
-
-        return await account_service.create_account(
-            UserCreate(**{**default_user, **overrides}), role=role
+        user = await account_service.create_account(
+            UserCreate(**{**default_user, **overrides}),
+            role=role,
         )
+        created_users.append(user)
 
-    return make
+        return user
+
+    yield make
+    for user in created_users:
+        await account_service.delete_account(user.id)

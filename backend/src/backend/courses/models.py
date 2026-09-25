@@ -3,6 +3,13 @@ from datetime import datetime
 from sqlmodel import Field, Relationship, SQLModel
 from typing import TYPE_CHECKING, List
 from sqlalchemy import UniqueConstraint
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Optional
+from uuid import UUID, uuid4
+
+from sqlalchemy import JSON, Column, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import Field, Field as SQLField, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
@@ -29,7 +36,9 @@ class Course(SQLModel, table=True):
     discipline: str | None
     description: str | None = None
 
-    owner_id: UUID = Field(foreign_key="user.id", index=True)
+    owner_id: UUID = Field(
+        sa_column=Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    )
     owner: "User" = Relationship(back_populates="owned_courses")
     students: list["User"] = Relationship(
         back_populates="enrolled_courses",
@@ -50,7 +59,9 @@ class Course(SQLModel, table=True):
 class CourseAccessCode(SQLModel, table=True):
     __tablename__ = "course_access_code"  # type: ignore
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
-    course_id: UUID = Field(foreign_key="course.id", index=True)
+    course_id: UUID = Field(
+        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
+    )
     code_hash: str = Field(unique=True, index=True)
     active: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -63,7 +74,9 @@ class CourseAccessCode(SQLModel, table=True):
 class LectureNote(SQLModel, table=True):
     __tablename__ = "lecture_note"  # type: ignore
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
-    course_id: UUID = Field(foreign_key="course.id")
+    course_id: UUID = Field(
+        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
+    )
     title: str
     original_filename: str
     storage_path: str = Field(unique=True)
