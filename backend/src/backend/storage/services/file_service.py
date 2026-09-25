@@ -159,7 +159,7 @@ class FileService:
         try:
             if not file_id:
                 return
-            await self._repo.delete(file_id=file_id)
+            await self._repo.delete(record_id=file_id)
         except FileRetrievalError:
             pass
 
