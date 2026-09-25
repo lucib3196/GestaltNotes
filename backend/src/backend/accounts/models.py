@@ -1,11 +1,15 @@
 from enum import StrEnum
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from pydantic import EmailStr
 from sqlalchemy import Column, Enum
 from sqlmodel import Field, Relationship, SQLModel
 
+from backend.courses.models import CourseEnrollment
 
+if TYPE_CHECKING:
+    from backend.courses.models import Course, CourseEnrollment
 class UserRole(StrEnum):
     STUDENT = "student"
     EDUCATOR = "educator"
@@ -44,4 +48,13 @@ class User(SQLModel, table=True):
     roles: list["Role"] = Relationship(
         back_populates="users",
         link_model=UserRoleLink,
+    )
+    owned_courses: list["Course"] = Relationship(
+        back_populates="owner",
+        sa_relationship_kwargs={"foreign_keys": "Course.owner_id","cascade": "all, delete-orphan","passive_deletes": True,},
+    )
+
+    enrolled_courses: list["Course"] = Relationship(
+        back_populates="students",
+        link_model=CourseEnrollment,
     )

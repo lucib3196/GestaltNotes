@@ -5,7 +5,6 @@ from fastapi import Depends
 
 from backend.core.logger import logger
 from backend.core.settings import get_settings
-from backend.data.course import CourseDB
 from backend.data.message import MessageDB
 from backend.database import SessionDep
 from backend.service import FirebaseStorage
@@ -28,17 +27,6 @@ def get_firebase_storage() -> FirebaseStorage:
 
 FbStorageDependency = Annotated[FirebaseStorage, Depends(get_firebase_storage)]
 
-
-@lru_cache
-def get_course_db(session: SessionDep) -> CourseDB:
-    try:
-        logger.debug("Initialized Course DB")
-        return CourseDB(session)
-    except Exception:
-        raise ValueError("Failed to initialize Course DB")
-
-
-CourseDBDependency = Annotated[CourseDB, Depends(get_course_db)]
 
 
 @lru_cache
