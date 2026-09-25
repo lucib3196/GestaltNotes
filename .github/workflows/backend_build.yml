@@ -23,7 +23,7 @@ jobs:
         python-version: [3.11, 3.12, 3.13]
 
     env:
-      MODE: "testing"
+      ENV: "testing"
       DATABASE_URL: "sqlite:///:memory:"
       LANGGRAPH_STREAM_URL: "123"
       STORAGE_BUCKET: ${{secrets.STORAGE_BUCKET}}
