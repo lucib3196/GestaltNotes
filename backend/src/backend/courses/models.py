@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
@@ -7,6 +8,19 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
+
+
+class CourseContentType(StrEnum):
+    LECTURE = "lecture"
+    NOTES = "notes"
+    ASSIGNMENT = "assignment"
+    EXAM = "exam"
+    QUIZ = "quiz"
+    TEXTBOOK = "textbook"
+    HANDOUT = "handout"
+    SYLLABUS = "syllabus"
+    REFERENCE = "reference"
+    OTHER = "other"
 
 
 class CourseEnrollment(SQLModel, table=True):
@@ -71,15 +85,10 @@ class LectureNote(SQLModel, table=True):
     course_id: UUID = Field(
         sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
     )
+    file_id: UUID = Field(
+        sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
+    )
     title: str
-    original_filename: str
-    storage_path: str = Field(unique=True)
-
-    # File data
-    content_type: str | None = None
-    file_size_bytes: int | None = None
-
-    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    content_type: CourseContentType
 
     course: "Course" = Relationship(back_populates="lecture_notes")

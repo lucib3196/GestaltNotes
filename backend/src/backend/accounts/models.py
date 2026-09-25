@@ -10,6 +10,8 @@ from backend.courses.models import CourseEnrollment
 
 if TYPE_CHECKING:
     from backend.courses.models import Course, CourseEnrollment
+
+
 class UserRole(StrEnum):
     STUDENT = "student"
     EDUCATOR = "educator"
@@ -51,10 +53,18 @@ class User(SQLModel, table=True):
     )
     owned_courses: list["Course"] = Relationship(
         back_populates="owner",
-        sa_relationship_kwargs={"foreign_keys": "Course.owner_id","cascade": "all, delete-orphan","passive_deletes": True,},
+        sa_relationship_kwargs={
+            "foreign_keys": "Course.owner_id",
+            "cascade": "all, delete-orphan",
+            "passive_deletes": True,
+        },
     )
 
     enrolled_courses: list["Course"] = Relationship(
         back_populates="students",
         link_model=CourseEnrollment,
     )
+
+    @property
+    def storage_key(self) -> str:
+        return f"users/{self.id}"

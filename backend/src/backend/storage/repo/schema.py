@@ -7,8 +7,8 @@ from sqlmodel import Field, SQLModel
 
 
 class File(SQLModel, table=True):
-    id: UUID | None = Field(default_factory=uuid4)
-    owner_id: UUID = Field(foreign_key="user.id", primary_key=True)
+    id: UUID | None = Field(default_factory=uuid4,primary_key=True)
+    owner_id: UUID = Field(foreign_key="user.id", index=True)
     original_name: str
     storage_key: str = Field(description="Points to storage location")
     content_type: str | None = None
