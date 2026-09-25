@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from "@mui/material/styles";
-import { AuthProvider } from './context/AuthProvider.tsx';
+import { AuthProvider } from './features/Auth';
 import { MathJaxContext } from "better-react-mathjax";
 import { ToastContainer } from "react-toastify";
 import { GenContentProvider } from './features/GeneratedContent/instance/context.tsx';

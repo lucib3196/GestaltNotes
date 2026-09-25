@@ -1,5 +1,5 @@
 import { Navigate, useLocation, Outlet } from "react-router-dom";
-import { useAuth } from "../../../../context";
+import { useAuth } from "../..";
 import type { ValidRole } from "../../../../services";
 export default function RoleRedirect({ allow }: { allow: ValidRole[] }) {
     const { user, userData, loading,} = useAuth();

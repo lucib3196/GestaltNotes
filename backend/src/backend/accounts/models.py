@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
-
+from sqlalchemy import Column, ForeignKey, UniqueConstraint
 from pydantic import EmailStr
 from sqlalchemy import Column, Enum
 from sqlmodel import Field, Relationship, SQLModel
@@ -20,7 +20,11 @@ class UserRole(StrEnum):
 
 class UserRoleLink(SQLModel, table=True):
     __tablename__ = "user_role_link"  # type: ignore
-    user_id: UUID = Field(foreign_key="user.id", primary_key=True)
+    user_id: UUID = Field(
+        sa_column=Column(
+            ForeignKey("user.id", ondelete="CASCADE"), nullable=False, primary_key=True
+        )
+    )
     role_id: UUID = Field(foreign_key="role.id", primary_key=True)
 
 

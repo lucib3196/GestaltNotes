@@ -1,4 +1,4 @@
-import { useAuth } from "../../context";
+import { useAuth } from "../Auth";
 import type { NavigationItem, DropDownNavRoute, Base } from "./types";
 import clsx from "clsx";
 import { canAccessRoute } from "./utils";

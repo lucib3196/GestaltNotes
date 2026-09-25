@@ -7,7 +7,7 @@ from fastapi.responses import Response
 from fastapi.routing import APIRouter
 from sqlmodel import select
 
-from backend.courses.models import LectureNote
+from backend.courses.models import CourseNote
 from backend.web.accounts.dependencies import EducatorDep
 from backend.web.dependencies import FbStorageDependency, SessionDep
 

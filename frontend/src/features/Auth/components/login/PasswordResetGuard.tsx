@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../../../../context";
+import { useAuth } from "../..";
 
 export default function PasswordResetGuard() {
     const { user, userData, loading } = useAuth();

@@ -29,7 +29,9 @@ class CourseAccessCodeService:
     def __init__(self, session: Session) -> None:
         self._session = session
         self._course_service = CourseService(session)
-        self._enrollment_service = CourseEnrollmentService(session)
+        self._enrollment_service = CourseEnrollmentService(
+            self._course_service, session
+        )
 
     async def create_access_code(
         self,

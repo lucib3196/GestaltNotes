@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
-
+from sqlalchemy import Column, ForeignKey, UniqueConstraint
 if TYPE_CHECKING:
     pass
 
@@ -34,7 +34,9 @@ class MessageCreate(BaseModel):
 class Thread(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
 
-    user_id: UUID = Field(foreign_key="user.id")
+    user_id: UUID = Field(
+        sa_column=Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    )
     course_id: UUID | None = Field(default=None, foreign_key="course.id")
 
     title: str | None = None
