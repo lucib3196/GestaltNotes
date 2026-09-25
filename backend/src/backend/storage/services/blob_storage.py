@@ -1,12 +1,15 @@
-from typing import Protocol, BinaryIO
+from typing import BinaryIO, Protocol
+
 from backend.storage.models import BlobMetadata
+
+BlobUploadData = BinaryIO | bytes | str
 
 
 class BlobStorage(Protocol):
     async def upload(
         self,
         key: str,
-        data: BinaryIO,
+        data: BlobUploadData,
         content_type: str | None = None,
     ) -> None: ...
 
@@ -50,3 +53,8 @@ class BlobStorage(Protocol):
         self,
         key: str,
     ) -> "BlobMetadata": ...
+
+    async def get_download_url(
+        self,
+        key: str,
+    ) -> str: ...

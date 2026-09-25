@@ -68,3 +68,23 @@ class FileNotFoundError(FileRepositoryError, LookupError):
     def __init__(self, file_id: str) -> None:
         super().__init__(f"File '{file_id}' not found")
         self.file_id = file_id
+
+
+class FileServiceError(Exception):
+    """Base exception for file service operations."""
+
+
+class FileServiceCreateError(FileServiceError):
+    """Raised when file creation orchestration fails."""
+
+
+class FileServiceRetrievalError(FileServiceError):
+    """Raised when file retrieval orchestration fails."""
+
+
+class FileServiceUpdateError(FileServiceError):
+    """Raised when file update orchestration fails."""
+
+
+class FileServiceDeletionError(FileServiceError):
+    """Raised when file deletion orchestration fails."""

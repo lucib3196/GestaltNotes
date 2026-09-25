@@ -1,5 +1,3 @@
-from typing import BinaryIO
-
 from backend.storage.exceptions import (
     BlobDirectoryNotFoundError,
     BlobNotFoundError,
@@ -14,7 +12,7 @@ from backend.storage.models import BlobMetadata
 from firebase_admin import storage
 from google.cloud.storage.blob import Blob
 
-from .blob_storage import BlobStorage
+from .blob_storage import BlobStorage, BlobUploadData
 
 
 class FirebaseBlobStorage(BlobStorage):
@@ -25,13 +23,13 @@ class FirebaseBlobStorage(BlobStorage):
         return bool(self._bucket.get_blob(self._to_blob_key(key)))
 
     async def upload(
-        self, key: str, data: BinaryIO, content_type: str | None = None
+        self, key: str, data: BlobUploadData, content_type: str | None = None
     ) -> None:
         blob_key = self._to_blob_key(key)
         try:
             blob: Blob = self._bucket.blob(blob_key)
             blob.upload_from_string(
-                data,
+                self._read_upload_data(data),
                 content_type=content_type or "application/octet-stream",
             )
         except Exception as e:
@@ -132,6 +130,20 @@ class FirebaseBlobStorage(BlobStorage):
                 f"Failed to get metadata for blob '{blob_key}'"
             ) from e
 
+    async def get_download_url(self, key: str) -> str:
+        blob_key = self._to_blob_key(key)
+        try:
+            blob = self._bucket.get_blob(blob_key)
+            if blob is None:
+                raise BlobNotFoundError(blob_key)
+            return blob.public_url
+        except BlobNotFoundError:
+            raise
+        except Exception as e:
+            raise BlobStorageReadError(
+                f"Failed to get download URL for blob '{blob_key}'"
+            ) from e
+
     def _to_metadata(self, blob: Blob) -> BlobMetadata:
         assert blob.name
         return BlobMetadata(
@@ -156,3 +168,8 @@ class FirebaseBlobStorage(BlobStorage):
         if not name.endswith("/"):
             name = f"{name}/"
         return name
+
+    def _read_upload_data(self, data: BlobUploadData) -> bytes | str:
+        if isinstance(data, bytes | str):
+            return data
+        return data.read()
