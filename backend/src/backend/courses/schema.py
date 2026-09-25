@@ -8,6 +8,7 @@ class CourseCreate(BaseModel):
     discipline: str | None = None
     description: str | None = None
 
+
 class CourseUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1)
     discipline: str | None = None

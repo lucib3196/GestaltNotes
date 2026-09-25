@@ -53,15 +53,15 @@ class Course(SQLModel, table=True):
         link_model=CourseEnrollment,
     )
 
-    storage_prefix: str | None = Field(
-        default=None,
-        description="Cloud storage folder/prefix for course assets",
-    )
-    lecture_notes: list["LectureNote"] = Relationship(back_populates="course")
+    notes: list["CourseNote"] = Relationship(back_populates="course")
     access_codes: list["CourseAccessCode"] = Relationship(back_populates="course")
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @property
+    def storage_prefix(self) -> str:
+        return f"courses/{self.id}"
 
 
 class CourseAccessCode(SQLModel, table=True):
@@ -79,8 +79,12 @@ class CourseAccessCode(SQLModel, table=True):
     course: "Course" = Relationship(back_populates="access_codes")
 
 
-class LectureNote(SQLModel, table=True):
-    __tablename__ = "lecture_note"  # type: ignore
+class CourseNote(SQLModel, table=True):
+    __tablename__ = "course_note"  # type: ignore
+    __table_args__ = (
+        UniqueConstraint("course_id", "file_id", name="uq_course_note_course_file"),
+    )
+
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     course_id: UUID = Field(
         sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
@@ -89,6 +93,6 @@ class LectureNote(SQLModel, table=True):
         sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
     )
     title: str
-    content_type: CourseContentType
+    resource_type: CourseContentType
 
-    course: "Course" = Relationship(back_populates="lecture_notes")
+    course: "Course" = Relationship(back_populates="notes")

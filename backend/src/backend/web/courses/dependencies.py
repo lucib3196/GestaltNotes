@@ -5,25 +5,21 @@ from starlette import status
 
 from backend.core import logger
 from backend.courses.service.access_code_service import CourseAccessCodeService
+from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 from backend.database import SessionDep
-from backend.courses.service.storage_service import CourseStorageService
-from backend.core.settings import get_settings
-
-settings = get_settings()
 
 
-def get_course_storage() -> CourseStorageService:
-    assert settings.STORAGE_BUCKET
-    return CourseStorageService(bucket=settings.STORAGE_BUCKET)
+def get_course_note_service(session: SessionDep) -> CourseNoteService:
+    return CourseNoteService(session)
 
 
 def get_course_service(
-    session: SessionDep, storage: "CourseStorageDependency"
+    session: SessionDep, note_service: "CourseNoteServiceDep"
 ) -> CourseService:
     try:
-        return CourseService(session, storage=storage)
+        return CourseService(session, note_service=note_service)
     except Exception as e:
         logger.exception("Failed to initialize CourseService")
         raise HTTPException(
@@ -56,7 +52,7 @@ def get_enrollment_service(
         ) from e
 
 
-CourseStorageDependency = Annotated[CourseStorageService, Depends(get_course_storage)]
+CourseNoteServiceDep = Annotated[CourseNoteService, Depends(get_course_note_service)]
 CourseServiceDep = Annotated[CourseService, Depends(get_course_service)]
 
 CourseAccessCodeServiceDep = Annotated[

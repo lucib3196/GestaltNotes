@@ -5,7 +5,7 @@ from backend.courses.models import (
     Course,
     CourseAccessCode,
     CourseEnrollment,
-    LectureNote,
+    CourseNote,
 )
 from backend.model.chat import Message, Thread
 from backend.model.generated_content import GeneratedMCQ
@@ -16,7 +16,7 @@ __all__ = [
     "CourseAccessCode",
     "CourseEnrollment",
     "GeneratedMCQ",
-    "LectureNote",
+    "CourseNote",
     "Message",
     "Role",
     "Thread",

@@ -36,6 +36,28 @@ class CourseOwnershipError(CourseServiceException, PermissionError):
 class CoursePermissionError(CourseServiceException, PermissionError):
     """Raised when a user cannot perform a course action."""
 
+
+class CourseNoteServiceError(CourseServiceException):
+    """Base exception for course note operations."""
+
+
+class CourseNoteAssociationError(CourseNoteServiceError):
+    """Raised when associating a file with a course fails."""
+
+
+class CourseNoteRetrievalError(CourseNoteServiceError):
+    """Raised when retrieving course notes fails."""
+
+
+class CourseNoteNotFoundError(CourseNoteServiceError, LookupError):
+    """Raised when a course note association cannot be found."""
+
+    def __init__(self, course_id: str, file_id: str) -> None:
+        super().__init__(f"File '{file_id}' is not attached to course '{course_id}'")
+        self.course_id = course_id
+        self.file_id = file_id
+
+
 class CourseAccessCodeError(CourseServiceException):
     """Base exception for course access code operations."""
 
@@ -66,6 +88,7 @@ class CourseAccessCodeDisabledError(CourseAccessCodeError, PermissionError):
 
 class CourseEnrollmentError(CourseAccessCodeError):
     """Raised when redeeming an access code cannot enroll a student."""
+
 
 class CourseEnrollmentServiceError(CourseServiceException):
     """Base exception for course enrollment operations."""

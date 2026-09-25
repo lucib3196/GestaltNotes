@@ -3,22 +3,19 @@ from typing import Protocol
 from pytest import fixture
 
 from backend.accounts import User
-from backend.core.settings import get_settings
 from backend.courses import Course, CourseCreate
+from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
-from backend.courses.service.storage_service import CourseStorageService
-
-settings = get_settings()
 
 
-class FakeCourseStorageService:
+class FakeCourseNoteService:
     def course_prefix(self, course_id: str) -> str:
         return f"courses/{course_id}"
 
 
 @fixture
-def course_storage(request) -> CourseStorageService:
+def course_note_service(request, db_session) -> CourseNoteService:
     account_service_kind = getattr(
         getattr(request.node, "callspec", None),
         "params",
@@ -26,15 +23,14 @@ def course_storage(request) -> CourseStorageService:
     ).get("account_service", "real")
 
     if account_service_kind == "fake":
-        return FakeCourseStorageService()  # type: ignore[return-value]
+        return FakeCourseNoteService()  # type: ignore[return-value]
 
-    request.getfixturevalue("firebase_app_for_tests")
-    return CourseStorageService(settings.STORAGE_BUCKET)  # type: ignore[arg-type]
+    return CourseNoteService(db_session)
 
 
 @fixture
-def course_service(db_session, course_storage: CourseStorageService) -> CourseService:
-    return CourseService(db_session, course_storage)
+def course_service(db_session, course_note_service: CourseNoteService) -> CourseService:
+    return CourseService(db_session, course_note_service)
 
 
 @fixture
