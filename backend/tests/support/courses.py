@@ -1,12 +1,13 @@
-import pytest
-from pytest import fixture
-from backend.courses.service.storage_service import CourseStorageService
-from backend.core.settings import get_settings
-from backend.courses.service.enrollment_service import CourseEnrollmentService
-from backend.courses.service.course_service import CourseService
-from backend.courses import Course, CourseCreate
 from typing import Protocol
+
+from pytest import fixture
+
 from backend.accounts import User
+from backend.core.settings import get_settings
+from backend.courses import Course, CourseCreate
+from backend.courses.service.course_service import CourseService
+from backend.courses.service.enrollment_service import CourseEnrollmentService
+from backend.courses.service.storage_service import CourseStorageService
 
 settings = get_settings()
 

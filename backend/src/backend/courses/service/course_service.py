@@ -16,7 +16,7 @@ from backend.courses.models import Course
 from backend.courses.schema import CourseCreate, CourseDelete, CourseUpdate
 from backend.shared.types import ID
 from backend.utils.utils import convert_uuid
-from google.cloud.storage import Bucket
+
 from .storage_service import CourseStorageService
 
 
@@ -42,8 +42,7 @@ class CourseService:
             self._session.commit()
             self._session.refresh(course)
 
-            course = self._set_course_prefix(course)
-            return course
+            return self._set_course_prefix(course)
         except SQLAlchemyError as e:
             self._session.rollback()
             message = f"[CourseService] failed to create course {e}"

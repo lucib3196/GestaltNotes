@@ -1,12 +1,10 @@
-from backend.accounts.services import AccountService
-import backend.core
-from pytest import fixture
-import pytest
-import pytest_asyncio
 from typing import Protocol
-from backend.accounts import UserCreate, UserRole, User, Role
-from backend.accounts.services import RoleDB
-from uuid import uuid4
+
+import pytest_asyncio
+from pytest import fixture
+
+from backend.accounts import Role, User, UserCreate, UserRole
+from backend.accounts.services import AccountService, RoleDB
 
 
 class FakeAccountService:
@@ -44,8 +42,7 @@ def account_service(db_session, request, fake_account_service):
 
 @pytest_asyncio.fixture(autouse=True)
 async def seed_roles(_clean_db, db_session):
-    roles = await RoleDB(db_session).seed_roles()
-    return roles
+    return await RoleDB(db_session).seed_roles()
 
 
 class MakeUserPayload(Protocol):

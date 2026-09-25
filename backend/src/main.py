@@ -2,18 +2,17 @@ import os
 from contextlib import asynccontextmanager
 
 import uvicorn
-from backend.accounts.services import RoleDB
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 from sqlmodel import Session
 
+from backend.accounts.services import RoleDB
 from backend.core.firebase import initialize_firebase_app
 from backend.core.logger import logger
 from backend.core.settings import get_settings
 from backend.database.config import initialize_database_engine
 from backend.web import ALL_ROUTES
-
 
 settings = get_settings()
 

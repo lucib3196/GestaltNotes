@@ -2,7 +2,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from backend.accounts.models import Role, UserRole
-
 from backend.core import logger
 
 

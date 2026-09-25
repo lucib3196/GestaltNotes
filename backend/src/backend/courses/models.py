@@ -1,15 +1,9 @@
-from uuid import UUID, uuid4
 from datetime import datetime
-from sqlmodel import Field, Relationship, SQLModel
-from typing import TYPE_CHECKING, List
-from sqlalchemy import UniqueConstraint
-from datetime import datetime
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, Column, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import Field, Field as SQLField, Relationship, SQLModel
+from sqlalchemy import Column, ForeignKey, UniqueConstraint
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from backend.accounts.models import User

@@ -1,10 +1,9 @@
-from google.cloud.storage.blob import Blob
-
 from firebase_admin import storage
+from google.cloud.storage.blob import Blob
 
 
 class CourseStorageService:
-    def __init__(self, bucket: str):
+    def __init__(self, bucket: str) -> None:
         self.bucket = storage.bucket(bucket)
 
     def course_prefix(self, course_id: str) -> str:

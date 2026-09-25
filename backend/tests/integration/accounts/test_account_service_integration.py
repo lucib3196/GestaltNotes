@@ -3,12 +3,10 @@ import pytest_asyncio
 from firebase_admin import auth
 from firebase_admin.auth import UserNotFoundError as FBUserNotFoundError
 from firebase_admin.auth import UserRecord
-from sqlmodel import Session
 
 from backend.accounts.exceptions import UserNotFoundError
 from backend.accounts.models import User, UserRole
 from backend.accounts.schema import UserCreate, UserUpdate
-from backend.accounts.services.role import RoleDB
 from backend.accounts.services.user import AccountService
 
 ROLES: list[UserRole] = [

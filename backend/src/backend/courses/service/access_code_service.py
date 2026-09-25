@@ -74,7 +74,7 @@ class CourseAccessCodeService:
             codes = self._session.exec(
                 select(CourseAccessCode).where(
                     CourseAccessCode.course_id == convert_uuid(course_id),
-                    CourseAccessCode.active == True,
+                    CourseAccessCode.active,
                 )
             ).all()
 

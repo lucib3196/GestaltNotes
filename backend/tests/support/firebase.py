@@ -2,8 +2,7 @@ import contextlib
 import os
 from collections.abc import Generator
 from typing import Any
-import firebase_admin
-from firebase_admin import credentials
+
 import firebase_admin
 import pytest
 

@@ -1,8 +1,6 @@
-import backend.core
 from uuid import uuid4
 
 import pytest
-from pytest import fixture
 
 from backend.accounts.models import UserRole
 from backend.courses import CourseCreate
@@ -13,9 +11,6 @@ from backend.courses.exceptions import (
 )
 from backend.courses.schema import CourseUpdate
 from backend.courses.service.course_service import CourseService
-from backend.courses.service.storage_service import CourseStorageService
-from backend.core.settings import get_settings
-
 
 
 def unique_user_fields(prefix: str) -> dict[str, str]:

@@ -1,4 +1,4 @@
-from .schema import CourseCreate
 from .models import Course
+from .schema import CourseCreate
 
-__all__=["CourseCreate","Course"]
+__all__=["Course", "CourseCreate"]
