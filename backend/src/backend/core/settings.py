@@ -4,6 +4,7 @@ from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+
 from dotenv import load_dotenv
 from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -181,7 +182,8 @@ def get_settings_pretty_print(mode: Literal["str", "json"] = "json") -> str:
             "database": bool(app_settings.DATABASE_URL),
             "firebase_credentials": bool(app_settings.FIREBASE_CRED),
             "storage_bucket": bool(app_settings.STORAGE_BUCKET),
-            "Langsmith Agents": bool(app_settings.LANGGRAPH_STREAM_URL) and bool(app_settings.LANGSMITH_API_KEY) 
+            "Langsmith Agents": bool(app_settings.LANGGRAPH_STREAM_URL)
+            and bool(app_settings.LANGSMITH_API_KEY),
         },
     }
 

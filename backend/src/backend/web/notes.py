@@ -7,9 +7,9 @@ from fastapi.responses import Response
 from fastapi.routing import APIRouter
 from sqlmodel import select
 
-from backend.model.course import LectureNote
+from backend.courses.models import LectureNote
+from backend.web.accounts.dependencies import EducatorDep
 from backend.web.dependencies import FbStorageDependency, SessionDep
-from backend.web.user.dependencies import EducatorDep
 
 router = APIRouter(prefix="/notes")
 
@@ -49,15 +49,17 @@ async def upload_lecture_note(
     existing = session.exec(
         select(LectureNote)
         .where(LectureNote.course_id == course_id)
-        .where(LectureNote.file_name == file.filename)
+        .where(LectureNote.original_filename == file.filename)
     ).first()
 
     contents = await file.read()
     path = f"courses/{course_id}/notes/{file.filename}"
-    file_url = storage.upload_file(path, contents, file.content_type)
+    storage.upload_file(path, contents, file.content_type)
 
     if existing:
-        existing.file_url = file_url
+        existing.storage_path = path
+        existing.content_type = file.content_type
+        existing.file_size_bytes = len(contents)
         session.commit()
         session.refresh(existing)
         return existing
@@ -65,8 +67,10 @@ async def upload_lecture_note(
     note = LectureNote(
         course_id=course_id,
         title=file.filename.rsplit(".", 1)[0].replace("-", " ").replace("_", " "),
-        file_name=file.filename,
-        file_url=file_url,
+        original_filename=file.filename,
+        storage_path=path,
+        content_type=file.content_type,
+        file_size_bytes=len(contents),
     )
     session.add(note)
     session.commit()
@@ -85,7 +89,7 @@ def delete_lecture_note(
     note = session.exec(select(LectureNote).where(LectureNote.id == note_id)).first()
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
-    storage.delete_file(f"courses/{course_id}/notes/{note.file_name}")
+    storage.delete_file(note.storage_path)
     session.delete(note)
     session.commit()
     return Response(status_code=204)

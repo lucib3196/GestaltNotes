@@ -43,5 +43,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
+  # langgraph:
+  #   build:
+  #     context: ./ai_agents
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     ENV: dev
+  #   ports:
+  #     - 2024:2024
+  #   volumes:
+  #     - ./ai_agents:/deps/ai_agents # mount project allows for reloading
+
 volumes:
   postgres_data:
