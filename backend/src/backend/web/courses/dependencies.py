@@ -16,10 +16,10 @@ def get_course_note_service(session: SessionDep) -> CourseNoteService:
 
 
 def get_course_service(
-    session: SessionDep, note_service: "CourseNoteServiceDep"
+    session: SessionDep
 ) -> CourseService:
     try:
-        return CourseService(session, note_service=note_service)
+        return CourseService(session, )
     except Exception as e:
         logger.exception("Failed to initialize CourseService")
         raise HTTPException(
