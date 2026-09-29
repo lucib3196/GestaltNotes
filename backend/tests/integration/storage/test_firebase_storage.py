@@ -1,3 +1,4 @@
+import contextlib
 from uuid import uuid4
 
 import pytest
@@ -10,10 +11,8 @@ def storage_key(name: str) -> str:
 
 
 async def cleanup_directory(storage, key: str) -> None:
-    try:
+    with contextlib.suppress(BlobDirectoryNotFoundError):
         await storage.delete_directory(key)
-    except BlobDirectoryNotFoundError:
-        pass
 
 
 @pytest.mark.asyncio

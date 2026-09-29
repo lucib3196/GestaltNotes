@@ -28,7 +28,6 @@ def get_firebase_storage() -> FirebaseStorage:
 FbStorageDependency = Annotated[FirebaseStorage, Depends(get_firebase_storage)]
 
 
-
 @lru_cache
 def get_message_db(session: SessionDep) -> MessageDB:
     try:

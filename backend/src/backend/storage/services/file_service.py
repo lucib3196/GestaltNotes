@@ -2,6 +2,8 @@ import contextlib
 from pathlib import Path
 from uuid import UUID
 
+from sqlmodel import Session
+
 from backend.accounts.models import User
 from backend.storage.blob.base import BlobStorage, BlobUploadData
 from backend.storage.blob.exceptions import BlobStorageDeleteError
@@ -16,7 +18,6 @@ from backend.storage.exceptions import (
 )
 from backend.storage.repo.file_repository import FileRepository
 from backend.storage.repo.schema import File, FileUpdate
-from sqlmodel import Session
 
 
 class FileService:
@@ -39,7 +40,6 @@ class FileService:
             self._session.commit()
             return file
         except Exception as e:
-            
             raise e
 
     async def stage_file(

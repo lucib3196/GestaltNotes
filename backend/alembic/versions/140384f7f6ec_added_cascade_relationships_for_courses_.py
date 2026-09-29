@@ -55,7 +55,6 @@ def upgrade() -> None:
         )
 
     with op.batch_alter_table("course_enrollment", schema=None) as batch_op:
-
         if (
             inspector.get_pk_constraint("course_enrollment").get("name")
             == "uq_course_enrollment_student_id"

@@ -1,13 +1,11 @@
-import asyncio
 from uuid import uuid4
 
 import pytest
 
 from backend.accounts.models import User
 from backend.storage.blob.exceptions import BlobNotFoundError
-from backend.storage.repo.file_repository import FileRepository
-from backend.storage.services.file_service import FileService
 from backend.storage.exceptions import FileNotFoundError
+from backend.storage.services.file_service import FileService
 
 
 def storage_key(name: str) -> str:
@@ -43,7 +41,6 @@ async def test_stage_file_does_not_persist(file_service, file_owner, db_session)
         data=content,
         content_type="text/markdown",
     )
-    
 
     assert await file_service.get_file(file.id) is not None
     db_session.rollback()

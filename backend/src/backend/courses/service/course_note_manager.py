@@ -1,14 +1,15 @@
-import fastapi
-from backend.src.backend.courses.models import CourseContentType
-from backend.tests.integration.storage.test_file_repository import storage_key
-from .course_service import CourseService
-from backend.storage import FileService
-from .course_note_service import CourseNoteService
 from uuid import UUID
+
+from backend.src.backend.courses.models import CourseContentType
 from fastapi import UploadFile
-from backend.courses.models import CourseNote
+
 from backend.accounts import User
+from backend.courses.models import CourseNote
+from backend.storage import FileService
 from backend.storage.utils import normalize_storage_key
+
+from .course_note_service import CourseNoteService
+from .course_service import CourseService
 
 
 class CourseNoteManager:

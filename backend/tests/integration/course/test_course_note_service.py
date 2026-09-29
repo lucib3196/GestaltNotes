@@ -1,43 +1,26 @@
 from uuid import uuid4
 
 import pytest
+import pytest_asyncio
 
-from backend.accounts.models import User
-from backend.courses.models import Course, CourseContentType, CourseNote
-from backend.courses.service.course_note_service import CourseNoteService
+from backend.courses.models import CourseContentType, CourseNote
 from backend.storage.models import File
 
 
-@pytest.fixture
-def course_note_service(db_session):
-    return CourseNoteService(db_session)
-
-
-@pytest.fixture
-def course_owner(db_session):
+@pytest_asyncio.fixture
+async def course_owner(make_user):
     suffix = uuid4().hex
-    user = User(
-        email=f"course-note-owner-{suffix}@example.com",
-        username=f"course-note-owner-{suffix}",
-    )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
-    return user
+    user = {
+        "email": f"course-note-owner-{suffix}@example.com",
+        "username": f"course-note-owner-{suffix}",
+    }
+
+    return await make_user(role="educator", **user)
 
 
-@pytest.fixture
-def course(db_session, course_owner):
-    assert course_owner.id is not None
-    course = Course(
-        name="Mechanics",
-        discipline="Physics",
-        owner_id=course_owner.id,
-    )
-    db_session.add(course)
-    db_session.commit()
-    db_session.refresh(course)
-    return course
+@pytest_asyncio.fixture
+async def course(make_course, course_owner):
+    return await make_course(course_owner)
 
 
 @pytest.fixture

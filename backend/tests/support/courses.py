@@ -14,23 +14,32 @@ class FakeCourseNoteService:
         return f"courses/{course_id}"
 
 
+# @fixture
+# def course_note_service(request, db_session) -> CourseNoteService:
+#     account_service_kind = getattr(
+#         getattr(request.node, "callspec", None),
+#         "params",
+#         {},
+#     ).get("account_service", "real")
+
+#     if account_service_kind == "fake":
+#         return FakeCourseNoteService()  # type: ignore[return-value]
+
+#     return CourseNoteService(db_session)
+
+
 @fixture
-def course_note_service(request, db_session) -> CourseNoteService:
-    account_service_kind = getattr(
-        getattr(request.node, "callspec", None),
-        "params",
-        {},
-    ).get("account_service", "real")
+def course_service(
+    db_session,
+) -> CourseService:
+    return CourseService(
+        db_session,
+    )
 
-    if account_service_kind == "fake":
-        return FakeCourseNoteService()  # type: ignore[return-value]
 
+@fixture
+def course_note_service(db_session):
     return CourseNoteService(db_session)
-
-
-@fixture
-def course_service(db_session, course_note_service: CourseNoteService) -> CourseService:
-    return CourseService(db_session,)
 
 
 @fixture

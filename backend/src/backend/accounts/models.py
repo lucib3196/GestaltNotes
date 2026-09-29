@@ -1,9 +1,9 @@
 from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
-from sqlalchemy import Column, ForeignKey, UniqueConstraint
+
 from pydantic import EmailStr
-from sqlalchemy import Column, Enum
+from sqlalchemy import Column, Enum, ForeignKey
 from sqlmodel import Field, Relationship, SQLModel
 
 from backend.courses.models import CourseEnrollment

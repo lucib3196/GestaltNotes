@@ -20,6 +20,7 @@ class UserNotFoundError(UserServiceException, LookupError):
 class UserCreationError(UserServiceException):
     """Raised when user creation fails."""
 
+
 class UserDeletionError(UserServiceException):
     """Raised when account deletion or rollback fails."""
 

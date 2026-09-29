@@ -91,4 +91,3 @@ def firebase_app_for_tests() -> Generator[Any]:
         firebase_admin.delete_app(app)
 
     initialize_firebase_app.cache_clear()
-    

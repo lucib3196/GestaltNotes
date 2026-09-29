@@ -6,18 +6,18 @@ Create Date: 2026-09-25 13:17:48.887719
 
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
+
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 from alembic import op
-import sqlalchemy as sa
-import sqlmodel
-from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = "6ed1db905fc8"
-down_revision: Union[str, Sequence[str], None] = "859017df8b79"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "859017df8b79"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 """Updated lecture note model to be more of a link table including enums for resource type
@@ -51,7 +51,9 @@ def upgrade() -> None:
         batch_op.drop_constraint("file_pkey", type_="primary")
         batch_op.alter_column("id", existing_type=sa.UUID(), nullable=False)
         batch_op.create_primary_key("file_pkey", ["id"])
-        batch_op.create_index(batch_op.f("ix_file_owner_id"), ["owner_id"], unique=False)
+        batch_op.create_index(
+            batch_op.f("ix_file_owner_id"), ["owner_id"], unique=False
+        )
 
     content_type_enum.create(op.get_bind(), checkfirst=True)
 

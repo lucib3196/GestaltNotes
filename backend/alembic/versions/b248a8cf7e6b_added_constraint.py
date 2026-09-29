@@ -23,9 +23,9 @@ def upgrade() -> None:
 
     with op.batch_alter_table("user", schema=None) as batch_op:
         batch_op.create_unique_constraint(
-        "uq_user_email",
-        ["email"],
-    )
+            "uq_user_email",
+            ["email"],
+        )
 
     # ### end Alembic commands ###
 

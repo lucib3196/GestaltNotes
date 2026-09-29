@@ -40,9 +40,6 @@ USERS: list[UserCreate] = [
 ]
 
 
-
-
-
 @pytest.fixture
 def user_create_examples() -> list[UserCreate]:
     return USERS

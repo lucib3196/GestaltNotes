@@ -17,10 +17,10 @@ from backend.courses.schema import CourseCreate, CourseDelete, CourseUpdate
 from backend.shared.types import ID
 from backend.utils.utils import convert_uuid
 
+
 class CourseService:
     def __init__(self, session: Session) -> None:
         self._session = session
-
 
     async def create_course(self, data: CourseCreate, educator: User) -> Course:
         self._assert_educator(educator)

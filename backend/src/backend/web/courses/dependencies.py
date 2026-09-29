@@ -5,11 +5,11 @@ from starlette import status
 
 from backend.core import logger
 from backend.courses.service.access_code_service import CourseAccessCodeService
+from backend.courses.service.course_note_manager import CourseNoteManager
 from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 from backend.database import SessionDep
-from backend.courses.service.course_note_manager import CourseNoteManager
 
 
 def get_course_note_service(session: SessionDep) -> CourseNoteService:

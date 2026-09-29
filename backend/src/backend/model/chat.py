@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
+from sqlalchemy import Column, ForeignKey
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import Column, ForeignKey, UniqueConstraint
+
 if TYPE_CHECKING:
     pass
 

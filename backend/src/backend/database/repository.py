@@ -1,9 +1,10 @@
 from typing import Protocol, TypeVar
-from backend.accounts import User
 from uuid import UUID
 
+from backend.accounts import User
+
 RecordT = TypeVar("RecordT")
-UpdateT = TypeVar("UpdateT",contravariant=True)
+UpdateT = TypeVar("UpdateT", contravariant=True)
 
 
 class Repository(Protocol[RecordT, UpdateT]):

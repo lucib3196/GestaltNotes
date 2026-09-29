@@ -17,11 +17,12 @@ async def test_create_account_creates_db_user_assigns_role_and_calls_firebase(
     service = AccountService(db_session)
     payload = make_user_payload(role=UserRole.STUDENT)
 
-    with patch(
-        "backend.accounts.services.user.auth.create_user"
-    ) as mock_create_user, patch(
-        "backend.accounts.services.user.auth.set_custom_user_claims"
-    ) as mock_claims:
+    with (
+        patch("backend.accounts.services.user.auth.create_user") as mock_create_user,
+        patch(
+            "backend.accounts.services.user.auth.set_custom_user_claims"
+        ) as mock_claims,
+    ):
         mock_create_user.side_effect = lambda **kwargs: SimpleNamespace(
             uid=kwargs["uid"]
         )
@@ -59,11 +60,12 @@ async def test_create_account_can_skip_force_password_reset_claim(
     service = AccountService(db_session)
     payload = make_user_payload(email="noreset@example.com")
 
-    with patch(
-        "backend.accounts.services.user.auth.create_user"
-    ) as mock_create_user, patch(
-        "backend.accounts.services.user.auth.set_custom_user_claims"
-    ) as mock_claims:
+    with (
+        patch("backend.accounts.services.user.auth.create_user") as mock_create_user,
+        patch(
+            "backend.accounts.services.user.auth.set_custom_user_claims"
+        ) as mock_claims,
+    ):
         mock_create_user.side_effect = lambda **kwargs: SimpleNamespace(
             uid=kwargs["uid"]
         )

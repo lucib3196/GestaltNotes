@@ -1,14 +1,14 @@
-from backend.storage import (
-    FileService,
-    FileRepository,
-    FirebaseBlobStorage,
-    BlobStorage,
-)
-from backend.core import get_settings
-from backend.web.dependencies import SessionDep
 from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
+
+from backend.core import get_settings
+from backend.storage import (
+    BlobStorage,
+    FileService,
+    FirebaseBlobStorage,
+)
+from backend.web.dependencies import SessionDep
 
 settings = get_settings()
 

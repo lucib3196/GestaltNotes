@@ -11,12 +11,14 @@ from backend.model.chat import Message, Thread
 from backend.model.generated_content import GeneratedMCQ
 from backend.model.user import UserCourseLink
 from backend.storage.models import File
+
 __all__ = [
     "Course",
     "CourseAccessCode",
     "CourseEnrollment",
-    "GeneratedMCQ",
     "CourseNote",
+    "File",
+    "GeneratedMCQ",
     "Message",
     "Role",
     "Thread",
@@ -24,5 +26,4 @@ __all__ = [
     "UserCourseLink",
     "UserRole",
     "UserRoleLink",
-    "File"
 ]

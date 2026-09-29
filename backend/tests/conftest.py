@@ -3,5 +3,5 @@ pytest_plugins = [
     "tests.support.user",
     "tests.support.database",
     "tests.support.courses",
-    "tests.support.storage"
+    "tests.support.storage",
 ]
