@@ -10,7 +10,6 @@ from backend.storage.blob.exceptions import BlobStorageDeleteError
 from backend.storage.blob.schema import BlobMetadata
 from backend.storage.exceptions import (
     FileNotFoundError,
-    FileRetrievalError,
     FileServiceCreateError,
     FileServiceDeletionError,
     FileServiceRetrievalError,
@@ -40,7 +39,10 @@ class FileService:
             self._session.commit()
             return file
         except Exception as e:
-            raise e
+            self._session.rollback()
+            with contextlib.suppress(BlobStorageDeleteError):
+                await self._storage.delete(filename)
+            raise FileServiceCreateError(f"Failed to create file '{filename}'") from e
 
     async def stage_file(
         self,
@@ -48,8 +50,7 @@ class FileService:
         filename: str,
         data: BlobUploadData,
         content_type: str | None = None,
-    ):
-        file_id = None
+    ) -> File:
         try:
             await self._storage.upload(filename, data, content_type)
             metadata = await self._storage.get_metadata(filename)
@@ -60,30 +61,38 @@ class FileService:
                 content_type=metadata.content_type or content_type,
                 size_bytes=metadata.size,
             )
-            file_id = file_record.id
             return await self._repo.create(file_record)
         except Exception as e:
-            await self._rollback(filename, file_id)
+            await self._cleanup_failed_stage(filename)
             raise FileServiceCreateError(f"Failed to create file '{filename}'") from e
 
     async def delete_file(self, file_id: UUID) -> None:
-        await self.delete_file(file_id)
-        self._session.commit()
-        return None
-
-    async def stage_delete_file(
-        self,
-        file_id: UUID,
-    ) -> None:
-        """Delete both blob data and file metadata."""
         try:
-            file = await self.get_file(file_id)
-            await self._repo.delete(file_id)
+            file = await self.stage_delete_file(file_id)
+            self._session.commit()
             await self._storage.delete(file.storage_key)
         except FileNotFoundError:
             raise
         except Exception as e:
+            self._session.rollback()
             raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
+
+    async def stage_delete_file(
+        self,
+        file_id: UUID,
+    ) -> File:
+        """Stage deletion of file metadata in the current transaction."""
+        try:
+            file = await self.get_file(file_id)
+            await self._repo.delete(file_id)
+            return file
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
+
+    async def delete_blob(self, storage_key: str) -> None:
+        await self._storage.delete(storage_key)
 
     async def get_file(
         self,
@@ -136,7 +145,24 @@ class FileService:
         data: BlobUploadData,
         content_type: str | None = None,
     ) -> File:
-        """Replace blob contents and refresh file metadata."""
+        """Replace blob contents, update metadata, and commit."""
+        try:
+            file = await self.stage_replace_file(file_id, data, content_type)
+            self._session.commit()
+            return file
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            self._session.rollback()
+            raise FileServiceUpdateError(f"Failed to replace file '{file_id}'") from e
+
+    async def stage_replace_file(
+        self,
+        file_id: UUID,
+        data: BlobUploadData,
+        content_type: str | None = None,
+    ) -> File:
+        """Stage metadata updates after replacing blob contents."""
         try:
             file = await self.get_file(file_id)
             await self._storage.upload(file.storage_key, data, content_type)
@@ -158,7 +184,23 @@ class FileService:
         file_id: UUID,
         name: str,
     ) -> File:
-        """Move a blob to a new name and update file metadata."""
+        """Move a blob, update file metadata, and commit."""
+        try:
+            file = await self.stage_rename_file(file_id, name)
+            self._session.commit()
+            return file
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            self._session.rollback()
+            raise FileServiceUpdateError(f"Failed to rename file '{file_id}'") from e
+
+    async def stage_rename_file(
+        self,
+        file_id: UUID,
+        name: str,
+    ) -> File:
+        """Stage metadata updates after moving a blob to a new name."""
         try:
             file = await self.get_file(file_id)
             new_key = self._rename_storage_key(file.storage_key, name)
@@ -176,16 +218,9 @@ class FileService:
         except Exception as e:
             raise FileServiceUpdateError(f"Failed to rename file '{file_id}'") from e
 
-    async def _rollback(self, filename: str, file_id: UUID | None) -> None:
-        self._session.rollback()
+    async def _cleanup_failed_stage(self, filename: str) -> None:
         with contextlib.suppress(BlobStorageDeleteError):
             await self._storage.delete(filename)
-        try:
-            if not file_id:
-                return
-            await self._repo.delete(record_id=file_id)
-        except FileRetrievalError:
-            pass
 
     def _resolve_user_id(self, user: User | UUID) -> UUID:
         if isinstance(user, User):

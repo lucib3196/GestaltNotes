@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-
+from .models import CourseContentType
 
 class CourseCreate(BaseModel):
     name: str = Field(min_length=1)
@@ -27,3 +27,8 @@ class CourseRead(BaseModel):
 class CourseDelete(BaseModel):
     success: bool
     info: str
+
+
+class CourseNoteUpdate(BaseModel):
+    title: str | None = None
+    resource_type: CourseContentType | None = None

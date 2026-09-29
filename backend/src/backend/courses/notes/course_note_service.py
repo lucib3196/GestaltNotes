@@ -1,26 +1,78 @@
+import contextlib
 from uuid import UUID
 
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlmodel import Session, select
+from fastapi import UploadFile
+from sqlmodel import Session
 
-from backend.core import logger
+from backend.accounts import User
 from backend.courses.exceptions import (
     CourseNoteAssociationError,
     CourseNoteNotFoundError,
-    CourseNoteRetrievalError,
 )
 from backend.courses.models import Course, CourseContentType, CourseNote
+from backend.courses.notes.repo import CourseNoteRepository
+from backend.courses.service.course_service import CourseService
+from backend.storage import FileService
+from backend.storage.blob.exceptions import BlobStorageDeleteError
 from backend.storage.models import File
+from backend.storage.utils import normalize_storage_key
 
 
 class CourseNoteService:
-    def __init__(self, session: Session) -> None:
+    def __init__(
+        self,
+        session: Session,
+        file_service: FileService,
+    ) -> None:
         self._session = session
+        self._files = file_service
+        self._courses = CourseService(session)
+        self._repo = CourseNoteRepository(session)
 
-    def get_note(self, note_id: UUID) -> CourseNote | None:
-        return self._session.get(CourseNote, note_id)
+    async def upload_note(
+        self,
+        course_id: UUID,
+        educator: User,
+        upload: UploadFile,
+        resource_type: CourseContentType,
+        title: str | None = None,
+    ) -> CourseNote:
+        course = await self._courses.assert_course_owner(course_id, educator)
+        contents = await upload.read()
 
-    async def add_file_to_course(
+        if not upload.filename:
+            raise ValueError("Failed to determine filename")
+
+        storage_key = normalize_storage_key(
+            course.storage_prefix,
+            "notes",
+            upload.filename,
+        )
+
+        try:
+            file_record = await self._files.stage_file(
+                owner=educator,
+                filename=storage_key,
+                data=contents,
+                content_type=upload.content_type,
+            )
+            note = await self._repo.create(
+                self._create_note_record(
+                    course=course,
+                    file=file_record,
+                    resource_type=resource_type,
+                    title=title,
+                )
+            )
+            self._session.commit()
+            return note
+        except Exception:
+            self._session.rollback()
+            with contextlib.suppress(BlobStorageDeleteError):
+                await self._files.delete_blob(storage_key)
+            raise
+
+    async def add_file(
         self,
         course: Course,
         file: File,
@@ -28,123 +80,79 @@ class CourseNoteService:
         resource_type: CourseContentType = CourseContentType.OTHER,
         title: str | None = None,
     ) -> CourseNote:
-        """Add a file to a course and commit immediately."""
         try:
-            course_note = await self.stage_file_for_course(
-                course=course,
-                file=file,
-                resource_type=resource_type,
-                title=title,
+            note = await self._repo.create(
+                self._create_note_record(
+                    course=course,
+                    file=file,
+                    resource_type=resource_type,
+                    title=title,
+                )
             )
             self._session.commit()
-            return course_note
+            return note
         except Exception:
             self._session.rollback()
             raise
 
-    async def stage_file_for_course(
+    async def remove_file(
+        self,
+        course_id: UUID,
+        file_id: UUID,
+    ) -> None:
+        try:
+            note = await self._repo.get_by_course_and_file(course_id, file_id)
+
+            if note is None or note.id is None:
+                raise CourseNoteNotFoundError(str(course_id), str(file_id))
+
+            await self._repo.delete(note.id)
+            self._session.commit()
+        except Exception:
+            self._session.rollback()
+            raise
+
+    async def remove_note(
+        self,
+        course_id: UUID,
+        note_id: UUID,
+        educator: User,
+    ) -> None:
+        await self._courses.assert_course_owner(course_id, educator)
+
+        note = await self._repo.get(note_id)
+        if note is None or note.id is None or note.course_id != course_id:
+            raise CourseNoteNotFoundError(str(course_id), str(note_id))
+
+        try:
+            file = await self._files.stage_delete_file(note.file_id)
+            await self._repo.delete(note.id)
+            self._session.commit()
+        except Exception:
+            self._session.rollback()
+            raise
+        await self._files.delete_blob(file.storage_key)
+
+    async def list_notes(self, course_id: UUID) -> list[CourseNote]:
+        return await self._repo.list_by_course(course_id)
+
+    def _create_note_record(
         self,
         course: Course,
         file: File,
         *,
-        resource_type: CourseContentType = CourseContentType.OTHER,
-        title: str | None = None,
+        resource_type: CourseContentType,
+        title: str | None,
     ) -> CourseNote:
-        """Stage a course note in the current transaction."""
         if not course.id:
             raise CourseNoteAssociationError("Cannot add file to course without id")
         if not file.id:
             raise CourseNoteAssociationError("Cannot add file without id")
 
-        try:
-            course_note = CourseNote(
-                course_id=course.id,
-                file_id=file.id,
-                resource_type=resource_type,
-                title=title or file.original_name,
-            )
-            self._session.add(course_note)
-            self._session.flush()
-            self._session.refresh(course_note)
-            return course_note
-        except IntegrityError as e:
-            message = f"[CourseNoteService] failed to associate file with course {e}"
-            logger.error(message)
-            raise CourseNoteAssociationError(message) from e
-        except SQLAlchemyError as e:
-            message = f"[CourseNoteService] failed to add course note {e}"
-            logger.error(message)
-            raise CourseNoteAssociationError(message) from e
+        return CourseNote(
+            course_id=course.id,
+            file_id=file.id,
+            resource_type=resource_type,
+            title=title or file.original_name,
+        )
 
-    async def remove_file_from_course(
-        self,
-        course_id: UUID,
-        file_id: UUID,
-    ) -> None:
-        """Remove a file from a course and commit immediately."""
-        try:
-            await self.stage_remove_file_from_course(course_id, file_id)
-            self._session.commit()
-        except Exception:
-            self._session.rollback()
-            raise
-
-    async def stage_remove_file_from_course(
-        self,
-        course_id: UUID,
-        file_id: UUID,
-    ) -> None:
-        """Stage removal of a course note in the current transaction."""
-        try:
-            course_note = self._session.exec(
-                select(CourseNote)
-                .where(CourseNote.course_id == course_id)
-                .where(CourseNote.file_id == file_id)
-            ).first()
-
-            if not course_note:
-                raise CourseNoteNotFoundError(str(course_id), str(file_id))
-
-            self._session.delete(course_note)
-            self._session.flush()
-
-        except CourseNoteNotFoundError:
-            raise
-        except SQLAlchemyError as e:
-            message = f"[CourseNoteService] failed to remove course note {e}"
-            logger.error(message)
-            raise CourseNoteAssociationError(message) from e
-
-    async def remove_course_note(self, note_id: UUID) -> None:
-        try:
-            await self.stage_remove_course_note(note_id)
-            self._session.commit()
-        except Exception:
-            self._session.rollback()
-            raise
-
-    async def stage_remove_course_note(self, note_id: UUID) -> None:
-        try:
-            note = self.get_note(note_id)
-            if not note:
-                raise CourseNoteRetrievalError(f"Note {note_id} does not exist")
-            self._session.delete(note)
-            self._session.flush()
-        except CourseNoteRetrievalError:
-            raise
-        except SQLAlchemyError as e:
-            message = f"[CourseNoteService] failed to remove course note {e}"
-            logger.error(message)
-
-    async def list_course_notes(self, course_id: UUID) -> list[CourseNote]:
-        try:
-            return list(
-                self._session.exec(
-                    select(CourseNote).where(CourseNote.course_id == course_id)
-                ).all()
-            )
-        except SQLAlchemyError as e:
-            self._session.rollback()
-            message = f"[CourseNoteService] failed to list course notes {e}"
-            logger.error(message)
-            raise CourseNoteRetrievalError(message) from e

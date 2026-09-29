@@ -23,3 +23,4 @@ def get_file_service(session: SessionDep, storage: "StorageDep") -> FileService:
 
 
 StorageDep = Annotated[BlobStorage, Depends(get_storage)]
+FileServiceDep = Annotated[FileService, Depends(get_file_service)]

@@ -7,6 +7,7 @@ from backend.courses import Course, CourseCreate
 from backend.courses.notes.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
+from backend.storage import FileService
 
 
 class FakeCourseNoteService:
@@ -14,18 +15,18 @@ class FakeCourseNoteService:
         return f"courses/{course_id}"
 
 
-# @fixture
-# def course_note_service(request, db_session) -> CourseNoteService:
-#     account_service_kind = getattr(
-#         getattr(request.node, "callspec", None),
-#         "params",
-#         {},
-#     ).get("account_service", "real")
+@fixture
+def course_note_service(request, db_session, storage) -> CourseNoteService:
+    account_service_kind = getattr(
+        getattr(request.node, "callspec", None),
+        "params",
+        {},
+    ).get("account_service", "real")
 
-#     if account_service_kind == "fake":
-#         return FakeCourseNoteService()  # type: ignore[return-value]
+    if account_service_kind == "fake":
+        return FakeCourseNoteService()  # type: ignore[return-value]
 
-#     return CourseNoteService(db_session)
+    return CourseNoteService(db_session, FileService(storage, db_session))
 
 
 @fixture
@@ -36,10 +37,6 @@ def course_service(
         db_session,
     )
 
-
-@fixture
-def course_note_service(db_session):
-    return CourseNoteService(db_session)
 
 
 @fixture
