@@ -66,6 +66,25 @@ class FileService:
             await self._rollback(filename, file_id)
             raise FileServiceCreateError(f"Failed to create file '{filename}'") from e
 
+    async def delete_file(self, file_id: UUID) -> None:
+        await self.delete_file(file_id)
+        self._session.commit()
+        return None
+
+    async def stage_delete_file(
+        self,
+        file_id: UUID,
+    ) -> None:
+        """Delete both blob data and file metadata."""
+        try:
+            file = await self.get_file(file_id)
+            await self._repo.delete(file_id)
+            await self._storage.delete(file.storage_key)
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
+
     async def get_file(
         self,
         file_id: UUID,
@@ -156,20 +175,6 @@ class FileService:
             raise
         except Exception as e:
             raise FileServiceUpdateError(f"Failed to rename file '{file_id}'") from e
-
-    async def delete_file(
-        self,
-        file_id: UUID,
-    ) -> None:
-        """Delete both blob data and file metadata."""
-        try:
-            file = await self.get_file(file_id)
-            await self._storage.delete(file.storage_key)
-            await self._repo.delete(file_id)
-        except FileNotFoundError:
-            raise
-        except Exception as e:
-            raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
 
     async def _rollback(self, filename: str, file_id: UUID | None) -> None:
         self._session.rollback()

@@ -4,7 +4,7 @@ from pytest import fixture
 
 from backend.accounts import User
 from backend.courses import Course, CourseCreate
-from backend.courses.service.course_note_service import CourseNoteService
+from backend.courses.notes.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 

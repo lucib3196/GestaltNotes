@@ -17,6 +17,9 @@ class CourseNoteService:
     def __init__(self, session: Session) -> None:
         self._session = session
 
+    def get_note(self, note_id: UUID) -> CourseNote | None:
+        return self._session.get(CourseNote, note_id)
+
     async def add_file_to_course(
         self,
         course: Course,
@@ -111,6 +114,27 @@ class CourseNoteService:
             message = f"[CourseNoteService] failed to remove course note {e}"
             logger.error(message)
             raise CourseNoteAssociationError(message) from e
+
+    async def remove_course_note(self, note_id: UUID) -> None:
+        try:
+            await self.stage_remove_course_note(note_id)
+            self._session.commit()
+        except Exception:
+            self._session.rollback()
+            raise
+
+    async def stage_remove_course_note(self, note_id: UUID) -> None:
+        try:
+            note = self.get_note(note_id)
+            if not note:
+                raise CourseNoteRetrievalError(f"Note {note_id} does not exist")
+            self._session.delete(note)
+            self._session.flush()
+        except CourseNoteRetrievalError:
+            raise
+        except SQLAlchemyError as e:
+            message = f"[CourseNoteService] failed to remove course note {e}"
+            logger.error(message)
 
     async def list_course_notes(self, course_id: UUID) -> list[CourseNote]:
         try:
