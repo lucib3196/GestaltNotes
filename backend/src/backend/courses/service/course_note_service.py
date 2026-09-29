@@ -25,6 +25,29 @@ class CourseNoteService:
         resource_type: CourseContentType = CourseContentType.OTHER,
         title: str | None = None,
     ) -> CourseNote:
+        """Add a file to a course and commit immediately."""
+        try:
+            course_note = await self.stage_file_for_course(
+                course=course,
+                file=file,
+                resource_type=resource_type,
+                title=title,
+            )
+            self._session.commit()
+            return course_note
+        except Exception:
+            self._session.rollback()
+            raise
+
+    async def stage_file_for_course(
+        self,
+        course: Course,
+        file: File,
+        *,
+        resource_type: CourseContentType = CourseContentType.OTHER,
+        title: str | None = None,
+    ) -> CourseNote:
+        """Stage a course note in the current transaction."""
         if not course.id:
             raise CourseNoteAssociationError("Cannot add file to course without id")
         if not file.id:
@@ -38,21 +61,37 @@ class CourseNoteService:
                 title=title or file.original_name,
             )
             self._session.add(course_note)
-            self._session.commit()
+            self._session.flush()
             self._session.refresh(course_note)
             return course_note
         except IntegrityError as e:
-            self._session.rollback()
             message = f"[CourseNoteService] failed to associate file with course {e}"
             logger.error(message)
             raise CourseNoteAssociationError(message) from e
         except SQLAlchemyError as e:
-            self._session.rollback()
             message = f"[CourseNoteService] failed to add course note {e}"
             logger.error(message)
             raise CourseNoteAssociationError(message) from e
 
-    async def remove_file_from_course(self, course_id: UUID, file_id: UUID) -> None:
+    async def remove_file_from_course(
+        self,
+        course_id: UUID,
+        file_id: UUID,
+    ) -> None:
+        """Remove a file from a course and commit immediately."""
+        try:
+            await self.stage_remove_file_from_course(course_id, file_id)
+            self._session.commit()
+        except Exception:
+            self._session.rollback()
+            raise
+
+    async def stage_remove_file_from_course(
+        self,
+        course_id: UUID,
+        file_id: UUID,
+    ) -> None:
+        """Stage removal of a course note in the current transaction."""
         try:
             course_note = self._session.exec(
                 select(CourseNote)
@@ -64,11 +103,11 @@ class CourseNoteService:
                 raise CourseNoteNotFoundError(str(course_id), str(file_id))
 
             self._session.delete(course_note)
-            self._session.commit()
+            self._session.flush()
+
         except CourseNoteNotFoundError:
             raise
         except SQLAlchemyError as e:
-            self._session.rollback()
             message = f"[CourseNoteService] failed to remove course note {e}"
             logger.error(message)
             raise CourseNoteAssociationError(message) from e
