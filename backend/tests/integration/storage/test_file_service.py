@@ -1,3 +1,4 @@
+import asyncio
 from uuid import uuid4
 
 import pytest
@@ -6,6 +7,7 @@ from backend.accounts.models import User
 from backend.storage.blob.exceptions import BlobNotFoundError
 from backend.storage.repo.file_repository import FileRepository
 from backend.storage.services.file_service import FileService
+from backend.storage.exceptions import FileNotFoundError
 
 
 def storage_key(name: str) -> str:
@@ -14,8 +16,7 @@ def storage_key(name: str) -> str:
 
 @pytest.fixture
 def file_service(db_session, storage):
-    repo = FileRepository(db_session, storage)
-    return FileService(storage, repo)
+    return FileService(storage, db_session)
 
 
 @pytest.fixture
@@ -29,6 +30,25 @@ def file_owner(db_session):
     db_session.commit()
     db_session.refresh(user)
     return user
+
+
+@pytest.mark.asyncio
+async def test_stage_file_does_not_persist(file_service, file_owner, db_session):
+    key = storage_key("note.md")
+    content = b"# Title\ncontent"
+
+    file = await file_service.stage_file(
+        file_owner,
+        filename=key,
+        data=content,
+        content_type="text/markdown",
+    )
+    
+
+    assert await file_service.get_file(file.id) is not None
+    db_session.rollback()
+    with pytest.raises(FileNotFoundError):
+        assert await file_service.get_file(file.id) is None
 
 
 @pytest.mark.asyncio

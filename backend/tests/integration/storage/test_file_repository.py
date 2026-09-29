@@ -14,7 +14,7 @@ def storage_key(name: str) -> str:
 
 @pytest.fixture
 def file_repository(db_session):
-    return FileRepository(db_session, Mock())
+    return FileRepository(db_session)
 
 
 @pytest.fixture

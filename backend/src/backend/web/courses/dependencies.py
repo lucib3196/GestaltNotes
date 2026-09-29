@@ -9,17 +9,18 @@ from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 from backend.database import SessionDep
+from backend.courses.service.course_note_manager import CourseNoteManager
 
 
 def get_course_note_service(session: SessionDep) -> CourseNoteService:
     return CourseNoteService(session)
 
 
-def get_course_service(
-    session: SessionDep
-) -> CourseService:
+def get_course_service(session: SessionDep) -> CourseService:
     try:
-        return CourseService(session, )
+        return CourseService(
+            session,
+        )
     except Exception as e:
         logger.exception("Failed to initialize CourseService")
         raise HTTPException(
@@ -50,6 +51,15 @@ def get_enrollment_service(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to initialize course enrollment service",
         ) from e
+
+
+def get_course_note_manager(
+    course_service: "CourseServiceDep",
+    course_note_service="CourseNoteServiceDep",
+) -> CourseNoteManager:
+    return CourseNoteManager(
+        course_service=course_service, course_note_service=course_note_service
+    )
 
 
 CourseNoteServiceDep = Annotated[CourseNoteService, Depends(get_course_note_service)]

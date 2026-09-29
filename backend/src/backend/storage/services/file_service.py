@@ -16,12 +16,15 @@ from backend.storage.exceptions import (
 )
 from backend.storage.repo.file_repository import FileRepository
 from backend.storage.repo.schema import File, FileUpdate
+from sqlmodel import Session
 
 
 class FileService:
-    def __init__(self, storage: BlobStorage, repo: FileRepository) -> None:
+    def __init__(self, storage: BlobStorage, session: Session) -> None:
+
         self._storage = storage
-        self._repo = repo
+        self._session = session
+        self._repo = FileRepository(self._session)
 
     async def create_file(
         self,
@@ -31,6 +34,21 @@ class FileService:
         content_type: str | None = None,
     ) -> File:
         """Upload blob data and persist the matching file metadata."""
+        try:
+            file = await self.stage_file(owner, filename, data, content_type)
+            self._session.commit()
+            return file
+        except Exception as e:
+            
+            raise e
+
+    async def stage_file(
+        self,
+        owner: User | UUID,
+        filename: str,
+        data: BlobUploadData,
+        content_type: str | None = None,
+    ):
         file_id = None
         try:
             await self._storage.upload(filename, data, content_type)
@@ -154,6 +172,7 @@ class FileService:
             raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
 
     async def _rollback(self, filename: str, file_id: UUID | None) -> None:
+        self._session.rollback()
         with contextlib.suppress(BlobStorageDeleteError):
             await self._storage.delete(filename)
         try:

@@ -30,7 +30,7 @@ def course_note_service(request, db_session) -> CourseNoteService:
 
 @fixture
 def course_service(db_session, course_note_service: CourseNoteService) -> CourseService:
-    return CourseService(db_session, course_note_service)
+    return CourseService(db_session,)
 
 
 @fixture

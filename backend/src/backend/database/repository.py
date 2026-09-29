@@ -1,12 +1,12 @@
 from typing import Protocol, TypeVar
+from backend.accounts import User
 from uuid import UUID
 
 RecordT = TypeVar("RecordT")
 UpdateT = TypeVar("UpdateT",contravariant=True)
-OwnerT = TypeVar("OwnerT",contravariant=True)
 
 
-class Repository(Protocol[RecordT, UpdateT, OwnerT]):
+class Repository(Protocol[RecordT, UpdateT]):
     """Generic persistence interface for storage records."""
 
     async def create(self, record: RecordT) -> RecordT:
@@ -29,6 +29,6 @@ class Repository(Protocol[RecordT, UpdateT, OwnerT]):
         """Delete a record by id."""
         ...
 
-    async def list_by_owner(self, owner: OwnerT) -> list[RecordT]:
+    async def list_by_owner(self, owner: User) -> list[RecordT]:
         """List records belonging to an owner."""
         ...
