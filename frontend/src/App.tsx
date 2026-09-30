@@ -12,6 +12,7 @@ import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import { HomeworkNotes } from "./pages/LectureNotes";
 import CourseManagement from "./features/CourseManagement/CourseManagement";
+import SingleCourse from "./features/CourseManagement/SingleCourse";
 function Test() {
   return <div><CourseManagement /></div>;
 }
@@ -42,7 +43,9 @@ function App() {
 
             <Route element={<RoleRedirect allow={["educator"]} />}>
               <Route path="/educator" element={<EducatorPage />} />
-              <Route path="/test" element={<Test />} />
+              
+              <Route path="/educator/courses" element={<Test />} />
+              <Route path="/educator/courses/:courseId" element={<SingleCourse />} />
             </Route>
           </Route>
 

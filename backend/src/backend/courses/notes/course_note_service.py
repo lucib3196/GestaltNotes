@@ -11,6 +11,7 @@ from backend.courses.exceptions import (
 )
 from backend.courses.models import Course, CourseContentType, CourseNote
 from backend.courses.notes.repo import CourseNoteRepository
+from backend.courses.schema import CourseNoteRead
 from backend.courses.service.course_service import CourseService
 from backend.storage import FileService
 from backend.storage.blob.exceptions import BlobStorageDeleteError
@@ -136,6 +137,24 @@ class CourseNoteService:
     async def list_notes(self, course_id: UUID) -> list[CourseNote]:
         return await self._repo.list_by_course(course_id)
 
+    async def read_note(self, note: CourseNote) -> CourseNoteRead:
+        download_url = await self._files.get_download_url(note.file_id)
+        if not note.id:
+            raise CourseNoteAssociationError("Cannot read note without id")
+
+        return CourseNoteRead(
+            id=note.id,
+            course_id=note.course_id,
+            file_id=note.file_id,
+            title=note.title,
+            resource_type=note.resource_type,
+            download_url=download_url,
+        )
+
+    async def list_notes_with_urls(self, course_id: UUID) -> list[CourseNoteRead]:
+        notes = await self.list_notes(course_id)
+        return [await self.read_note(note) for note in notes]
+
     def _create_note_record(
         self,
         course: Course,
@@ -155,4 +174,3 @@ class CourseNoteService:
             resource_type=resource_type,
             title=title or file.original_name,
         )
-

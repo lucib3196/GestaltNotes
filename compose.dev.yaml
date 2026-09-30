@@ -5,7 +5,8 @@ services:
       context: .
       dockerfile: backend/Dockerfile.dev
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
       ENV: dev
@@ -26,7 +27,7 @@ services:
     ports:
       - 5173:5173
     volumes:
-      - ./frontend:/app # mount project allows for reloading
+      - ./frontend:/app
       - /app/node_modules
 
   # POSTGRES DB as a volume
@@ -38,10 +39,15 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: gestalt_notes
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gestalt_notes"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
 
   # langgraph:
   #   build:

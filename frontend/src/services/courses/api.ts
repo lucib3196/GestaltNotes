@@ -1,5 +1,12 @@
 import api from "../../config/api";
-import type { Course, CourseCreate, CourseDelete, CourseUpdate } from "./types";
+import type {
+  Course,
+  CourseCreate,
+  CourseDelete,
+  CourseNote,
+  CourseNoteDelete,
+  CourseUpdate,
+} from "./types";
 
 const base = "/courses";
 
@@ -53,6 +60,48 @@ export class CoursesAPI {
     const res = await api.delete<CourseDelete>(`${base}/${courseId}`, {
       headers: authHeaders(token),
     });
+    return res.data;
+  }
+
+  static async listCourseNotes(
+    token: string,
+    courseId: string,
+  ): Promise<CourseNote[]> {
+    const res = await api.get<CourseNote[]>(`${base}/notes/${courseId}`, {
+      headers: authHeaders(token),
+    });
+    return res.data;
+  }
+
+  static async uploadCourseNote(
+    token: string,
+    courseId: string,
+    file: File,
+  ): Promise<CourseNote> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await api.post<CourseNote>(
+      `${base}/notes/${courseId}`,
+      formData,
+      {
+        headers: authHeaders(token),
+      },
+    );
+    return res.data;
+  }
+
+  static async deleteCourseNote(
+    token: string,
+    courseId: string,
+    noteId: string,
+  ): Promise<CourseNoteDelete> {
+    const res = await api.delete<CourseNoteDelete>(
+      `${base}/notes/${courseId}/${noteId}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return res.data;
   }
 }
