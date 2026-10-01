@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import FileUpload from "../../components/FileUpload";
+import { FileUpload } from "../../components/FileAttachments";
 import type { CourseContentType } from "../../services/courses";
-import { CourseNoteFile } from "./components";
 import {
   useEditCourse,
   useFetchCourseNotes,
@@ -11,19 +10,9 @@ import {
   useStreamCourseNote,
   useUploadCourseNote,
 } from "./hooks";
+import { CourseNoteView } from "./components/CourseNoteView";
 
-const COURSE_CONTENT_TYPES = [
-  "lecture",
-  "notes",
-  "assignment",
-  "exam",
-  "quiz",
-  "textbook",
-  "handout",
-  "syllabus",
-  "reference",
-  "other",
-] as const satisfies readonly CourseContentType[];
+import CourseNoteUpload from "../CourseNote/components/CourseNoteUpload";
 
 export default function SingleCourse() {
   const navigate = useNavigate();
@@ -35,12 +24,7 @@ export default function SingleCourse() {
     error: notesError,
     refetch: refetchNotes,
   } = useFetchCourseNotes(courseId);
-  const {
-    uploadCourseNote,
-    loading: uploadingNote,
-    error: uploadError,
-  } = useUploadCourseNote();
-  const { streamCourseNote, error: streamError } = useStreamCourseNote();
+
   const {
     updateCourse,
     loading: updating,
@@ -99,12 +83,6 @@ export default function SingleCourse() {
       )}
       {notesError && (
         <p className="text-sm text-red-400">{notesError.message}</p>
-      )}
-      {uploadError && (
-        <p className="text-sm text-red-400">{uploadError.message}</p>
-      )}
-      {streamError && (
-        <p className="text-sm text-red-400">{streamError.message}</p>
       )}
 
       {course && (
@@ -214,31 +192,11 @@ export default function SingleCourse() {
 
       {course && (
         <section className="rounded-xl border border-border bg-surface p-6 shadow-soft">
-          <div className="mb-5">
-            <h2 className="text-xl font-semibold text-text">Course Files</h2>
-            <p className="mt-1 text-sm text-text-muted">
-              Upload course resources and check the files attached to this
-              course.
-            </p>
-          </div>
-
-          <FileUpload
-            resourceTypes={COURSE_CONTENT_TYPES}
-            defaultResourceType="notes"
-            variant="dropzone"
-            uploading={uploadingNote}
-            onUpload={async (items) => {
-              for (const item of items) {
-                await uploadCourseNote(course.id, item.file, item.resourceType);
-              }
-
-              await refetchNotes();
-            }}
-          />
+          <CourseNoteUpload courseID={courseId} reFetch={refetchNotes} />
 
           <div className="mt-6">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-text-soft">
-              Attached Files
+              Course Files
             </h3>
 
             {loadingNotes && (
@@ -253,14 +211,7 @@ export default function SingleCourse() {
 
             <div className="mt-3 grid gap-3">
               {notes.map((note) => (
-                <CourseNoteFile
-                  key={note.id}
-                  note={note}
-                  onView={(selectedNote) => {
-                    console.log("Selected")
-                    void streamCourseNote(course.id, selectedNote.id);
-                  }}
-                />
+                <CourseNoteView key={note.id} note={note} />
               ))}
             </div>
           </div>

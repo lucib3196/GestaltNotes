@@ -43,6 +43,22 @@ class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):
             logger.error(message)
             raise CourseNoteRetrievalError(message) from e
 
+    async def get_by_course_and_note(
+        self,
+        course_id: UUID,
+        note_id: UUID,
+    ) -> CourseNote | None:
+        try:
+            return self._session.exec(
+                select(CourseNote)
+                .where(CourseNote.id == note_id)
+                .where(CourseNote.course_id == course_id)
+            ).first()
+        except SQLAlchemyError as e:
+            message = f"[CourseNoteRepository] failed to get course note {e}"
+            logger.error(message)
+            raise CourseNoteRetrievalError(message) from e
+
     async def get_by_course_and_file(
         self,
         course_id: UUID,

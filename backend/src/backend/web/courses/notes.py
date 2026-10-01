@@ -12,6 +12,7 @@ from backend.courses.schema import CourseNoteDelete, CourseNoteRead
 from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep
 from backend.web.courses.dependencies import CourseNoteServiceDep
 from backend.web.courses.http import course_http_exception
+from backend.courses.schema import CourseNoteUpdate
 
 ID = UUID | str
 
@@ -67,6 +68,21 @@ async def remove_course_note(
         raise course_http_exception(e) from e
 
 
+@router.put("/{course_id}/{note_id}", response_model=CourseNoteRead)
+async def update_course_note(
+    course_id: UUID,
+    note_id: UUID,
+    educator: EducatorDep,
+    service: CourseNoteServiceDep,
+    update: CourseNoteUpdate,
+):
+    try:
+        await service.assert_permission(educator, course_id)
+        return await service.update_note_properties(course_id, note_id, update)
+    except Exception as e:
+        raise ValueError("Failed")
+
+
 @router.get("/{course_id}/{note_id}/stream")
 async def stream_course_note(
     course_id: UUID,
@@ -75,15 +91,15 @@ async def stream_course_note(
     service: CourseNoteServiceDep,
 ):
     try:
-        filename, content_type, data = await service.download_note_file(
+        file, data = await service.download_note_file(
             course_id=course_id,
             note_id=note_id,
         )
         return StreamingResponse(
             BytesIO(data),
-            media_type=content_type or "application/octet-stream",
+            media_type=file.content_type or "application/octet-stream",
             headers={
-                "Content-Disposition": f'inline; filename="{filename}"',
+                "Content-Disposition": f'inline; filename="{file.original_name}"',
             },
         )
     except CourseServiceException as e:

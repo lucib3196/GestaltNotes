@@ -17,6 +17,7 @@ from backend.storage import FileService
 from backend.storage.blob.exceptions import BlobStorageDeleteError
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key
+from backend.courses.schema import CourseNoteUpdate
 
 
 class CourseNoteService:
@@ -138,7 +139,6 @@ class CourseNoteService:
         return await self._repo.list_by_course(course_id)
 
     async def read_note(self, note: CourseNote) -> CourseNoteRead:
-        download_url = await self._files.get_download_url(note.file_id)
         if not note.id:
             raise CourseNoteAssociationError("Cannot read note without id")
 
@@ -148,7 +148,6 @@ class CourseNoteService:
             file_id=note.file_id,
             title=note.title,
             resource_type=note.resource_type,
-            download_url=download_url,
         )
 
     async def list_notes_with_urls(self, course_id: UUID) -> list[CourseNoteRead]:
@@ -159,15 +158,24 @@ class CourseNoteService:
         self,
         course_id: UUID,
         note_id: UUID,
-    ) -> tuple[str, str | None, bytes]:
+    ) -> tuple[File, bytes]:
         note = await self._repo.get(note_id)
 
         if note is None or note.course_id != course_id:
             raise CourseNoteNotFoundError(str(course_id), str(note_id))
 
-        file, data = await self._files.download_file(note.file_id)
-        print("This is the data", data)
-        return file.original_name, file.content_type, data
+        return await self._files.download_file(note.file_id)
+
+    async def update_note_properties(
+        self, course_id: UUID, note_id: UUID, update: CourseNoteUpdate
+    ) -> CourseNote:
+        note = await self._repo.get_by_course_and_note(course_id, note_id)
+        if not note:
+            raise CourseNoteNotFoundError(str(course_id), str(note_id))
+        return await self._repo.update(note, update)
+
+    async def assert_permission(self, educator: User, course_id: UUID) -> None:
+        await self._courses.assert_course_owner(course_id, educator)
 
     def _create_note_record(
         self,

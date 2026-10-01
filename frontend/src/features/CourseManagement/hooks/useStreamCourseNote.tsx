@@ -20,9 +20,8 @@ export function useStreamCourseNote() {
       try {
         const token = await user.getIdToken();
         const blob = await CoursesAPI.streamCourseNote(token, courseId, noteId);
+
         const url = URL.createObjectURL(blob);
-        console.log("URL for image",url)
-        window.open(url, "_blank", "noopener,noreferrer");
         return url;
       } catch (err) {
         const error =

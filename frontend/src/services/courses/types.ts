@@ -32,10 +32,15 @@ export type CourseContentType =
   | "quiz"
   | "textbook"
   | "handout"
+  | "homework"
   | "syllabus"
   | "reference"
   | "other";
 
+export type SupportedContentType = Extract<
+  CourseContentType,
+  "lecture" | "notes" | "homework" | "exam"|"other"
+>;
 export interface CourseNote {
   id: string;
   course_id: string;
