@@ -36,9 +36,9 @@ function App() {
               }
             >
               <Route path="/chat" element={<ChatPage />} />
-              <Route path="/my_content" element={<MyGeneratedContentPage />} />
+              {/* <Route path="/my_content" element={<MyGeneratedContentPage />} />
               <Route path="/lecture" element={<LectureNotes />} />
-              <Route path="/homework" element={<HomeworkNotes />} />
+              <Route path="/homework" element={<HomeworkNotes />} /> */}
             </Route>
 
             <Route element={<RoleRedirect allow={["educator"]} />}>
