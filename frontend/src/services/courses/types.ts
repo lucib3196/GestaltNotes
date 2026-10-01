@@ -39,7 +39,7 @@ export type CourseContentType =
 
 export type SupportedContentType = Extract<
   CourseContentType,
-  "lecture" | "notes" | "homework" | "exam"|"other"
+  "lecture" | "notes" | "homework" | "exam" | "other"
 >;
 export interface CourseNote {
   id: string;
@@ -48,6 +48,7 @@ export interface CourseNote {
   title: string;
   resource_type: CourseContentType;
   download_url: string | null;
+  content_type?: string | null;
 }
 
 export interface CourseNoteDelete {

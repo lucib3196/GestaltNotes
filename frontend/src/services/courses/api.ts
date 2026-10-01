@@ -112,11 +112,13 @@ export class CoursesAPI {
     token: string,
     courseId: string,
     noteId: string,
+    signal?: AbortSignal,
   ): Promise<Blob> {
     const res = await api.get<Blob>(
       `${base}/notes/${courseId}/${noteId}/stream`,
       {
         responseType: "blob",
+        signal,
         headers: authHeaders(token),
       },
     );

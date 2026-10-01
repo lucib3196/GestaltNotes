@@ -148,6 +148,7 @@ class CourseNoteService:
             file_id=note.file_id,
             title=note.title,
             resource_type=note.resource_type,
+            content_type=note.file.content_type if note.file else None,
         )
 
     async def list_notes_with_urls(self, course_id: UUID) -> list[CourseNoteRead]:

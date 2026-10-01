@@ -8,6 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
+    from backend.storage.repo.schema import File
 
 
 class CourseContentType(StrEnum):
@@ -96,3 +97,5 @@ class CourseNote(SQLModel, table=True):
     resource_type: CourseContentType
 
     course: "Course" = Relationship(back_populates="notes")
+
+    file: "File" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})

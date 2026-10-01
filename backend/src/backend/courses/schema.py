@@ -36,6 +36,7 @@ class CourseNoteRead(BaseModel):
     title: str
     resource_type: CourseContentType
     download_url: str | None = None
+    content_type: str | None = None
 
 
 class CourseNoteDelete(BaseModel):

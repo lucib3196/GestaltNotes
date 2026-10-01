@@ -34,7 +34,13 @@ export function useFetchCourseNotes(courseId: string | undefined) {
   }, [user, courseId]);
 
   useEffect(() => {
-    void fetchNotes();
+    let active = true;
+    queueMicrotask(() => {
+      if (active) void fetchNotes().catch(() => {
+        // The hook exposes fetch errors to the resource list.
+      });
+    });
+    return () => { active = false; };
   }, [fetchNotes]);
 
   return { notes, loading, error, refetch: fetchNotes };

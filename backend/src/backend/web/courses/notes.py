@@ -89,7 +89,7 @@ async def stream_course_note(
     note_id: UUID,
     _user: CurrentUserDep,
     service: CourseNoteServiceDep,
-):
+)->StreamingResponse:
     try:
         file, data = await service.download_note_file(
             course_id=course_id,
