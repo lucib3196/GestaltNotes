@@ -141,7 +141,7 @@ export default function CourseHeader({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <p className="text-sm font-medium text-text-muted">Course</p>
-              <h1 className="mt-1 break-words text-3xl font-bold tracking-tight text-text">
+              <h1 className="mt-1 wrap-break-word text-3xl font-bold tracking-tight text-text">
                 {course.name}
               </h1>
               <p className="mt-2 text-sm text-text-muted">

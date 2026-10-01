@@ -2,10 +2,10 @@ from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
-
-from sqlalchemy import Column, ForeignKey, UniqueConstraint
+from backend.shared import Status
+from sqlalchemy import Column, ForeignKey, UniqueConstraint, Index
 from sqlmodel import Field, Relationship, SQLModel
-
+from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
 if TYPE_CHECKING:
     from backend.accounts.models import User
     from backend.storage.repo.schema import File
@@ -95,7 +95,32 @@ class CourseNote(SQLModel, table=True):
     )
     title: str
     resource_type: CourseContentType
+    status: Status = Status.DRAFT
 
     course: "Course" = Relationship(back_populates="notes")
 
     file: "File" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+
+class CourseModule(SQLModel, table=True):
+    __tablename__ = "course_module"  # type: ignore
+    __table_args__ = (
+        UniqueConstraint("course_id", "id", name="uq_course_module_course_id"),
+        Index("ix_course_modules_course_position", "course_id", "position"),
+    )
+    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+    course_id: UUID = Field(
+        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
+    )
+    title: str
+    position: int = Field(default=0)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            default=datetime.utcnow,
+            onupdate=datetime.utcnow,
+        ),
+    )

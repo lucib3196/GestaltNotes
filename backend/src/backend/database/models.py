@@ -6,6 +6,7 @@ from backend.courses.models import (
     CourseAccessCode,
     CourseEnrollment,
     CourseNote,
+    CourseModule
 )
 from backend.model.chat import Message, Thread
 from backend.model.generated_content import GeneratedMCQ
