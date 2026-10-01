@@ -13,6 +13,16 @@ services:
       - ./firebase.json:/app/firebase.json:ro
       - ./storage.rules:/app/storage.rules:ro
       - ./.firebaserc:/app/.firebaserc:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "Promise.all([fetch(''http://127.0.0.1:9099''), fetch(''http://127.0.0.1:9199'')]).then(() => process.exit(0)).catch(() => process.exit(1))"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
     working_dir: /app
 
   gestalt_notes_backend:
@@ -23,7 +33,7 @@ services:
       db:
         condition: service_healthy
       firebase_emulator:
-        condition: service_started
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
       APP_ENV: docker

@@ -17,9 +17,10 @@ from backend.storage.blob.exceptions import (
 from backend.storage.blob.schema import BlobMetadata
 from backend.core.logger import logger
 
+
 class FirebaseBlobStorage(BlobStorage):
     def __init__(self, bucket: str) -> None:
-        self._bucket = storage.bucket(bucket) # type: ignore
+        self._bucket = storage.bucket(bucket)  # type: ignore
 
     async def exists(self, key: str) -> bool:
         """Return whether an exact Firebase blob exists."""
@@ -42,18 +43,18 @@ class FirebaseBlobStorage(BlobStorage):
     async def read(self, key: str) -> bytes:
         """Read a Firebase blob as bytes."""
         blob_key = self._to_blob_key(key)
-        print("Converting to blob key", blob_key)
 
         try:
             blob = self._bucket.get_blob(blob_key)
-            print("Blob is", blob)
 
             if blob is None:
                 raise BlobNotFoundError(blob_key)
 
-            logger.debug("Client API base URL", self._bucket.client._connection.API_BASE_URL)
-            print("Blob media link", blob.media_link)
-            print("Downloading")
+            # logger.debug(
+            #     "Client API base URL: %s",
+            #     self._bucket.client._connection.API_BASE_URL,
+            # )
+            # logger.debug("Blob media link: %s", blob.media_link)
 
             self._rewrite_emulator_media_link(blob)
             data = blob.download_as_bytes(timeout=60)
@@ -61,7 +62,7 @@ class FirebaseBlobStorage(BlobStorage):
         except BlobNotFoundError:
             raise
         except Exception as e:
-            raise BlobStorageReadError(f"Failed to read blob '{blob_key}'") from e
+            raise BlobStorageReadError(f"Failed to read blob '{blob_key}' Error:{e}") from e
 
     async def download(self, key: str) -> bytes:
         """Download a Firebase blob as bytes."""
@@ -199,12 +200,10 @@ class FirebaseBlobStorage(BlobStorage):
             return
 
         parsed_media = urlparse(media_link)
-        print("Parsed", parsed_media)
         if parsed_media.hostname not in {"127.0.0.1", "localhost"}:
             return
 
         parsed_emulator = urlparse(emulator_host)
-        print(parsed_emulator)
         blob._properties["mediaLink"] = urlunparse(
             parsed_media._replace(
                 scheme=parsed_emulator.scheme,
@@ -227,11 +226,9 @@ if __name__ == "__main__":
     bucket = get_settings().STORAGE_BUCKET
     print(bucket)
     storage = FirebaseBlobStorage(bucket=bucket)
-    filename = "courses/76a8ff62-48a1-487c-a75d-ed3d76dba8fc/notes/6813a28c-ba45-41bf-9c3f-0a28f9d033ba.png"
-    exist = asyncio.run(
-        storage.exists(
-            "courses/76a8ff62-48a1-487c-a75d-ed3d76dba8fc/notes/6813a28c-ba45-41bf-9c3f-0a28f9d033ba.png"
-        )
-    )
+    filename = "courses/76a8ff62-48a1-487c-a75d-ed3d76dba8fc/notes/Pasted text.txt"
+    exist = asyncio.run(storage.exists(filename))
     print(exist)
-    asyncio.run(storage.download(filename))
+    content = asyncio.run(storage.download(filename))
+    # print(content)
+    
