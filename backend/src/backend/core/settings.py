@@ -25,6 +25,7 @@ class Environment(StrEnum):
     TESTING = "testing"
     DEV = "dev"
     PRODUCTION = "production"
+    DOCKER = "docker"
 
 
 APP_ENV = os.getenv("APP_ENV", "dev").lower()
@@ -32,9 +33,10 @@ ENV_FILES: dict[str, str] = {
     "dev": ".env.dev",
     "test": ".env.testing",
     "testing": ".env.testing",
+    "docker": ".env.docker",
 }
 env_file = ROOT_PATH / ENV_FILES.get(APP_ENV, ".env.dev")
-print("Env file", env_file)
+
 load_dotenv(env_file, override=False)
 
 
@@ -128,6 +130,12 @@ class AppSettings(BaseSettings):
     def validate_emulators(self):
         if self.ENV == "production":
             return self
+
+        # if self.ENV == "docker" and "127.0.0.1" in os.environ["STORAGE_EMULATOR_HOST"]:
+        #     raise EmulatorConfigError(
+        #         "STORAGE_EMULATOR_HOST cannot be 127.0.0.1 inside Docker. "
+        #         "Use http://host.docker.internal:9199."
+        #     )
 
         if not (self.FIREBASE_AUTH_EMULATOR_HOST or self.STORAGE_EMULATOR_HOST):
             raise EmulatorConfigError(f"Missing emulator config for ENV={self.ENV}")

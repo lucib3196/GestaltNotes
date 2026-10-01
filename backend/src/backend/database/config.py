@@ -17,7 +17,7 @@ def initialize_database_engine():
     DATABASE_URL = None
     if app_settings.ENV == "testing":
         DATABASE_URL = "sqlite:///:memory:"
-    elif app_settings.ENV == "production" or app_settings.ENV == "dev":
+    else:
         DATABASE_URL = app_settings.DATABASE_URL
     if not DATABASE_URL:
         raise DatabaseConfigError("Failed to initialize database. URL is not set")

@@ -1,6 +1,7 @@
 import api from "../../config/api";
 import type {
   Course,
+  CourseContentType,
   CourseCreate,
   CourseDelete,
   CourseNote,
@@ -77,9 +78,11 @@ export class CoursesAPI {
     token: string,
     courseId: string,
     file: File,
+    resourceType: CourseContentType,
   ): Promise<CourseNote> {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("resource_type", resourceType);
 
     const res = await api.post<CourseNote>(
       `${base}/notes/${courseId}`,
@@ -99,6 +102,21 @@ export class CoursesAPI {
     const res = await api.delete<CourseNoteDelete>(
       `${base}/notes/${courseId}/${noteId}`,
       {
+        headers: authHeaders(token),
+      },
+    );
+    return res.data;
+  }
+
+  static async streamCourseNote(
+    token: string,
+    courseId: string,
+    noteId: string,
+  ): Promise<Blob> {
+    const res = await api.get<Blob>(
+      `${base}/notes/${courseId}/${noteId}/stream`,
+      {
+        responseType: "blob",
         headers: authHeaders(token),
       },
     );

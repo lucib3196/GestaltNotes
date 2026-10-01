@@ -22,6 +22,7 @@ settings = get_settings()
 async def on_startup(app: FastAPI):
     engine = initialize_database_engine()
     initialize_firebase_app()
+    logger.info("Initialized fb okay")
     logger.info("Created database successfully")
 
     logger.debug("Seeding roles")
@@ -37,7 +38,7 @@ def add_routes(app: FastAPI, routes: list[APIRouter] = ALL_ROUTES) -> None:
     for r in routes:
         app.include_router(r)
 
-
+ 
 def get_app():
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
     logger.info("[Initialization] Initialized app")

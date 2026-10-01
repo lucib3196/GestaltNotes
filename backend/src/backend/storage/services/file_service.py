@@ -139,6 +139,19 @@ class FileService:
                 f"Failed to get download URL for file '{file_id}'"
             ) from e
 
+    async def download_file(self, file_id: UUID) -> tuple[File, bytes]:
+        """Return file metadata and blob contents for a persisted file."""
+        try:
+            file = await self.get_file(file_id)
+            data = await self._storage.download(file.storage_key)
+            return file, data
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceRetrievalError(
+                f"Failed to download file '{file_id}'"
+            ) from e
+
     async def replace_file(
         self,
         file_id: UUID,

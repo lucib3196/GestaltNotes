@@ -155,6 +155,20 @@ class CourseNoteService:
         notes = await self.list_notes(course_id)
         return [await self.read_note(note) for note in notes]
 
+    async def download_note_file(
+        self,
+        course_id: UUID,
+        note_id: UUID,
+    ) -> tuple[str, str | None, bytes]:
+        note = await self._repo.get(note_id)
+
+        if note is None or note.course_id != course_id:
+            raise CourseNoteNotFoundError(str(course_id), str(note_id))
+
+        file, data = await self._files.download_file(note.file_id)
+        print("This is the data", data)
+        return file.original_name, file.content_type, data
+
     def _create_note_record(
         self,
         course: Course,

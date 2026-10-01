@@ -1,12 +1,46 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { useEditCourse, useGetCourse } from "./hooks";
+import FileUpload from "../../components/FileUpload";
+import type { CourseContentType } from "../../services/courses";
+import { CourseNoteFile } from "./components";
+import {
+  useEditCourse,
+  useFetchCourseNotes,
+  useGetCourse,
+  useStreamCourseNote,
+  useUploadCourseNote,
+} from "./hooks";
+
+const COURSE_CONTENT_TYPES = [
+  "lecture",
+  "notes",
+  "assignment",
+  "exam",
+  "quiz",
+  "textbook",
+  "handout",
+  "syllabus",
+  "reference",
+  "other",
+] as const satisfies readonly CourseContentType[];
 
 export default function SingleCourse() {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const { course, loading, error, refetch } = useGetCourse(courseId);
+  const {
+    notes,
+    loading: loadingNotes,
+    error: notesError,
+    refetch: refetchNotes,
+  } = useFetchCourseNotes(courseId);
+  const {
+    uploadCourseNote,
+    loading: uploadingNote,
+    error: uploadError,
+  } = useUploadCourseNote();
+  const { streamCourseNote, error: streamError } = useStreamCourseNote();
   const {
     updateCourse,
     loading: updating,
@@ -62,6 +96,15 @@ export default function SingleCourse() {
       {error && <p className="text-sm text-red-400">{error.message}</p>}
       {updateError && (
         <p className="text-sm text-red-400">{updateError.message}</p>
+      )}
+      {notesError && (
+        <p className="text-sm text-red-400">{notesError.message}</p>
+      )}
+      {uploadError && (
+        <p className="text-sm text-red-400">{uploadError.message}</p>
+      )}
+      {streamError && (
+        <p className="text-sm text-red-400">{streamError.message}</p>
       )}
 
       {course && (
@@ -167,6 +210,61 @@ export default function SingleCourse() {
             )}
           </label>
         </form>
+      )}
+
+      {course && (
+        <section className="rounded-xl border border-border bg-surface p-6 shadow-soft">
+          <div className="mb-5">
+            <h2 className="text-xl font-semibold text-text">Course Files</h2>
+            <p className="mt-1 text-sm text-text-muted">
+              Upload course resources and check the files attached to this
+              course.
+            </p>
+          </div>
+
+          <FileUpload
+            resourceTypes={COURSE_CONTENT_TYPES}
+            defaultResourceType="notes"
+            variant="dropzone"
+            uploading={uploadingNote}
+            onUpload={async (items) => {
+              for (const item of items) {
+                await uploadCourseNote(course.id, item.file, item.resourceType);
+              }
+
+              await refetchNotes();
+            }}
+          />
+
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-text-soft">
+              Attached Files
+            </h3>
+
+            {loadingNotes && (
+              <p className="mt-3 text-sm text-text-muted">Loading files...</p>
+            )}
+
+            {!loadingNotes && notes.length === 0 && (
+              <p className="mt-3 rounded-lg border border-border bg-surface-muted p-4 text-sm text-text-muted">
+                No files attached yet.
+              </p>
+            )}
+
+            <div className="mt-3 grid gap-3">
+              {notes.map((note) => (
+                <CourseNoteFile
+                  key={note.id}
+                  note={note}
+                  onView={(selectedNote) => {
+                    console.log("Selected")
+                    void streamCourseNote(course.id, selectedNote.id);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );

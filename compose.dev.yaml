@@ -1,15 +1,34 @@
 name: gestalt notes dev
 services:
-  gestalt_notes_backend:
+  firebase_emulator:
     build:
       context: .
-      dockerfile: backend/Dockerfile.dev
+      dockerfile: Dockerfile.firebase-emulator
+    ports:
+      - "9099:9099"
+      - "9199:9199"
+      - "0.0.0.0:4000:4000"
+    volumes:
+      - ./emulator-data:/app/emulator-data
+      - ./firebase.json:/app/firebase.json:ro
+      - ./storage.rules:/app/storage.rules:ro
+      - ./.firebaserc:/app/.firebaserc:ro
+    working_dir: /app
+
+  gestalt_notes_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
     depends_on:
       db:
         condition: service_healthy
+      firebase_emulator:
+        condition: service_started
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
-      ENV: dev
+      APP_ENV: docker
+      FIREBASE_AUTH_EMULATOR_HOST: firebase_emulator:9099
+      STORAGE_EMULATOR_HOST: http://firebase_emulator:9199
     env_file:
       - ./backend/.env.docker
     ports:
@@ -17,7 +36,7 @@ services:
     volumes:
       - ./backend:/app/backend # mount project allows for reloading
 
-  # Frontend 
+  # Frontend
   gestalt_notes_frontend:
     build:
       context: ./frontend
@@ -39,7 +58,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: gestalt_notes
-    healthcheck: 
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d gestalt_notes"]
       interval: 5s
       timeout: 5s
@@ -47,18 +66,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  # langgraph:
-  #   build:
-  #     context: ./ai_agents
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     ENV: dev
-  #   ports:
-  #     - 2024:2024
-  #   volumes:
-  #     - ./ai_agents:/deps/ai_agents # mount project allows for reloading
+      - postgres_data:/var/lib/postgresql
 
 volumes:
   postgres_data:

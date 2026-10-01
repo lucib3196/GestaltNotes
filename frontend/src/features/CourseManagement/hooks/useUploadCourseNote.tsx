@@ -1,7 +1,11 @@
 import { useCallback, useState } from "react";
 
 import { useAuth } from "../../Auth";
-import { CoursesAPI, type CourseNote } from "../../../services/courses";
+import {
+  CoursesAPI,
+  type CourseContentType,
+  type CourseNote,
+} from "../../../services/courses";
 
 export function useUploadCourseNote() {
   const { user } = useAuth();
@@ -10,7 +14,7 @@ export function useUploadCourseNote() {
   const [error, setError] = useState<Error | null>(null);
 
   const uploadCourseNote = useCallback(
-    async (courseId: string, file: File) => {
+    async (courseId: string, file: File, resourceType: CourseContentType) => {
       if (!user) {
         throw new Error("You must be signed in to upload notes.");
       }
@@ -24,6 +28,7 @@ export function useUploadCourseNote() {
           token,
           courseId,
           file,
+          resourceType,
         );
         setNote(uploadedNote);
         return uploadedNote;
