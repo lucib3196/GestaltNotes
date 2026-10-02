@@ -85,7 +85,7 @@ class PDFAnnotator(DocumentAnnotator):
                     self.annotate_page(page)
                 except (ValueError, RuntimeError) as exc:
                     raise RuntimeError(
-                        f"Could not annotate page index " f"{page.number} in {file!s}."
+                        f"Could not annotate page index {page.number} in {file!s}."
                     ) from exc
 
             try:
@@ -178,9 +178,8 @@ class PDFAnnotator(DocumentAnnotator):
 
 
 if __name__ == "__main__":
-    from PIL import Image
     from io import BytesIO
-    from IPython.display import Image, display
+
     import matplotlib.pyplot as plt
 
     file = Path(r"assets/Lec16_post.pdf").resolve()

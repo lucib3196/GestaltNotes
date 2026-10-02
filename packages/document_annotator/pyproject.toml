@@ -13,6 +13,7 @@ dependencies = [
     "pillow>=12.3.0",
     "pydantic>=2.13.5",
     "pymupdf>=1.28.2",
+    "ruff>=0.16.10",
 ]
 
 [project.scripts]
@@ -21,3 +22,30 @@ document-annotator = "document_annotator:main"
 [build-system]
 requires = ["uv_build>=0.12.0,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplify
+    "C4",  # comprehensions
+    "TID", # tidy imports
+    "RUF", # Ruff-specific
+    "ASYNC", # async issues
+    "ANN", # type annotations
+    "RET", # return issues
+    "ARG", # unused arguments
+    "PTH", # pathlib recommendations
+]
+
+ignore = [
+    "ANN101", # missing self annotation
+    "ANN102", # missing cls annotation
+]
