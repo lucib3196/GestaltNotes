@@ -53,7 +53,7 @@ class PDF2ImageConverter(Converter):
                     images.append(pixmap.tobytes(self.extension))
                 except (ValueError, RuntimeError) as exc:
                     raise RuntimeError(
-                        f"Could not render page {page.number + 1} "
+                        f"Could not render page {page.number or 0 + 1} "
                         f"in {file!s}."
                     ) from exc
             return images

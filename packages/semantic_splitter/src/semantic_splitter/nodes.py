@@ -1,23 +1,30 @@
 from langgraph.runtime import Runtime
 from multimodal_llm import MultiModalLLM
-from .state import SegmentationContext, State, InputState
+
+from .models import ExtractionResult
+from .state import InputState, SegmentationContext
 
 
-def analyze(state: InputState, runtime: Runtime[SegmentationContext]) -> None:
-    print("Analyzing Document... ")
+def analyze(
+    state: InputState,
+    runtime: Runtime[SegmentationContext],
+):
+    if not state.pages:
+        raise ValueError("At least one page is required.")
+
     llm = MultiModalLLM(runtime.context.model)
+
+    content_type = runtime.context.structured_output
+    if content_type is None:
+        content_type = str
+
+    output_model = ExtractionResult[content_type]
+
     result = llm.invoke(
         prompt=runtime.context.prompt,
-        images=[p.content for p in state.pages],
+        images=[page.content for page in state.pages],
         mime_type=state.pages[0].mime_type,
-        output_model=runtime.context.structured_output,
+        output_model=output_model,
     )
-    print(result)
-
-
-def chunk(state: State, runtime: Runtime[SegmentationContext]) -> None:
-    print("Chunking Pages..")
-
-
-def finalize(state: State, runtime: Runtime[SegmentationContext]) -> None:
-    print("Finalizing....")
+    result = ExtractionResult[content_type].model_validate(result)
+    return {"extracted": result.pages}

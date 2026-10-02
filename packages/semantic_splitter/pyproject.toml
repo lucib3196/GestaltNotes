@@ -33,6 +33,7 @@ multimodal-llm = { path = "../multimodal_llm" }
 
 [dependency-groups]
 dev = [
+    "langchain>=1.4.3",
     "langchain-google-genai>=4.4.0",
     "python-dotenv>=1.2.4",
 ]

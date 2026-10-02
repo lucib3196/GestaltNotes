@@ -19,9 +19,13 @@ class PageImage(BaseModel):
     mime_type: str = "image/png"
 
 
-TContent = TypeVar("TContent", bound=BaseModel)
+TContent = TypeVar("TContent", bound=BaseModel | str)
 
 
-class PageContent[TContent: BaseModel](BaseModel):
+class PageContent[TContent: BaseModel | str](BaseModel):
     page_range: PageRange
-    content: str | TContent
+    content: TContent
+
+
+class ExtractionResult[TContent: BaseModel | str](BaseModel):
+    pages: list[PageContent[TContent]]
