@@ -28,7 +28,7 @@ class Config(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
 
     anchor: Anchor = Anchor.BOTTOM_RIGHT
-    margin_frac: float = Field(default=0.1, gt=0, lt=0.5, allow_inf_nan=False)
+    margin_frac: float = Field(default=0.05, gt=0, lt=0.5, allow_inf_nan=False)
     offset: tuple[int, int] = (20, 20)
     zoom: float = Field(default=2.0, gt=0, allow_inf_nan=False)
 
@@ -183,6 +183,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     file = Path(r"assets/Lec16_post.pdf").resolve()
+    dest = file.parent / "output.pdf"
     print(file)
     print(file.exists())
     annotator = PDFAnnotator()
@@ -195,3 +196,5 @@ if __name__ == "__main__":
     plt.imshow(image)
     plt.axis("off")
     plt.show()
+
+    annotator.annotate_and_save(file, dest)
