@@ -14,6 +14,11 @@ class PageRange(BaseModel):
         return self
 
 
+class PageImage(BaseModel):
+    content: bytes
+    mime_type: str = "image/png"
+
+
 TContent = TypeVar("TContent", bound=BaseModel)
 
 

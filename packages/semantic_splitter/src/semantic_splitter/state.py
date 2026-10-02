@@ -3,11 +3,11 @@ from typing import Generic
 from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 
-from .models import PageContent, TContent
+from .models import PageContent, PageImage, TContent
 
 
 class SegmentationContext(BaseModel, Generic[TContent]):
-    model: BaseChatModel | None = None
+    model: BaseChatModel
     structured_output: type[TContent] | None = None
     prompt: str = (
         "Separate the pages into distinct documents based on their content. "
@@ -16,7 +16,7 @@ class SegmentationContext(BaseModel, Generic[TContent]):
 
 
 class InputState(BaseModel):
-    file: str  # File path; consider naming this file_path.
+    pages: list[PageImage]  # File path; consider naming this file_path.
 
 
 class State(InputState, Generic[TContent]):
