@@ -118,3 +118,4 @@ data_analysis/src/data_analysis/**.ipynb
 data_analysis/src/data_analysis/**.md
 
 *.env**
+packages/document_annotator/src/document_annotator/assets
