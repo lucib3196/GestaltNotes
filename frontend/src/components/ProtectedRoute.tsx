@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context";
+import { useAuth } from "../features/Auth/context/AuthProvider";
 import type { ValidRole } from "../services";
 
 interface ProtectedRouteProps {

@@ -6,11 +6,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 from sqlmodel import Session
-from backend.database.config import initialize_database_engine
+
+from backend.accounts.services import RoleDB
 from backend.core.firebase import initialize_firebase_app
 from backend.core.logger import logger
 from backend.core.settings import get_settings
-from backend.data.role import RoleDB
+from backend.database.config import initialize_database_engine
 from backend.web import ALL_ROUTES
 
 settings = get_settings()
@@ -21,6 +22,7 @@ settings = get_settings()
 async def on_startup(app: FastAPI):
     engine = initialize_database_engine()
     initialize_firebase_app()
+    logger.info("Initialized fb okay")
     logger.info("Created database successfully")
 
     logger.debug("Seeding roles")
@@ -36,7 +38,7 @@ def add_routes(app: FastAPI, routes: list[APIRouter] = ALL_ROUTES) -> None:
     for r in routes:
         app.include_router(r)
 
-
+ 
 def get_app():
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
     logger.info("[Initialization] Initialized app")

@@ -1,0 +1,68 @@
+[project]
+name = "semantic-splitter"
+version = "0.1.0"
+description = "Split PDFs into semantic sections using a multimodal model"
+readme = "README.md"
+authors = [
+    { name = "Luciano Bermudez", email = "lberm007@ucr.edu" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "document-processing",
+    "langchain-core>=1.6.6",
+    "langgraph>=1.2.12",
+    "multimodal-llm",
+    "pillow>=12.3.0",
+    "pydantic>=2.13.5",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"
+
+
+
+[tool.uv.sources]
+document-processing = { path = "../document_processing", editable = true }
+multimodal-llm = { path = "../multimodal_llm" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+    "langchain>=1.4.3",
+    "langchain-google-genai>=4.4.0",
+    "python-dotenv>=1.2.4",
+]
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not integration'"
+markers = ["integration: live Gemini tests requiring API credentials"]
+pythonpath = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplify
+    "C4",  # comprehensions
+    "TID", # tidy imports
+    "RUF", # Ruff-specific
+    "ASYNC", # async issues
+    "ANN", # type annotations
+    "RET", # return issues
+    "ARG", # unused arguments
+    "PTH", # pathlib recommendations
+]
+
+ignore = [
+    "ANN101", # missing self annotation
+    "ANN102", # missing cls annotation
+]

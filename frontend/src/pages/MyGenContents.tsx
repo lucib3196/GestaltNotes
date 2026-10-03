@@ -1,5 +1,5 @@
 import { useGenContentProvider } from "../features/GeneratedContent";
-import { useAuth } from "../context";
+import { useAuth } from "../features/Auth";
 import { useState, useEffect, useMemo } from "react";
 import { RenderMCQSingle } from "../features/MCQ";
 

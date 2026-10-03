@@ -1,5 +1,5 @@
 import type { ToolName } from "../models/tools.types";
-import { useAuth } from "../../../context";
+import { useAuth } from "../../Auth";
 import type { BaseMessage } from "langchain";
 import { isToolMessage } from "../utils";
 import { tools } from "../toolDefinition";

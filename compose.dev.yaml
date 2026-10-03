@@ -1,14 +1,44 @@
 name: gestalt notes dev
 services:
-  gestalt_notes_backend:
+  firebase_emulator:
     build:
       context: .
-      dockerfile: backend/Dockerfile.dev
+      dockerfile: Dockerfile.firebase-emulator
+    ports:
+      - "9099:9099"
+      - "9199:9199"
+      - "0.0.0.0:4000:4000"
+    volumes:
+      - ./emulator-data:/app/emulator-state
+      - ./firebase.json:/app/firebase.json:ro
+      - ./storage.rules:/app/storage.rules:ro
+      - ./.firebaserc:/app/.firebaserc:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "Promise.all([fetch(''http://127.0.0.1:9099''), fetch(''http://127.0.0.1:9199'')]).then(() => process.exit(0)).catch(() => process.exit(1))"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    working_dir: /app
+
+  gestalt_notes_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      firebase_emulator:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
-      ENV: dev
+      APP_ENV: docker
+      FIREBASE_AUTH_EMULATOR_HOST: firebase_emulator:9099
+      STORAGE_EMULATOR_HOST: http://firebase_emulator:9199
     env_file:
       - ./backend/.env.docker
     ports:
@@ -16,7 +46,7 @@ services:
     volumes:
       - ./backend:/app/backend # mount project allows for reloading
 
-  # Frontend 
+  # Frontend
   gestalt_notes_frontend:
     build:
       context: ./frontend
@@ -26,7 +56,7 @@ services:
     ports:
       - 5173:5173
     volumes:
-      - ./frontend:/app # mount project allows for reloading
+      - ./frontend:/app
       - /app/node_modules
 
   # POSTGRES DB as a volume
@@ -38,6 +68,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: gestalt_notes
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gestalt_notes"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
       - "5432:5432"
     volumes:

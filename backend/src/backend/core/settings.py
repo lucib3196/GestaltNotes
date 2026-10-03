@@ -4,6 +4,7 @@ from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+
 from dotenv import load_dotenv
 from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -24,6 +25,7 @@ class Environment(StrEnum):
     TESTING = "testing"
     DEV = "dev"
     PRODUCTION = "production"
+    DOCKER = "docker"
 
 
 APP_ENV = os.getenv("APP_ENV", "dev").lower()
@@ -31,9 +33,10 @@ ENV_FILES: dict[str, str] = {
     "dev": ".env.dev",
     "test": ".env.testing",
     "testing": ".env.testing",
+    "docker": ".env.docker",
 }
 env_file = ROOT_PATH / ENV_FILES.get(APP_ENV, ".env.dev")
-print("Env file", env_file)
+
 load_dotenv(env_file, override=False)
 
 
@@ -128,6 +131,12 @@ class AppSettings(BaseSettings):
         if self.ENV == "production":
             return self
 
+        # if self.ENV == "docker" and "127.0.0.1" in os.environ["STORAGE_EMULATOR_HOST"]:
+        #     raise EmulatorConfigError(
+        #         "STORAGE_EMULATOR_HOST cannot be 127.0.0.1 inside Docker. "
+        #         "Use http://host.docker.internal:9199."
+        #     )
+
         if not (self.FIREBASE_AUTH_EMULATOR_HOST or self.STORAGE_EMULATOR_HOST):
             raise EmulatorConfigError(f"Missing emulator config for ENV={self.ENV}")
 
@@ -181,7 +190,8 @@ def get_settings_pretty_print(mode: Literal["str", "json"] = "json") -> str:
             "database": bool(app_settings.DATABASE_URL),
             "firebase_credentials": bool(app_settings.FIREBASE_CRED),
             "storage_bucket": bool(app_settings.STORAGE_BUCKET),
-            "Langsmith Agents": bool(app_settings.LANGGRAPH_STREAM_URL) and bool(app_settings.LANGSMITH_API_KEY) 
+            "Langsmith Agents": bool(app_settings.LANGGRAPH_STREAM_URL)
+            and bool(app_settings.LANGSMITH_API_KEY),
         },
     }
 

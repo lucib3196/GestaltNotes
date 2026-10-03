@@ -1,11 +1,11 @@
 import asyncio
 from pathlib import Path
 
+from backend.service.user.user_manager import UserCreate, UserManager
 from sqlmodel import create_engine
 
-from backend.database import Session, engine
 from backend.core.settings import get_settings
-from backend.service.user.user_manager import UserCreate, UserManager
+from backend.database import Session, engine
 
 settings = get_settings()
 print(settings.ENV)
