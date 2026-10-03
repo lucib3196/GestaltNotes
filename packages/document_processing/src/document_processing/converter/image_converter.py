@@ -20,25 +20,32 @@ class PDF2ImageConverter(Converter):
     """Render each PDF page into image bytes."""
 
     def __init__(self, config: Config | None = None) -> None:
+        """Use the supplied image format and scale, or their defaults."""
         self._config = config if config is not None else Config()
 
     @property
     def extension(self) -> str:
+        """Return the file extension used for rendered images."""
         return self._config.extension
 
-    def convert(self, file: str | Path) -> list[bytes]:
+    def convert(self, file: str | Path | bytes) -> list[bytes]:
         """Render all pages while preserving their order and rotation."""
+        description = "in-memory PDF" if isinstance(file, bytes) else str(file)
         try:
-            doc = pymupdf.open(file)
+            doc = (
+                pymupdf.open(stream=file, filetype="pdf")
+                if isinstance(file, bytes)
+                else pymupdf.open(filename=str(file))
+            )
         except (OSError, RuntimeError) as exc:
-            raise RuntimeError(f"Could not open PDF {file!s}.") from exc
+            raise RuntimeError(f"Could not open PDF {description}.") from exc
 
         with doc:
             if not doc.is_pdf:
-                raise ValueError(f"Expected a PDF document: {file!s}")
+                raise ValueError(f"Expected a PDF document: {description}")
             if doc.needs_pass:
                 raise ValueError(
-                    f"Password-protected PDFs are unsupported: {file!s}"
+                    f"Password-protected PDFs are unsupported: {description}"
                 )
 
             matrix = pymupdf.Matrix(self._config.zoom, self._config.zoom)
@@ -53,7 +60,6 @@ class PDF2ImageConverter(Converter):
                     images.append(pixmap.tobytes(self.extension))
                 except (ValueError, RuntimeError) as exc:
                     raise RuntimeError(
-                        f"Could not render page {page.number or 0 + 1} "
-                        f"in {file!s}."
+                        f"Could not render page index {page.number} in {description}."
                     ) from exc
             return images

@@ -12,7 +12,7 @@ class Converter(ABC):
         """File extension for converted outputs."""
 
     @abstractmethod
-    def convert(self, file: str | Path) -> Sequence[bytes]:
+    def convert(self, file: str | Path | bytes) -> Sequence[bytes]:
         """Return converted content in document order."""
 
     def save(
@@ -22,7 +22,7 @@ class Converter(ABC):
         *,
         prefix: str = "page",
     ) -> list[Path]:
-        """Save content with one-based numbering; overwrite matching files."""
+        """Save content with zero-based numbering; overwrite matching files."""
         if (
             not prefix
             or prefix in {".", ".."}
@@ -34,7 +34,7 @@ class Converter(ABC):
         output_dir = Path(directory)
         output_dir.mkdir(parents=True, exist_ok=True)
         paths = []
-        for number, data in enumerate(content, start=1):
+        for number, data in enumerate(content):
             path = output_dir / f"{prefix}_{number}.{self.extension}"
             path.write_bytes(data)
             paths.append(path)
@@ -42,7 +42,7 @@ class Converter(ABC):
 
     def convert_and_save(
         self,
-        file: str | Path,
+        file: str | Path | bytes,
         directory: str | Path,
         *,
         prefix: str = "page",

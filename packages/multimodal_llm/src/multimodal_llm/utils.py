@@ -3,6 +3,7 @@ from collections.abc import Iterable
 
 
 def prepare_image_payload(payload: Iterable[bytes], mime_type: str):
+    """Encode image bytes as data URLs using the supplied MIME type."""
     return [
         {
             "type": "image_url",

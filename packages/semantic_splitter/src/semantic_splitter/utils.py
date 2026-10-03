@@ -1,25 +1,13 @@
 from datetime import date, datetime, time
 from enum import Enum
-from io import BytesIO
 from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-from PIL import Image
 from pydantic import BaseModel
 
 
-def get_image_type(data: bytes) -> str:
-    try:
-        with Image.open(BytesIO(data)) as image:
-            if not image.format:
-                raise ValueError("Failed to determine image type")
-            return image.format
-    except Exception as e:
-        raise ValueError(f"Failed to open image {e}")
-
-
-def to_serializable(obj: Any) -> Any:
+def to_serializable(obj: Any) -> Any:  # noqa: ANN401
     """Convert supported objects into JSON-serializable Python values."""
     if isinstance(obj, Enum):
         return obj.value
@@ -27,7 +15,7 @@ def to_serializable(obj: Any) -> Any:
         return obj.model_dump(mode="json")
     if isinstance(obj, dict):
         return {key: to_serializable(value) for key, value in obj.items()}
-    if isinstance(obj, list):
+    if isinstance(obj, (list, tuple, set)):
         return [to_serializable(value) for value in obj]
     if isinstance(obj, (datetime, date, time)):
         return obj.isoformat()
@@ -35,7 +23,4 @@ def to_serializable(obj: Any) -> Any:
         return str(obj)
     if isinstance(obj, Path):
         return obj.as_posix()
-    if isinstance(obj, (list, tuple, set)):
-        return [to_serializable(value) for value in obj]
-
     return obj

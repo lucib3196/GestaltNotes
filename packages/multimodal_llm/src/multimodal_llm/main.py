@@ -11,7 +11,9 @@ class Response(BaseModel):
 
 
 class MultiModalLLM:
+    """Send prompts and image bytes to a multimodal chat model."""
     def __init__(self, model: BaseChatModel) -> None:
+        """Use the supplied chat model for sync and async requests."""
         self._llm = model
 
     def invoke(
@@ -22,6 +24,7 @@ class MultiModalLLM:
         mime_type: str,
         output_model: type[BaseModel] | None = Response,
     ):
+        """Return a multimodal response, optionally using a structured schema."""
         message = self.prepare_payload(prompt, images, mime_type)
         if output_model:
             chain = self._llm.with_structured_output(schema=output_model)
@@ -36,6 +39,7 @@ class MultiModalLLM:
         mime_type: str,
         output_model: type[BaseModel] | None = Response,
     ):
+        """Await a multimodal response, optionally using a structured schema."""
         message = self.prepare_payload(prompt, images, mime_type)
         if output_model:
             chain = self._llm.with_structured_output(schema=output_model)
@@ -48,6 +52,7 @@ class MultiModalLLM:
         data: Iterable[bytes],
         mime_type: str,
     ):
+        """Build a user message containing a prompt and base64 image URLs."""
         return {
             "role": "user",
             "content": [

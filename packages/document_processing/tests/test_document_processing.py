@@ -36,17 +36,17 @@ def read_pages(data):
         return [(page.get_text().strip(), page.rotation) for page in doc]
 
 
-@pytest.mark.parametrize("start,end", [(1, 1), (3, 3), (1, 3)])
+@pytest.mark.parametrize("start,end", [(0, 0), (2, 2), (0, 2)])
 def test_extract(splitter, source, start, end):
     chunk = splitter.extract(source, start, end)
     assert (chunk.start, chunk.end) == (start, end)
     assert chunk.mime_type == "application/pdf"
     assert read_pages(chunk.content) == [
-        (f"Page {number}", 90) for number in range(start, end + 1)
+        (f"Page {number}", 90) for number in range(start + 1, end + 2)
     ]
 
 
-@pytest.mark.parametrize("start,end", [(-2, 1), (-1, 1), (2, 1), (1, 4)])
+@pytest.mark.parametrize("start,end", [(-2, 1), (-1, 1), (2, 1), (0, 3), (3, 3)])
 def test_invalid_page_ranges(splitter, pdf_source, start, end):
     _, data = pdf_source
     with pymupdf.open(stream=data, filetype="pdf") as doc:
@@ -63,7 +63,7 @@ def test_page_numbers_must_be_integers(splitter, pdf_source, start, end):
 
 
 def test_split_preserves_requested_order(splitter, source):
-    chunks = splitter.split(source, [(3, 3), (1, 2)])
+    chunks = splitter.split(source, [(2, 2), (0, 1)])
     assert [read_pages(chunk.content) for chunk in chunks] == [
         [("Page 3", 90)],
         [("Page 1", 90), ("Page 2", 90)],
@@ -76,7 +76,7 @@ def test_split_empty_ranges(splitter, source):
 
 def test_page_chunk_save(tmp_path):
     chunk = PageChunk(
-        content=b"example", start=1, end=1, mime_type="application/pdf"
+        content=b"example", start=0, end=0, mime_type="application/pdf"
     )
     destination = tmp_path / "chunk.pdf"
     assert chunk.save(destination) == destination
@@ -85,7 +85,7 @@ def test_page_chunk_save(tmp_path):
 
 def test_extract_and_save(splitter, source, tmp_path):
     destination = tmp_path / "extract.pdf"
-    assert splitter.extract_and_save(source, 2, 3, destination) == destination
+    assert splitter.extract_and_save(source, 1, 2, destination) == destination
     assert read_pages(destination.read_bytes()) == [
         ("Page 2", 90), ("Page 3", 90)
     ]
@@ -94,10 +94,10 @@ def test_extract_and_save(splitter, source, tmp_path):
 def test_split_and_save(splitter, source, tmp_path):
     directory = tmp_path / "nested" / "output"
     paths = splitter.split_and_save(
-        source, [(1, 1), (2, 3)], directory, prefix="part", suffix=".pdf"
+        source, [(0, 0), (1, 2)], directory, prefix="part", suffix=".pdf"
     )
     assert paths == [
-        directory / "part_1_1-1.pdf", directory / "part_2_2-3.pdf"
+        directory / "part_0_0-0.pdf", directory / "part_1_1-2.pdf"
     ]
     assert [read_pages(path.read_bytes()) for path in paths] == [
         [("Page 1", 90)],
@@ -183,7 +183,7 @@ def test_invalid_files(splitter, tmp_path, file_kind):
     if file_kind == "corrupt":
         source.write_bytes(b"not a PDF")
     with pytest.raises(RuntimeError):
-        splitter.extract(source, 1, 1)
+        splitter.extract(source, 0, 0)
     with pytest.raises(RuntimeError):
         PDFAnnotator().annotate(source)
 
@@ -199,6 +199,6 @@ def test_password_protected_pdf(splitter, pdf_source, tmp_path):
             user_pw="user-password",
         )
     with pytest.raises(ValueError):
-        splitter.extract(encrypted, 1, 1)
+        splitter.extract(encrypted, 0, 0)
     with pytest.raises(ValueError):
         PDFAnnotator().annotate(encrypted)

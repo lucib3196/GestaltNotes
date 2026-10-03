@@ -1,0 +1,68 @@
+name: Semantic Splitter CI
+
+on:
+  push:
+    branches: ["main", "dev"]
+    paths:
+      - "packages/semantic_splitter/**"
+      - "packages/document_processing/**"
+      - "packages/multimodal_llm/**"
+      - ".github/workflows/semantic_splitter_build.yml"
+      - ".github/actions/setup-python-project/**"
+  pull_request:
+    branches: ["main", "dev"]
+    paths:
+      - "packages/semantic_splitter/**"
+      - "packages/document_processing/**"
+      - "packages/multimodal_llm/**"
+      - ".github/workflows/semantic_splitter_build.yml"
+      - ".github/actions/setup-python-project/**"
+  workflow_dispatch:
+    inputs:
+      run_gemini:
+        description: Run the live Gemini smoke test
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: packages/semantic_splitter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-project
+        with:
+          python-version: "3.14"
+          working-dir: packages/semantic_splitter
+      - name: Run deterministic tests
+        run: uv run --locked pytest -q -m "not integration"
+
+  gemini:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_gemini
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: packages/semantic_splitter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-project
+        with:
+          python-version: "3.14"
+          working-dir: packages/semantic_splitter
+      - name: Run live Gemini smoke test
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GOOGLE_API_KEY" ] && [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::Configure GOOGLE_API_KEY or GEMINI_API_KEY."
+            exit 1
+          fi
+          uv run --locked pytest -q -m integration

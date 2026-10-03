@@ -1,7 +1,7 @@
 [project]
 name = "semantic-splitter"
 version = "0.1.0"
-description = "Add your description here"
+description = "Split PDFs into semantic sections using a multimodal model"
 readme = "README.md"
 authors = [
     { name = "Luciano Bermudez", email = "lberm007@ucr.edu" }
@@ -14,12 +14,7 @@ dependencies = [
     "multimodal-llm",
     "pillow>=12.3.0",
     "pydantic>=2.13.5",
-    "pytest>=9.1.1",
-    "ruff>=0.16.10",
 ]
-
-[project.scripts]
-semantic-splitter = "semantic_splitter:main"
 
 [build-system]
 requires = ["uv_build>=0.12.0,<0.13.0"]
@@ -33,16 +28,20 @@ multimodal-llm = { path = "../multimodal_llm" }
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
     "langchain>=1.4.3",
     "langchain-google-genai>=4.4.0",
     "python-dotenv>=1.2.4",
 ]
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+target-version = "py314"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not integration'"
+markers = ["integration: live Gemini tests requiring API credentials"]
 pythonpath = ["src"]
 
 [tool.ruff.lint]
