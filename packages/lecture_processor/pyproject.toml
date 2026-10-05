@@ -8,6 +8,9 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "document-processing",
+    "multimodal-llm",
+    "pydantic>=2.13.5",
     "semantic-splitter",
 ]
 
@@ -20,3 +23,13 @@ build-backend = "uv_build"
 
 [tool.uv.sources]
 semantic-splitter = { path = "../semantic_splitter" }
+multimodal-llm = { path = "../multimodal_llm" }
+document-processing = { path = "../document_processing", editable = true }
+
+[dependency-groups]
+dev = [
+    "langchain>=1.4.3",
+    "langchain-google-genai>=4.4.0",
+    "python-dotenv>=1.2.4",
+    "ruff>=0.16.10",
+]

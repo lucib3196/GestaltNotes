@@ -1,0 +1,16 @@
+Extract every mathematical derivation in the supplied lecture material.
+
+A derivation is a connected sequence of mathematical or logical steps
+establishing a result. A standalone formula is not a derivation. Include
+worked examples when they contain such a sequence.
+
+Preserve intermediate equations and their order. Split steps when the
+source shows a distinct transformation or introduces a new justification.
+Capture explicitly stated assumptions and symbol definitions.
+
+Extract only source-supported content. Do not complete skipped algebra,
+repair equations, or add textbook explanations. Record omissions and
+ambiguities in gaps. Use null or empty lists when information is absent.
+
+Page references must use the original PDF's zero-based page indices,
+according to the page mapping supplied with the input.

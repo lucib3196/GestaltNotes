@@ -70,3 +70,9 @@ class PDFPageSplitter(DocumentPageSplitter):
             return pymupdf.open(filename=str(source))
         except (OSError, RuntimeError) as exc:
             raise RuntimeError(f"Could not open PDF {exc!s}") from exc
+
+
+
+if __name__ == "__main__":
+    file = r""
+    PDFPageSplitter().extract_and_save(source=file, start=0, end=1, destination="./output.pdf")
