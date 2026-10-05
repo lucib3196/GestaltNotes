@@ -852,6 +852,8 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "document-processing" },
+    { name = "langchain-core" },
+    { name = "langgraph" },
     { name = "multimodal-llm" },
     { name = "pydantic" },
     { name = "semantic-splitter" },
@@ -868,6 +870,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "document-processing", editable = "../document_processing" },
+    { name = "langchain-core", specifier = ">=1.6.6" },
+    { name = "langgraph", specifier = ">=1.2.13" },
     { name = "multimodal-llm", directory = "../multimodal_llm" },
     { name = "pydantic", specifier = ">=2.13.5" },
     { name = "semantic-splitter", directory = "../semantic_splitter" },
