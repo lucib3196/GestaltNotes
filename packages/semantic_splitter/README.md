@@ -11,7 +11,7 @@ are zero-based and inclusive. Saved page and chunk filenames also start at zero.
 
 ```python
 from langchain.chat_models import init_chat_model
-from semantic_splitter.pdf_section_parser import PDFSectionParser
+from semantic_splitter import PDFSectionParser
 
 model = init_chat_model(model_provider="google_genai", model="gemini-2.5-flash")
 sections = PDFSectionParser(model=model).parse("document.pdf")
@@ -28,7 +28,7 @@ From this package directory:
 
 ```bash
 uv sync --group dev
-uv run python -m semantic_splitter.pdf_section_parser
+uv run python -m semantic_splitter.parser.pdf_section_parser
 uv run pytest
 ```
 
@@ -41,11 +41,12 @@ annotation, rendering, and splitting; they need no API key or network access.
 
 ## Package layout
 
-- `pdf_section_parser.py`: pipeline orchestration and executable example.
-- `models.py`: page ranges, images, model responses, and extracted PDF sections.
-- `context.py`: model, metadata schema, and shared default prompt.
-- `state.py`: graph input and processing state.
-- `nodes.py`: multimodal section analysis.
+- `parser/pdf_section_parser.py`: pipeline orchestration and executable example.
+- `parser/models.py`: extracted PDF sections.
+- `graph/models.py`: page ranges, images, and model responses.
+- `graph/context.py`: model, metadata schema, and shared default prompt.
+- `graph/state.py`: graph input and processing state.
+- `graph/nodes.py`: multimodal section analysis.
 - `assets/example.pdf`: shared example and test document.
 - `tests/`: pipeline and converter tests.
 

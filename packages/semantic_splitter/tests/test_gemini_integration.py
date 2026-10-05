@@ -6,7 +6,7 @@ import pymupdf
 import pytest
 from langchain.chat_models import init_chat_model
 
-from semantic_splitter.pdf_section_parser import PDFSectionParser
+from semantic_splitter import PDFSectionParser
 
 
 @pytest.mark.integration

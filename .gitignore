@@ -119,3 +119,5 @@ data_analysis/src/data_analysis/**.md
 
 *.env**
 packages/document_processing/src/document_processing/assets
+
+**output.json

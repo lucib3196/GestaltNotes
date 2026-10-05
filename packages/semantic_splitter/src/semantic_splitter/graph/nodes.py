@@ -2,9 +2,9 @@ from langgraph.runtime import Runtime
 from multimodal_llm import MultiModalLLM
 from pydantic import BaseModel
 
-from .context import SegmentationContext
-from .models import ExtractionResult, PageContent
-from .state import InputState
+from semantic_splitter.graph.context import SegmentationContext
+from semantic_splitter.graph.models import ExtractionResult, PageContent
+from semantic_splitter.graph.state import InputState
 
 
 def analyze[TContent: BaseModel | str](

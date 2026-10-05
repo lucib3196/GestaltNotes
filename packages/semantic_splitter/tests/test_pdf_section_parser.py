@@ -14,8 +14,7 @@ from langchain_core.runnables import RunnableLambda
 from PIL import Image
 from pydantic import BaseModel
 
-from semantic_splitter.models import PDFSection
-from semantic_splitter.pdf_section_parser import PDFSectionParser
+from semantic_splitter import PDFSection, PDFSectionParser
 
 
 @pytest.mark.parametrize("structured", [False, True])

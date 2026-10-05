@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from .models import PageContent, PageImage
+from semantic_splitter.graph.models import PageContent, PageImage
 
 
 class InputState(BaseModel):

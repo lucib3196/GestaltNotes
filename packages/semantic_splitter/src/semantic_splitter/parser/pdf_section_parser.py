@@ -12,10 +12,11 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.runtime import get_runtime
 from pydantic import BaseModel
 
-from .context import DEFAULT_PROMPT, SegmentationContext
-from .models import PageContent, PageImage, PDFSection
-from .nodes import aanalyze, analyze
-from .state import InputState, State
+from semantic_splitter.graph.context import DEFAULT_PROMPT, SegmentationContext
+from semantic_splitter.graph.models import PageContent, PageImage
+from semantic_splitter.graph.nodes import aanalyze, analyze
+from semantic_splitter.graph.state import InputState, State
+from semantic_splitter.parser.models import PDFSection
 
 
 def _analyze_pages(state: InputState) -> dict:

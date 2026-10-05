@@ -8,9 +8,9 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import RunnableLambda
 from pydantic import BaseModel
 
-from semantic_splitter.models import PageImage
-from semantic_splitter.pdf_section_parser import PDFSectionParser
-from semantic_splitter.state import InputState
+from semantic_splitter import PDFSectionParser
+from semantic_splitter.graph.models import PageImage
+from semantic_splitter.graph.state import InputState
 
 
 @pytest.mark.parametrize("structured", [False, True])
