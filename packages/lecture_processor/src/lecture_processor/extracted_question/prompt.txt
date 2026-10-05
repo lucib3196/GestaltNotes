@@ -1,0 +1,4 @@
+Extract all questions and worked problems from the supplied lecture.
+Preserve given values, units, options, and solution steps. Do not solve
+unanswered questions or fill missing work. Record gaps explicitly.
+Use original zero-based PDF page indices for references.
