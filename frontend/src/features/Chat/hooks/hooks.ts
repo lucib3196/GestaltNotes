@@ -1,4 +1,4 @@
-import { useAuth } from "../../../context";
+import { useAuth } from "../../Auth";
 import type { ThreadCreate } from "../../../services";
 import { ChatAPI } from "../../../services";
 import { useThreadStore } from "../instance/store";

@@ -1,11 +1,11 @@
-import { useAuth } from "../../../../context";
+import { useAuth } from "../..";
 import { InputTextForm } from "../../../../components/FormComponents";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Button } from "../../../../components/Button";
 import { sendPasswordResetEmail, getAuth } from "firebase/auth";
 import { toast } from "react-toastify";
-import type { AuthMode } from "../../../../context";
+import type { AuthMode } from "../..";
 import clsx from "clsx";
 
 interface AuthProps {

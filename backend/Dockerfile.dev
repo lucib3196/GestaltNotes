@@ -1,13 +1,12 @@
-# syntax=docker/dockerfile:1
-
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+# syntax=docker/dockerfile:1.7
 
 ARG PYTHON_VERSION=3.13.7
 FROM python:${PYTHON_VERSION}-slim as backend
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+WORKDIR /app/backend
 
 # Prevent Python from writing pyc files and buffer logs
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -29,8 +28,6 @@ RUN adduser \
     && mkdir -p /home/appuser \
     && chown -R appuser:appuser /home/appuser
 
-# Install python dependencies system 
-RUN pip install --no-cache-dir uv
 # Install system dependencies for psycopg2 and other build tools
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -40,14 +37,17 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 
-# Copy the source code into the container.
-COPY . /app
-WORKDIR /app/backend
+COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
+
+COPY . .
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
 # Expose the port that the application listens on.
 EXPOSE 8000
 
 # Run the application.
 CMD ["uvicorn", "main:app","--reload", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
-

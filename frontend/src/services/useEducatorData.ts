@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context";
+import { useAuth } from "../features/Auth";
 import CourseManager, { type Course } from "../services/courseManager";
 
 export interface Student {

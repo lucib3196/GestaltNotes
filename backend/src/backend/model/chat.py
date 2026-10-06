@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
+from sqlalchemy import Column, ForeignKey
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .course import Course
-    from .user import User
+    pass
 
 
 class ThreadCreate(BaseModel):
@@ -35,7 +35,9 @@ class MessageCreate(BaseModel):
 class Thread(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
 
-    user_id: UUID = Field(foreign_key="user.id")
+    user_id: UUID = Field(
+        sa_column=Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    )
     course_id: UUID | None = Field(default=None, foreign_key="course.id")
 
     title: str | None = None
@@ -44,8 +46,6 @@ class Thread(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    user: "User" = Relationship(back_populates="threads")
-    course: "Course" = Relationship(back_populates="threads")
     messages: list["Message"] = Relationship(back_populates="thread")
 
 
