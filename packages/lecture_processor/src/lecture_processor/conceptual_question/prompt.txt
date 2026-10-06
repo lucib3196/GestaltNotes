@@ -1,4 +1,0 @@
-Extract conceptual questions from the supplied lecture, including any
-options, answers, and explanations shown. Do not generate new questions
-or infer correctness when the source does not establish it.
-Use original zero-based PDF page indices for references.

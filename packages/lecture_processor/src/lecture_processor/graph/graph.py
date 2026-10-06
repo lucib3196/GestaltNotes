@@ -14,8 +14,12 @@ from .section_extraction import (
 from .state import InputState, OutputState, State
 
 
-def build_graph():
-    """Build the lecture-processing graph from exported node registries."""
+def build_graph(*, max_attempts: int = 3):
+    """Build the graph with the requested maximum attempts per node."""
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+    node_retry_policy = retry_policy._replace(max_attempts=max_attempts)
+
     builder = StateGraph(
         state_schema=State,
         input_schema=InputState,
@@ -23,7 +27,7 @@ def build_graph():
         output_schema=OutputState,
     )
 
-    builder.set_node_defaults(error_handler=handle_node_error) # type: ignore
+    builder.set_node_defaults(error_handler=handle_node_error)  # type: ignore
     for nodes in (
         SECTION_PREPARATION_NODES,
         SECTION_EXTRACTION_NODES,
@@ -34,7 +38,7 @@ def build_graph():
             builder.add_node(
                 name,
                 node,
-                retry_policy=retry_policy,
+                retry_policy=node_retry_policy,
             )
 
     builder.add_conditional_edges(
@@ -62,13 +66,14 @@ def build_graph():
 graph = build_graph()
 
 if __name__ == "__main__":
+    import json
+    from pathlib import Path
+
     from dotenv import load_dotenv
     from langchain.chat_models import init_chat_model
-    from pathlib import Path
-    import json
+    from semantic_splitter.utils import to_serializable
 
     from lecture_processor.utils import save_graph_visualization
-    from semantic_splitter.utils import to_serializable
 
     save_graph_visualization(graph, "assets")  # type: ignore
 
@@ -85,7 +90,6 @@ if __name__ == "__main__":
         InputState(source=file),
         context=ExtractionContext(
             model=model,
-            
         ),
     )
     Path("./full_output.json").write_text(json.dumps(to_serializable(result)))

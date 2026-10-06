@@ -63,7 +63,7 @@ def generate_conceptual_questions(
             runtime,
             default_prompt=(
                 files("lecture_processor")
-                .joinpath("conceptual_question", "generation_prompt.txt")
+                .joinpath("conceptual_question", "generation_prompt.md")
                 .read_text(encoding="utf-8")
             ),
         ),
@@ -80,7 +80,7 @@ def generate_lecture_summary(
         runtime,
         default_prompt=(
             files("lecture_processor")
-            .joinpath("lecture_analysis", "prompt.txt")
+            .joinpath("lecture_analysis", "prompt.md")
             .read_text(encoding="utf-8")
         ),
     )

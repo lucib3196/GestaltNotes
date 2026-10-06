@@ -16,17 +16,12 @@ NODE_LABELS = {
 
 NODE_COLORS = NodeStyles(
     default=(
-        "fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,"
-        "color:#0f172a,line-height:1.6"
+        "fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px,color:#0f172a,line-height:1.6"
     ),
     first=(
-        "fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,"
-        "color:#1e3a8a,line-height:1.6"
+        "fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a,line-height:1.6"
     ),
-    last=(
-        "fill:#ecfdf5,stroke:#10b981,stroke-width:2px,"
-        "color:#064e3b,line-height:1.6"
-    ),
+    last=("fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#064e3b,line-height:1.6"),
 )
 
 

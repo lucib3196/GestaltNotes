@@ -6,7 +6,6 @@ from langgraph.runtime import Runtime
 from multimodal_llm import MultiModalLLM
 from pydantic import BaseModel
 from semantic_splitter import PDFSectionParser
-from semantic_splitter.graph.context import DEFAULT_PROMPT
 from semantic_splitter.parser import PDFSection
 
 from lecture_processor.extract_derivations.model import Derivation
@@ -27,7 +26,13 @@ def extract_sections(
     parser = PDFSectionParser[SectionMetadata](
         model=runtime.context.model,
         prompt=resolve_context_prompts(
-            "segmentation", runtime, default_prompt=DEFAULT_PROMPT
+            "segmentation",
+            runtime,
+            default_prompt=(
+                files("lecture_processor")
+                .joinpath("graph", "prompts", "section_extraction.md")
+                .read_text(encoding="utf-8")
+            ),
         ),
         structured_output=SectionMetadata,
     )
@@ -59,7 +64,7 @@ def extract_items[T: BaseModel](
         runtime,
         default_prompt=(
             files("lecture_processor")
-            .joinpath(prompt_folder, "prompt.txt")
+            .joinpath(prompt_folder, "prompt.md")
             .read_text(encoding="utf-8")
         ),
     )

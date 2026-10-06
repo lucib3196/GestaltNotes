@@ -1,3 +1,0 @@
-Summarize the supplied lecture with a concise title, main topics,
-learning objectives, prerequisites, and teaching emphasis.
-Keep the summary brief and ground every field in the lecture content.

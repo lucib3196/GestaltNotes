@@ -1,4 +1,0 @@
-Extract reusable problem-solving procedures taught or demonstrated in
-the supplied lecture. Capture applicability, required inputs, ordered
-actions, equations, checks, and limitations. Do not add unsupported steps.
-Use original zero-based PDF page indices for references.
