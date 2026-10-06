@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HomePage, ChatPage, MyAccount, MyGeneratedContentPage } from "./pages";
+import { HomePage, ChatPage, MyAccount } from "./pages";
 import EducatorPage from "./features/EducatorPage/EducatorPage";
 import {
   AuthPage,
@@ -7,14 +7,13 @@ import {
   RoleRedirect,
   UnauthorizedPage,
 } from "./features/Auth";
-import LectureNotes from "./pages/LectureNotes";
 import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
-import { HomeworkNotes } from "./pages/LectureNotes";
-import CourseManagement from "./features/CourseManagement/CourseManagement";
 import SingleCourse from "./features/CourseManagement/SingleCourse";
+import ChatSideBar from "./features/Chat/ui/sidebar/ChatSideBar";
+import { ChatProvider } from "./features/Chat/instance";
 function Test() {
-  return <div><CourseManagement /></div>;
+  return <div><ChatProvider><ChatSideBar/></ChatProvider></div>;
 }
 
 function App() {
@@ -27,6 +26,7 @@ function App() {
           <Route path="/login" element={<AuthPage />} />
           <Route path="/account" element={<MyAccount />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          <Route path="/test" element={<Test />} />
 
           <Route element={<PasswordResetGuard />}>
             {/* Student Only Roots */}

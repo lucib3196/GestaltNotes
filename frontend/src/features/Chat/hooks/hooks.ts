@@ -5,7 +5,6 @@ import { ChatAPI } from "../../../services";
 import { useState, useCallback, useEffect } from "react";
 import type { ThreadUpdate } from "../../../services/chat/types";
 
-
 export const useGenerateThread = () => {
   const { user } = useAuth();
 
@@ -84,12 +83,8 @@ export const useGetThread = () => {
   };
 };
 
-
-
 export function useUpdateThread() {
   const { user } = useAuth();
-
-  const updateThreadInStore = useChatStore((s) => s.updateThread);
 
   const [loading, setLoading] = useState(false);
 
@@ -114,7 +109,7 @@ export function useUpdateThread() {
           token,
         );
 
-        updateThreadInStore(updatedThread);
+        // updateThreadInStore(updatedThread);
 
         return updatedThread;
       } catch (error) {
@@ -125,7 +120,7 @@ export function useUpdateThread() {
         setLoading(false);
       }
     },
-    [user, updateThreadInStore],
+    [user],
   );
 
   return {

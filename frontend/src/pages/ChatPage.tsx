@@ -2,7 +2,7 @@ import { ChatSession } from "../features/Chat";
 import { useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 
-import ChatSideBar from "../features/Chat/ui/sidebar/Sidebar";
+import ChatSideBar from "../features/Chat/ui/sidebar/ChatSideBar";
 import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import StarterView from "../features/ConversationStarters/components/StarterView";
 import { TabButton } from "../components/Button";
