@@ -10,11 +10,12 @@ from .types import PageChunk
 
 class PDFPageSplitter(DocumentPageSplitter):
     """Extract PDF pages while preserving their original content."""
+
     def __init__(
         self,
     ) -> None:
         """Create a PDF page splitter."""
-        return None
+        return
 
     @multimethod
     def extract(self, file: str | Path, start: int, end: int) -> PageChunk:
@@ -72,7 +73,8 @@ class PDFPageSplitter(DocumentPageSplitter):
             raise RuntimeError(f"Could not open PDF {exc!s}") from exc
 
 
-
 if __name__ == "__main__":
     file = r""
-    PDFPageSplitter().extract_and_save(source=file, start=0, end=1, destination="./output.pdf")
+    PDFPageSplitter().extract_and_save(
+        source=file, start=0, end=1, destination="./output.pdf"
+    )

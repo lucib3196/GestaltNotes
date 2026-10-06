@@ -5,7 +5,9 @@ from lecture_processor.extracted_question.model import Option
 
 
 class ConceptualQuestion(BaseModel):
-    question: str = Field(description="Conceptual question stated in the source.")
+    question: str = Field(
+        description="Conceptual study question grounded in the lecture content."
+    )
     topics: list[str] = Field(
         description="Relevant concepts; do not force a fixed number of topics."
     )
@@ -13,13 +15,10 @@ class ConceptualQuestion(BaseModel):
         description="Source answer options; [] for an open-ended question."
     )
     answer: str | None = Field(
-        description="Source-supported answer; null if not provided."
+        description="Answer supported by the lecture content; null if unavailable."
     )
     explanation: str | None = Field(
-        description=(
-            "Source-supported physical or conceptual reasoning for the answer; "
-            "null if absent. Do not invent an explanation."
-        )
+        description=("Reasoning supported by the lecture content; null if unavailable.")
     )
     reference: PageRange | None = Field(
         description="Zero-based, inclusive source pages; null if unavailable."

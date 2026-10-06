@@ -1,5 +1,8 @@
-from pydantic import BaseModel
 from pathlib import Path
+
+from pydantic import BaseModel
+
+
 class PageChunk(BaseModel):
     """PDF bytes and their zero-based, inclusive source page range."""
 

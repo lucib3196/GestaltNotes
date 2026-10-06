@@ -23,12 +23,7 @@ class Converter(ABC):
         prefix: str = "page",
     ) -> list[Path]:
         """Save content with zero-based numbering; overwrite matching files."""
-        if (
-            not prefix
-            or prefix in {".", ".."}
-            or "/" in prefix
-            or "\\" in prefix
-        ):
+        if not prefix or prefix in {".", ".."} or "/" in prefix or "\\" in prefix:
             raise ValueError("prefix must be a nonempty filename component")
 
         output_dir = Path(directory)

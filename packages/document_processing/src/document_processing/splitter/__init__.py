@@ -1,5 +1,5 @@
-from .types import PageChunk
 from .base import DocumentPageSplitter
 from .pdf_splitter import PDFPageSplitter
+from .types import PageChunk
 
-__all__ = ["PageChunk", "DocumentPageSplitter", "PDFPageSplitter"]
+__all__ = ["DocumentPageSplitter", "PDFPageSplitter", "PageChunk"]

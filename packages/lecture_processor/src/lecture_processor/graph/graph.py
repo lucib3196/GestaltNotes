@@ -1,55 +1,76 @@
-from pathlib import Path
-from langgraph.runtime import Runtime
-from pydantic import BaseModel
-from semantic_splitter import PDFSectionParser
-from typing import Literal
-from lecture_processor.graph.context import ExtractionContext
-from langchain.chat_models import init_chat_model
-from pathlib import Path
-from semantic_splitter.utils import to_serializable
-from .context import ExtractionContext
-from pathlib import Path
-import base64
 from langgraph.graph import END, START, StateGraph
-from pydantic import BaseModel
-from semantic_splitter.parser import PDFSection
-from typing import List
 
-
-class SectionMetadata(BaseModel):
-    section: Literal["derivation", "question"]
-
-
-class InputState(BaseModel):
-    source: str | Path
-
-
-class State(InputState):
-    sections: List[PDFSection[SectionMetadata]]
-
-
-def extract_sections(state: InputState, runtime: Runtime[ExtractionContext]):
-    parser = PDFSectionParser[SectionMetadata](
-        model=runtime.context.model,
-        structured_output=SectionMetadata,
-    )
-    sections = parser.parse(state.source)
-    return {"sections": sections}
-
-
-builder = StateGraph(
-    state_schema=State, input_schema=InputState, context_schema=ExtractionContext
+from .content_generation import (
+    CONTENT_GENERATION_NODES,
+    LECTURE_PREPARATION_NODES,
 )
-builder.add_node("extract", extract_sections)
-builder.add_edge(START, "extract")
-builder.add_edge("extract", END)
-graph = builder.compile()
+from .context import ExtractionContext
+from .error_handling import handle_node_error, retry_policy
+from .routers import route_generation, route_sections, route_tasks
+from .section_extraction import (
+    SECTION_EXTRACTION_NODES,
+    SECTION_PREPARATION_NODES,
+)
+from .state import InputState, OutputState, State
 
+
+def build_graph():
+    """Build the lecture-processing graph from exported node registries."""
+    builder = StateGraph(
+        state_schema=State,
+        input_schema=InputState,
+        context_schema=ExtractionContext,
+        output_schema=OutputState,
+    )
+
+    builder.set_node_defaults(error_handler=handle_node_error) # type: ignore
+    for nodes in (
+        SECTION_PREPARATION_NODES,
+        SECTION_EXTRACTION_NODES,
+        LECTURE_PREPARATION_NODES,
+        CONTENT_GENERATION_NODES,
+    ):
+        for name, node in nodes.items():
+            builder.add_node(
+                name,
+                node,
+                retry_policy=retry_policy,
+            )
+
+    builder.add_conditional_edges(
+        START,
+        route_tasks,
+        [*SECTION_PREPARATION_NODES, *LECTURE_PREPARATION_NODES, END],
+    )
+    builder.add_conditional_edges(
+        "extract_sections",
+        route_sections,
+        [*SECTION_EXTRACTION_NODES, END],
+    )
+    builder.add_conditional_edges(
+        "prepare_lecture",
+        route_generation,
+        [*CONTENT_GENERATION_NODES, END],
+    )
+
+    for name in (*SECTION_EXTRACTION_NODES, *CONTENT_GENERATION_NODES):
+        builder.add_edge(name, END)
+
+    return builder.compile()
+
+
+graph = build_graph()
 
 if __name__ == "__main__":
-    from pathlib import Path
     from dotenv import load_dotenv
+    from langchain.chat_models import init_chat_model
+    from pathlib import Path
     import json
+
+    from lecture_processor.utils import save_graph_visualization
+    from semantic_splitter.utils import to_serializable
+
+    save_graph_visualization(graph, "assets")  # type: ignore
 
     load_dotenv()
 
@@ -61,25 +82,10 @@ if __name__ == "__main__":
         model="gemini-2.5-flash",
     )
     result = graph.invoke(
-    InputState(source=file),
-    context=ExtractionContext(
-        model=model,
-        prompt=(
-            "Identify sections containing any of the following:\n"
-            "- derivation: Mathematical or logical steps establishing an "
-            "equation, relationship, or result.\n"
-            "- question: A practice question, exercise, or worked example, "
-            "with or without a solution.\n"
-            "Return each section using the supplied schema. Include the full "
-            "question, solution, or derivation across all relevant pages. "
-            "A section may contain more than one category; preserve overlapping "
-            "page ranges when needed. Exclude standalone formulas and general "
-            "discussion unless they support one of these categories.\n"
-            "Use zero-based, inclusive page ranges based on the supplied "
-            "page-index labels, not printed page numbers. "
-            "Do not invent content absent from the source."
+        InputState(source=file),
+        context=ExtractionContext(
+            model=model,
+            
         ),
-    ),
-)
+    )
     Path("./full_output.json").write_text(json.dumps(to_serializable(result)))
-    

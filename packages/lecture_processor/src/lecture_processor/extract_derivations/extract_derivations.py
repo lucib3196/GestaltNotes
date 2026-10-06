@@ -1,13 +1,15 @@
 from multimodal_llm import MultiModalLLM
 from semantic_splitter.utils import to_serializable
+
 from .model import Derivation
 
 if __name__ == "__main__":
-    from langchain.chat_models import init_chat_model
-    from document_processing.converter import PDF2ImageConverter
-    from dotenv import load_dotenv
     import json
     from pathlib import Path
+
+    from document_processing.converter import PDF2ImageConverter
+    from dotenv import load_dotenv
+    from langchain.chat_models import init_chat_model
 
     load_dotenv()
     model = init_chat_model(

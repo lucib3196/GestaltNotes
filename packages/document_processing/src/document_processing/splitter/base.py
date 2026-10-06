@@ -2,14 +2,13 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from multimethod import multimethod
-from pydantic import BaseModel
+
 from .types import PageChunk
-
-
 
 
 class DocumentPageSplitter(ABC):
     """Extract zero-based, inclusive page ranges from documents."""
+
     @multimethod
     @abstractmethod
     def extract(self, file: str | Path, start: int, end: int) -> PageChunk:
@@ -21,16 +20,12 @@ class DocumentPageSplitter(ABC):
         """Extract an inclusive page range from document bytes."""
 
     @multimethod
-    def split(
-        self, data: bytes, ranges: list[tuple[int, int]]
-    ) -> list[PageChunk]:
+    def split(self, data: bytes, ranges: list[tuple[int, int]]) -> list[PageChunk]:
         """Extract ranges from bytes in the supplied order."""
         return [self.extract(data, start, end) for start, end in ranges]
 
     @multimethod
-    def split(
-        self, file: str | Path, ranges: list[tuple[int, int]]
-    ) -> list[PageChunk]:
+    def split(self, file: str | Path, ranges: list[tuple[int, int]]) -> list[PageChunk]:
         """Read a source file and extract ranges in the supplied order."""
         return self.split(Path(file).read_bytes(), ranges)
 
@@ -60,8 +55,7 @@ class DocumentPageSplitter(ABC):
 
         return [
             chunk.save(
-                output_dir
-                / f"{prefix}_{index}_{chunk.start}-{chunk.end}{suffix}"
+                output_dir / f"{prefix}_{index}_{chunk.start}-{chunk.end}{suffix}"
             )
             for index, chunk in enumerate(chunks)
         ]

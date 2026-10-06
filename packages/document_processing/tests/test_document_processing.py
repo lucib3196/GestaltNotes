@@ -57,9 +57,8 @@ def test_invalid_page_ranges(splitter, pdf_source, start, end):
 @pytest.mark.parametrize("start,end", [(True, 2), (1.0, 2), (1, "2")])
 def test_page_numbers_must_be_integers(splitter, pdf_source, start, end):
     _, data = pdf_source
-    with pymupdf.open(stream=data, filetype="pdf") as doc:
-        with pytest.raises(TypeError):
-            splitter.validate_page_range(doc, start, end)
+    with pymupdf.open(stream=data, filetype="pdf") as doc, pytest.raises(TypeError):
+        splitter.validate_page_range(doc, start, end)
 
 
 def test_split_preserves_requested_order(splitter, source):
@@ -75,9 +74,7 @@ def test_split_empty_ranges(splitter, source):
 
 
 def test_page_chunk_save(tmp_path):
-    chunk = PageChunk(
-        content=b"example", start=0, end=0, mime_type="application/pdf"
-    )
+    chunk = PageChunk(content=b"example", start=0, end=0, mime_type="application/pdf")
     destination = tmp_path / "chunk.pdf"
     assert chunk.save(destination) == destination
     assert destination.read_bytes() == b"example"
@@ -86,9 +83,7 @@ def test_page_chunk_save(tmp_path):
 def test_extract_and_save(splitter, source, tmp_path):
     destination = tmp_path / "extract.pdf"
     assert splitter.extract_and_save(source, 1, 2, destination) == destination
-    assert read_pages(destination.read_bytes()) == [
-        ("Page 2", 90), ("Page 3", 90)
-    ]
+    assert read_pages(destination.read_bytes()) == [("Page 2", 90), ("Page 3", 90)]
 
 
 def test_split_and_save(splitter, source, tmp_path):
@@ -96,9 +91,7 @@ def test_split_and_save(splitter, source, tmp_path):
     paths = splitter.split_and_save(
         source, [(0, 0), (1, 2)], directory, prefix="part", suffix=".pdf"
     )
-    assert paths == [
-        directory / "part_0_0-0.pdf", directory / "part_1_1-2.pdf"
-    ]
+    assert paths == [directory / "part_0_0-0.pdf", directory / "part_1_1-2.pdf"]
     assert [read_pages(path.read_bytes()) for path in paths] == [
         [("Page 1", 90)],
         [("Page 2", 90), ("Page 3", 90)],
@@ -139,16 +132,15 @@ def test_annotate_and_save(pdf_source, tmp_path):
     ],
 )
 def test_anchor_coordinates(anchor, expected):
-    assert PDFAnnotator.get_annotation_coords(
-        (600, 800), 0.05, (20, 20), anchor
-    ) == expected
+    assert (
+        PDFAnnotator.get_annotation_coords((600, 800), 0.05, (20, 20), anchor)
+        == expected
+    )
 
 
 def test_unsupported_anchor():
     with pytest.raises(ValueError):
-        PDFAnnotator.get_annotation_coords(
-            (600, 800), 0.05, (20, 20), "unsupported"
-        )
+        PDFAnnotator.get_annotation_coords((600, 800), 0.05, (20, 20), "unsupported")
 
 
 @pytest.mark.parametrize(

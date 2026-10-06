@@ -12,6 +12,7 @@ class Response(BaseModel):
 
 class MultiModalLLM:
     """Send prompts and image bytes to a multimodal chat model."""
+
     def __init__(self, model: BaseChatModel) -> None:
         """Use the supplied chat model for sync and async requests."""
         self._llm = model

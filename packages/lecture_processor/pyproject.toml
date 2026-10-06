@@ -35,3 +35,34 @@ dev = [
     "python-dotenv>=1.2.4",
     "ruff>=0.16.10",
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplify
+    "C4",  # comprehensions
+    "TID", # tidy imports
+    "RUF", # Ruff-specific
+    "ASYNC", # async issues
+    "ANN", # type annotations
+    "RET", # return issues
+    "ARG", # unused arguments
+    "PTH", # pathlib recommendations
+]
+
+ignore = [
+    "ANN101", # missing self annotation
+    "ANN102", # missing cls annotation
+]

@@ -4,6 +4,7 @@ from pathlib import Path
 
 class DocumentAnnotator(ABC):
     """Produce annotated document bytes from a source file."""
+
     @abstractmethod
     def annotate(self, file: str | Path) -> bytes:
         """Return annotated bytes without overwriting the source."""
