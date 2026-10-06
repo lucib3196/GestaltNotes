@@ -5,7 +5,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from backend.core.logger import logger
-from backend.model.chat import Thread, ThreadUpdate
+from backend.chat.model import Thread
+from backend.chat.schema import ThreadUpdate
 from backend.utils.utils import convert_uuid
 
 from .exceptions import (

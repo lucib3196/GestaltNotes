@@ -6,13 +6,12 @@ from langgraph_sdk import get_client
 from starlette import status
 
 from backend.core.settings import get_settings
-from backend.model.chat import (
+from backend.chat.model import (
     Message,
-    MessageCreate,
     Thread,
-    ThreadCreate,
-    ThreadUpdate,
+
 )
+from backend.chat.schema import MessageCreate, ThreadCreate, ThreadUpdate
 from backend.service.chat import ThreadBaseException
 from backend.web.accounts.dependencies import CurrentUser
 from backend.web.dependencies import MessageDBDependency

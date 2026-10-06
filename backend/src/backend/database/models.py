@@ -5,10 +5,9 @@ from backend.courses.models import (
     Course,
     CourseAccessCode,
     CourseEnrollment,
-    CourseNote,
-    CourseModule
+    CourseNote
 )
-from backend.model.chat import Message, Thread
+from backend.chat.model import Message, Thread
 from backend.model.generated_content import GeneratedMCQ
 from backend.model.user import UserCourseLink
 from backend.storage.models import File
