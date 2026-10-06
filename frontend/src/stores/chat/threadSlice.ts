@@ -1,24 +1,15 @@
 import type { StateCreator } from "zustand";
-import type { ThreadStore } from "./state";
-import type { Thread } from "../../services";
+import type { ChatStore, ThreadSlice } from "./state";
+import { threadsById } from "./utils";
 
 export type ThreadSliceCreator<
-  Store extends ThreadStore = ThreadStore,
-  Slice = ThreadStore,
+  Store extends ChatStore = ChatStore,
+  Slice = ThreadSlice,
 > = StateCreator<Store, [], [], Slice>;
 
-export function threadsById(threads: Thread[]): Record<string, Thread> {
-  const byId: Record<string, Thread> = {};
-  for (const t of threads) {
-    if (!t.id) continue;
-    byId[t.id] = t;
-  }
-  return byId;
-}
-
 export function createThreadStore<
-  Store extends ThreadStore = ThreadStore,
->(): ThreadSliceCreator<Store, ThreadStore> {
+  Store extends ChatStore = ChatStore,
+>(): ThreadSliceCreator<Store, ThreadSlice> {
   return (set) => ({
     threadsById: {},
     threadIds: [],
@@ -75,6 +66,9 @@ export function createThreadStore<
                 activeThreadId: null,
                 activeThreadStatus: "idle" as const,
                 activeThreadError: null,
+                draftText: "",
+                attachments: [],
+                pendingPrompt: null,
               }
             : {}),
         } as Partial<Store>;
