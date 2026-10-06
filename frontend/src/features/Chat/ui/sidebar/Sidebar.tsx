@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { BsLayoutSidebarReverse } from "react-icons/bs";
-import ThreadBubble from "./ThreadBubble";
-import ChatActions, { NewChatButton } from "./ChatActions";
-import { useThreadStore } from "../instance/store";
-import { useGetThreads } from "../hooks/hooks";
+import ThreadBubble from "../../components/ThreadBubble";
+import { NewChatButton } from "../buttons/ChatActions";
+import { useChatStore } from "../../instance";
+import { useGetThreads } from "../../hooks/useGetThreads";
 
 const sidebarExpandedStyle =
   "h-full w-72 min-w-72 rounded-xl border border-border bg-surface-strong p-3 shadow-sm ring-1 ring-black/5";
 const sidebarCollapsedStyle = "h-full w-12 min-w-12 rounded-xl border border-border bg-surface p-2";
 
 export default function ChatSideBar() {
-  const threadId = useThreadStore((s) => s.threadId);
-  const setThreadId = useThreadStore((s) => s.setThreadId);
-  const allThreads = useThreadStore((s) => s.threads);
+  const threadId = useChatStore((s) => s.threadId);
+  const setThreadId = useChatStore((s) => s.setThreadId);
+  const allThreads = useChatStore((s) => s.threads);
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const { loading, error } = useGetThreads();
 
@@ -36,7 +36,7 @@ export default function ChatSideBar() {
             <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-text-soft">
               Chats
             </h2>
-            <ChatActions />
+            <NewChatButton />
           </div>
 
           {loading ? (

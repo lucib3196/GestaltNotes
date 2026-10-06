@@ -1,7 +1,7 @@
 import { useStarterStore } from "../instance/store";
 import { IoIosArrowDropdownCircle, IoIosArrowDroprightCircle } from "react-icons/io";
 import { useState } from "react";
-import { useChatStore } from "../../Chat/instance/store";
+import { useChatStore } from "../../Chat/instance";
 export default function StarterView() {
     const validStarter = useStarterStore((s) => s.validStates);
     const setSelectedStarter = useStarterStore((s) => s.setSelectedState);

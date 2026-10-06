@@ -10,12 +10,12 @@ import { ChatSessionHeader } from "./components/ChatSessionHeader";
 import { ChatContainer, ChatInput } from "./components";
 import { useGenerateThread, useGetThread } from "./hooks/hooks";
 
-import { useThreadStore, useChatStore } from "./instance/store";
+import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils";
 
 export default function ChatSession() {
   // State
-  const currentThread = useThreadStore((s) => s.thread);
+  const currentThread = useChatStore((s) => s.thread);
   const assistantId = useChatStore((s) => s.assistantId);
   const externalMessage = useChatStore((s) => s.externalMessage);
   const setExternalMessage = useChatStore((s) => s.setExternalMessage);

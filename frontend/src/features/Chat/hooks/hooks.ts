@@ -11,7 +11,7 @@ export const useGenerateThread = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const setThread = useThreadStore((s) => s.setThread);
+  const setThread = useChatStore((s) => s.setThread);
 
   const generateThread = async (data: ThreadCreate) => {
     setLoading(true);
@@ -41,8 +41,8 @@ export const useGetThread = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const threadId = useThreadStore((s) => s.threadId);
-  const setThread = useThreadStore((s) => s.setThread);
+  const threadId = useChatStore((s) => s.threadId);
+  const setThread = useChatStore((s) => s.setThread);
 
   useEffect(() => {
     if (!user || !threadId) return;
@@ -89,7 +89,7 @@ export const useGetThread = () => {
 export function useUpdateThread() {
   const { user } = useAuth();
 
-  const updateThreadInStore = useThreadStore((s) => s.updateThread);
+  const updateThreadInStore = useChatStore((s) => s.updateThread);
 
   const [loading, setLoading] = useState(false);
 
