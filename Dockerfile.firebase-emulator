@@ -13,4 +13,4 @@ RUN --mount=type=cache,target=/root/.npm \
 
 WORKDIR /app
 
-CMD ["firebase", "emulators:start", "--import=./emulator-state/export", "--export-on-exit=./emulator-state/export", "--only", "auth,storage"]
+CMD ["firebase", "emulators:start", "--import=./emulator-data/export", "--export-on-exit=./emulator-data/export", "--only", "auth,storage"]

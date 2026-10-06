@@ -18,7 +18,7 @@ export default function ChatSession() {
   const currentThread = useThreadStore((s) => s.thread);
   const assistantId = useChatStore((s) => s.assistantId);
   const externalMessage = useChatStore((s) => s.externalMessage);
-  const setExternalMessage = useChatStore((s) => s.setExternalMessage)
+  const setExternalMessage = useChatStore((s) => s.setExternalMessage);
   const appendToolMessage = useWorkspaceStore((s) => s.appendToolMessage);
   const clearWorkspaceItems = useWorkspaceStore((s) => s.clearWorkspace);
   // Hooks
@@ -34,7 +34,6 @@ export default function ChatSession() {
       await generateThread({
         thread_id: id,
       });
-
     },
   });
 
@@ -60,7 +59,6 @@ export default function ChatSession() {
   useEffect(() => {
     stream.messages.forEach((msg) => {
       if (msg.type === "tool") {
-      
         appendToolMessage(msg as ToolMessage);
       }
     });
@@ -68,11 +66,10 @@ export default function ChatSession() {
 
   useEffect(() => {
     if (!externalMessage) return;
-    handleSubmit(externalMessage)
-    setExternalMessage(null)
+    handleSubmit(externalMessage);
+    setExternalMessage(null);
     // handleSubmit(externalMessage);
   }, [externalMessage]);
-
 
   if (loading) return <div>Loading</div>;
   if (error) return <div>Error</div>;
@@ -87,11 +84,7 @@ export default function ChatSession() {
           size="lg"
           bordered={false}
           scrollTrigger={stream.messages.length}
-          starters={
-            stream.messages.length === 0 ? (
-              <ConversationStarters onSelect={(v) => handleSubmit(v)} />
-            ) : null
-          }
+          starters={null}
           input={
             <ChatInput
               handleSubmit={handleSubmit}
@@ -101,9 +94,7 @@ export default function ChatSession() {
           }
         >
           <MathJax dynamic>
-            
             {stream.messages.map((msg) => {
-  
               if (msg.type === "human") {
                 return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
               }
