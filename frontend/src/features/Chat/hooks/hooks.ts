@@ -1,7 +1,7 @@
 import { useAuth } from "../../Auth";
 import type { ThreadCreate } from "../../../services";
 import { ChatAPI } from "../../../services";
-import { useThreadStore } from "../instance/store";
+
 import { useState, useCallback, useEffect } from "react";
 import type { ThreadUpdate } from "../../../services/chat/types";
 
@@ -84,44 +84,7 @@ export const useGetThread = () => {
   };
 };
 
-export const useGetThreads = () => {
-  const { user } = useAuth();
 
-  const [loading, setLoading] = useState(false);
-
-  const [error, setError] = useState<string | null>(null);
-
-  const setThreads = useThreadStore((s) => s.setThreads);
-
-  const getThreads = useCallback(async () => {
-    if (!user) {
-      setError("User not authenticated");
-
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const token = await user.getIdToken();
-
-      const threads = await ChatAPI.listMyThreads(token);
-
-      setThreads(threads);
-    } catch (error) {
-      setError(`Error getting threads: ${String(error)}`);
-    } finally {
-      setLoading(false);
-    }
-  }, [user, setThreads]);
-
-  return {
-    getThreads,
-    loading,
-    error,
-  };
-};
 
 export function useUpdateThread() {
   const { user } = useAuth();

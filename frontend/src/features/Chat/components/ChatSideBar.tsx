@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BsLayoutSidebarReverse } from "react-icons/bs";
 import ThreadBubble from "./ThreadBubble";
 import ChatActions, { NewChatButton } from "./ChatActions";
@@ -14,11 +14,7 @@ export default function ChatSideBar() {
   const setThreadId = useThreadStore((s) => s.setThreadId);
   const allThreads = useThreadStore((s) => s.threads);
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const { getThreads, loading, error } = useGetThreads();
-
-  useEffect(() => {
-    getThreads();
-  }, [getThreads]);
+  const { loading, error } = useGetThreads();
 
   return (
     <aside className={collapsed ? sidebarCollapsedStyle : sidebarExpandedStyle}>
