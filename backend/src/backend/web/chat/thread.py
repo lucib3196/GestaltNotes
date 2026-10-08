@@ -12,7 +12,7 @@ from backend.chat.model import (
 
 )
 from backend.chat.schema import MessageCreate, ThreadCreate, ThreadUpdate
-from backend.service.chat import ThreadBaseException
+from backend.chat.exceptions import ThreadBaseException
 from backend.web.accounts.dependencies import CurrentUser
 from backend.web.dependencies import MessageDBDependency
 
@@ -41,7 +41,6 @@ async def create_thread(
     return await tdb.create_thread(
         thread_id=data.thread_id,
         user_id=user_id,
-        course_id=data.course_id,
         title=data.title,
         agent=data.agent,
     )

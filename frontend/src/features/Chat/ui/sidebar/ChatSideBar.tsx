@@ -52,6 +52,7 @@ export default function ChatSideBar() {
           aria-busy={loading}
           className="min-h-0 flex-1 space-y-1 overflow-y-auto p-1"
         >
+          <p>Recent</p>
           {loading ? (
             <p role="status" className="px-3 py-6 text-sm text-text-soft">
               Loading chats...

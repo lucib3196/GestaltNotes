@@ -9,7 +9,7 @@ from backend.chat.model import Thread
 from backend.chat.schema import ThreadUpdate
 from backend.utils.utils import convert_uuid
 
-from .exceptions import (
+from backend.chat.exceptions import (
     ThreadBaseException,
     ThreadCreateError,
     ThreadNotFound,
@@ -29,7 +29,6 @@ class ThreadDB:
         self,
         user_id: UUID | str,
         thread_id: UUID | str | None = None,
-        course_id: UUID | str | None = None,
         title: str | None = None,
         agent: str | None = None,
     ) -> Thread:
@@ -50,7 +49,6 @@ class ThreadDB:
             thread_orm = Thread(
                 id=convert_uuid(thread_id) if thread_id else None,
                 user_id=convert_uuid(user_id),
-                course_id=convert_uuid(course_id) if course_id else None,
                 title=title,
                 agent=agent,
                 # created_at/updated_at handled automatically
@@ -147,7 +145,6 @@ class ThreadDB:
     async def list_threads_for_user(
         self,
         user_id: UUID | str,
-        course_id: UUID | None = None,
     ) -> list[Thread]:
         """
         List all threads for a user, optionally filtered by course.
@@ -156,8 +153,6 @@ class ThreadDB:
         """
         try:
             stmt = select(Thread).where(Thread.user_id == convert_uuid(user_id))
-            if course_id is not None:
-                stmt = stmt.where(Thread.course_id == course_id)
             stmt = stmt.order_by(Thread.updated_at.desc())  # type: ignore
             return list(self.session.exec(stmt).all())
         except SQLAlchemyError as e:

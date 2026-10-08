@@ -1,3 +1,4 @@
+
 from functools import lru_cache
 from typing import Annotated
 
@@ -5,7 +6,7 @@ from fastapi import Depends
 
 from backend.core.logger import logger
 from backend.database import SessionDep
-from backend.service.chat import ThreadDB
+from backend.chat import ThreadDB
 
 
 @lru_cache

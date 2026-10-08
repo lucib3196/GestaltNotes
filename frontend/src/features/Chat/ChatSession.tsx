@@ -1,39 +1,33 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
-import { AIMessage, HumanMessage, ToolMessage } from "langchain";
-import { useEffect } from "react";
+import { AIMessage, HumanMessage } from "langchain";
 import { streamURL } from "../../config/api";
-import ConversationStarters from "../ConversationStarters/components/ConverstationStarter";
-import { useWorkspaceStore } from "../Tools/instance/store";
 import { AIBubble, HumanBubble } from "./components/ChatMessage";
-import { ChatSessionHeader } from "./components/ChatSessionHeader";
 import { ChatContainer, ChatInput } from "./components";
-import { useGenerateThread, useGetThread } from "./hooks/hooks";
 
 import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils";
+import { useCreateThread } from "./hooks/useCreateThread";
 
 export default function ChatSession() {
-  // State
-  const currentThread = useChatStore((s) => s.thread);
-  const assistantId = useChatStore((s) => s.assistantId);
-  const externalMessage = useChatStore((s) => s.externalMessage);
-  const setExternalMessage = useChatStore((s) => s.setExternalMessage);
-  const appendToolMessage = useWorkspaceStore((s) => s.appendToolMessage);
-  const clearWorkspaceItems = useWorkspaceStore((s) => s.clearWorkspace);
+  const activeThreadId = useChatStore((s) => s.activeThreadId);
+  const assistantId = useChatStore((s) => s.assistant.id);
+  const setActiveThread = useChatStore((s) => s.selectThread);
+
+
+  console.log("Current active thread", activeThreadId)
+
   // Hooks
-  const { generateThread } = useGenerateThread();
-  const { loading, error } = useGetThread();
+  const { createThread } = useCreateThread();
 
   const stream = useStream({
-    threadId: currentThread?.id || null,
+    threadId: activeThreadId,
     apiUrl: streamURL,
     assistantId: assistantId,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     onThreadId: async (id: string) => {
-      await generateThread({
-        thread_id: id,
-      });
+      const thread = await createThread({ thread_id: id });
+      setActiveThread(thread.id);
     },
   });
 
@@ -49,35 +43,32 @@ export default function ChatSession() {
       ],
     });
   };
-  useEffect(() => {
-    if (!currentThread) return;
-    if (currentThread) {
-      clearWorkspaceItems();
-    }
-  }, [currentThread?.id]);
+  // useEffect(() => {
+  //   if (!currentThread) return;
+  //   if (currentThread) {
+  //     clearWorkspaceItems();
+  //   }
+  // }, [currentThread?.id]);
 
-  useEffect(() => {
-    stream.messages.forEach((msg) => {
-      if (msg.type === "tool") {
-        appendToolMessage(msg as ToolMessage);
-      }
-    });
-  }, [stream.messages, appendToolMessage, currentThread?.id]);
+  // useEffect(() => {
+  //   stream.messages.forEach((msg) => {
+  //     if (msg.type === "tool") {
+  //       appendToolMessage(msg as ToolMessage);
+  //     }
+  //   });
+  // }, [stream.messages, appendToolMessage, currentThread?.id]);
 
-  useEffect(() => {
-    if (!externalMessage) return;
-    handleSubmit(externalMessage);
-    setExternalMessage(null);
-    // handleSubmit(externalMessage);
-  }, [externalMessage]);
-
-  if (loading) return <div>Loading</div>;
-  if (error) return <div>Error</div>;
+  // useEffect(() => {
+  //   if (!externalMessage) return;
+  //   handleSubmit(externalMessage);
+  //   setExternalMessage(null);
+  //   // handleSubmit(externalMessage);
+  // }, [externalMessage]);
 
   return (
     <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
       <div className="shrink-0  border-border px-3 py-2 sm:px-4">
-        <ChatSessionHeader thread={currentThread} />
+        {/* <ChatSessionHeader thread={currentThread} /> */}
       </div>
       <div className="min-h-0 flex-1">
         <ChatContainer

@@ -1,7 +1,7 @@
 import { ChatSession } from "../features/Chat";
 import { useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
-
+import { ChatProvider } from "../features/Chat/instance";
 import ChatSideBar from "../features/Chat/ui/sidebar/ChatSideBar";
 import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import StarterView from "../features/ConversationStarters/components/StarterView";
@@ -87,6 +87,7 @@ export default function ChatPage() {
 
     return (
         <div className="h-[calc(90vh-1rem)] w-full p-2 sm:p-3">
+            <ChatProvider>
             <Group className="h-8-10">
 
 
@@ -135,6 +136,7 @@ export default function ChatPage() {
                     {showResources ? <ResourceSection /> : null}
                 </Panel>
             </Group>
+            </ChatProvider>
         </div>
     );
 }

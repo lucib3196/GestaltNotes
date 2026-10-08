@@ -6,10 +6,8 @@ type ChatContainerVariant = "demo" | "main";
 type Sizes = "sm" | "med" | "lg";
 
 const Variants: Record<ChatContainerVariant, string> = {
-  demo:
-    "relative flex flex-col overflow-hidden rounded-xl bg-surface text-text backdrop-blur",
-  main:
-    "relative mx-auto flex flex-col overflow-hidden rounded-xl bg-surface-strong p-4 text-text backdrop-blur",
+  demo: "relative flex flex-col overflow-hidden rounded-xl bg-surface text-text backdrop-blur",
+  main: "relative mx-auto flex flex-col overflow-hidden rounded-xl bg-surface-strong p-4 text-text backdrop-blur",
 };
 
 const SizeClasses: Record<Sizes, string> = {
