@@ -41,7 +41,7 @@ RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 
 # Copy the source code into the container.
-COPY . /app
+COPY . /app/backend
 WORKDIR /app/backend
 
 RUN uv sync --frozen --no-dev
