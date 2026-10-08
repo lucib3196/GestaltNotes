@@ -53,4 +53,4 @@ USER appuser
 EXPOSE 8000
 
 # Run the application.
-CMD ["uv", "run", "--no-sync", "uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/opt/venv/bin/uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
