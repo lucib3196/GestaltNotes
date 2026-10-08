@@ -1,7 +1,6 @@
 from .chat.thread import router as thread_router
 from .course import router as course_router
 from .generated_content.mcq import router as mcq_router
-from .healtcheck import router as health_router
 from .notes import router
 from .user import user_routes
 from .health.health import router as health_router
