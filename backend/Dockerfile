@@ -40,16 +40,19 @@ RUN mkdir -p /opt/venv /app \
 
 USER appuser
 
-COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+# COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock ./
 
 RUN uv sync --locked --no-install-project
 
-COPY --chown=appuser:appuser . .
+# COPY --chown=appuser:appuser . .
 
 RUN uv sync --locked --no-editable
-
+# Copy the source code into the container.
+COPY . /app
+WORKDIR /app/src
 # Expose the port that the application listens on.
 EXPOSE 8000
 
 # Run the application.
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
