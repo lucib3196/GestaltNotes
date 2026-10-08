@@ -39,8 +39,8 @@ RUN mkdir -p /opt/venv /app \
 
 COPY pyproject.toml uv.lock ./
 
-RUN --mount=type=cache,id=uv-cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project
+RUN --mount=type=cache,id=s/3cd0b9f3-5bfa-401f-b948-766dc243efb4-/root/.cache/uv,target=/root/.cache/uv \
+    uv sync --frozen
 
 COPY . .
 
