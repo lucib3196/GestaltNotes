@@ -7,7 +7,6 @@ from sqlmodel import Session, create_engine
 from backend.core.logger import logger
 from backend.core.settings import get_settings
 
-
 from .exceptions import DatabaseConfigError, DatabaseInitializationError
 
 app_settings = get_settings()
@@ -39,6 +38,7 @@ def initialize_database_engine():
 
 def get_session() -> Generator[Session, None, None]:
     """Yield a SQLModel session per request."""
+    engine = initialize_database_engine()
     with Session(engine, expire_on_commit=False) as session:
         yield session
 
