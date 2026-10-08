@@ -6,7 +6,7 @@ FROM python:${PYTHON_VERSION}-slim as backend
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-WORKDIR /app/backend
+WORKDIR /app
 
 # Prevent Python from writing pyc files and buffer logs
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -52,4 +52,4 @@ RUN uv sync --locked --no-editable
 EXPOSE 8000
 
 # Run the application.
-CMD ["uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
