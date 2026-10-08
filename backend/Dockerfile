@@ -40,9 +40,14 @@ RUN mkdir -p /opt/venv /app \
 COPY pyproject.toml uv.lock ./
 
 RUN --mount=type=cache,id=s/3cd0b9f3-5bfa-401f-b948-766dc243efb4-/root/.cache/uv,target=/root/.cache/uv \
-    uv sync --frozen
+    uv sync --frozen --no-install-project
 
 COPY . .
+
+RUN --mount=type=cache,id=s/3cd0b9f3-5bfa-401f-b948-766dc243efb4-/root/.cache/uv,target=/root/.cache/uv \
+    uv sync --frozen 
+
+USER appuser
 
 # Expose the port that the application listens on.
 EXPOSE 8000
