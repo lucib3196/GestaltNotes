@@ -118,3 +118,9 @@ data_analysis/src/data_analysis/**.ipynb
 data_analysis/src/data_analysis/**.md
 
 *.env**
+*output.json
+*output.pdf
+*.langgraph_checkpoint**
+**.pckl
+packages/document_processing/src/document_processing/assets/Lec16_post.pdf
+packages/document_processing/src/document_processing/assets/me116_spring_2026_lectures_Lecture_04_02_Lecture_04_02.pdf
