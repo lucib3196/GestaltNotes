@@ -40,12 +40,12 @@ RUN mkdir -p /opt/venv /app \
 COPY pyproject.toml uv.lock ./
 
 RUN --mount=type=cache,id=s/3cd0b9f3-5bfa-401f-b948-766dc243efb4-/root/.cache/uv,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project
+    uv sync --locked --no-install-project
 
 COPY . .
 
 RUN --mount=type=cache,id=s/3cd0b9f3-5bfa-401f-b948-766dc243efb4-/root/.cache/uv,target=/root/.cache/uv \
-    uv sync --frozen 
+    uv sync --locked --no-editable
 
 USER appuser
 
@@ -53,4 +53,4 @@ USER appuser
 EXPOSE 8000
 
 # Run the application.
-CMD ["uvicorn", "main:app","--reload", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
+CMD ["uv", "run", "--no-sync", "uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
