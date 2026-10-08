@@ -44,7 +44,3 @@ def firebase_health():
         ) from e
 
 
-@router.get("/settings")
-async def get_current_settings(settings: SettingDependency):
-    """Return the current storage settings (cloud or local)."""
-    return {"settings": settings}
