@@ -12,7 +12,8 @@ WORKDIR /app/backend
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
-    UV_PROJECT_ENVIRONMENT=/opt/venv
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_NO_CACHE=1
 
 ENV PATH="/opt/venv/bin:${PATH}"
 
@@ -37,20 +38,18 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 
-COPY pyproject.toml uv.lock ./
-
-RUN --mount=type=cache,id=s/3cd0b9f3-5bfa-401f-b948-766dc243efb4-/root/.cache/uv,target=/root/.cache/uv \
-    uv sync --locked --no-install-project
-
-COPY . .
-
-RUN --mount=type=cache,id=s/3cd0b9f3-5bfa-401f-b948-766dc243efb4-/root/.cache/uv,target=/root/.cache/uv \
-    uv sync --locked --no-editable
-
 USER appuser
+
+COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+
+RUN uv sync --locked --no-install-project
+
+COPY --chown=appuser:appuser . .
+
+RUN uv sync --locked --no-editable
 
 # Expose the port that the application listens on.
 EXPOSE 8000
 
 # Run the application.
-CMD ["/opt/venv/bin/uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]
