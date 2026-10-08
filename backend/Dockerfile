@@ -49,5 +49,5 @@ RUN uv sync --frozen --no-dev
 EXPOSE 8000
 
 # Run the application.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000","--forwarded-allow-ips", "*"]
 
