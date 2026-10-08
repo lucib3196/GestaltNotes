@@ -7,8 +7,6 @@ from sqlmodel import Session, create_engine
 from backend.core.logger import logger
 from backend.core.settings import get_settings
 
-
-from backend.src.backend.database.config import initialize_database_engine
 from .exceptions import DatabaseConfigError, DatabaseInitializationError
 
 app_settings = get_settings()

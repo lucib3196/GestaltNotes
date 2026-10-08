@@ -2,7 +2,7 @@ import firebase_admin
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 from starlette import status
-from backend.
+from backend.web.dependencies import SessionDep
 
 router = APIRouter(tags=["Health"], prefix="/health")
 
