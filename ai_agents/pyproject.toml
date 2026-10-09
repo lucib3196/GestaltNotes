@@ -7,8 +7,9 @@ authors = [
 ]
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.11,<3.14"
 dependencies = [
+    "gestalt-models",
     "langchain>=1.4.2",
     "langchain-google-genai>=4.4.0",
     "langgraph>=1.0.0",
@@ -57,6 +58,9 @@ lint.ignore = [
 "tests/*" = ["D", "UP"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.uv.sources]
+gestalt-models = { path = "../packages/gestalt_models" }
 
 [dependency-groups]
 dev = [

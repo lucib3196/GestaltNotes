@@ -51,6 +51,10 @@ export default class ChatAPI {
     return response.data;
   }
 
+  static async deleteThread(threadId: string, token: string): Promise<void> {
+    await api.delete(`${this.base}/${threadId}`, this.withAuth(token));
+  }
+
   static async listMyThreads(token?: string): Promise<Thread[]> {
     const response = await api.get(`${this.base}/`, this.withAuth(token));
     return response.data;

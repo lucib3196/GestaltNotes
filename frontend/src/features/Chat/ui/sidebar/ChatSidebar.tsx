@@ -3,16 +3,17 @@ import { useState } from "react";
 import { BsLayoutSidebarReverse } from "react-icons/bs";
 import { useGetThreads } from "../../hooks/useGetThreads";
 import { useChatStore } from "../../instance";
-import ThreadItem from "./ThreadItem";
-import ToolBar from "./ToolBar";
+import ThreadList from "./ThreadList";
+import ChatSidebarToolbar from "./ChatSidebarToolbar";
 
 const containerStyle =
-  "flex h-full min-h-svh shrink-0 flex-col gap-3 overflow-hidden rounded-xl border border-border shadow-sm";
+  "flex h-full min-h-0 shrink-0 flex-col gap-3 overflow-hidden rounded-xl border border-border shadow-sm";
 
-export default function ChatSideBar() {
+export default function ChatSidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const { threads, loading, error } = useGetThreads();
+  const { threads, loading, error, refetch } = useGetThreads();
   const selectedThread = useChatStore((s) => s.activeThreadId);
+  const removeThread = useChatStore((s) => s.removeThread);
   const selectThread = useChatStore((s) => s.selectThread);
 
   return (
@@ -44,38 +45,22 @@ export default function ChatSideBar() {
         </button>
       </div>
 
-      <ToolBar collapsed={collapsed} />
+      <ChatSidebarToolbar collapsed={collapsed} />
 
       {!collapsed && (
-        <nav
-          aria-label="Chat threads"
-          aria-busy={loading}
-          className="min-h-0 flex-1 space-y-1 overflow-y-auto p-1"
-        >
-          <p>Recent</p>
-          {loading ? (
-            <p role="status" className="px-3 py-6 text-sm text-text-soft">
-              Loading chats...
-            </p>
-          ) : error ? (
-            <p role="alert" className="px-3 py-6 text-sm text-red-500">
-              Failed to load chats
-            </p>
-          ) : threads.length === 0 ? (
-            <p className="px-3 py-6 text-center text-sm text-text-soft">
-              No chats yet
-            </p>
-          ) : (
-            threads.map((thread) => (
-              <ThreadItem
-                key={thread.id}
-                thread={thread}
-                selected={thread.id === selectedThread}
-                onSelect={selectThread}
-              />
-            ))
-          )}
-        </nav>
+        <ThreadList
+          threads={threads}
+          loading={loading}
+          error={error}
+          selectedThreadId={selectedThread}
+          onSelect={selectThread}
+          onRenamed={refetch}
+          onDeleted={(id) => {
+            removeThread(id);
+            refetch();
+          }}
+          onRetry={refetch}
+        />
       )}
     </aside>
   );

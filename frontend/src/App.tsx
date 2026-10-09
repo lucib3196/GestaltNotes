@@ -10,10 +10,10 @@ import {
 import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import SingleCourse from "./features/CourseManagement/SingleCourse";
-import ChatSideBar from "./features/Chat/ui/sidebar/ChatSideBar";
+import { ChatSidebar } from "./features/Chat/ui/sidebar";
 import { ChatProvider } from "./features/Chat/instance";
 function Test() {
-  return <div><ChatProvider><ChatSideBar/></ChatProvider></div>;
+  return <div><ChatProvider><ChatSidebar/></ChatProvider></div>;
 }
 
 function App() {

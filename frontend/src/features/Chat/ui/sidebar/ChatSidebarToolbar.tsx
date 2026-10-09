@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
 import { NewChatButton } from "../buttons/ChatActions";
 
-export default function ToolBar({
-  collapsed = false,
-  children,
-}: {
+export type ChatSidebarToolbarProps = {
   collapsed?: boolean;
   children?: ReactNode;
-}) {
+};
+
+export default function ChatSidebarToolbar({
+  collapsed = false,
+  children,
+}: ChatSidebarToolbarProps) {
   return (
     <div
       className={

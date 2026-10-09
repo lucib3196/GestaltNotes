@@ -13,13 +13,12 @@ export function NewChatButton({
   className,
 }: NewChatButtonProps) {
   const startNewChat = useChatStore((s) => s.startNewChat);
-  const {refetch} = useGetThreads()
-  
-  const handleClick = () =>{
+  const { refetch } = useGetThreads();
+
+  const handleClick = () => {
     startNewChat();
-    refetch()
-    console.log("Refetched");
-  }
+    refetch();
+  };
   const iconOnly = variant === "icon";
 
   return (

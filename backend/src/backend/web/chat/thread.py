@@ -1,145 +1,133 @@
+from typing import Any
 from uuid import UUID
 
-from fastapi.exceptions import HTTPException
-from fastapi.routing import APIRouter
-from langgraph_sdk import get_client
-from starlette import status
+from fastapi import APIRouter, HTTPException
 
-from backend.core.settings import get_settings
-from backend.chat.model import (
-    Message,
-    Thread,
-
+from backend.chat.exceptions import (
+    ThreadBaseException,
+    ThreadClientDeleteError,
+    ThreadDeleteCommitError,
+    ThreadDeleteError,
+    ThreadMessageRetrievalError,
+    ThreadNotFound,
 )
+from backend.chat.model import Message, Thread
 from backend.chat.schema import MessageCreate, ThreadCreate, ThreadUpdate
-from backend.chat.exceptions import ThreadBaseException
 from backend.web.accounts.dependencies import CurrentUser
 from backend.web.dependencies import MessageDBDependency
 
-from .dependencies import ThreadDBDependency
+from .dependencies import ThreadServiceDependency
 
 router = APIRouter(prefix="/threads", tags=["threads"])
 
-settings = get_settings()
-client = get_client(
-    url=settings.LANGGRAPH_STREAM_URL, api_key=settings.LANGSMITH_API_KEY
-)
+
+def thread_http_error(exc: ThreadBaseException) -> HTTPException:
+    if isinstance(exc, ThreadNotFound):
+        return HTTPException(404, "Thread not found")
+    if isinstance(exc, ThreadMessageRetrievalError):
+        return HTTPException(502, "Failed to retrieve messages")
+    if isinstance(exc, ThreadClientDeleteError):
+        return HTTPException(502, "Failed to delete remote thread")
+    if isinstance(exc, ThreadDeleteCommitError):
+        return HTTPException(500, "Remote thread deleted, but local deletion failed")
+    if isinstance(exc, ThreadDeleteError):
+        return HTTPException(500, "Failed to delete thread")
+    return HTTPException(500, "Thread operation failed")
 
 
 @router.post("/", response_model=Thread)
 async def create_thread(
     data: ThreadCreate,
-    tdb: ThreadDBDependency,
+    service: ThreadServiceDependency,
     user: CurrentUser,
 ) -> Thread:
-    user_id = None
-    if user or data.user_id:
-        user_id = user
-
-    if user_id is None:
-        raise HTTPException(detail="user_id is required", status_code=400)
-    return await tdb.create_thread(
-        thread_id=data.thread_id,
-        user_id=user_id,
-        title=data.title,
-        agent=data.agent,
-    )
+    try:
+        return await service.create_thread(
+            thread_id=data.thread_id,
+            user_id=user,
+            title=data.title,
+            agent=data.agent,
+        )
+    except ThreadBaseException as exc:
+        raise thread_http_error(exc) from exc
 
 
 @router.get("/", response_model=list[Thread])
 async def list_my_threads(
-    tdb: ThreadDBDependency,
+    service: ThreadServiceDependency,
     user: CurrentUser,
 ) -> list[Thread]:
-    return await tdb.list_threads_for_user(
-        user_id=user,
-    )
+    try:
+        return await service.list_threads_for_user(user_id=user)
+    except ThreadBaseException as exc:
+        raise thread_http_error(exc) from exc
 
 
 @router.post("/{thread_id}/messages", response_model=Message)
 async def create_message(
-    thread_id: UUID | str,
+    thread_id: UUID,
     data: MessageCreate,
     mdb: MessageDBDependency,
-    tdb: ThreadDBDependency,
+    service: ThreadServiceDependency,
+    user: CurrentUser,
 ) -> Message:
     try:
+        await service.assert_thread_owner(user, thread_id)
         msg = await mdb.create_message(
             thread_id=thread_id,
             role=data.role,
             content=data.content,
         )
-        await tdb.touch_updated_at(thread_id)
+        await service.touch_updated_at(user, thread_id)
         return msg
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create the message {e}",
-        )
+    except ThreadBaseException as exc:
+        raise thread_http_error(exc) from exc
+    except Exception as exc:
+        raise HTTPException(500, "Failed to create message") from exc
 
 
-@router.get("/{thread_id}/messages", response_model=Thread)
+@router.get("/{thread_id}/messages", response_model=list[dict[str, Any]])
 async def get_messages(
-    thread_id: UUID | str,
-    tdb: ThreadDBDependency,
-):
+    thread_id: UUID,
+    service: ThreadServiceDependency,
+    user: CurrentUser,
+) -> list[dict[str, Any]]:
     try:
-        await tdb.get_thread(thread_id)
-
-        data = await client.threads.get(str(thread_id))
-        values = data.get("values", {}) if isinstance(data, dict) else {}
-        messages = values.get("messages", [])  # type: ignore
-        return messages if isinstance(messages, list) else []
-    except ThreadBaseException as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to retrieve thread {thread_id} {e}",
-        ) from e
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to retrieve thread data from stream service: {e}",
-        ) from e
+        return await service.get_messages(user, thread_id)
+    except ThreadBaseException as exc:
+        raise thread_http_error(exc) from exc
 
 
-@router.get("/{thread_id}")
-async def get_thread(thread_id: str | UUID, tdb: ThreadDBDependency) -> Thread:
-    try:
-        return await tdb.get_thread(thread_id)
-    except ThreadBaseException as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to get thread  {thread_id} {e}",
-        ) from e
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Thread error internal: {e}",
-        ) from e
-
-
-@router.put("/{thread_id}")
-async def update_thread(
-    thread_id: str | UUID, tdb: ThreadDBDependency, thread_update: ThreadUpdate
+@router.get("/{thread_id}", response_model=Thread)
+async def get_thread(
+    thread_id: UUID, service: ThreadServiceDependency, user: CurrentUser
 ) -> Thread:
     try:
-        return await tdb.update_thread(thread_id, thread_update)
-    except ThreadBaseException as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to update thread  {thread_id} {e}",
-        ) from e
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Thread error internal: {e}",
-        ) from e
+        return await service.get_thread_for_user(user, thread_id)
+    except ThreadBaseException as exc:
+        raise thread_http_error(exc) from exc
 
 
-# @router.get("/{thread_id}/messages", response_model=list[Message])
-# async def list_messages(
-#     thread_id: UUID,
-#     mdb: MessageDBDependency,
-#     user: CurrentUser,
-# ) -> list[Message]:
-#     return await mdb.list_messages(thread_id)
+@router.put("/{thread_id}", response_model=Thread)
+async def update_thread(
+    thread_id: UUID,
+    service: ThreadServiceDependency,
+    thread_update: ThreadUpdate,
+    user: CurrentUser,
+) -> Thread:
+    try:
+        return await service.update_thread(user, thread_id, thread_update)
+    except ThreadBaseException as exc:
+        raise thread_http_error(exc) from exc
+
+
+@router.delete("/{thread_id}", status_code=204)
+async def delete_thread(
+    thread_id: UUID,
+    service: ThreadServiceDependency,
+    user: CurrentUser,
+) -> None:
+    try:
+        await service.delete_thread(user, thread_id)
+    except ThreadBaseException as exc:
+        raise thread_http_error(exc) from exc

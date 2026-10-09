@@ -16,3 +16,19 @@ class ThreadRetrievalError(ThreadBaseException):
 
 class ThreadUpdateError(ThreadBaseException):
     """Exception when failure to update thread"""
+
+
+class ThreadMessageRetrievalError(ThreadBaseException):
+    """Failed to retrieve messages from LangGraph."""
+
+
+class ThreadDeleteError(ThreadBaseException):
+    """SQL thread deletion failed."""
+
+
+class ThreadClientDeleteError(ThreadBaseException):
+    """Remote deletion failed; SQL deletion was rolled back."""
+
+
+class ThreadDeleteCommitError(ThreadDeleteError):
+    """Remote deletion succeeded, but the SQL commit failed."""

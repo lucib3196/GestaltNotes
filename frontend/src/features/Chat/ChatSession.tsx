@@ -8,14 +8,11 @@ import { ChatContainer, ChatInput } from "./components";
 import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils";
 import { useCreateThread } from "./hooks/useCreateThread";
-
+import MessageBubble from "./ui/messages/MessageBubble";
 export default function ChatSession() {
   const activeThreadId = useChatStore((s) => s.activeThreadId);
   const assistantId = useChatStore((s) => s.assistant.id);
   const setActiveThread = useChatStore((s) => s.selectThread);
-
-
-  console.log("Current active thread", activeThreadId)
 
   // Hooks
   const { createThread } = useCreateThread();
@@ -85,17 +82,9 @@ export default function ChatSession() {
           }
         >
           <MathJax dynamic>
-            {stream.messages.map((msg) => {
-              if (msg.type === "human") {
-                return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
-              }
-              if (msg.type === "ai") {
-                return (
-                  <AIBubble key={msg.id} msg={msg as AIMessage}></AIBubble>
-                );
-              }
-              return null;
-            })}
+            {stream.messages.map((msg, index) => (
+              <MessageBubble key={msg.id ?? `${activeThreadId}-${index}`} message={msg} />
+            ))}
           </MathJax>
         </ChatContainer>
       </div>

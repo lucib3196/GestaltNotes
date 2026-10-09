@@ -2,10 +2,9 @@ import type { ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-
-
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 export default function Markdown({ children }: { children: ReactNode | null }) {
   if (!children) return null;
@@ -14,10 +13,16 @@ export default function Markdown({ children }: { children: ReactNode | null }) {
     return <div className="markdown-content text-text">{children}</div>;
   }
 
-
   return (
     <div className="markdown-content container text-text">
-      <ReactMarkdown rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: "ignore", }]]} remarkPlugins={[remarkGfm, remarkMath]}>{children}</ReactMarkdown>
+      <ReactMarkdown
+        rehypePlugins={[
+          [rehypeKatex, { throwOnError: false, strict: "ignore" }],
+        ]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+      >
+        {children}
+      </ReactMarkdown>
     </div>
   );
 }

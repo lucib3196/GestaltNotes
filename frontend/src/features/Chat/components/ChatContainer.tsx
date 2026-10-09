@@ -11,9 +11,9 @@ const Variants: Record<ChatContainerVariant, string> = {
 };
 
 const SizeClasses: Record<Sizes, string> = {
-  sm: "h-[360px] w-full max-w-md",
-  med: "h-[560px] w-full max-w-3xl",
-  lg: "h-[760px] w-full max-w-5xl",
+  sm: " h-full w-full max-w-md",
+  med: "h-full w-full max-w-3xl",
+  lg: "h-full w-full max-w-5xl",
 };
 
 interface ChatContainerProps {

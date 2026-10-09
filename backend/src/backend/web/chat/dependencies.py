@@ -1,21 +1,21 @@
-
-from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends
+from langgraph_sdk import get_client
 
-from backend.core.logger import logger
+from backend.chat import ThreadService
+from backend.core.settings import get_settings
 from backend.database import SessionDep
-from backend.chat import ThreadDB
+
+settings = get_settings()
+client = get_client(
+    url=settings.LANGGRAPH_STREAM_URL,
+    api_key=settings.LANGSMITH_API_KEY,
+)
 
 
-@lru_cache
-def get_thread_db(session: SessionDep) -> ThreadDB:
-    try:
-        logger.debug("Initialized Thread DB")
-        return ThreadDB(session)
-    except Exception:
-        raise ValueError("Failed to initialize Thread DB")
+def get_thread_service(session: SessionDep) -> ThreadService:
+    return ThreadService(session=session, client=client)
 
 
-ThreadDBDependency = Annotated[ThreadDB, Depends(get_thread_db)]
+ThreadServiceDependency = Annotated[ThreadService, Depends(get_thread_service)]

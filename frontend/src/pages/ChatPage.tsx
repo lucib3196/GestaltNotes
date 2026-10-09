@@ -2,7 +2,7 @@ import { ChatSession } from "../features/Chat";
 import { useState } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { ChatProvider } from "../features/Chat/instance";
-import ChatSideBar from "../features/Chat/ui/sidebar/ChatSideBar";
+import { ChatSidebar } from "../features/Chat/ui/sidebar";
 import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import StarterView from "../features/ConversationStarters/components/StarterView";
 import { TabButton } from "../components/Button";
@@ -91,7 +91,7 @@ export default function ChatPage() {
             <Group className="h-8-10">
 
 
-                <ChatSideBar />
+                <ChatSidebar />
 
                 <Panel
                     id="chat-main"
