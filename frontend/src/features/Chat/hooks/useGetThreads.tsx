@@ -1,11 +1,15 @@
 import { useAuth } from "../../Auth";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import type { Thread } from "../../../services";
+import { useChatStore } from "../instance";
 import { ChatAPI } from "../../../services";
 
 export const useGetThreads = () => {
   const { user } = useAuth();
-  const [threads, setThreads] = useState<Thread[]>([]);
+  const setThreads = useChatStore((state) => state.setThreads);
+  const threadIds = useChatStore((state) => state.threadIds);
+  const threadsById = useChatStore((state) => state.threadsById);
+  const threads = useMemo(() => threadIds.map((id) => threadsById[id]).filter((thread): thread is Thread => Boolean(thread)), [threadIds, threadsById]);
   const [refreshKey, setRefreshKey] = useState(0);
   const refetch = useCallback(() => {
     setRefreshKey((key) => key + 1);
@@ -42,7 +46,7 @@ export const useGetThreads = () => {
     return () => {
       active = false;
     };
-  }, [user, refreshKey]);
+  }, [user, refreshKey, setThreads]);
 
   return {
     threads,

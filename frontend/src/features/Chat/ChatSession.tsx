@@ -2,15 +2,17 @@ import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
 import { streamURL } from "../../config/api";
 import { ChatContainer, ChatInput } from "./components";
-
+import { ChatSessionHeader } from "./ui/layout/Header";
 import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils/messageSending";
 import { useCreateThread } from "./hooks/useCreateThread";
 import MessageList from "./ui/messages/MessageList";
 export default function ChatSession() {
   const activeThreadId = useChatStore((s) => s.activeThreadId);
+  const activeThread = useChatStore((s) => activeThreadId ? s.threadsById[activeThreadId] ?? null : null);
   const assistantId = useChatStore((s) => s.assistant.id);
   const setActiveThread = useChatStore((s) => s.selectThread);
+  const upsertThread = useChatStore((s) => s.upsertThread);
 
   // Hooks
   const { createThread } = useCreateThread();
@@ -22,6 +24,7 @@ export default function ChatSession() {
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     onThreadId: async (id: string) => {
       const thread = await createThread({ thread_id: id });
+      upsertThread(thread);
       setActiveThread(thread.id);
     },
   });
@@ -62,9 +65,7 @@ export default function ChatSession() {
 
   return (
     <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
-      <div className="shrink-0  border-border px-3 py-2 sm:px-4">
-        {/* <ChatSessionHeader thread={currentThread} /> */}
-      </div>
+      <ChatSessionHeader thread={activeThread} />
       <div className="min-h-0 flex-1">
         <ChatContainer
           size="lg"
