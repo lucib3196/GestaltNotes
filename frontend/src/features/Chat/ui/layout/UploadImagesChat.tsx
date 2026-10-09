@@ -1,3 +1,4 @@
+import { useId } from "react";
 import clsx from "clsx";
 import { CiCirclePlus } from "react-icons/ci";
 
@@ -54,14 +55,16 @@ type UploadFilesProp = {
   multiple?: boolean;
   // Which file types are accepted by this upload control.
   accept?: UploadAccept;
+  disabled?: boolean;
 };
 
 export function UploadImagesChat({
   onFilesSelected,
   multiple = true,
   accept = "images",
+  disabled = false,
 }: UploadFilesProp) {
-  const inputId = "chat-upload-input";
+  const inputId = useId();
 
   return (
     <>
@@ -69,8 +72,10 @@ export function UploadImagesChat({
         type="file"
         accept={acceptMap[accept]}
         id={inputId}
-        className="sr-only"
+        className="peer sr-only"
         multiple={multiple}
+        disabled={disabled}
+        aria-label="Attach files"
         onChange={(e) => {
           const files = e.target.files ? Array.from(e.target.files) : [];
           onFilesSelected(files);
@@ -80,14 +85,15 @@ export function UploadImagesChat({
 
       <label
         htmlFor={inputId}
-        aria-label="Upload files"
-        title="Upload image"
+        aria-label="Attach files"
+        title="Attach files"
         className={clsx(
-          "group inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md",
+          "group inline-flex h-10 w-10 items-center justify-center rounded-md",
           "border border-border bg-surface text-text-muted shadow-sm",
           "transition-all duration-base ease-base",
           "hover:border-border-strong hover:bg-surface-muted hover:text-text",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60",
+          "peer-focus-visible:ring-2 peer-focus-visible:ring-accent/60",
+          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
         )}
       >
         <CiCirclePlus

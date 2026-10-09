@@ -6,15 +6,15 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 
-export default function Markdown({ children }: { children: ReactNode | null }) {
+export default function MarkdownRenderer({ children }: { children: ReactNode | null }) {
   if (!children) return null;
 
   if (typeof children !== "string") {
-    return <div className="markdown-content text-text">{children}</div>;
+    return <div className="chat-markdown text-text">{children}</div>;
   }
 
   return (
-    <div className="markdown-content container text-text">
+    <div className="chat-markdown min-w-0 text-text">
       <ReactMarkdown
         rehypePlugins={[
           [rehypeKatex, { throwOnError: false, strict: "ignore" }],

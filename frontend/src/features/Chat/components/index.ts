@@ -1,5 +1,5 @@
-export { default as ChatContainer } from "./ChatContainer";
-export { default as ChatInput } from "./ChatInput";
+export { default as ChatContainer } from "../ui/layout/ChatContainer";
+export { default as ChatInput } from "../ui/layout/ChatInput";
 
 export { ToolBubble, ToolInvocation } from "./Tools";
 export {
@@ -8,5 +8,5 @@ export {
   uploadFilesBase,
   UploadFilesSize,
   UploadFilesStyles,
-} from "./UploadImagesChat";
+} from "../ui/layout/UploadImagesChat";
 export { isMessageType, normalizeType, parseToolResult } from "./utils";

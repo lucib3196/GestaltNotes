@@ -6,14 +6,14 @@ type ChatContainerVariant = "demo" | "main";
 type Sizes = "sm" | "med" | "lg";
 
 const Variants: Record<ChatContainerVariant, string> = {
-  demo: "relative flex flex-col overflow-hidden rounded-xl bg-surface text-text backdrop-blur",
-  main: "relative mx-auto flex flex-col overflow-hidden rounded-xl bg-surface-strong p-4 text-text backdrop-blur",
+  demo: "relative flex min-h-0 flex-col overflow-hidden rounded-xl bg-surface text-text backdrop-blur",
+  main: "relative mx-auto flex min-h-0 flex-col overflow-hidden rounded-xl bg-surface-strong p-3 text-text sm:p-5 backdrop-blur",
 };
 
 const SizeClasses: Record<Sizes, string> = {
-  sm: " h-full w-full max-w-md",
-  med: "h-full w-full max-w-3xl",
-  lg: "h-full w-full max-w-5xl",
+  sm: " h-full w-full",
+  med: "h-full w-full",
+  lg: "h-full w-full",
 };
 
 interface ChatContainerProps {
@@ -49,16 +49,16 @@ export default function ChatContainer({
       className={clsx(
         Variants[variant],
         SizeClasses[size],
-        bordered ? "border border-border shadow-soft" : "border-0 shadow-none",
+        bordered ? "border border-border shadow-sm" : "border-0 shadow-none",
       )}
     >
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto pr-1 scroll-smooth scrollbar-hide sm:pr-2">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain scrollbar-hide px-1 py-3 sm:px-2">
         {children}
         <div ref={bottomRef} />
       </div>
 
-      {starters ? <div className="mt-3">{starters}</div> : null}
-      <div className="mt-3  pt-3">{input}</div>
+      {starters ? <div className="shrink-0 border-t border-border pt-3">{starters}</div> : null}
+      <div className="mt-3 shrink-0 border-t border-border pt-3">{input}</div>
     </section>
   );
 }

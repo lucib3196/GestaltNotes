@@ -1,9 +1,4 @@
-import {
-  AIMessage,
-  HumanMessage,
-  ToolMessageChunk,
-  ContentBlock,
-} from "@langchain/core/messages";
+import { ContentBlock } from "@langchain/core/messages";
 
 export type TextPayload = {
   type: "text";
@@ -12,7 +7,7 @@ export type TextPayload = {
 
 export type ImagePayload = {
   type: "image_url";
-  image_url: string;
+  image_url: { url: string };
 };
 export type MessagePayload = TextPayload | ImagePayload;
 

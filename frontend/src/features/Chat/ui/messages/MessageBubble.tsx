@@ -3,13 +3,13 @@ import { renderContent } from "../../utils/messageParsing";
 import type { MessageType } from "@langchain/core/messages";
 import { RenderToolCall } from "../../../ToolCalls/RenderToolCalls";
 
-import Markdown from "../../components/MardownRender";
+import Markdown from "../layout/MarkdownRenderer";
 const ChatBubbleBase =
-  "my-2 max-w-full rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap shadow-soft";
+  "min-w-0 max-w-full rounded-lg px-4 py-3 text-sm leading-relaxed sm:max-w-[90%]";
 
 const ChatBubbleStyles: Record<MessageType, string> = {
   ai: `${ChatBubbleBase} self-start border border-border bg-surface text-text`,
-  human: `${ChatBubbleBase} self-end border border-border-strong bg-surface-strong text-text`,
+  human: `${ChatBubbleBase} self-end border border-accent/25 bg-accent/10 text-text sm:max-w-[80%]`,
   tool: `${ChatBubbleBase} self-start border border-accent/35 bg-surface-muted text-text`,
   system: `${ChatBubbleBase} self-start border border-border bg-surface text-text`,
 };

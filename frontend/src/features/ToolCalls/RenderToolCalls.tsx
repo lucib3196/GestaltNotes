@@ -1,5 +1,5 @@
 import type { Message } from "@langchain/langgraph-sdk";
-import Markdown from "../Chat/components/MardownRender";
+import Markdown from "../Chat/ui/layout/MarkdownRenderer";
 import { renderContent } from "../Chat/utils/messageParsing";
 import { toolCallRegistry } from "./registry";
 

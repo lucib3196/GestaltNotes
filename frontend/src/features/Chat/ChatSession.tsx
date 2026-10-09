@@ -1,14 +1,12 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
-import { AIMessage, HumanMessage } from "langchain";
 import { streamURL } from "../../config/api";
-import { AIBubble, HumanBubble } from "./components/ChatMessage";
 import { ChatContainer, ChatInput } from "./components";
 
 import { useChatStore } from "./instance";
-import { prepareMessage } from "./utils";
+import { prepareMessage } from "./utils/messageSending";
 import { useCreateThread } from "./hooks/useCreateThread";
-import MessageBubble from "./ui/messages/MessageBubble";
+import MessageList from "./ui/messages/MessageList";
 export default function ChatSession() {
   const activeThreadId = useChatStore((s) => s.activeThreadId);
   const assistantId = useChatStore((s) => s.assistant.id);
@@ -82,9 +80,7 @@ export default function ChatSession() {
           }
         >
           <MathJax dynamic>
-            {stream.messages.map((msg, index) => (
-              <MessageBubble key={msg.id ?? `${activeThreadId}-${index}`} message={msg} />
-            ))}
+            <MessageList messages={stream.messages} />
           </MathJax>
         </ChatContainer>
       </div>
