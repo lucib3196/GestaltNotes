@@ -12,58 +12,19 @@ export const acceptMap: Record<UploadAccept, string> = {
   any: "*",
 };
 
-export type UploadFileSize = "sm" | "md" | "lg" | "full";
-
-// Base styles shared by upload surfaces.
-export const uploadFilesBase =
-  "mx-auto flex w-full cursor-pointer flex-col items-center justify-center p-8 text-center transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-accent/60";
-
-export type UploadFilesStyle = "outline" | "solid" | "ghost" | "editor";
-export const UploadFilesStyles: Record<UploadFilesStyle, string> = {
-  outline: clsx(
-    "rounded-lg border-2 border-dashed border-border bg-surface",
-    "hover:border-border-strong hover:bg-surface-muted",
-  ),
-  solid: clsx(
-    "rounded-lg border border-transparent bg-accent text-bg",
-    "hover:opacity-90",
-  ),
-  ghost: clsx(
-    "rounded-lg border border-transparent bg-transparent text-text-muted",
-    "hover:bg-surface-muted hover:text-text",
-  ),
-  editor: clsx(
-    "rounded-lg border border-border-strong bg-code text-text",
-    "hover:border-accent focus-within:ring-accent/60",
-  ),
-};
-
-export const UploadFilesSize: Record<UploadFileSize, string> = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  full: "w-full",
-};
-
-type UploadFilesProp = {
+type ChatAttachmentPickerProps = {
   onFilesSelected: (files: File[]) => void;
-  variant?: UploadFilesStyle;
-  size?: UploadFileSize;
-  // Optional helper message describing what files users should upload.
-  message?: string;
-  // Whether the picker should allow selecting multiple files at once.
   multiple?: boolean;
-  // Which file types are accepted by this upload control.
   accept?: UploadAccept;
   disabled?: boolean;
 };
 
-export function UploadImagesChat({
+export function ChatAttachmentPicker({
   onFilesSelected,
   multiple = true,
   accept = "images",
   disabled = false,
-}: UploadFilesProp) {
+}: ChatAttachmentPickerProps) {
   const inputId = useId();
 
   return (

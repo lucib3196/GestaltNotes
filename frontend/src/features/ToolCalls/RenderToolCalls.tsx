@@ -1,6 +1,6 @@
 import type { Message } from "@langchain/langgraph-sdk";
-import Markdown from "../Chat/ui/layout/MarkdownRenderer";
-import { renderContent } from "../Chat/utils/messageParsing";
+import Markdown from "../../components/Markdown/MarkdownRenderer";
+import { renderContent } from "../Chat/ui/messages/renderMessageContent";
 import { toolCallRegistry } from "./registry";
 
 export function RenderToolCall({ message }: { message: Message }) {

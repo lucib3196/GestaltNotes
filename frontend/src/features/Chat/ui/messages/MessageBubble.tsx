@@ -1,9 +1,9 @@
 import type { Message } from "@langchain/langgraph-sdk";
-import { renderContent } from "../../utils/messageParsing";
+import { renderContent } from "./renderMessageContent";
 import type { MessageType } from "@langchain/core/messages";
 import { RenderToolCall } from "../../../ToolCalls/RenderToolCalls";
 
-import Markdown from "../layout/MarkdownRenderer";
+import Markdown from "../../../../components/Markdown/MarkdownRenderer";
 const ChatBubbleBase =
   "min-w-0 max-w-full rounded-lg px-4 py-3 text-sm leading-relaxed sm:max-w-[90%]";
 

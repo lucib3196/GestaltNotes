@@ -1,6 +1,7 @@
+import { extractMessageContent } from "../../utils/messageContent";
 import type { ContentBlock } from "langchain";
 import type { ReactNode } from "react";
-import type { ImagePayload } from "../types/content";
+import type { ImagePayload } from "../../types/content";
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -24,23 +25,17 @@ function isImagePayload(value: unknown): value is ImagePayload {
   );
 }
 
-export function extractMessageContent(content: unknown): string | unknown[] {
-  if (typeof content === "string") return content;
-  if (Array.isArray(content)) return content;
-  return String(content ?? "");
-}
 export function renderContent(content: unknown): string | ReactNode[] {
   const msgContent = extractMessageContent(content);
   if (typeof msgContent === "string") {
     return msgContent;
   }
   if (isContentBlockArray(msgContent) && msgContent.length) {
-    const lastMsg = msgContent.at(-1);
-    if (!lastMsg) return "";
-    if (lastMsg.type === "image_generation_call") {
-      return "image generated";
-    }
-    return typeof lastMsg.text === "string" ? lastMsg.text : "";
+    return msgContent.map((block) =>
+      block.type === "image_generation_call"
+        ? "image generated"
+        : typeof block.text === "string" ? block.text : "",
+    ).join("\n\n");
   }
 
   return msgContent.map((item, index) => {

@@ -1,6 +1,6 @@
 import type { ExtractedQuestion } from "../../models/lecture.types";
 import BaseLectureEntry from "./BaseLectureEntry";
-import Markdown from "../../../Chat/ui/layout/MarkdownRenderer";
+import Markdown from "../../../../components/Markdown/MarkdownRenderer";
 type ExtractedQuestionsProps = {
   question: ExtractedQuestion;
 };

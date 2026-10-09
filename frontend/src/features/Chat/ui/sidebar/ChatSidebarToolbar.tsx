@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { NewChatButton } from "../buttons/ChatActions";
+import { NewChatButton } from "./NewChatButton";
 
 export type ChatSidebarToolbarProps = {
   collapsed?: boolean;

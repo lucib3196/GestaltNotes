@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React, { useMemo, useState, useRef, type JSX } from "react";
 import { IoCloseCircle } from "react-icons/io5";
-import { UploadImagesChat } from "./UploadImagesChat";
+import { ChatAttachmentPicker } from "./ChatAttachmentPicker";
 
 type ChatInputVariant = "default" | "subtle";
 
@@ -141,7 +141,7 @@ export default function ChatInput({
       />
       <div className={styles.toolbar}>
         {multiModal && (
-          <UploadImagesChat
+          <ChatAttachmentPicker
             onFilesSelected={onFileSelect}
             disabled={disabled}
           />

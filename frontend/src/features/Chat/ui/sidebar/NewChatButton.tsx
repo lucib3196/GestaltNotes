@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { useChatStore } from "../../instance";
-import { useGetThreads } from "../../hooks/useGetThreads";
 type NewChatButtonProps = {
   variant?: "full" | "icon";
   disabled?: boolean;
@@ -13,11 +12,9 @@ export function NewChatButton({
   className,
 }: NewChatButtonProps) {
   const startNewChat = useChatStore((s) => s.startNewChat);
-  const { refetch } = useGetThreads();
 
   const handleClick = () => {
     startNewChat();
-    refetch();
   };
   const iconOnly = variant === "icon";
 

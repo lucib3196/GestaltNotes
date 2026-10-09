@@ -1,8 +1,9 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
 import { streamURL } from "../../config/api";
-import { ChatContainer, ChatInput } from "./components";
-import { ChatSessionHeader } from "./ui/layout/Header";
+import ChatContainer from "./ui/layout/ChatContainer";
+import ChatInput from "./ui/composer/ChatInput";
+import { ChatSessionHeader } from "./ui/layout/ChatSessionHeader";
 import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils/messageSending";
 import { useCreateThread } from "./hooks/useCreateThread";

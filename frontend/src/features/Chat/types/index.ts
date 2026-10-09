@@ -1,1 +1,1 @@
-export type { MessagePayload, RendableContent } from "./content";
+export type { MessagePayload } from "./content";
