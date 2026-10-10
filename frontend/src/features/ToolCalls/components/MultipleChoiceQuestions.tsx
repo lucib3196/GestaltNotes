@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { MultipleChoiceSet } from "../schemas";
+import type { MultipleChoiceSet } from "../schemas/practice";
 
 export default function MultipleChoiceQuestions({
   data,

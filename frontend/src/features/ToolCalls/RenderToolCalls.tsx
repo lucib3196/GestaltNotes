@@ -1,21 +1,15 @@
 import type { Message } from "@langchain/langgraph-sdk";
 import Markdown from "../../components/Markdown/MarkdownRenderer";
 import { renderContent } from "../Chat/ui/messages/renderMessageContent";
-import { toolCallRegistry } from "./registry";
 
+import { getArtifactData } from "./artifacts";
+import { resolveToolComponent } from "./resolveToolComponent";
 export function RenderToolCall({ message }: { message: Message }) {
   if (message.type !== "tool") return null;
 
   const artifact: unknown = message.artifact;
-  const data =
-    typeof artifact === "object" && artifact !== null && "data" in artifact
-      ? artifact.data
-      : undefined;
-  const renderer =
-    message.name && Object.hasOwn(toolCallRegistry, message.name)
-      ? toolCallRegistry[message.name]
-      : undefined;
-
+  const data = getArtifactData(artifact);
+  const renderer = resolveToolComponent(message);
   return (
     <div className="flex min-w-0 flex-col gap-3">
       {message.content.length > 0 && (

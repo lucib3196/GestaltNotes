@@ -1,4 +1,4 @@
-import type { FlashcardSet } from "../schemas";
+import type { FlashcardSet } from "../schemas/practice";
 
 export default function Flashcards({ data }: { data: FlashcardSet }) {
   return (
