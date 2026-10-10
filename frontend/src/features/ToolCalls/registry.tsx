@@ -1,18 +1,18 @@
 import type { ReactNode } from "react";
-import { Flashcards, MultipleChoiceQuestions } from "./components";
+import { Flashcards } from "./components";
 import LegacyLectureSources from "./components/legacy/LegacyLectureSources";
 import {
   flashcardSetSchema,
-  multipleChoiceSetSchema,
 } from "./schemas/practice";
 import { legacySourceDocumentsSchema } from "./schemas/legacySources";
 
+import { QuestionsPractice, multipleChoiceSetSchema } from "./MCQ";
 type ToolRenderer = (data: unknown) => ReactNode;
 
 const renderQuestions: ToolRenderer = (data) => {
   const result = multipleChoiceSetSchema.safeParse(data);
   return result.success ? (
-    <MultipleChoiceQuestions data={result.data} />
+    <QuestionsPractice data={result.data} />
   ) : (
     <p role="alert">The question data could not be displayed.</p>
   );

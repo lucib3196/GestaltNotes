@@ -8,10 +8,15 @@ import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils/messageSending";
 import { useCreateThread } from "./hooks/useCreateThread";
 import MessageList from "./ui/messages/MessageList";
+import { useEffect } from "react";
 export default function ChatSession() {
   const activeThreadId = useChatStore((s) => s.activeThreadId);
-  const activeThread = useChatStore((s) => activeThreadId ? s.threadsById[activeThreadId] ?? null : null);
+  const activeThread = useChatStore((s) =>
+    activeThreadId ? (s.threadsById[activeThreadId] ?? null) : null,
+  );
   const assistantId = useChatStore((s) => s.assistant.id);
+  const draftText = useChatStore((s) => s.draftText);
+  const setDraftText = useChatStore((s) => s.setDraftText);
   const setActiveThread = useChatStore((s) => s.selectThread);
   const upsertThread = useChatStore((s) => s.upsertThread);
 
@@ -42,12 +47,26 @@ export default function ChatSession() {
       ],
     });
   };
-  // useEffect(() => {
-  //   if (!currentThread) return;
-  //   if (currentThread) {
-  //     clearWorkspaceItems();
-  //   }
-  // }, [currentThread?.id]);
+  useEffect(() => {
+    const handleExternalMessage = async () => {
+      if (!draftText) return;
+      const content = await prepareMessage(draftText);
+      stream.submit({
+        messages: [
+          {
+            role: "human",
+            content,
+            additional_kwargs: {
+              internal: true,
+              purpose: "quiz_review",
+            },
+          },
+        ],
+      });
+      setDraftText("");
+    };
+    void handleExternalMessage();
+  }, [draftText]);
 
   // useEffect(() => {
   //   stream.messages.forEach((msg) => {
@@ -63,6 +82,14 @@ export default function ChatSession() {
   //   setExternalMessage(null);
   //   // handleSubmit(externalMessage);
   // }, [externalMessage]);
+
+  const visibleMessages = stream.messages.filter(
+    (message) =>
+      !(
+        message.type === "human" &&
+        message.additional_kwargs?.internal === true
+      ),
+  );
 
   return (
     <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
@@ -82,7 +109,7 @@ export default function ChatSession() {
           }
         >
           <MathJax dynamic>
-            <MessageList messages={stream.messages} />
+            <MessageList messages={visibleMessages} />
           </MathJax>
         </ChatContainer>
       </div>

@@ -1,2 +1,2 @@
-export { default as MultipleChoiceQuestions } from "./MultipleChoiceQuestions";
+export { MultipleChoiceQuiz as MultipleChoiceQuestions } from "../MCQ";
 export { default as Flashcards } from "./Flashcards";

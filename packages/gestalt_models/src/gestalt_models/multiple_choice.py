@@ -19,6 +19,21 @@ class MultipleChoiceQuestion(BaseModel):
 
 
 class MultipleChoiceQuestionSet(BaseModel):
-    """A collection of multiple-choice questions."""
+    """A quiz containing related multiple-choice questions."""
 
-    questions: list[MultipleChoiceQuestion] = Field(min_length=1)
+    quiz_title: NonEmptyText = Field(
+        description=(
+            "A concise, descriptive title identifying the quiz's main topic. "
+            "For example: 'Second-Order ODEs and Phase Plane Analysis'."
+        ),
+    )
+    description: NonEmptyText = Field(
+        description=(
+            "One or two sentences describing the concepts and skills assessed "
+            "by the quiz. Do not include answers or repeat the title."
+        ),
+    )
+    questions: list[MultipleChoiceQuestion] = Field(
+        min_length=1,
+        description="The multiple-choice questions included in this quiz.",
+    )

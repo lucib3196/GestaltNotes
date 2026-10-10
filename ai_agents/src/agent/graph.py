@@ -45,6 +45,7 @@ graph = create_agent(
                 api_endpoint=settings.ASTRA_DB_API_ENDPOINT,
                 token=settings.ASTRA_DB_APPLICATION_TOKEN,
             ),
+            summary_model= model,
             name="retrieve_me118_notes",
             description="Use this to return documents from the course me118",
         ),
