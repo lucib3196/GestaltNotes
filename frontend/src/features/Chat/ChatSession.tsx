@@ -3,6 +3,7 @@ import { MathJax } from "better-react-mathjax";
 import { streamURL } from "../../config/api";
 import ChatContainer from "./ui/layout/ChatContainer";
 import ChatInput from "./ui/composer/ChatInput";
+import { ChatModelPicker } from "./ui/composer/ChatModelPicker";
 import { ChatSessionHeader } from "./ui/layout/ChatSessionHeader";
 import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils/messageSending";
@@ -18,6 +19,7 @@ type ChatAgentState = {
 };
 
 export default function ChatSession() {
+  const config = useChatStore((s) => s.config);
   const activeThreadId = useChatStore((s) => s.activeThreadId);
   const threadsById = useChatStore((s) => s.threadsById);
   const activeThread = useChatStore((s) =>
@@ -66,14 +68,19 @@ export default function ChatSession() {
   const handleSubmit = async (text: string, images?: string[]) => {
     const content = await prepareMessage(text, images);
 
-    stream.submit({
-      messages: [
-        {
-          type: "human",
-          content,
-        },
-      ],
-    });
+    stream.submit(
+      {
+        messages: [
+          {
+            type: "human",
+            content,
+          },
+        ],
+      },
+      {
+        context: config,
+      },
+    );
   };
   useEffect(() => {
     const handleExternalMessage = async () => {
@@ -89,7 +96,7 @@ export default function ChatSession() {
             },
           },
         ],
-      });
+      }, { context: config });
       setDraftText("");
     };
     void handleExternalMessage();
@@ -115,6 +122,7 @@ export default function ChatSession() {
               handleSubmit={handleSubmit}
               disabled={stream.isLoading}
               multiModal={true}
+              toolbar={<ChatModelPicker disabled={stream.isLoading} />}
             />
           }
         >
@@ -123,7 +131,6 @@ export default function ChatSession() {
           </MathJax>
         </ChatContainer>
       </div>
-  
     </section>
   );
 }

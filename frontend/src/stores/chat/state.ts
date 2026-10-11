@@ -5,8 +5,10 @@ import type {
   RequestStatus,
 } from "./types";
 import type { Thread } from "../../services";
+import type { ConfigSchema } from "./config";
 
 export type ChatState = {
+  config: ConfigSchema;
   assistant: Assistant;
   draftText: string;
   attachments: Attachment[];
@@ -14,6 +16,7 @@ export type ChatState = {
 };
 
 export type ChatActions = {
+  setModel: (model: ConfigSchema["model"]) => void;
   setAssistant: (id: Assistant) => void;
   setDraftText: (text: string) => void;
   addAttachments: (files: File[]) => void;

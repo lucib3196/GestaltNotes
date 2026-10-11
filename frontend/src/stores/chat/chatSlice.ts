@@ -1,5 +1,6 @@
 import type { StateCreator } from "zustand";
 import type { ChatStore, ChatSlice } from "./state";
+import { ConfigSchema } from "./config";
 
 export type ChatSliceCreator = StateCreator<ChatStore, [], [], ChatSlice>;
 
@@ -7,6 +8,11 @@ export function createChatSessionSlice<
   Store extends ChatStore = ChatStore,
 >(): ChatSliceCreator {
   return (set) => ({
+    config: ConfigSchema.parse({}),
+    setModel: (model) =>
+      set((state) => ({
+        config: ConfigSchema.parse({ ...state.config, model }),
+      })),
     assistant: { id: "agent", label: "agent", description: null },
     draftText: "",
     attachments: [],

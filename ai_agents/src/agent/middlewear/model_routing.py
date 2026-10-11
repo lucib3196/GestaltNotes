@@ -62,6 +62,8 @@ class ModelRoutingMiddleware(AgentMiddleware):
     ) -> ModelResponse:
         """Route sync model calls through the cached model registry."""
         model_name = request.runtime.context.model
+        
+        print("Model name", model_name)
         return handler(request.override(model=get_model(model_name)))
 
     async def awrap_model_call(  # type: ignore
@@ -71,4 +73,5 @@ class ModelRoutingMiddleware(AgentMiddleware):
     ) -> ModelResponse:
         """Route async model calls through the cached model registry."""
         model_name = request.runtime.context.model
+        print("Model name", model_name)
         return await handler(request.override(model=get_model(model_name)))
