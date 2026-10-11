@@ -11,6 +11,7 @@ import MessageList from "./ui/messages/MessageList";
 import { useEffect } from "react";
 import type { Message } from "@langchain/langgraph-sdk";
 import { useUpdateThread } from "./hooks/useUpdateThread";
+
 type ChatAgentState = {
   messages: Message[];
   thread_title?: string;
