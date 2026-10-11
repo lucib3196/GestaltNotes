@@ -80,14 +80,13 @@ export function ResourceSection() {
 
 export default function ChatPage() {
   return (
-    <div className="flex flex-row gap-2 h-[calc(90vh-1rem)] w-full p-2 sm:p-3">
+    <section id="chat-page" className="flex min-h-0 flex-1 overflow-hidden">
       <ChatProvider>
         <ChatSidebar />
-
-        <div className="grow">
+        <div className="min-h-0 min-w-0 flex-1">
           <ChatSession />
         </div>
       </ChatProvider>
-    </div>
+    </section>
   );
 }

@@ -3,17 +3,19 @@ import clsx from "clsx";
 import { useEffect, useRef } from "react";
 
 type ChatContainerVariant = "demo" | "main";
-type Sizes = "sm" | "med" | "lg";
 
-const Variants: Record<ChatContainerVariant, string> = {
-  demo: "relative flex min-h-0 flex-col overflow-hidden rounded-xl bg-surface text-text backdrop-blur",
-  main: "relative mx-auto flex min-h-0 flex-col overflow-hidden rounded-xl bg-surface-strong p-3 text-text sm:p-5 backdrop-blur",
+const containerStyles = {
+  root: "relative flex h-full min-h-0 min-w-0 w-full   flex-col overflow-hidden  text-text",
+  spacing: "p-1 sm:p-3 lg:p-5",
+  messages:
+    "min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide px-1 py-2 sm:px-2 sm:py-3",
+  starters: "shrink-0 border-t border-border pt-2 sm:pt-3",
+  composer: "min-w-0 shrink-0 pt-2 lg:pt-3",
 };
 
-const SizeClasses: Record<Sizes, string> = {
-  sm: " h-full w-full",
-  med: "h-full w-full",
-  lg: "h-full w-full",
+const variantStyles: Record<ChatContainerVariant, string> = {
+  main: "bg-inherit",
+  demo: "rounded-xl bg-surface",
 };
 
 interface ChatContainerProps {
@@ -21,7 +23,7 @@ interface ChatContainerProps {
   starters?: React.ReactNode;
   children: React.ReactNode;
   variant?: ChatContainerVariant;
-  size?: Sizes;
+  className?: string;
   scrollTrigger?: number;
   bordered?: boolean;
 }
@@ -31,7 +33,7 @@ export default function ChatContainer({
   starters,
   children,
   variant = "main",
-  size = "med",
+  className,
   scrollTrigger = 0,
   bordered = true,
 }: ChatContainerProps) {
@@ -45,20 +47,29 @@ export default function ChatContainer({
   }, [scrollTrigger]);
 
   return (
-    <section
+    <div
       className={clsx(
-        Variants[variant],
-        SizeClasses[size],
-        bordered ? "border border-border shadow-sm" : "border-0 shadow-none",
+        containerStyles.root,
+        containerStyles.spacing,
+        variantStyles[variant],
+        bordered && "border border-border shadow-sm",
+        className,
       )}
     >
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain scrollbar-hide px-1 py-3 sm:px-2">
+      <div id="message-container" className={containerStyles.messages}>
         {children}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} aria-hidden="true" />
       </div>
 
-      {starters ? <div className="shrink-0 border-t border-border pt-3">{starters}</div> : null}
-      <div className="mt-3 shrink-0 border-t border-border pt-3">{input}</div>
-    </section>
+      {starters ? (
+        <div id="conversation-starters" className={containerStyles.starters}>
+          {starters}
+        </div>
+      ) : null}
+
+      <div id="input-container" className={containerStyles.composer}>
+        {input}
+      </div>
+    </div>
   );
 }

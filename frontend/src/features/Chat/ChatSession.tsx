@@ -103,11 +103,10 @@ export default function ChatSession() {
   );
 
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
+    <section className="flex flex-col h-full py-2 min-h-0 min-w-0 bg-inherit">
       <ChatSessionHeader thread={activeThread} />
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 min-w-0 flex-1">
         <ChatContainer
-          size="lg"
           bordered={false}
           scrollTrigger={stream.messages.length}
           starters={null}
@@ -124,6 +123,7 @@ export default function ChatSession() {
           </MathJax>
         </ChatContainer>
       </div>
+  
     </section>
   );
 }

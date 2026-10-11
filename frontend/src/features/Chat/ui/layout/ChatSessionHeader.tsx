@@ -56,9 +56,9 @@ function HeaderContent({ thread }: HeaderProps) {
   }
 
   return (
-    <header className="shrink-0 border-b border-border bg-surface px-4 py-2 text-text sm:px-6">
+    <header className="shrink-0 bg-inherit px-2 py-1 text-text sm:px-3 lg:px-6 lg:py-2">
       <div className="mx-auto max-w-5xl">
-        <p className="mb-1 text-xs font-medium uppercase tracking-wider text-text-soft">
+        <p className="mb-1 hidden text-xs font-medium uppercase tracking-wider text-text-soft lg:block">
           Conversation
         </p>
         {isEditing ? (
@@ -124,7 +124,7 @@ function HeaderContent({ thread }: HeaderProps) {
           <div className="flex min-w-0 items-center justify-between gap-3">
             <h1
               title={displayTitle}
-              className="min-w-0 truncate text-base font-semibold sm:text-lg"
+              className="min-w-0 truncate text-sm font-semibold md:text-base lg:text-lg"
             >
               {displayTitle}
             </h1>
@@ -146,7 +146,7 @@ function HeaderContent({ thread }: HeaderProps) {
                 aria-hidden="true"
                 className="h-5 w-5"
               />
-              <span className="ml-2 hidden sm:inline">Rename</span>
+              <span className="ml-2 hidden lg:inline">Rename</span>
             </button>
           </div>
         )}

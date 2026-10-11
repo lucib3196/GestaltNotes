@@ -7,10 +7,18 @@ import ThreadList from "./ThreadList";
 import ChatSidebarToolbar from "./ChatSidebarToolbar";
 
 const containerStyle =
-  "flex h-full min-h-0 shrink-0 flex-col gap-3 overflow-hidden rounded-xl border border-border shadow-sm";
+  "flex h-full min-h-0 shrink-0 flex-col gap-2 overflow-hidden border-0 bg-inherit shadow-none sm:gap-3 ";
+
+const collapsedStyle = "w-10 items-center p-1 sm:w-14 md:w-12  sm:p-2 ";
+
+const expandedStyle = "w-60 p-2 sm:w-72 sm:p-3 ";
 
 export default function ChatSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(max-width: 1023px)").matches
+      : false,
+  );
   const { threads, loading, error, refetch } = useGetThreads();
   const selectedThread = useChatStore((s) => s.activeThreadId);
   const removeThread = useChatStore((s) => s.removeThread);
@@ -21,9 +29,7 @@ export default function ChatSidebar() {
       aria-label="Chat sidebar"
       className={clsx(
         containerStyle,
-        collapsed
-          ? "w-14 items-center bg-surface p-2"
-          : "w-72 bg-surface-strong p-3",
+        collapsed ? collapsedStyle : expandedStyle,
       )}
     >
       <div className="flex w-full items-center justify-between">
