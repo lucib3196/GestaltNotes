@@ -1,18 +1,18 @@
 """Dynamic agent configured with runtime model routing."""
 
+from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langchain_astradb import AstraDBVectorStore
-from agent.config.models import GeminiModel, ModelProvider
-from agent.middlewear.model_routing import ConfigSchema, ModelRoutingMiddleware
-from agent.tools.flashcard_tool import create_flashcards
-from agent.tools.mc_tool import create_multiple_choice_questions
-from agent.tools.lecture_retriever import build_retrieval_tool
-from dotenv import load_dotenv
-from agent.vectorstores.loader import vector_store
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+from agent.config.models import GeminiModel, ModelProvider
 from agent.core.setting import get_settings
+from agent.middlewear.model_routing import ConfigSchema, ModelRoutingMiddleware
 from agent.middlewear.title_generator import ThreadTitleMiddleware
+from agent.tools.flashcard_tool import create_flashcards
+from agent.tools.lecture_retriever import build_retrieval_tool
+from agent.tools.mc_tool import create_multiple_choice_questions
 
 load_dotenv()
 settings = get_settings()

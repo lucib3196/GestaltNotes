@@ -1,10 +1,10 @@
+from typing import List, Literal
+
 from langchain_core.documents import Document
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.tools import BaseTool, tool
 from langchain_core.vectorstores import VectorStore
 from pydantic import BaseModel
-from typing import Literal, List
-
-from langchain_core.language_models.chat_models import BaseChatModel
 
 
 class ResourceArtifact(BaseModel):

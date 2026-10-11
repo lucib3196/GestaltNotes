@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal, Optional
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Literal
+
 from dotenv import load_dotenv
-from pydantic import Field, model_validator
-from pydantic_settings import BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Load .env variables before settings are instantiated.
 
@@ -32,7 +31,7 @@ class Settings(BaseSettings):
     model: str = "gemini-2.5-flash"
     embedding_model: str = "gemini-embedding-001"
     mode: ENV = Field(alias="ENV", default="dev")
-    prompt_source: Optional[Literal["local", "production"]] = None
+    prompt_source: Literal["local", "production"] | None = None
 
     # External service keys
     GOOGLE_API_KEY: str | None = None
@@ -73,4 +72,4 @@ def get_settings_pretty_print() -> str:
 
 
 if __name__ == "__main__":
-    print(get_settings_pretty_print())
+    pass
