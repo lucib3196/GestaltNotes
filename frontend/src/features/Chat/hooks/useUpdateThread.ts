@@ -12,11 +12,12 @@ export function useUpdateThread() {
   const [error, setError] = useState<string | null>(null);
 
   const updateThread = useCallback(
-    async (threadId: string, update: ThreadUpdate) => {
+    async (threadId: string|null, update: ThreadUpdate) => {
       if (!user) {
         setError("User not authenticated");
         return;
       }
+      if (!threadId) return;
 
       try {
         setLoading(true);

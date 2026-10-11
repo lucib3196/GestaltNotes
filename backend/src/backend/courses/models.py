@@ -6,6 +6,7 @@ from backend.shared import Status
 from sqlalchemy import Column, ForeignKey, UniqueConstraint, Index
 from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import Enum as SAEnum
 if TYPE_CHECKING:
     from backend.accounts.models import User
     from backend.storage.repo.schema import File
@@ -94,7 +95,12 @@ class CourseNote(SQLModel, table=True):
         sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
     )
     title: str
-    resource_type: CourseContentType
+    resource_type: CourseContentType = Field(
+        sa_column=Column(
+            SAEnum(CourseContentType, name="course_content_type"),
+            nullable=False,
+        )
+    )
     status: Status = Status.DRAFT
 
     course: "Course" = Relationship(back_populates="notes")

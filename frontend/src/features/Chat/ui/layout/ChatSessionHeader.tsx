@@ -36,7 +36,10 @@ function HeaderContent({ thread }: HeaderProps) {
     submitting.current = true;
     setSaveError(null);
     try {
-      const updated = await updateThread(thread.id, { title: nextTitle });
+      const updated = await updateThread(thread.id, {
+        title: nextTitle,
+        title_source: "manual",
+      });
       if (!updated) {
         setSaveError("Please sign in to rename this chat.");
         return;

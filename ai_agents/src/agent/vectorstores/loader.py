@@ -2,6 +2,7 @@ from langchain_astradb import AstraDBVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from agent.core.setting import get_settings
 from dotenv import load_dotenv
+
 load_dotenv()
 settings = get_settings()
 embeddings = GoogleGenerativeAIEmbeddings(model=settings.embedding_model)

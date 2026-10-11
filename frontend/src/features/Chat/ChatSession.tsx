@@ -9,11 +9,20 @@ import { prepareMessage } from "./utils/messageSending";
 import { useCreateThread } from "./hooks/useCreateThread";
 import MessageList from "./ui/messages/MessageList";
 import { useEffect } from "react";
+import type { Message } from "@langchain/langgraph-sdk";
+import { useUpdateThread } from "./hooks/useUpdateThread";
+type ChatAgentState = {
+  messages: Message[];
+  thread_title?: string;
+};
+
 export default function ChatSession() {
   const activeThreadId = useChatStore((s) => s.activeThreadId);
+  const threadsById = useChatStore((s) => s.threadsById);
   const activeThread = useChatStore((s) =>
     activeThreadId ? (s.threadsById[activeThreadId] ?? null) : null,
   );
+  const { updateThread } = useUpdateThread();
   const assistantId = useChatStore((s) => s.assistant.id);
   const draftText = useChatStore((s) => s.draftText);
   const setDraftText = useChatStore((s) => s.setDraftText);
@@ -23,7 +32,7 @@ export default function ChatSession() {
   // Hooks
   const { createThread } = useCreateThread();
 
-  const stream = useStream({
+  const stream = useStream<ChatAgentState>({
     threadId: activeThreadId,
     apiUrl: streamURL,
     assistantId: assistantId,
@@ -33,6 +42,24 @@ export default function ChatSession() {
       upsertThread(thread);
       setActiveThread(thread.id);
     },
+    onFinish: (state, run) => {
+      const title = state.values.thread_title?.trim();
+      const threadId = run?.thread_id;
+      if (!threadId) return;
+      const thread = threadsById[threadId];
+
+      if (!title || !thread || thread.title_source !== "default") return;
+
+      void updateThread(threadId, { title, title_source: "generated" })
+        .then((updatedThread) => {
+          if (updatedThread) {
+            upsertThread(updatedThread);
+          }
+        })
+        .catch((error) => {
+          console.error("Could not save the conversation title", error);
+        });
+    },
   });
 
   const handleSubmit = async (text: string, images?: string[]) => {
@@ -41,7 +68,7 @@ export default function ChatSession() {
     stream.submit({
       messages: [
         {
-          role: "human",
+          type: "human",
           content,
         },
       ],
@@ -54,11 +81,10 @@ export default function ChatSession() {
       stream.submit({
         messages: [
           {
-            role: "human",
+            type: "human",
             content,
             additional_kwargs: {
               internal: true,
-              purpose: "quiz_review",
             },
           },
         ],
@@ -68,26 +94,10 @@ export default function ChatSession() {
     void handleExternalMessage();
   }, [draftText]);
 
-  // useEffect(() => {
-  //   stream.messages.forEach((msg) => {
-  //     if (msg.type === "tool") {
-  //       appendToolMessage(msg as ToolMessage);
-  //     }
-  //   });
-  // }, [stream.messages, appendToolMessage, currentThread?.id]);
-
-  // useEffect(() => {
-  //   if (!externalMessage) return;
-  //   handleSubmit(externalMessage);
-  //   setExternalMessage(null);
-  //   // handleSubmit(externalMessage);
-  // }, [externalMessage]);
-
   const visibleMessages = stream.messages.filter(
     (message) =>
       !(
-        message.type === "human" &&
-        message.additional_kwargs?.internal === true
+        message.type === "human" && message.additional_kwargs?.internal === true
       ),
   );
 

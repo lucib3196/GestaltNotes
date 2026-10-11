@@ -2,6 +2,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from backend.chat.model import ThreadTitleSource
+
 
 class ThreadCreate(BaseModel):
     thread_id: UUID | str | None = None
@@ -12,6 +14,7 @@ class ThreadCreate(BaseModel):
 
 class ThreadUpdate(BaseModel):
     title: str | None = None
+    title_source: ThreadTitleSource | None = None
 
 
 class MessageCreate(BaseModel):

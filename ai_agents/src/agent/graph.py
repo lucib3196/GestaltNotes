@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from agent.vectorstores.loader import vector_store
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from agent.core.setting import get_settings
+from agent.middlewear.title_generator import ThreadTitleMiddleware
 
 load_dotenv()
 settings = get_settings()
@@ -33,7 +34,7 @@ graph = create_agent(
         "for flashcards. Do not repeat the generated content in ordinary chat text."
         "You also have access to retrieve lecture content"
     ),
-    middleware=[ModelRoutingMiddleware()],  # type: ignore
+    middleware=[ModelRoutingMiddleware(), ThreadTitleMiddleware(model=model)],  # type: ignore
     context_schema=ConfigSchema,
     tools=[
         create_multiple_choice_questions,
@@ -45,7 +46,7 @@ graph = create_agent(
                 api_endpoint=settings.ASTRA_DB_API_ENDPOINT,
                 token=settings.ASTRA_DB_APPLICATION_TOKEN,
             ),
-            summary_model= model,
+            summary_model=model,
             name="retrieve_me118_notes",
             description="Use this to return documents from the course me118",
         ),

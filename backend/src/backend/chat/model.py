@@ -1,9 +1,17 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, Enum as SAEnum, ForeignKey
 from sqlmodel import Field, Relationship, SQLModel
+
+
+class ThreadTitleSource(StrEnum):
+    DEFAULT = "default"
+    GENERATED = "generated"
+    MANUAL = "manual"
+
 
 if TYPE_CHECKING:
     pass
@@ -16,6 +24,14 @@ class Thread(SQLModel, table=True):
     )
     title: str | None = None
     agent: str | None = None
+    title_source: ThreadTitleSource | None = Field(
+        default=ThreadTitleSource.DEFAULT,
+        sa_column=Column(
+            SAEnum(ThreadTitleSource, name="thread_title_source"),
+            default=ThreadTitleSource.DEFAULT,
+            nullable=True,
+        ),
+    )
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
