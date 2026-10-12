@@ -7,6 +7,8 @@ import { legacySourceDocumentsSchema } from "./schemas/legacySources";
 import { QuestionsPractice, multipleChoiceSetSchema } from "./MCQ";
 import { WebSearchSources } from "./WebSearch/WebSearchSources";
 import { webSearchSourcesSchema } from "./WebSearch/schema";
+import { MermaidDiagram } from "./MermaidDiagram/MermaidDiagram";
+import { flowDiagramSchema } from "./MermaidDiagram/schema";
 
 export type ToolEntry = {
   render: ToolRenderer;
@@ -52,6 +54,17 @@ function createToolEntry(render: ToolRenderer, compact = false): ToolEntry {
   return { render, compact };
 }
 
+const renderMermaidDiagram: ToolRenderer = (data) => {
+  const result = flowDiagramSchema.safeParse(data);
+  return result.success ? (
+    <MermaidDiagram data={result.data} />
+  ) : (
+    <p role="alert">The diagram data could not be displayed.</p>
+  );
+};
+
+const mermaidEntry = createToolEntry(renderMermaidDiagram);
+
 const questionsEntry = createToolEntry(renderQuestions);
 const flashcardsEntry = createToolEntry(renderFlashcards);
 const legacySourcesEntry = createToolEntry(renderLegacySources);
@@ -59,6 +72,9 @@ const webSearchEntry = createToolEntry(renderWebSearchSources, true);
 
 // Artifact kinds take precedence; tool names remain supported as aliases.
 export const toolCallRegistry: Readonly<Record<string, ToolEntry>> = {
+  mermaid: mermaidEntry,
+  create_mermaid_diagram: mermaidEntry,
+  review_quiz_understanding: mermaidEntry,
   web_search: webSearchEntry,
   search: webSearchEntry,
   "multiple-choice-question": questionsEntry,

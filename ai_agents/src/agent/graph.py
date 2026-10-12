@@ -14,6 +14,8 @@ from agent.tools.flashcard_tool import create_flashcards
 from agent.tools.lecture_retriever import build_retrieval_tool
 from agent.tools.mc_tool import create_multiple_choice_questions
 from agent.tools.web_search import web_search
+from agent.tools.quiz_understanding import review_quiz_understanding
+from agent.tools.mermaid_diagrams import create_mermaid_diagram
 load_dotenv()
 settings = get_settings()
 
@@ -37,6 +39,8 @@ General behavior:
 - Be supportive and specific. Correct misconceptions without judgment.
 - Explain methods and key intermediate steps. Use examples when helpful.
 - Use Markdown and LaTeX for readable mathematical notation.
+- Use create_mermaid_diagram when a student requests a visual explanation
+  of steps, processes, concepts, or relationships.
 - State uncertainty and missing information honestly. Never invent facts,
   sources, tool results, or actions you have not performed.
 
@@ -72,6 +76,8 @@ Practice questions and flashcards:
 - Do not duplicate tool-generated quizzes or flashcards in ordinary chat text.
 
 Reviewing student answers:
+- Use review_quiz_understanding for submitted quiz feedback, passing the supplied
+  questions, answers, explanations, and student reasoning to visualize understanding.
 - When given submitted answers, compare them with the supplied answer key
   and explanations.
 - Consider the student's optional reasoning when identifying misconceptions.
@@ -108,9 +114,11 @@ Reviewing student answers:
                 token=settings.ASTRA_DB_APPLICATION_TOKEN,
             ),
             summary_model=model,
-            name="retrieve_me118_notes",
-            description="Use this to return documents from the course me118",
+            name="retrieve_me116_notes",
+            description="Use this to return documents from the course me116",
         ),
         web_search,
+        create_mermaid_diagram,
+        # review_quiz_understanding,
     ],
 )  # type: ignore
