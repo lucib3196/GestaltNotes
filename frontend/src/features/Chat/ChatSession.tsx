@@ -86,17 +86,20 @@ export default function ChatSession() {
     const handleExternalMessage = async () => {
       if (!draftText) return;
       const content = await prepareMessage(draftText);
-      stream.submit({
-        messages: [
-          {
-            type: "human",
-            content,
-            additional_kwargs: {
-              internal: true,
+      stream.submit(
+        {
+          messages: [
+            {
+              type: "human",
+              content,
+              additional_kwargs: {
+                internal: true,
+              },
             },
-          },
-        ],
-      }, { context: config });
+          ],
+        },
+        { context: config },
+      );
       setDraftText("");
     };
     void handleExternalMessage();
@@ -110,7 +113,7 @@ export default function ChatSession() {
   );
 
   return (
-    <section className="flex flex-col h-full py-2 min-h-0 min-w-0 bg-inherit">
+    <>
       <ChatSessionHeader thread={activeThread} />
       <div className="min-h-0 min-w-0 flex-1">
         <ChatContainer
@@ -131,6 +134,6 @@ export default function ChatSession() {
           </MathJax>
         </ChatContainer>
       </div>
-    </section>
+</>
   );
 }
