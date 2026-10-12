@@ -8,7 +8,7 @@ import { QuestionsPractice, multipleChoiceSetSchema } from "./MCQ";
 import { WebSearchSources } from "./WebSearch/WebSearchSources";
 import { webSearchSourcesSchema } from "./WebSearch/schema";
 import { MermaidDiagram } from "./MermaidDiagram/MermaidDiagram";
-import { flowDiagramSchema } from "./MermaidDiagram/schema";
+import { flowDiagramDataSchema } from "./MermaidDiagram/schema";
 
 export type ToolEntry = {
   render: ToolRenderer;
@@ -55,7 +55,7 @@ function createToolEntry(render: ToolRenderer, compact = false): ToolEntry {
 }
 
 const renderMermaidDiagram: ToolRenderer = (data) => {
-  const result = flowDiagramSchema.safeParse(data);
+  const result = flowDiagramDataSchema.safeParse(data);
   return result.success ? (
     <MermaidDiagram data={result.data} />
   ) : (

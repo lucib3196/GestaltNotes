@@ -105,12 +105,26 @@ export default function ChatSession() {
     void handleExternalMessage();
   }, [draftText]);
 
-  const visibleMessages = stream.messages.filter(
-    (message) =>
-      !(
-        message.type === "human" && message.additional_kwargs?.internal === true
-      ),
-  );
+  const visibleMessages = stream.messages.filter((message) => {
+    if (
+      message.type === "human" &&
+      message.additional_kwargs?.internal === true
+    ) {
+      return false;
+    }
+
+    if (message.type === "ai") {
+      const metadata =
+        stream.getMessagesMetadata(message)?.streamMetadata;
+
+      // Internal model calls made while a tool is running.
+      if (metadata?.langgraph_node === "tools") {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   return (
     <>

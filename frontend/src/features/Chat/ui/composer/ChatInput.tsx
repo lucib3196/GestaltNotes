@@ -17,24 +17,24 @@ const VariantClasses: Record<
   }
 > = {
   default: {
-    root: "rounded-xl border border-border bg-surface p-2 lg:p-3 shadow-sm transition-colors focus-within:border-accent/50",
-    preview: "mb-2 w-full rounded-xl border border-border bg-surface-muted p-2",
-    toolbar: "mt-1 flex w-full flex-wrap items-center gap-2 lg:mt-3",
+    root: "rounded-xl border border-border bg-surface p-2 shadow-sm transition-colors focus-within:border-accent/50 sm:p-3",
+    preview: "mb-3 w-full rounded-xl border border-border bg-surface-muted p-3",
+    toolbar: "mt-1 flex w-full flex-wrap items-center gap-2",
     newButton:
       "rounded-md border border-border px-3 py-2 text-sm text-text-muted transition-colors duration-base ease-base hover:bg-surface-muted hover:text-text",
     input:
-      "w-full border-0 bg-transparent px-1 py-1 lg:py-2 text-sm leading-relaxed text-text outline-none placeholder:text-text-soft disabled:cursor-not-allowed disabled:opacity-60",
+      "w-full border-0 bg-transparent px-1 py-1 text-base leading-relaxed text-text outline-none placeholder:text-text-soft disabled:cursor-not-allowed disabled:opacity-60",
     sendButton:
       "rounded-md bg-accent px-3.5 py-2.5 text-sm font-semibold text-white dark:text-code transition-all duration-base ease-base hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
   },
   subtle: {
-    root: "rounded-xl border border-border bg-surface-muted p-2 lg:p-3 transition-colors focus-within:border-accent/50",
-    preview: "mb-2 w-full rounded-xl border border-border bg-surface p-2",
-    toolbar: "mt-1 flex w-full flex-wrap items-center gap-2 lg:mt-3",
+    root: "rounded-xl border border-border bg-surface-muted p-2 transition-colors focus-within:border-accent/50 sm:p-3",
+    preview: "mb-3 w-full rounded-xl border border-border bg-surface p-3",
+    toolbar: "mt-1 flex w-full flex-wrap items-center gap-2",
     newButton:
       "rounded-md border border-border px-3 py-2 text-sm text-text-muted transition-colors duration-base ease-base hover:bg-surface hover:text-text",
     input:
-      "w-full border-0 bg-transparent px-1 py-1 lg:py-2 text-sm leading-relaxed text-text outline-none placeholder:text-text-soft disabled:cursor-not-allowed disabled:opacity-60",
+      "w-full border-0 bg-transparent px-1 py-1 text-base leading-relaxed text-text outline-none placeholder:text-text-soft disabled:cursor-not-allowed disabled:opacity-60",
     sendButton:
       "rounded-md bg-accent px-3.5 py-2.5 text-sm font-semibold text-white dark:text-code transition-all duration-base ease-base hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50",
   },
@@ -124,13 +124,13 @@ export default function ChatInput({
         ref={textareaRef}
         className={clsx(
           styles.input,
-          "h-10 min-h-10 max-h-[min(10rem,25dvh)] resize-none overflow-y-auto lg:h-auto lg:max-h-55",
+          "h-10 min-h-10 max-h-[min(10rem,25dvh)] resize-none overflow-y-auto lg:max-h-55",
         )}
         aria-label="Message"
         placeholder="Ask a question or share an idea…"
         disabled={disabled}
         value={message}
-        rows={2}
+        rows={1}
         onChange={(e) => onMessageChange(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -151,16 +151,13 @@ export default function ChatInput({
             {toolbar}
           </div>
         )}
-        <span className="ml-auto hidden text-xs text-text-soft lg:block">
-          Shift + Enter for a new line
-        </span>
         <button
           type="button"
           onClick={submit}
           disabled={disabled || !message.trim()}
           className={clsx(
             styles.sendButton,
-            "ml-auto min-w-22 rounded-lg lg:ml-0 px-4 py-2 text-sm font-semibold transition-all",
+            "ml-auto min-w-22 rounded-lg px-4 py-2 text-sm font-semibold transition-all",
             "enabled:hover:-translate-y-0.5 enabled:hover:shadow-sm",
             "disabled:cursor-not-allowed disabled:opacity-50",
           )}

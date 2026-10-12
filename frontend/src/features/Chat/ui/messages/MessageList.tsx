@@ -4,7 +4,7 @@ import MessageBubble from "./MessageBubble";
 export default function MessageList({ messages }: { messages: Message[] }) {
   return (
     <div
-      className="flex min-w-0 flex-col gap-4"
+      className="mx-auto flex w-full max-w-4xl min-w-0 flex-col gap-6 sm:gap-8"
       role="log"
       aria-label="Conversation"
       id="message-list"

@@ -56,8 +56,8 @@ function HeaderContent({ thread }: HeaderProps) {
   }
 
   return (
-    <header className="shrink-0 bg-inherit px-2 py-1 text-text sm:px-3 lg:px-6 lg:py-2">
-      <div className="mx-auto max-w-5xl">
+    <header className="shrink-0 border-b border-border bg-inherit px-3 py-1 text-text">
+      <div className="mx-auto max-w-4xl">
         <p className="mb-1 hidden text-xs font-medium uppercase tracking-wider text-text-soft lg:block">
           Conversation
         </p>

@@ -7,11 +7,11 @@ import ThreadList from "./ThreadList";
 import ChatSidebarToolbar from "./ChatSidebarToolbar";
 
 const containerStyle =
-  "flex h-full min-h-0 shrink-0 flex-col gap-2 overflow-hidden border-0 bg-inherit shadow-none sm:gap-3 ";
+  "flex h-full min-h-0 shrink-0 flex-col gap-4 overflow-hidden border-r border-border bg-inherit shadow-none";
 
-const collapsedStyle = "w-10 items-center p-1 sm:w-14 md:w-12  sm:p-2 ";
+const collapsedStyle = "w-12 items-center px-1 py-4 sm:w-14 sm:px-2";
 
-const expandedStyle = "w-60 p-2 sm:w-72 sm:p-3 ";
+const expandedStyle = "w-60 px-3 py-4 sm:w-64 sm:px-4";
 
 export default function ChatSidebar() {
   const [collapsed, setCollapsed] = useState(() =>

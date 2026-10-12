@@ -5,7 +5,7 @@ import { RenderToolCall } from "../../../ToolCalls/RenderToolCalls";
 
 import Markdown from "../../../../components/Markdown/MarkdownRenderer";
 const ChatBubbleBase =
-  "min-w-0 max-w-full rounded-lg px-4 py-3 text-sm leading-relaxed sm:max-w-[90%]";
+  "min-w-0 max-w-full rounded-lg px-4 py-4 text-sm leading-relaxed sm:max-w-[90%] sm:px-5 sm:text-base";
 
 const ChatBubbleStyles: Record<MessageType, string> = {
   ai: `${ChatBubbleBase} self-start border border-border bg-surface text-text`,
@@ -15,6 +15,7 @@ const ChatBubbleStyles: Record<MessageType, string> = {
 };
 export default function MessageBubble({ message }: { message: Message }) {
   if (message.type === "tool") return <RenderToolCall message={message} />;
+  if (Array.isArray(message.content) && !message.content.length) return null
   return (
     <div className={ChatBubbleStyles[message.type]}>
       <Markdown>{renderContent(message.content)}</Markdown>

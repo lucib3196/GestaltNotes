@@ -5,12 +5,12 @@ import { useEffect, useRef } from "react";
 type ChatContainerVariant = "demo" | "main";
 
 const containerStyles = {
-  root: "relative flex h-full min-h-0 min-w-0 w-full  flex-col overflow-hidden  text-text",
-  spacing: "p-1 sm:p-3 lg:p-5",
+  root: "relative flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden text-text",
+  spacing: "px-3 pb-3 sm:px-6 sm:pb-5 lg:px-8",
   messages:
-    "min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide px-1 py-2 sm:px-2 sm:py-3",
-  starters: "shrink-0 border-t border-border pt-2 sm:pt-3",
-  composer: "min-w-0 shrink-0 pt-2 lg:pt-3 w-full md:max-w-3/4 mt-4 mx-auto max-h-1/4 w-full",
+    "min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide py-5 sm:py-8",
+  starters: "mx-auto w-full max-w-4xl shrink-0 border-t border-border pt-4",
+  composer: "mx-auto w-full max-w-4xl  min-w-0 shrink-0 pt-4 sm:pt-5",
 };
 
 const variantStyles: Record<ChatContainerVariant, string> = {

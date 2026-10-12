@@ -43,12 +43,14 @@ export default function QuestionCard({
                 onChange={() => onAnswerChange(optionIndex)}
                 className="mt-1 h-4 w-4 shrink-0 accent-accent"
               />
-              <span className="min-w-0 flex-1">
-                <span className="mr-2 font-semibold">
+              <div className="flex min-w-0 flex-1 items-start gap-2">
+                <span className="shrink-0 font-semibold">
                   {String.fromCharCode(65 + optionIndex)}.
                 </span>
-                {option}
-              </span>
+                <div className="min-w-0 flex-1">
+                  <Markdown>{option}</Markdown>
+                </div>
+              </div>
             </label>
           ))}
         </div>

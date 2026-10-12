@@ -49,7 +49,7 @@ export function ChatAttachmentPicker({
         aria-label="Attach files"
         title="Attach files"
         className={clsx(
-          "group inline-flex h-10 w-10 items-center justify-center rounded-md",
+          "group inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md sm:h-10 sm:w-10",
           "border border-border bg-surface text-text-muted shadow-sm",
           "transition-all duration-base ease-base",
           "hover:border-border-strong hover:bg-surface-muted hover:text-text",
@@ -58,8 +58,7 @@ export function ChatAttachmentPicker({
         )}
       >
         <CiCirclePlus
-          size={22}
-          className="transition-transform duration-base ease-base group-hover:scale-105"
+          className="h-5 w-5 transition-transform duration-base ease-base group-hover:scale-105 sm:h-[22px] sm:w-[22px]"
         />
       </label>
     </>

@@ -83,7 +83,7 @@ export default function ChatPage() {
     <section id="chat-page" className="flex min-h-0 flex-1 overflow-hidden">
       <ChatProvider>
         <ChatSidebar />
-        <div className="flex flex-col h-full py-2 min-h-0 min-w-0 max-w-3/4 mx-auto gap-2">
+        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
           <ChatSession />
         </div>
       </ChatProvider>

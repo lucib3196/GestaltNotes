@@ -12,6 +12,11 @@ export function RenderToolCall({ message }: { message: Message }) {
   const entry = resolveToolComponent(message);
   const toolCompact = entry?.compact;
   const toolRender = entry && entry.render(data);
+
+
+  if (message.status !== "success") {
+    return <div>Loading</div>;
+  }
   return (
     <div className={`flex min-w-0 flex-col`}>
       {message.content.length > 0 && (

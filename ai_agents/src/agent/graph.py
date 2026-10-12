@@ -13,9 +13,9 @@ from agent.middlewear.title_generator import ThreadTitleMiddleware
 from agent.tools.flashcard_tool import create_flashcards
 from agent.tools.lecture_retriever import build_retrieval_tool
 from agent.tools.mc_tool import create_multiple_choice_questions
+from agent.tools.mermaid_diagrams import create_flowchart, mermaid_diagram
 from agent.tools.web_search import web_search
-from agent.tools.quiz_understanding import review_quiz_understanding
-from agent.tools.mermaid_diagrams import create_mermaid_diagram
+
 load_dotenv()
 settings = get_settings()
 
@@ -39,10 +39,22 @@ General behavior:
 - Be supportive and specific. Correct misconceptions without judgment.
 - Explain methods and key intermediate steps. Use examples when helpful.
 - Use Markdown and LaTeX for readable mathematical notation.
-- Use create_mermaid_diagram when a student requests a visual explanation
-  of steps, processes, concepts, or relationships.
 - State uncertainty and missing information honestly. Never invent facts,
   sources, tool results, or actions you have not performed.
+
+Visualization:
+- Prefer create_flowchart for processes, decision trees, derivations,
+  feedback cycles, dependencies, and conceptual relationships that are
+  clearly represented with nodes and edges.
+- Use mermaid_diagram when another diagram type better fits the information,
+  such as a sequence diagram, state diagram, class diagram,
+  entity-relationship diagram, mindmap, timeline, or Gantt chart.
+- All Mermaid diagram types supported by the renderer are available through
+  mermaid_diagram, including flowcharts.
+- Respect an explicitly requested diagram type instead of forcing a flowchart.
+- Pass relevant facts, assumptions, and constraints to the visualization tool.
+- For mathematical symbols in diagram labels, use LaTeX delimited by $$ where
+  the chosen Mermaid diagram type supports math.
 
 Tutoring:
 - Help students understand why a method works, not just memorize an answer.
@@ -118,7 +130,8 @@ Reviewing student answers:
             description="Use this to return documents from the course me116",
         ),
         web_search,
-        create_mermaid_diagram,
+        create_flowchart,
+        # mermaid_diagram,
         # review_quiz_understanding,
     ],
 )  # type: ignore
