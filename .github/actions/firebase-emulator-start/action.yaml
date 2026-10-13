@@ -57,4 +57,4 @@ runs:
         EOF
     - name: Start firebase emulator
       shell: bash
-      run: firebase emulators:start --project demo-test sleep 10
+      run: firebase emulators:start --project demo-test > /tmp/firebase-emulators.log 2>&1 &\ sleep 10
