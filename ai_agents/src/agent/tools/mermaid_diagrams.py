@@ -6,7 +6,8 @@ from langchain.tools import ToolRuntime, tool
 from pydantic import Field
 
 from agent.middlewear.model_routing import ConfigSchema, get_model
-from agent.models.flow_diagram import FlowDiagram, MermaidArtifact, MermaidData
+from agent.models.flow_diagram import  MermaidArtifact, MermaidData
+from gestalt_models.
 from agent.tools.diagram_summary import summarize_diagram
 
 FLOW_DIAGRAM_PROMPT = """

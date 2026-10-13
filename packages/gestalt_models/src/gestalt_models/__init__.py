@@ -2,14 +2,16 @@
 
 from .flashcards import Flashcard, FlashcardSet
 from .multiple_choice import MultipleChoiceQuestion, MultipleChoiceQuestionSet
+from .flow_diagram import DiagramNode, DiagramEdge, FlowDiagram
 
 __all__ = [
     "Flashcard",
     "FlashcardSet",
     "MultipleChoiceQuestion",
     "MultipleChoiceQuestionSet",
+    "DiagramNode",
+    "DiagramEdge",
+    "FlowDiagram",
 ]
 
 
-def main() -> None:
-    print("Hello from gestalt-models!")
