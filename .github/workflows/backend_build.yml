@@ -7,6 +7,7 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/backend_build.yml"
+      - "packages/object_store/**"
     branches: ["main", "dev"]
   pull_request:
     paths:
