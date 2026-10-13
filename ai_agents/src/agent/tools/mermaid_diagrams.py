@@ -7,7 +7,7 @@ from pydantic import Field
 
 from agent.middlewear.model_routing import ConfigSchema, get_model
 from agent.models.flow_diagram import  MermaidArtifact, MermaidData
-from gestalt_models.
+from gestalt_models import FlowDiagram
 from agent.tools.diagram_summary import summarize_diagram
 
 FLOW_DIAGRAM_PROMPT = """
