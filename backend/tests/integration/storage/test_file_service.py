@@ -3,7 +3,7 @@ from uuid import uuid4
 import pytest
 
 from backend.accounts.models import User
-from backend.storage.blob.exceptions import BlobNotFoundError
+from object_store.exceptions import BlobNotFoundError
 from backend.storage.exceptions import FileNotFoundError
 from backend.storage.services.file_service import FileService
 

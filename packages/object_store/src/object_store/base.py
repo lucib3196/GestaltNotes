@@ -1,6 +1,6 @@
 from typing import BinaryIO, Protocol
 
-from backend.storage.blob.schema import BlobMetadata
+from .schema import BlobMetadata
 
 BlobUploadData = BinaryIO | bytes | str
 

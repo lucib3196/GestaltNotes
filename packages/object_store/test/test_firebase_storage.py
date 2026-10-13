@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from backend.storage.exceptions import BlobDirectoryNotFoundError, BlobNotFoundError
+from object_store.exceptions import BlobDirectoryNotFoundError, BlobNotFoundError
 
 
 def storage_key(name: str) -> str:

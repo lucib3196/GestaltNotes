@@ -3,8 +3,8 @@ from urllib.parse import urlparse, urlunparse
 from firebase_admin import storage
 from google.cloud.storage.blob import Blob
 
-from backend.storage.blob.base import BlobStorage, BlobUploadData
-from backend.storage.blob.exceptions import (
+from .base import BlobStorage, BlobUploadData
+from .exceptions import (
     BlobDirectoryNotFoundError,
     BlobNotFoundError,
     BlobStorageDeleteError,
@@ -14,8 +14,7 @@ from backend.storage.blob.exceptions import (
     BlobStorageUploadError,
     InvalidBlobKeyError,
 )
-from backend.storage.blob.schema import BlobMetadata
-from backend.core.logger import logger
+from .schema import BlobMetadata
 
 
 class FirebaseBlobStorage(BlobStorage):
@@ -50,19 +49,15 @@ class FirebaseBlobStorage(BlobStorage):
             if blob is None:
                 raise BlobNotFoundError(blob_key)
 
-            # logger.debug(
-            #     "Client API base URL: %s",
-            #     self._bucket.client._connection.API_BASE_URL,
-            # )
-            # logger.debug("Blob media link: %s", blob.media_link)
-
             self._rewrite_emulator_media_link(blob)
             data = blob.download_as_bytes(timeout=60)
             return data
         except BlobNotFoundError:
             raise
         except Exception as e:
-            raise BlobStorageReadError(f"Failed to read blob '{blob_key}' Error:{e}") from e
+            raise BlobStorageReadError(
+                f"Failed to read blob '{blob_key}' Error:{e}"
+            ) from e
 
     async def download(self, key: str) -> bytes:
         """Download a Firebase blob as bytes."""
@@ -215,20 +210,3 @@ class FirebaseBlobStorage(BlobStorage):
         if isinstance(data, bytes | str):
             return data
         return data.read()
-
-
-if __name__ == "__main__":
-    from backend.core.settings import get_settings
-    from backend.core.firebase import initialize_firebase_app
-    import asyncio
-
-    initialize_firebase_app()
-    bucket = get_settings().STORAGE_BUCKET
-    print(bucket)
-    storage = FirebaseBlobStorage(bucket=bucket)
-    filename = "courses/76a8ff62-48a1-487c-a75d-ed3d76dba8fc/notes/Pasted text.txt"
-    exist = asyncio.run(storage.exists(filename))
-    print(exist)
-    content = asyncio.run(storage.download(filename))
-    # print(content)
-    

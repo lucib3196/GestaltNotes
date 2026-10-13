@@ -5,9 +5,10 @@ from uuid import UUID
 from sqlmodel import Session
 
 from backend.accounts.models import User
-from backend.storage.blob.base import BlobStorage, BlobUploadData
-from backend.storage.blob.exceptions import BlobStorageDeleteError
-from backend.storage.blob.schema import BlobMetadata
+from object_store import BlobStorage, BlobUploadData, BlobMetadata
+
+from object_store.exceptions import BlobStorageDeleteError
+
 from backend.storage.exceptions import (
     FileNotFoundError,
     FileServiceCreateError,

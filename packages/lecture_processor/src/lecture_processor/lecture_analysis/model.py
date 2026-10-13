@@ -26,7 +26,8 @@ class LectureAnalysis(BaseModel):
     kind: Literal["conceptual", "derivation", "computational", "mixed"] = Field(
         description="Primary teaching emphasis of the lecture."
     )
-
+    def __str__(self):
+        return self.as_string()
     def as_string(self) -> str:
         parts = [
             f"## {self.title}",

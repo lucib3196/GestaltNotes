@@ -5,8 +5,8 @@ from pathlib import Path
 from lecture_processor.graph.graph import State
 
 s = State.model_validate(json.loads(Path("./full_output.json").read_text()))
-content = s.sections[0].document.content
-
-pdf_bytes = base64.b64decode(content, validate=True)
-
-Path("section.pdf").write_bytes(pdf_bytes)
+print(s.lecture_summary)
+for res in s.results:
+    if res.kind == "derivation":
+        
+    

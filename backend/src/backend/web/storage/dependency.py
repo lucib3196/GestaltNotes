@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import Depends
 
 from backend.core import get_settings
-from backend.storage import BlobStorage, FileService
-from backend.storage.blob.firebase import FirebaseBlobStorage
+from backend.storage import FileService
+from object_store import BlobStorage, FirebaseBlobStorage
 from backend.web.dependencies import SessionDep
 
 settings = get_settings()

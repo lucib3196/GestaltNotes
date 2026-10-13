@@ -14,7 +14,7 @@ from backend.courses.notes.repo import CourseNoteRepository
 from backend.courses.schema import CourseNoteRead
 from backend.courses.service.course_service import CourseService
 from backend.storage import FileService
-from backend.storage.blob.exceptions import BlobStorageDeleteError
+from object_store.exceptions import BlobStorageDeleteError
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key
 from backend.courses.schema import CourseNoteUpdate
