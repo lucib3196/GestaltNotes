@@ -58,5 +58,25 @@ runs:
     - name: Start firebase emulator
       shell: bash
       run: |
-        firebase emulators:start --project demo-test > /tmp/firebase-emulators.log 2>&1 &
-        sleep 10
+        firebase emulators:start --project demo-test \
+          > /tmp/firebase-emulators.log 2>&1 &
+        emulator_pid=$!
+
+        for attempt in {1..60}; do
+          if ! kill -0 "$emulator_pid" 2>/dev/null; then
+            cat /tmp/firebase-emulators.log
+            exit 1
+          fi
+
+          if (echo > /dev/tcp/127.0.0.1/9099) 2>/dev/null &&
+            (echo > /dev/tcp/127.0.0.1/9199) 2>/dev/null; then
+            echo "Firebase emulator ports are reachable"
+            exit 0
+          fi
+
+          sleep 2
+        done
+
+        cat /tmp/firebase-emulators.log
+        echo "Firebase emulators did not become ready"
+        exit 1
