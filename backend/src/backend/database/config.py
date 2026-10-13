@@ -44,6 +44,7 @@ def session_cache():
 def get_session() -> Generator[Session, None, None]:
     engine = initialize_database_engine()
     """Yield a SQLModel session per request."""
+    engine = initialize_database_engine()
     with Session(engine, expire_on_commit=False) as session:
         yield session
 

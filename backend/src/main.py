@@ -25,11 +25,6 @@ async def on_startup(app: FastAPI):
     logger.info("Initialized fb okay")
     logger.info("Created database successfully")
 
-    logger.debug("Seeding roles")
-    with Session(engine) as session:
-        await RoleDB(session).seed_roles()
-        logger.info("[Initialization] Roles Created/verified Successfully")
-        session.commit()
 
     yield
 
