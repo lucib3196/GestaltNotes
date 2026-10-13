@@ -44,11 +44,11 @@ def create_multiple_choice_questions(
     - Do not wrap content in code fences or pre-encode it as HTML entities.
 
     Mathematics:
-    - Use LaTeX delimited by $$expression$$ in every field containing math.
-    - Never use single-dollar math delimiters.
-    - Preserve LaTeX braces and commands, such as $$Q_{in}$$,
-      $$\frac{W}{Q_{in}}$$, and $$\eta = 1 - \frac{1}{r^{\gamma - 1}}$$.
-    - Put longer equations on separate lines with blank lines around them.
+    - Use $expression$ for inline math in questions, options, and explanations.
+    - Use $$expression$$ for standalone block equations.
+    - Put block delimiters on separate lines, with blank lines around the block.
+    - Keep short mathematical answer options inline.
+    - Preserve LaTeX braces and commands, such as $Q_{in}$ and $\frac{W}{Q_{in}}$.
     - Escape backslashes correctly when producing JSON; the parsed strings
       must contain the intended LaTeX commands.
 

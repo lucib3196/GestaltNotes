@@ -14,6 +14,7 @@ const mathJaxConfig = {
   tex: {
     inlineMath: [["$", "$"]],
     displayMath: [["$$", "$$"]],
+    processEscapes: true,
   },
 };
 

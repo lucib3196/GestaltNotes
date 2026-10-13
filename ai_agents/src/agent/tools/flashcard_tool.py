@@ -22,7 +22,17 @@ def create_flashcards(
     ],
     cards: list[Flashcard],
 ) -> tuple[str, dict]:
-    """Package exactly the requested number of flashcards."""
+    r"""Package exactly the requested number of flashcards.
+
+    Keep each front focused on one question and each back on its answer.
+    These math formatting rules apply to both sides:
+    - Use $expression$ for inline math within sentences.
+    - Use $$expression$$ for standalone block equations.
+    - Put block delimiters on separate lines, with blank lines around the block.
+    - Preserve LaTeX braces and commands, such as $Q_{in}$ and $\Delta T$.
+    - Escape backslashes correctly when producing JSON; the parsed strings
+      must contain the intended LaTeX commands.
+    """
     result = FlashcardSet(cards=cards)
     if len(result.cards) != num_flashcards:
         raise ValueError(f"Expected exactly {num_flashcards} flashcards.")

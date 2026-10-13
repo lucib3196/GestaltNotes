@@ -22,8 +22,6 @@ export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
   });
 
 
-  console.log(result.error)
-
   function regenerateGraph() {
     if (result.status !== "error" || draftText || regenerationRequested) {
       return;

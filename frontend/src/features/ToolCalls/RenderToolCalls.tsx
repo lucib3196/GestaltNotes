@@ -13,7 +13,6 @@ export function RenderToolCall({ message }: { message: Message }) {
   const toolCompact = entry?.compact;
   const toolRender = entry && entry.render(data);
 
-
   if (message.status !== "success") {
     return <div>Loading</div>;
   }
