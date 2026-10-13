@@ -5,8 +5,9 @@ from typing import Any
 
 import firebase_admin
 import pytest
+from google.auth.credentials import AnonymousCredentials
 
-from backend.core.firebase import initialize_firebase_app
+from backend.core.settings import get_settings
 
 ALLOWED_EMULATOR_HOST_PREFIXES = (
     "localhost:",
@@ -87,10 +88,15 @@ def firebase_app_for_tests() -> Generator[Any]:
     if not is_firebase_enabled():
         pytest.skip("Firebase auth emulator is not configured.")
 
-    app = initialize_firebase_app()
+    settings = get_settings()
+    app = firebase_admin.initialize_app(
+        AnonymousCredentials(),
+        options={
+            "projectId": os.environ["FIREBASE_PROJECT_ID"],
+            "storageBucket": settings.STORAGE_BUCKET,
+        },
+    )
     yield app
 
     with contextlib.suppress(Exception):
         firebase_admin.delete_app(app)
-
-    initialize_firebase_app.cache_clear()

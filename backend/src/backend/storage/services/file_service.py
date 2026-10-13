@@ -43,7 +43,7 @@ class FileService:
             self._session.rollback()
             with contextlib.suppress(BlobStorageDeleteError):
                 await self._storage.delete(filename)
-            raise FileServiceCreateError(f"Failed to create file '{filename}' Error : {e}") from e
+            raise FileServiceCreateError(f"Failed to create file '{filename}'") from e
 
     async def stage_file(
         self,
