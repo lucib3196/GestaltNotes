@@ -6,4 +6,4 @@ from .generated_content.mcq import router as mcq_router
 
 from .health.health import router as health_router
 
-ALL_ROUTES = [*course_routes, thread_router, health_router, mcq_router, health_router]
+ALL_ROUTES = [*course_routes, thread_router, health_router, mcq_router, health_router, *account_routes]

@@ -37,12 +37,14 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 
-COPY pyproject.toml uv.lock ./
+COPY backend/pyproject.toml backend/uv.lock ./
+COPY packages/object_store /app/packages/object_store
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
-COPY . .
+
+COPY backend/ .
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen

@@ -27,8 +27,8 @@ services:
 
   gestalt_notes_backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: backend/Dockerfile.dev
     depends_on:
       db:
         condition: service_healthy
@@ -45,6 +45,7 @@ services:
       - 8000:8000
     volumes:
       - ./backend:/app/backend # mount project allows for reloading
+      - ./packages/object_store:/app/packages/object_store
 
   # Frontend
   gestalt_notes_frontend:
