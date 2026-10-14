@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FiBookOpen, FiLoader, FiPlus } from "react-icons/fi";
 import { toast } from "react-toastify";
 
 import { InputTextForm } from "../../../components/FormComponents";
@@ -7,9 +8,10 @@ import { useCreateCourse } from "../hooks";
 
 type CreateCourseProps = {
   onCreated?: (course: Course) => void;
+  onCancel?: () => void;
 };
 
-export default function CreateCourse({ onCreated }: CreateCourseProps) {
+export default function CreateCourse({ onCreated, onCancel }: CreateCourseProps) {
   const { createCourse, loading, error } = useCreateCourse();
 
   const [name, setName] = useState("");
@@ -43,18 +45,19 @@ export default function CreateCourse({ onCreated }: CreateCourseProps) {
   }
 
   return (
-    <section className="rounded-xl border border-border bg-surface p-5 shadow-soft">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold text-text">Create course</h2>
-        <p className="mt-1 text-sm text-text-muted">
-          Add a course workspace for notes, materials, and student access.
+    <section className="">
+      <div className="mb-6">
+        <div className="mb-4 inline-flex rounded-xl bg-accent/10 p-3 text-accent"><FiBookOpen aria-hidden="true" size={24} /></div>
+        <h2 className="text-2xl font-semibold tracking-tight text-text">Create a course</h2>
+        <p className="mt-2 text-sm leading-6 text-text-muted">
+          Start with the basics. Give your course a name and a little context.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <InputTextForm
           id="course-name"
-          label="Course Name"
+          label="Course name"
           variant="auth"
           value={name}
           onChange={(event) => setName(event.target.value)}
@@ -64,7 +67,7 @@ export default function CreateCourse({ onCreated }: CreateCourseProps) {
 
         <InputTextForm
           id="course-discipline"
-          label="Discipline"
+          label="Discipline (optional)"
           variant="auth"
           value={discipline}
           onChange={(event) => setDiscipline(event.target.value)}
@@ -76,7 +79,7 @@ export default function CreateCourse({ onCreated }: CreateCourseProps) {
             htmlFor="course-description"
             className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-soft"
           >
-            Description
+            Description (optional)
           </label>
           <textarea
             id="course-description"
@@ -90,13 +93,13 @@ export default function CreateCourse({ onCreated }: CreateCourseProps) {
 
         {error && <p className="text-sm text-red-400">{error.message}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-fit rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading ? "Creating..." : "Create Course"}
-        </button>
+        <div className="mt-2 flex items-center justify-end gap-3 border-t border-border pt-5">
+          {onCancel && <button type="button" onClick={onCancel} disabled={loading} className="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-text-muted hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-60">Cancel</button>}
+          <button type="submit" disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-bg hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-60">
+            {loading ? <FiLoader aria-hidden="true" className="motion-safe:animate-spin" size={16} /> : <FiPlus aria-hidden="true" size={16} />}
+            {loading ? "Creating…" : "Create course"}
+          </button>
+        </div>
       </form>
     </section>
   );

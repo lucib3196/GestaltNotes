@@ -10,11 +10,8 @@ import {
 import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import SingleCourse from "./features/CourseManagement/SingleCourse";
-import { ChatSidebar } from "./features/Chat/ui/sidebar";
-import { ChatProvider } from "./features/Chat/instance";
-function Test() {
-  return <div><ChatProvider><ChatSidebar/></ChatProvider></div>;
-}
+import CourseManagement from "./features/CourseManagement/CourseManagement";
+
 
 function App() {
   return (
@@ -26,7 +23,7 @@ function App() {
           <Route path="/login" element={<AuthPage />} />
           <Route path="/account" element={<MyAccount />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
-          <Route path="/test" element={<Test />} />
+
 
           <Route element={<PasswordResetGuard />}>
             {/* Student Only Roots */}
@@ -44,7 +41,7 @@ function App() {
             <Route element={<RoleRedirect allow={["educator"]} />}>
               <Route path="/educator" element={<EducatorPage />} />
               
-              <Route path="/educator/courses" element={<Test />} />
+              <Route path="/educator/courses" element={<CourseManagement/>} />
               <Route path="/educator/courses/:courseId" element={<SingleCourse />} />
             </Route>
           </Route>
