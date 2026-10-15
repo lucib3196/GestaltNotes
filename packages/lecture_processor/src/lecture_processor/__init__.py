@@ -12,6 +12,7 @@ from .graph.context import (
 from .graph.state import OutputState, SectionResult, TaskFailure
 from .lecture_analysis import LectureAnalysis
 from .problem_solving_procedure import ProblemSolvingProcedure, ProcedureStep
+from .parser.parser import parse_lecture_documents
 
 __all__ = [
     "ConceptualQuestion",
@@ -34,4 +35,5 @@ __all__ = [
     "TaskFailure",
     "TaskName",
     "process_lecture",
+    "parse_lecture_documents",
 ]
