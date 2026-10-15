@@ -65,7 +65,7 @@ def initialize_firebase_app():
             os.environ.pop("STORAGE_EMULATOR_HOST", None)
 
         else:
-            print("Running")
+
             # ensure dev env vars exist
             if not app_settings.FIREBASE_AUTH_EMULATOR_HOST:
                 raise FirebaseInitializationError(
