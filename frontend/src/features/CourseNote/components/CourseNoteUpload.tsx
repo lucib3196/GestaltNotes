@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { useCourseDetailsStore } from "../../CourseDetails/instance";
 import { EyeIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   FileBox,
@@ -10,70 +11,54 @@ import type { CourseContentType } from "../../../services/courses/types";
 import { useUploadCourseNote } from "../../../hooks/courses";
 import { ContentTypeDropDown } from "./ContentTypeDropDown";
 
-type PendingCourseNote = {
-  id: string;
-  file: File;
-  resourceType: CourseContentType;
-};
-
-export default function CourseNoteUpload({
-  courseID,
-  reFetch,
-}: {
-  courseID?: string | null;
-  reFetch?: () => void;
-}) {
-  const [items, setItems] = useState<PendingCourseNote[]>([]);
-  const [previewID, setPreviewID] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const uploadInProgress = useRef(false);
+export default function CourseNoteUpload({ reFetch }: { reFetch?: () => void }) {
+  const {
+    selectedCourseId: courseID,
+    items,
+    previewID,
+    uploading,
+    error,
+    addFiles,
+    removeFile,
+    updateResourceType,
+    togglePreview,
+    beginUpload,
+    completeFile,
+    finishUpload,
+  } = useCourseDetailsStore(
+    useShallow((state) => ({
+      selectedCourseId: state.selectedCourseId,
+      items: state.items,
+      previewID: state.previewID,
+      uploading: state.uploading,
+      error: state.error,
+      addFiles: state.addFiles,
+      removeFile: state.removeFile,
+      updateResourceType: state.updateResourceType,
+      togglePreview: state.togglePreview,
+      beginUpload: state.beginUpload,
+      completeFile: state.completeFile,
+      finishUpload: state.finishUpload,
+    })),
+  );
   const { uploadCourseNote } = useUploadCourseNote();
 
-  function handleFilesChange(files: File[]) {
-    setError(null);
-    setItems((current) => [
-      ...current,
-      ...files.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        resourceType: "notes" as const,
-      })),
-    ]);
-  }
-
-  function updateResourceType(id: string, resourceType: CourseContentType) {
-    setItems((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, resourceType } : item,
-      ),
-    );
-  }
-
-  function handleRemove(id: string) {
-    setItems((current) => current.filter((item) => item.id !== id));
-    setPreviewID((current) => (current === id ? null : current));
-  }
-
   async function handleUpload() {
-    if (!courseID || items.length === 0 || uploadInProgress.current) return;
-    uploadInProgress.current = true;
-    setUploading(true);
-    setError(null);
+    if (!courseID) return;
+    const batch = beginUpload();
+    if (!batch) return;
 
+    let failure: string | undefined;
     try {
       // Preserve failed and unattempted files so the user can retry.
-      for (const item of items) {
+      for (const item of batch) {
         await uploadCourseNote(courseID, item.file, item.resourceType);
-        handleRemove(item.id);
+        completeFile(item.id);
       }
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Failed to upload files.",
-      );
+      failure = cause instanceof Error ? cause.message : "Failed to upload files.";
     } finally {
-      uploadInProgress.current = false;
-      setUploading(false);
+      finishUpload(failure);
       reFetch?.();
     }
   }
@@ -107,7 +92,7 @@ export default function CourseNoteUpload({
         variant="dropzone"
         multiple
         disabled={uploading || !courseID}
-        onFilesChange={handleFilesChange}
+        onFilesChange={addFiles}
       />
 
       {items.length > 0 && (
@@ -146,11 +131,7 @@ export default function CourseNoteUpload({
                       aria-controls={`preview-${item.id}`}
                       title="Preview file"
                       className={actionClassName}
-                      onClick={() =>
-                        setPreviewID((current) =>
-                          current === item.id ? null : item.id,
-                        )
-                      }
+                      onClick={() => togglePreview(item.id)}
                     >
                       <EyeIcon aria-hidden="true" className="h-5 w-5" />
                     </button>
@@ -160,7 +141,7 @@ export default function CourseNoteUpload({
                       aria-label={`Remove ${item.file.name}`}
                       title="Remove file"
                       className={actionClassName}
-                      onClick={() => handleRemove(item.id)}
+                      onClick={() => removeFile(item.id)}
                     >
                       <XMarkIcon aria-hidden="true" className="h-5 w-5" />
                     </button>

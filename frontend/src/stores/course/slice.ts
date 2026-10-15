@@ -24,11 +24,19 @@ export function createCourseStore<
     selectedCourse: null,
     setSelectedCourseId: (id) => {
       set(
-        () =>
+        (state) =>
           ({
             selectedCourseId: id,
+            selectedCourse:
+              state.selectedCourse?.id === id ? state.selectedCourse : null,
           }) as Partial<Store>,
       );
+    },
+    setSelectedCourse: (course) => {
+      set((state) => ({
+        selectedCourse: course,
+        selectedCourseId: course?.id ?? state.selectedCourseId,
+      }) as Partial<Store>);
     },
   });
 }

@@ -7,6 +7,7 @@ export type CourseState = {
 
 export type CourseActions = {
   setSelectedCourseId: (id: string) => void;
+  setSelectedCourse: (course: Course | null) => void;
 };
 
 export type CourseStore = CourseState & CourseActions;

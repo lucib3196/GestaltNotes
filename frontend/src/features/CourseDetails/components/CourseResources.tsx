@@ -13,12 +13,10 @@ import CourseNoteUpload from "../../CourseNote/components/CourseNoteUpload";
 import { CourseNoteBox } from "./CourseNoteBox";
 import { ResourceActions } from "./ResourceActions";
 import { ResourcePreview } from "./ResourcePreview";
+import { useCourseDetailsStore } from "../instance";
 
-export function CourseResources({ courseId }: { courseId: string }) {
-  return <ResourceContent key={courseId} courseId={courseId} />;
-}
-
-function ResourceContent({ courseId }: { courseId: string }) {
+export function CourseResources() {
+  const courseId = useCourseDetailsStore((state) => state.selectedCourseId);
   const {
     notes,
     setNotes,
@@ -190,7 +188,7 @@ function ResourceContent({ courseId }: { courseId: string }) {
       </header>
       {showUpload && (
         <Modal setShowModal={setShowUpload}>
-          <CourseNoteUpload courseID={courseId} reFetch={refreshNotes} />
+          <CourseNoteUpload reFetch={refreshNotes} />
         </Modal>
       )}
       {actionError && (

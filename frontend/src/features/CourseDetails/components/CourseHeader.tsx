@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { MdOutlineEdit } from "react-icons/md";
 
-import type { Course } from "../../../services/courses";
+import { useCourseDetailsStore } from "../instance";
 import { useEditCourse } from "../../../hooks/courses";
 
 const fieldClass =
@@ -10,13 +10,11 @@ const fieldClass =
 const buttonClass =
   "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-60";
 
-export default function CourseHeader({
-  course,
-  refetch,
-}: {
-  course: Course;
-  refetch?: () => void;
-}) {
+export default function CourseHeader() {
+  const course = useCourseDetailsStore((state) => state.selectedCourse);
+  const setSelectedCourse = useCourseDetailsStore(
+    (state) => state.setSelectedCourse,
+  );
   const { updateCourse, loading: updating } = useEditCourse();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
@@ -25,6 +23,7 @@ export default function CourseHeader({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   function handleEdit() {
+    if (!course) return;
     setName(course.name);
     setDiscipline(course.discipline ?? "");
     setDescription(course.description ?? "");
@@ -34,16 +33,17 @@ export default function CourseHeader({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (updating || !name.trim()) return;
+    if (!course || updating || !name.trim()) return;
 
     setSaveError(null);
 
     try {
-      await updateCourse(course.id, {
+      const updatedCourse = await updateCourse(course.id, {
         name: name.trim(),
         discipline: discipline.trim() || null,
         description: description.trim() || null,
       });
+      setSelectedCourse(updatedCourse);
     } catch (error) {
       setSaveError(
         error instanceof Error ? error.message : "Unable to save changes.",
@@ -52,8 +52,9 @@ export default function CourseHeader({
     }
 
     setEditing(false);
-    refetch?.();
   }
+
+  if (!course) return null;
 
   return (
     <section className="border-b border-border pb-8">
