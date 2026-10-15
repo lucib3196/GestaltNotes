@@ -1,122 +1,153 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { MathJax } from "better-react-mathjax";
-import { AIMessage, HumanMessage, ToolMessage } from "langchain";
-import { useEffect } from "react";
 import { streamURL } from "../../config/api";
-import ConversationStarters from "../ConversationStarters/components/ConverstationStarter";
-import { useWorkspaceStore } from "../Tools/instance/store";
-import { AIBubble, HumanBubble } from "./components/ChatMessage";
-import { ChatSessionHeader } from "./components/ChatSessionHeader";
-import { ChatContainer, ChatInput } from "./components";
-import { useGenerateThread, useGetThread } from "./hooks/hooks";
+import ChatContainer from "./ui/layout/ChatContainer";
+import ChatInput from "./ui/composer/ChatInput";
+import { ChatModelPicker } from "./ui/composer/ChatModelPicker";
+import { ChatSessionHeader } from "./ui/layout/ChatSessionHeader";
+import { useChatStore } from "./instance";
+import { prepareMessage } from "./utils/messageSending";
+import { useCreateThread } from "./hooks/useCreateThread";
+import MessageList from "./ui/messages/MessageList";
+import { useEffect } from "react";
+import type { Message } from "@langchain/langgraph-sdk";
+import { useUpdateThread } from "./hooks/useUpdateThread";
 
-import { useThreadStore, useChatStore } from "./instance/store";
-import { prepareMessage } from "./utils";
+type ChatAgentState = {
+  messages: Message[];
+  thread_title?: string;
+};
 
 export default function ChatSession() {
-  // State
-  const currentThread = useThreadStore((s) => s.thread);
-  const assistantId = useChatStore((s) => s.assistantId);
-  const externalMessage = useChatStore((s) => s.externalMessage);
-  const setExternalMessage = useChatStore((s) => s.setExternalMessage)
-  const appendToolMessage = useWorkspaceStore((s) => s.appendToolMessage);
-  const clearWorkspaceItems = useWorkspaceStore((s) => s.clearWorkspace);
-  // Hooks
-  const { generateThread } = useGenerateThread();
-  const { loading, error } = useGetThread();
+  const config = useChatStore((s) => s.config);
+  const activeThreadId = useChatStore((s) => s.activeThreadId);
+  const threadsById = useChatStore((s) => s.threadsById);
+  const activeThread = useChatStore((s) =>
+    activeThreadId ? (s.threadsById[activeThreadId] ?? null) : null,
+  );
+  const { updateThread } = useUpdateThread();
+  const assistantId = useChatStore((s) => s.assistant.id);
+  const draftText = useChatStore((s) => s.draftText);
+  const setDraftText = useChatStore((s) => s.setDraftText);
+  const setActiveThread = useChatStore((s) => s.selectThread);
+  const upsertThread = useChatStore((s) => s.upsertThread);
 
-  const stream = useStream({
-    threadId: currentThread?.id || null,
+  // Hooks
+  const { createThread } = useCreateThread();
+
+  const stream = useStream<ChatAgentState>({
+    threadId: activeThreadId,
     apiUrl: streamURL,
     assistantId: assistantId,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     onThreadId: async (id: string) => {
-      await generateThread({
-        thread_id: id,
-      });
+      const thread = await createThread({ thread_id: id });
+      upsertThread(thread);
+      setActiveThread(thread.id);
+    },
+    onFinish: (state, run) => {
+      const title = state.values.thread_title?.trim();
+      const threadId = run?.thread_id;
+      if (!threadId) return;
+      const thread = threadsById[threadId];
 
+      if (!title || !thread || thread.title_source !== "default") return;
+
+      void updateThread(threadId, { title, title_source: "generated" })
+        .then((updatedThread) => {
+          if (updatedThread) {
+            upsertThread(updatedThread);
+          }
+        })
+        .catch((error) => {
+          console.error("Could not save the conversation title", error);
+        });
     },
   });
 
   const handleSubmit = async (text: string, images?: string[]) => {
     const content = await prepareMessage(text, images);
 
-    stream.submit({
-      messages: [
-        {
-          role: "human",
-          content,
-        },
-      ],
-    });
+    stream.submit(
+      {
+        messages: [
+          {
+            type: "human",
+            content,
+          },
+        ],
+      },
+      {
+        context: config,
+      },
+    );
   };
   useEffect(() => {
-    if (!currentThread) return;
-    if (currentThread) {
-      clearWorkspaceItems();
+    const handleExternalMessage = async () => {
+      if (!draftText) return;
+      const content = await prepareMessage(draftText);
+      stream.submit(
+        {
+          messages: [
+            {
+              type: "human",
+              content,
+              additional_kwargs: {
+                internal: true,
+              },
+            },
+          ],
+        },
+        { context: config },
+      );
+      setDraftText("");
+    };
+    void handleExternalMessage();
+  }, [draftText]);
+
+  const visibleMessages = stream.messages.filter((message) => {
+    if (
+      message.type === "human" &&
+      message.additional_kwargs?.internal === true
+    ) {
+      return false;
     }
-  }, [currentThread?.id]);
 
-  useEffect(() => {
-    stream.messages.forEach((msg) => {
-      if (msg.type === "tool") {
-      
-        appendToolMessage(msg as ToolMessage);
+    if (message.type === "ai") {
+      const metadata =
+        stream.getMessagesMetadata(message)?.streamMetadata;
+
+      // Internal model calls made while a tool is running.
+      if (metadata?.langgraph_node === "tools") {
+        return false;
       }
-    });
-  }, [stream.messages, appendToolMessage, currentThread?.id]);
+    }
 
-  useEffect(() => {
-    if (!externalMessage) return;
-    handleSubmit(externalMessage)
-    setExternalMessage(null)
-    // handleSubmit(externalMessage);
-  }, [externalMessage]);
-
-
-  if (loading) return <div>Loading</div>;
-  if (error) return <div>Error</div>;
+    return true;
+  });
 
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-lg border border-border bg-surface-strong">
-      <div className="shrink-0  border-border px-3 py-2 sm:px-4">
-        <ChatSessionHeader thread={currentThread} />
-      </div>
-      <div className="min-h-0 flex-1">
+    <>
+      <ChatSessionHeader thread={activeThread} />
+      <div className="min-h-0 min-w-0 flex-1">
         <ChatContainer
-          size="lg"
           bordered={false}
           scrollTrigger={stream.messages.length}
-          starters={
-            stream.messages.length === 0 ? (
-              <ConversationStarters onSelect={(v) => handleSubmit(v)} />
-            ) : null
-          }
+          starters={null}
           input={
             <ChatInput
               handleSubmit={handleSubmit}
               disabled={stream.isLoading}
               multiModal={true}
+              toolbar={<ChatModelPicker disabled={stream.isLoading} />}
             />
           }
         >
           <MathJax dynamic>
-            
-            {stream.messages.map((msg) => {
-  
-              if (msg.type === "human") {
-                return <HumanBubble key={msg.id} msg={msg as HumanMessage} />;
-              }
-              if (msg.type === "ai") {
-                return (
-                  <AIBubble key={msg.id} msg={msg as AIMessage}></AIBubble>
-                );
-              }
-              return null;
-            })}
+            <MessageList messages={visibleMessages} />
           </MathJax>
         </ChatContainer>
       </div>
-    </section>
+</>
   );
 }

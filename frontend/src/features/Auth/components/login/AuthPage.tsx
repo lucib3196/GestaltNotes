@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useAuth } from "../../../../context";
+import { useAuth } from "../..";
 import LogInForm from "./Login";
 import { SignUpForm } from "./SignUp";
 import PasswordResetForm from "./PasswordResetForm";

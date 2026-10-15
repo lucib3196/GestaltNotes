@@ -7,6 +7,7 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/backend_build.yml"
+      - "packages/object_store/**"
     branches: ["main", "dev"]
   pull_request:
     paths:
@@ -23,7 +24,8 @@ jobs:
         python-version: [3.11, 3.12, 3.13]
 
     env:
-      MODE: "testing"
+      APP_ENV: "testing"
+      ENV: "testing"
       DATABASE_URL: "sqlite:///:memory:"
       LANGGRAPH_STREAM_URL: "123"
       STORAGE_BUCKET: ${{secrets.STORAGE_BUCKET}}

@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from backend.core.logger import logger
-from backend.model.chat import Message
+from backend.chat.model import Message
 from backend.utils.utils import convert_uuid
 
 

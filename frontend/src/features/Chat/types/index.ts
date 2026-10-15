@@ -1,0 +1,1 @@
+export type { MessagePayload } from "./content";

@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
 from backend.data.message import MessageDB
-from backend.model.chat import Message
+from backend.chat.model import Message
 
 
 def raise_error(*args, **kwargs) -> Never:

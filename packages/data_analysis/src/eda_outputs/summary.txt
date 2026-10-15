@@ -1,0 +1,52 @@
+Filtered Users
+==============
+Email pattern: me\_%
+Total filtered rows: 100
+Unique users: 100
+
+Threads Per User
+================
+count    39.000000
+mean      2.512821
+std       1.847784
+min       1.000000
+25%       1.000000
+50%       2.000000
+75%       3.000000
+max       8.000000
+dtype: float64
+
+Messages Per Thread
+===================
+count    0.0
+mean     NaN
+std      NaN
+min      NaN
+25%      NaN
+50%      NaN
+75%      NaN
+max      NaN
+dtype: float64
+
+User Segments
+=============
+Light (1-2 threads): 25 users (64.1%)
+Moderate (3-8 threads): 14 users (35.9%)
+Heavy (9+ threads): 0 users (0.0%)
+
+Conversation Types
+==================
+Single-turn threads: 0
+Multi-turn threads: 0
+
+Time-Based Activity
+===================
+No message timestamps available.
+
+Saved Graphs
+============
+eda_outputs/threads_per_user_distribution.png
+eda_outputs/messages_per_thread_distribution.png
+eda_outputs/messages_by_hour.png
+eda_outputs/messages_over_time.png
+eda_outputs/user_segments.png

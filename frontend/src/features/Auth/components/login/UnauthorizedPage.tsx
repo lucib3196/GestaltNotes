@@ -1,4 +1,4 @@
-import { useAuth } from "../../../../context";
+import { useAuth } from "../..";
 
 export default function UnauthorizedPage() {
     const { logout } = useAuth();

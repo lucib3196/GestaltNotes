@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from backend.core.settings import get_settings
-from backend.model import *
+from backend.database.models import *
 
 # Database models
 

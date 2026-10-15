@@ -1,0 +1,6 @@
+Identify the document's sections.
+For each section, return content matching the supplied schema (a descriptive
+title when content is a string) and a 0-based, inclusive page_range.
+Use positions in the supplied page images and their added page-index labels,
+not page numbers printed in the original document.
+Include every page on which the section is covered.

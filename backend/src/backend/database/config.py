@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends
@@ -16,27 +17,32 @@ def initialize_database_engine():
     DATABASE_URL = None
     if app_settings.ENV == "testing":
         DATABASE_URL = "sqlite:///:memory:"
-    elif app_settings.ENV == "production" or app_settings.ENV == "dev":
+    else:
         DATABASE_URL = app_settings.DATABASE_URL
     if not DATABASE_URL:
         raise DatabaseConfigError("Failed to initialize database. URL is not set")
-    logger.info(f"[DATABASE Intialization] Success")
+    logger.info("[DATABASE Intialization] Success")
 
     try:
         connect_args = {}
-        engine = create_engine(
+        return create_engine(
             url=DATABASE_URL,
             echo=True,
             connect_args=connect_args,  # always a dict, never None
         )
-        return engine
     except Exception as e:
         raise DatabaseInitializationError(
             f"Error initializing database engine {e}"
         ) from e
 
 
+@lru_cache
+def session_cache():
+    return initialize_database_engine()
+
+
 def get_session() -> Generator[Session, None, None]:
+    engine = initialize_database_engine()
     """Yield a SQLModel session per request."""
     engine = initialize_database_engine()
     with Session(engine, expire_on_commit=False) as session:

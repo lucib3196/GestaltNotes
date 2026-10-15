@@ -13,31 +13,33 @@ export default function ThemeToggle() {
             aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
             aria-pressed={isDark}
             className={[
-                "group relative inline-flex h-10 w-19 items-center rounded-full border p-1",
-                "bg-surface border-border shadow-soft",
-                "transition-colors duration-300 hover:border-border-strong",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
+                "relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full p-1 sm:w-19",
+                "bg-surface text-text-muted hover:bg-surface-muted",
+                "sm:border sm:border-border sm:shadow-soft sm:hover:border-border-strong",
+                "transition-colors duration-300",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60",
             ].join(" ")}
         >
+            <span className="text-lg sm:hidden" aria-hidden="true">
+                {isDark ? <MdLightMode /> : <MdDarkMode />}
+            </span>
             <span
+                aria-hidden="true"
                 className={[
-                    "absolute h-8 w-8 rounded-full bg-accent shadow-md",
-                    "transition-transform duration-300 ease-out",
+                    "absolute left-1 hidden h-8 w-8 rounded-full bg-accent shadow-md sm:block",
+                    "transition-transform duration-300 ease-out motion-reduce:transition-none",
                     isDark ? "translate-x-9" : "translate-x-0",
                 ].join(" ")}
             />
-            <span className="relative z-10 flex w-full items-center justify-between px-1.5 text-base">
+            <span
+                aria-hidden="true"
+                className="relative z-10 hidden w-full items-center justify-between px-1.5 text-base sm:flex"
+            >
                 <MdLightMode
-                    className={[
-                        "transition-colors duration-300",
-                        isDark ? "text-text-soft" : "text-white",
-                    ].join(" ")}
+                    className={isDark ? "text-text-soft" : "text-white"}
                 />
                 <MdDarkMode
-                    className={[
-                        "transition-colors duration-300",
-                        isDark ? "text-white" : "text-text-soft",
-                    ].join(" ")}
+                    className={isDark ? "text-white" : "text-text-soft"}
                 />
             </span>
         </button>
