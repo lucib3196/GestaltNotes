@@ -21,21 +21,14 @@ export function createCourseStore<
 >(): CourseSliceCreator<Store, CourseStore> {
   return (set) => ({
     selectedCourseId: "",
-    courseById: {},
     selectedCourse: null,
     setSelectedCourseId: (id) => {
       set(
-        (state) =>
+        () =>
           ({
-            selectedCourse: state.courseById[id],
             selectedCourseId: id,
           }) as Partial<Store>,
       );
-    },
-    setCoursesById: (courses) => {
-      set(() => {
-        return { courseById: coursesById(courses) } as Partial<Store>;
-      });
     },
   });
 }

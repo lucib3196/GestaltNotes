@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
-import { useAuth } from "../../Auth";
-import { CoursesAPI, type CourseNoteDelete } from "../../../services/courses";
+import { useAuth } from "../../features/Auth";
+import { CoursesAPI, type CourseNoteDelete } from "../../services/courses";
 
 export function useDeleteCourseNote() {
   const { user } = useAuth();

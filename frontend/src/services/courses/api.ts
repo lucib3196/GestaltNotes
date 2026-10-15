@@ -94,6 +94,19 @@ export class CoursesAPI {
     return res.data;
   }
 
+  static async updateCourseNote(
+    token: string,
+    courseId: string,
+    noteId: string,
+    data: { resource_type: CourseContentType; },
+  ): Promise<CourseNote> {
+    const response = await api.put<CourseNote>(
+      `${base}/notes/${courseId}/${noteId}`, data,
+      { headers: authHeaders(token) },
+    );
+    return response.data;
+  }
+
   static async deleteCourseNote(
     token: string,
     courseId: string,

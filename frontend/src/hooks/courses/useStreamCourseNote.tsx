@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "../../Auth";
-import { CoursesAPI } from "../../../services/courses";
+import { useAuth } from "../../features/Auth";
+import { CoursesAPI } from "../../services/courses";
 
 export function useStreamCourseNote() {
   const { user } = useAuth();

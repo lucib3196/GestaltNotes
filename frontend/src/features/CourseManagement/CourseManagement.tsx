@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Modal from "../../components/Modal/Modal";
 import { CourseCard, CreateCourse } from "./components";
-import { useFetchMyCourses } from "./hooks";
+import { useFetchMyCourses } from "../../hooks/courses";
 import { useState } from "react";
 import { FiBookOpen, FiPlus } from "react-icons/fi";
 

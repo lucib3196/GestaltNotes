@@ -6,14 +6,14 @@ import {
   FileUpload,
   UploadButton,
 } from "../../../components/FileAttachments";
-import type { SupportedContentType } from "../../../services/courses/types";
-import { useUploadCourseNote } from "../../CourseManagement/hooks";
+import type { CourseContentType } from "../../../services/courses/types";
+import { useUploadCourseNote } from "../../../hooks/courses";
 import { ContentTypeDropDown } from "./ContentTypeDropDown";
 
 type PendingCourseNote = {
   id: string;
   file: File;
-  resourceType: SupportedContentType;
+  resourceType: CourseContentType;
 };
 
 export default function CourseNoteUpload({
@@ -42,7 +42,7 @@ export default function CourseNoteUpload({
     ]);
   }
 
-  function updateResourceType(id: string, resourceType: SupportedContentType) {
+  function updateResourceType(id: string, resourceType: CourseContentType) {
     setItems((current) =>
       current.map((item) =>
         item.id === id ? { ...item, resourceType } : item,
@@ -135,7 +135,7 @@ export default function CourseNoteUpload({
                       onChange={(event) =>
                         updateResourceType(
                           item.id,
-                          event.target.value as SupportedContentType,
+                          event.target.value as CourseContentType,
                         )
                       }
                     />

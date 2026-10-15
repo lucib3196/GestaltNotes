@@ -1,4 +1,5 @@
 import { useAuth } from "../Auth";
+import { useFetchMyCourses } from "../../hooks/courses";
 import type { NavigationItem, DropDownNavRoute, Base } from "./types";
 import clsx from "clsx";
 import { canAccessRoute } from "./utils";
@@ -37,10 +38,16 @@ function RoutePill({ to, label }: Base) {
   );
 }
 
-function DropDownNav({ nav }: { nav: DropDownNavRoute }) {
+function DropDownNav({ nav, loading, error, onRetry }: {
+  nav: DropDownNavRoute;
+  loading?: boolean;
+  error?: Error | null;
+  onRetry: () => void;
+}) {
   return (
     <Menu as="div" className="relative">
       <MenuButton
+        onClick={onRetry}
         className={clsx(
           "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium",
           "text-text-muted transition-all duration-200 hover:bg-surface-muted hover:text-text",
@@ -58,6 +65,11 @@ function DropDownNav({ nav }: { nav: DropDownNavRoute }) {
           "focus:outline-none",
         )}
       >
+        {loading && <p role="status" className="px-3 py-2 text-xs text-text-muted">Loading courses…</p>}
+        {error && <div className="px-3 py-2 text-xs text-text-muted" role="alert">
+          <p>Could not load courses.</p>
+          <button type="button" onClick={onRetry} className="mt-1 text-accent underline">Try again</button>
+        </div>}
         {nav.items.map((child) => (
           <MenuItem key={child.to}>
             {({ focus }) => (
@@ -81,7 +93,22 @@ function DropDownNav({ nav }: { nav: DropDownNavRoute }) {
 export default function NavBar({ items }: NavBarProps) {
   const { user, userData, logout } = useAuth();
   const role = userData?.roles ?? [];
+  const isEducator = role.includes("educator");
+  const { courses, loading: coursesLoading, error: coursesError, refetch } = useFetchMyCourses(isEducator);
+  const courseNavigation: DropDownNavRoute = {
+    type: "dropdown",
+    label: "My courses",
+    to: "/educator/courses",
+    items: [
+      { label: "All courses", to: "/educator/courses" },
+      ...courses.map((course) => ({
+        label: course.name,
+        to: `/educator/courses/${course.id}`,
+      })),
+    ],
+  };
   const visibleItems = items.filter((item) => canAccessRoute(item, user, role));
+  if (user && isEducator) visibleItems.push(courseNavigation);
 
   return (
     <Disclosure
@@ -98,6 +125,7 @@ export default function NavBar({ items }: NavBarProps) {
               "group inline-flex items-center justify-center rounded-lg p-2 text-text-muted transition",
               "hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50",
             )}
+            onClick={() => { if (user && isEducator) void refetch().catch(() => { }); }}
             aria-label="Toggle navigation menu"
           >
             <Bars3Icon className="block h-6 w-6 group-data-open:hidden" />
@@ -109,7 +137,13 @@ export default function NavBar({ items }: NavBarProps) {
           <nav className="flex items-center gap-1" aria-label="Primary views">
             {visibleItems.map((item) =>
               item.type === "dropdown" ? (
-                <DropDownNav key={item.label} nav={item} />
+                <DropDownNav
+                  key={item.label}
+                  nav={item}
+                  loading={item === courseNavigation && coursesLoading}
+                  error={item === courseNavigation ? coursesError : null}
+                  onRetry={() => void refetch().catch(() => { })}
+                />
               ) : (
                 <RoutePill key={item.to} to={item.to} label={item.label} />
               ),
@@ -163,6 +197,15 @@ export default function NavBar({ items }: NavBarProps) {
                 <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-text-soft">
                   {item.label}
                 </p>
+                {item === courseNavigation && coursesLoading && <p role="status" className="px-3 py-2 text-xs text-text-muted">Loading courses…</p>}
+                {item === courseNavigation && coursesError && <div role="alert" className="px-3 py-2 text-xs text-text-muted">
+                  <p>Could not load courses.</p>
+                  <button
+                    type="button"
+                    onClick={() => void refetch().catch(() => { })}
+                    className="mt-1 text-accent underline"
+                  >Try again</button>
+                </div>}
                 {item.items.map((child) => (
                   <DisclosureButton
                     key={child.to}

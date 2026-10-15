@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { MdOutlineEdit } from "react-icons/md";
 
 import type { Course } from "../../../services/courses";
-import { useEditCourse } from "../../CourseManagement/hooks";
+import { useEditCourse } from "../../../hooks/courses";
 
 const fieldClass =
   "w-full rounded-lg border border-border bg-surface-strong px-3 py-2 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/35 disabled:opacity-60";

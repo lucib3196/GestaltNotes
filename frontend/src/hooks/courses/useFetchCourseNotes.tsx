@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { useAuth } from "../../Auth";
-import { CoursesAPI, type CourseNote } from "../../../services/courses";
+import { useAuth } from "../../features/Auth";
+import { CoursesAPI, type CourseNote } from "../../services/courses";
 
 export function useFetchCourseNotes(courseId: string | undefined) {
   const { user } = useAuth();
@@ -43,5 +43,5 @@ export function useFetchCourseNotes(courseId: string | undefined) {
     return () => { active = false; };
   }, [fetchNotes]);
 
-  return { notes, loading, error, refetch: fetchNotes };
+  return { notes, setNotes, loading, error, refetch: fetchNotes };
 }

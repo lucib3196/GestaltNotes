@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import { InputTextForm } from "../../../components/FormComponents";
 import type { Course } from "../../../services/courses";
-import { useCreateCourse } from "../hooks";
+import { useCreateCourse } from "../../../hooks/courses";
 
 type CreateCourseProps = {
   onCreated?: (course: Course) => void;

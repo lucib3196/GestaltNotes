@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-
-
 type PreviewKind = "pdf" | "image" | "audio" | "video" | "text" | "other";
 
 type Preview = {
@@ -15,11 +13,10 @@ type Preview = {
 
 const TEXT_PREVIEW_LIMIT = 100 * 1024; // 100 KB
 
-
 type PreviewProps = {
-    file: File
-    showDownload?:boolean
-}
+  file: File;
+  showDownload?: boolean;
+};
 
 function getPreviewKind(file: File): PreviewKind {
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
@@ -64,7 +61,7 @@ function getPreviewKind(file: File): PreviewKind {
   return "other";
 }
 
-export default function FilePreview({ file, showDownload=false }: PreviewProps) {
+export default function FilePreview({ file, showDownload = false }: PreviewProps) {
   const [preview, setPreview] = useState<Preview | null>(null);
 
   useEffect(() => {
@@ -79,13 +76,16 @@ export default function FilePreview({ file, showDownload=false }: PreviewProps) 
 
     const url = URL.createObjectURL(source);
 
-    setPreview({
-      file,
-      url,
-      kind,
-      text: null,
-      truncated: file.size > TEXT_PREVIEW_LIMIT,
-      error: null,
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setPreview({
+        file,
+        url,
+        kind,
+        text: null,
+        truncated: file.size > TEXT_PREVIEW_LIMIT,
+        error: null,
+      });
     });
 
     if (kind === "text") {
@@ -129,9 +129,9 @@ export default function FilePreview({ file, showDownload=false }: PreviewProps) 
     setPreview((current) =>
       current?.file === file
         ? {
-            ...current,
-            error: "Your browser could not preview this file. Download it to open it.",
-          }
+          ...current,
+          error: "Your browser could not preview this file. Download it to open it.",
+        }
         : current,
     );
   }
@@ -139,13 +139,13 @@ export default function FilePreview({ file, showDownload=false }: PreviewProps) 
   return (
     <section
       aria-label={`Preview of ${file.name}`}
-      className="mt-3 min-w-0 overflow-hidden rounded-xl border border-border"
+      className="min-w-0 overflow-hidden"
     >
-      <div className="border-b border-border px-4 py-3">
+      <div className="px-1 py-3">
         <p className="break-all text-sm font-medium">{file.name}</p>
       </div>
 
-      <div className="p-4">
+      <div className="py-3">
         {preview.error ? (
           <p className="text-sm text-text-soft" role="status">
             {preview.error}
@@ -158,7 +158,7 @@ export default function FilePreview({ file, showDownload=false }: PreviewProps) 
                   key={preview.url}
                   src={preview.url}
                   title={`Preview of ${file.name}`}
-                  className="h-128 w-full rounded-lg border border-border"
+                  className="h-[70vh] min-h-96 w-full border-0"
                 />
                 <p className="mt-2 text-xs text-text-soft">
                   If the PDF doesn’t display, use the download below.
@@ -231,7 +231,7 @@ export default function FilePreview({ file, showDownload=false }: PreviewProps) 
         )}
       </div>
 
-      {showDownload && <div className="border-t border-border px-4 py-3">
+      {showDownload && <div className="px-1 py-3">
         <a
           href={preview.url}
           download={file.name}

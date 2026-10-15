@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HomePage, ChatPage, MyAccount } from "./pages";
-import EducatorPage from "./features/EducatorPage/EducatorPage";
 import {
   AuthPage,
   PasswordResetGuard,
@@ -9,9 +8,8 @@ import {
 } from "./features/Auth";
 import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
-import SingleCourse from "./features/CourseManagement/SingleCourse";
+import { CourseDetails } from "./features/CourseDetails";
 import CourseManagement from "./features/CourseManagement/CourseManagement";
-
 
 function App() {
   return (
@@ -23,7 +21,6 @@ function App() {
           <Route path="/login" element={<AuthPage />} />
           <Route path="/account" element={<MyAccount />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
 
           <Route element={<PasswordResetGuard />}>
             {/* Student Only Roots */}
@@ -39,10 +36,10 @@ function App() {
             </Route>
 
             <Route element={<RoleRedirect allow={["educator"]} />}>
-              <Route path="/educator" element={<EducatorPage />} />
-              
-              <Route path="/educator/courses" element={<CourseManagement/>} />
-              <Route path="/educator/courses/:courseId" element={<SingleCourse />} />
+              <Route path="/educator" element={<Navigate to="/educator/courses" replace />} />
+
+              <Route path="/educator/courses" element={<CourseManagement />} />
+              <Route path="/educator/courses/:courseId" element={<CourseDetails />} />
             </Route>
           </Route>
 

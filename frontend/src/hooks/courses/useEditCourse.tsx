@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 
-import { useAuth } from "../../Auth";
+import { useAuth } from "../../features/Auth";
 import {
   CoursesAPI,
   type Course,
   type CourseUpdate,
-} from "../../../services/courses";
+} from "../../services/courses";
 
 export function useEditCourse() {
   const { user } = useAuth();
