@@ -1,9 +1,9 @@
 from uuid import uuid4
 
 import pytest
+from object_store.exceptions import BlobNotFoundError
 
 from backend.accounts.models import User
-from object_store.exceptions import BlobNotFoundError
 from backend.storage.exceptions import FileNotFoundError
 from backend.storage.services.file_service import FileService
 

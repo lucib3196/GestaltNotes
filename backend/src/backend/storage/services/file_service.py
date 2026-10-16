@@ -2,13 +2,11 @@ import contextlib
 from pathlib import Path
 from uuid import UUID
 
+from object_store import BlobMetadata, BlobStorage, BlobUploadData
+from object_store.exceptions import BlobStorageDeleteError
 from sqlmodel import Session
 
 from backend.accounts.models import User
-from object_store import BlobStorage, BlobUploadData, BlobMetadata
-
-from object_store.exceptions import BlobStorageDeleteError
-
 from backend.storage.exceptions import (
     FileNotFoundError,
     FileServiceCreateError,
@@ -17,8 +15,8 @@ from backend.storage.exceptions import (
     FileServiceUpdateError,
 )
 from backend.storage.repo.file_repository import FileRepository
-from backend.storage.repo.schema import File, FileUpdate
-
+from backend.storage.schema import FileUpdate
+from backend.storage.models import File
 
 class FileService:
     def __init__(self, storage: BlobStorage, session: Session) -> None:

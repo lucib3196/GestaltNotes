@@ -1,7 +1,9 @@
 from uuid import UUID
+
 from celery.result import AsyncResult
 from fastapi.routing import APIRouter
-from worker import random_number, app
+
+from worker import app, random_number
 
 ID = UUID | str
 
@@ -20,5 +22,4 @@ def get_number(taks_id: str):
     result = AsyncResult(taks_id, app=app)
     if result.ready():
         return {"status": "complete", "value": result.get()}
-    else:
-        return {"status": "processing"}
+    return {"status": "processing"}

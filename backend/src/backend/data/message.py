@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from backend.core.logger import logger
 from backend.chat.model import Message
+from backend.core.logger import logger
 from backend.utils.utils import convert_uuid
 
 

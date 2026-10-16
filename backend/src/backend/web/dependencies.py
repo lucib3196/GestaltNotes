@@ -4,12 +4,8 @@ from typing import Annotated
 from fastapi import Depends
 
 from backend.core.logger import logger
-from backend.core.settings import get_settings
 from backend.data.message import MessageDB
 from backend.database import SessionDep
-
-
-
 
 
 @lru_cache

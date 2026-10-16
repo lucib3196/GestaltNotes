@@ -2,14 +2,16 @@ from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
-from backend.shared import Status
-from sqlalchemy import Column, ForeignKey, UniqueConstraint, Index
-from sqlmodel import Field, Relationship, SQLModel
+
 from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
+from sqlmodel import Field, Relationship, SQLModel
+
+from backend.shared import Status
+
 if TYPE_CHECKING:
     from backend.accounts.models import User
-    from backend.storage.repo.schema import File
+    from backend.storage.schema import File
 
 
 class CourseContentType(StrEnum):

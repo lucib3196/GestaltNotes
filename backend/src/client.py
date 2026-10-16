@@ -1,7 +1,8 @@
-import time 
+import time
+
 from celery.result import AsyncResult
 
-from worker import random_number, app
+from worker import app, random_number
 
 time.sleep(5)
 

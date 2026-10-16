@@ -38,7 +38,6 @@ def course_service(
     )
 
 
-
 @fixture
 def enrollment_service(course_service: CourseService, db_session):
     return CourseEnrollmentService(course_service, db_session)

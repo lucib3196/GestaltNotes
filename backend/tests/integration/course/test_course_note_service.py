@@ -9,9 +9,6 @@ from backend.courses.models import CourseContentType, CourseNote
 from backend.storage.models import File
 
 
-
-
-
 @pytest_asyncio.fixture
 async def course_owner(make_user):
     suffix = uuid4().hex
@@ -52,7 +49,7 @@ def upload_file(
     return UploadFile(
         file=BytesIO(content),
         filename=filename,
-        headers={"content-type": content_type}, # type: ignore
+        headers={"content-type": content_type},  # type: ignore
     )
 
 

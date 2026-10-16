@@ -18,7 +18,7 @@ from backend.chat.exceptions import (
     ThreadRetrievalError,
     ThreadUpdateError,
 )
-from backend.chat.model import Message, Thread, ThreadTitleSource
+from backend.chat.model import Thread, ThreadTitleSource
 from backend.chat.schema import ThreadUpdate
 from backend.core.logger import logger
 from backend.utils.utils import convert_uuid
@@ -155,7 +155,7 @@ class ThreadService:
                 return thread
             for field, value in changes.items():
                 setattr(thread, field, value)
-                
+
             print("Changes", changes)
             thread.updated_at = datetime.utcnow()
             self.session.add(thread)

@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import Session, select
 

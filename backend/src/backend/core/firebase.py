@@ -1,13 +1,14 @@
 import os
+import socket
 from functools import lru_cache
 from urllib.parse import urlparse
-import socket
+
 import firebase_admin
 from firebase_admin import credentials
 
-from .settings import get_settings
 from .exceptions import FirebaseInitializationError, MissingConfigError
 from .logger import logger
+from .settings import get_settings
 
 app_settings = get_settings()
 
@@ -65,7 +66,6 @@ def initialize_firebase_app():
             os.environ.pop("STORAGE_EMULATOR_HOST", None)
 
         else:
-
             # ensure dev env vars exist
             if not app_settings.FIREBASE_AUTH_EMULATOR_HOST:
                 raise FirebaseInitializationError(
@@ -82,7 +82,6 @@ def initialize_firebase_app():
             )
             os.environ["STORAGE_EMULATOR_HOST"] = app_settings.STORAGE_EMULATOR_HOST
 
-            
             _log_firebase_emulator_config()
 
         # -----------------------------

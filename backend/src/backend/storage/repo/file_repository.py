@@ -7,6 +7,7 @@ from sqlmodel import Session, col, select
 from backend.accounts.models import User
 from backend.core import logger
 from backend.database import Repository
+from backend.storage.models import File
 from backend.storage.repo.exceptions import (
     FileCreationError,
     FileDeletionError,
@@ -14,7 +15,7 @@ from backend.storage.repo.exceptions import (
     FileRetrievalError,
     FileUpdateError,
 )
-from backend.storage.repo.schema import File, FileUpdate
+from backend.storage.schema import FileUpdate
 
 
 class FileRepository(Repository[File, FileUpdate]):

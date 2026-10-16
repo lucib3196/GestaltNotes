@@ -2,6 +2,7 @@ import firebase_admin
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 from starlette import status
+
 from backend.web.dependencies import SessionDep
 
 router = APIRouter(tags=["Health"], prefix="/health")
@@ -42,5 +43,3 @@ def firebase_health():
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Firebase Admin app is not initialized",
         ) from e
-
-

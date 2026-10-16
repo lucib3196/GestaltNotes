@@ -1,4 +1,3 @@
-
 from backend.storage.repo.exceptions import (
     FileCreationError,
     FileDeletionError,
@@ -30,7 +29,6 @@ class FileServiceDeletionError(FileServiceError):
 
 
 __all__ = [
-
     "FileCreationError",
     "FileDeletionError",
     "FileNotFoundError",

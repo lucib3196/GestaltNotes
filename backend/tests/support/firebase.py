@@ -14,8 +14,7 @@ ALLOWED_EMULATOR_HOST_PREFIXES = (
     "127.0.0.1:",
     "0.0.0.0:",
     "firebase",
-    "firebase_emulator"
-    "host.docker.internal:",
+    "firebase_emulatorhost.docker.internal:",
     "http://localhost:",
     "http://firebase_emulator:",
     "http://127.0.0.1:",

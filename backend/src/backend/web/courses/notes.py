@@ -8,11 +8,10 @@ from starlette import status
 
 from backend.courses.exceptions import CourseServiceException
 from backend.courses.models import CourseContentType
-from backend.courses.schema import CourseNoteDelete, CourseNoteRead
+from backend.courses.schema import CourseNoteDelete, CourseNoteRead, CourseNoteUpdate
 from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep
 from backend.web.courses.dependencies import CourseNoteServiceDep
 from backend.web.courses.http import course_http_exception
-from backend.courses.schema import CourseNoteUpdate
 
 ID = UUID | str
 
@@ -79,7 +78,7 @@ async def update_course_note(
     try:
         await service.assert_permission(educator, course_id)
         return await service.update_note_properties(course_id, note_id, update)
-    except Exception as e:
+    except Exception:
         raise ValueError("Failed")
 
 
@@ -89,7 +88,7 @@ async def stream_course_note(
     note_id: UUID,
     _user: CurrentUserDep,
     service: CourseNoteServiceDep,
-)->StreamingResponse:
+) -> StreamingResponse:
     try:
         file, data = await service.download_note_file(
             course_id=course_id,

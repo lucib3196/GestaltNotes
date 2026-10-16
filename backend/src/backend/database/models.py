@@ -1,16 +1,16 @@
 """Centralized SQLModel imports for Alembic metadata discovery."""
 
 from backend.accounts.models import Role, User, UserRole, UserRoleLink
+from backend.chat.model import Message, Thread
 from backend.courses.models import (
     Course,
     CourseAccessCode,
     CourseEnrollment,
-    CourseNote
+    CourseNote,
 )
-from backend.chat.model import Message, Thread
 from backend.model.generated_content import GeneratedMCQ
 from backend.model.user import UserCourseLink
-from backend.storage.models import File
+from backend.storage.models import File, FileProcessing, ProcessingStatus
 
 __all__ = [
     "Course",
@@ -26,4 +26,6 @@ __all__ = [
     "UserCourseLink",
     "UserRole",
     "UserRoleLink",
+    "FileProcessing",
+    "ProcessingStatus"
 ]

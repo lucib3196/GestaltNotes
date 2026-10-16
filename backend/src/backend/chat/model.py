@@ -3,7 +3,8 @@ from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, Enum as SAEnum, ForeignKey
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
 
 

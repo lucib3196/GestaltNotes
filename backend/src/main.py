@@ -5,9 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
-from sqlmodel import Session
 
-from backend.accounts.services import RoleDB
 from backend.core.firebase import initialize_firebase_app
 from backend.core.logger import logger
 from backend.core.settings import get_settings
@@ -25,7 +23,6 @@ async def on_startup(app: FastAPI):
     logger.info("Initialized fb okay")
     logger.info("Created database successfully")
 
-
     yield
 
 
@@ -33,7 +30,7 @@ def add_routes(app: FastAPI, routes: list[APIRouter] = ALL_ROUTES) -> None:
     for r in routes:
         app.include_router(r)
 
- 
+
 def get_app():
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
     logger.info("[Initialization] Initialized app")

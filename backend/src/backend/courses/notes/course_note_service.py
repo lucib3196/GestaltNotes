@@ -2,6 +2,7 @@ import contextlib
 from uuid import UUID
 
 from fastapi import UploadFile
+from object_store.exceptions import BlobStorageDeleteError
 from sqlmodel import Session
 
 from backend.accounts import User
@@ -11,13 +12,11 @@ from backend.courses.exceptions import (
 )
 from backend.courses.models import Course, CourseContentType, CourseNote
 from backend.courses.notes.repo import CourseNoteRepository
-from backend.courses.schema import CourseNoteRead
+from backend.courses.schema import CourseNoteRead, CourseNoteUpdate
 from backend.courses.service.course_service import CourseService
 from backend.storage import FileService
-from object_store.exceptions import BlobStorageDeleteError
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key
-from backend.courses.schema import CourseNoteUpdate
 
 
 class CourseNoteService:

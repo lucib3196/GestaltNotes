@@ -1,17 +1,17 @@
-from dotenv import load_dotenv
-import os 
-import time
+import os
 import random
+import time
 
+from dotenv import load_dotenv
 
 load_dotenv()
 
 from celery import Celery
+
 app = Celery(
     "random_number",
     broker=os.getenv("CELERY_BROKER_URL"),
-    backend=os.getenv("CELERY_BACKEND_URL")
-    
+    backend=os.getenv("CELERY_BACKEND_URL"),
 )
 
 
