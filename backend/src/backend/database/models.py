@@ -10,22 +10,23 @@ from backend.courses.models import (
 )
 from backend.model.generated_content import GeneratedMCQ
 from backend.model.user import UserCourseLink
-from backend.storage.models import File, FileProcessing, ProcessingStatus
+from backend.storage.models import Document, File, FileProcessing, ProcessingStatus
 
 __all__ = [
     "Course",
     "CourseAccessCode",
     "CourseEnrollment",
     "CourseNote",
+    "Document",
     "File",
+    "FileProcessing",
     "GeneratedMCQ",
     "Message",
+    "ProcessingStatus",
     "Role",
     "Thread",
     "User",
     "UserCourseLink",
     "UserRole",
     "UserRoleLink",
-    "FileProcessing",
-    "ProcessingStatus"
 ]

@@ -14,9 +14,10 @@ from backend.storage.exceptions import (
     FileServiceRetrievalError,
     FileServiceUpdateError,
 )
+from backend.storage.models import File
 from backend.storage.repo.file_repository import FileRepository
 from backend.storage.schema import FileUpdate
-from backend.storage.models import File
+
 
 class FileService:
     def __init__(self, storage: BlobStorage, session: Session) -> None:
