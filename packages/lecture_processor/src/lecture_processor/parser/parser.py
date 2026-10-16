@@ -71,4 +71,3 @@ if __name__ == "__main__":
     source = json.loads(Path("full_output.json").read_text())
     docs = parse_lecture_documents(source)
     full = [d for d in docs]
-
