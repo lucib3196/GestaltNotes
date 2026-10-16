@@ -34,6 +34,11 @@ services:
         condition: service_healthy
       firebase_emulator:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
     environment:
       DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
       APP_ENV: docker
@@ -79,5 +84,47 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: customuser
+      RABBITMQ_DEFAULT_PASS: custompassword
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    command: "redis-server --save 60 1 --loglevel warning"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  celery_worker:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile.celery.dev
+    command: celery -A worker worker --loglevel=info
+    env_file:
+      - ./backend/.env.docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 volumes:
   postgres_data:
+  rabbitmq_data:
+  redis_data:

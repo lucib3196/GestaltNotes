@@ -13,9 +13,10 @@ export function RenderToolCall({ message }: { message: Message }) {
   const toolCompact = entry?.compact;
   const toolRender = entry && entry.render(data);
 
-  if (message.status !== "success") {
-    return <div>Loading</div>;
+  if (message.status === "error") {
+    return <div>Error</div>;
   }
+
   return (
     <div className={`flex min-w-0 flex-col`}>
       {message.content.length > 0 && (

@@ -1,6 +1,5 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-
-from agent.models.flow_diagram import FlowDiagram
+from gestalt_models import FlowDiagram
 
 
 async def summarize_diagram(model: BaseChatModel, diagram: FlowDiagram) -> str:
