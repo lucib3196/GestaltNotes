@@ -3,6 +3,8 @@ import useGetMermaidDiagram from "./useGetMermaidDiagram";
 import type { FlowDiagramData } from "./schema";
 import { useChatStore } from "../../Chat/instance";
 
+type Orientation = "original" | "TD" | "BT" | "LR" | "RL";
+
 export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
   const settingsId = useId();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -12,8 +14,20 @@ export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
   const setDraftText = useChatStore((state) => state.setDraftText);
   const draftText = useChatStore((state) => state.draftText);
   const [regenerationRequested, setRegenerationRequested] = useState(false);
+  const [orientation, setOrientation] = useState<Orientation>("original");
 
-  const result = useGetMermaidDiagram(data.code, {
+  const flowchartHeader =
+    /^([ \t]*(?:flowchart|graph)[ \t]+)(TD|TB|BT|LR|RL)\b/m;
+  const supportsOrientation = flowchartHeader.test(data.code);
+  const displayCode =
+    orientation === "original"
+      ? data.code
+      : data.code.replace(
+          flowchartHeader,
+          (_, prefix: string) => `${prefix}${orientation}`,
+        );
+
+  const result = useGetMermaidDiagram(displayCode, {
     useMaxWidth: fitToWidth,
     nodeSpacing: compact ? 15 : 30,
     rankSpacing: compact ? 25 : 50,
@@ -65,6 +79,25 @@ export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
       <div id={settingsId} hidden={!settingsOpen}>
         <fieldset className="mb-3 flex flex-wrap gap-4 text-xs">
           <legend className="sr-only">Diagram settings</legend>
+
+          {supportsOrientation && (
+            <label className="flex items-center gap-2">
+              Orientation
+              <select
+                value={orientation}
+                onChange={(event) =>
+                  setOrientation(event.target.value as Orientation)
+                }
+                className="rounded-md border border-border bg-surface px-2 py-1 text-text"
+              >
+                <option value="original">Original</option>
+                <option value="TD">Top to bottom</option>
+                <option value="BT">Bottom to top</option>
+                <option value="LR">Left to right</option>
+                <option value="RL">Right to left</option>
+              </select>
+            </label>
+          )}
 
           <label className="flex items-center gap-2">
             <input

@@ -21,6 +21,31 @@ EdgeType = Literal[
 ]
 
 
+def relative_luminance(color: str) -> float:
+    channels = [
+        int(color[index:index + 2], 16) / 255
+        for index in (1, 3, 5)
+    ]
+    linear = [
+        channel / 12.92
+        if channel <= 0.04045
+        else ((channel + 0.055) / 1.055) ** 2.4
+        for channel in channels
+    ]
+    return sum(
+        channel * weight
+        for channel, weight in zip(linear, (0.2126, 0.7152, 0.0722))
+    )
+
+
+def contrast_ratio(first: str, second: str) -> float:
+    lighter, darker = sorted(
+        (relative_luminance(first), relative_luminance(second)),
+        reverse=True,
+    )
+    return (lighter + 0.05) / (darker + 0.05)
+
+
 class DiagramNode(BaseModel):
     id: str = Field(
         pattern=r"^[A-Za-z_][A-Za-z0-9_]*$",
@@ -41,7 +66,11 @@ class DiagramNode(BaseModel):
     )
     text_color: HexColor | None = Field(
         default=None,
-        description="Optional six-digit hex text color.",
+        description=(
+            "Optional six-digit hex text color. Must have at least 4.5:1 "
+            "contrast against the node background. When a background is set, "
+            "missing or low-contrast text colors are corrected automatically."
+        ),
     )
     border_width: float | None = Field(
         default=None,
@@ -49,6 +78,22 @@ class DiagramNode(BaseModel):
         le=10,
         description="Optional border width in pixels.",
     )
+
+    @model_validator(mode="after")
+    def ensure_text_contrast(self) -> "DiagramNode":
+        if self.color is None:
+            return self
+
+        if (
+            self.text_color is None
+            or contrast_ratio(self.color, self.text_color) < 4.5
+        ):
+            self.text_color = max(
+                ("#000000", "#FFFFFF"),
+                key=lambda candidate: contrast_ratio(self.color, candidate),
+            )
+
+        return self
 
     @field_validator("id")
     @classmethod

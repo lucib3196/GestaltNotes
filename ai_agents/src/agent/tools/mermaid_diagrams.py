@@ -167,6 +167,11 @@ DERIVATIONS AND SCIENTIFIC EXPLANATIONS
   assumption instead of filling the gap with an unsupported claim.
 
 COLOR AND STYLE
+- Whenever setting a node background color, also choose a text color
+  with at least 4.5:1 contrast against that background.
+- Prefer black text on light backgrounds and white text on dark backgrounds.
+- Apply the same contrast requirements to legend nodes.
+- When relying on theme defaults, leave both background and text unset.
 - Use color sparingly and consistently to communicate a clear distinction.
 - Nodes with the same role or category should normally share styling.
 - Use valid six-digit hex colors in color fields.
@@ -243,6 +248,7 @@ async def create_flowchart(
 ) -> tuple[str, dict[str, Any]]:
     """Create a structured educational Mermaid flowchart."""
     model = get_model(runtime.context.model)
+    runtime.stream_writer({"type": "progress", "message": "Generating diagram…"})
 
     diagram = await model.with_structured_output(FlowDiagram).ainvoke(
         [
@@ -254,6 +260,9 @@ async def create_flowchart(
         ]
     )
     diagram = FlowDiagram.model_validate(diagram)
+    runtime.stream_writer(
+        {"type": "progress", "message": "Writing diagram explanation…"}
+    )
     summary = await summarize_diagram(model, diagram)
     artifact = MermaidArtifact(
         data=MermaidData(title=diagram.title, code=diagram.code())
@@ -319,6 +328,7 @@ async def mermaid_diagram(
 ) -> tuple[str, dict[str, Any]]:
     """Create an educational diagram using general Mermaid syntax."""
     model = get_model(runtime.context.model)
+    runtime.stream_writer({"type": "progress", "message": "Generating diagram…"})
     model_with_search = model.bind_tools([{"google_search": {}}])
     response = await model_with_search.ainvoke(
         [
@@ -331,6 +341,7 @@ async def mermaid_diagram(
         raise ValueError("The Mermaid generator returned no content.")
 
     # Package the search-enabled response using the existing artifact schema.
+    runtime.stream_writer({"type": "progress", "message": "Preparing diagram…"})
     output = await model.with_structured_output(GeneralMermaidOutput).ainvoke(
         [
             (

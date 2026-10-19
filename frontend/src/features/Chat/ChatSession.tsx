@@ -9,7 +9,7 @@ import { useChatStore } from "./instance";
 import { prepareMessage } from "./utils/messageSending";
 import { useCreateThread } from "./hooks/useCreateThread";
 import MessageList from "./ui/messages/MessageList";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Message } from "@langchain/langgraph-sdk";
 import { useUpdateThread } from "./hooks/useUpdateThread";
 
@@ -18,7 +18,23 @@ type ChatAgentState = {
   thread_title?: string;
 };
 
+function getProgressMessage(event: unknown): string | null {
+  if (
+    typeof event !== "object" ||
+    event === null ||
+    !("type" in event) ||
+    event.type !== "progress" ||
+    !("message" in event) ||
+    typeof event.message !== "string"
+  ) {
+    return null;
+  }
+
+  return event.message;
+}
+
 export default function ChatSession() {
+  const [progress, setProgress] = useState<string | null>(null);
   const config = useChatStore((s) => s.config);
   const activeThreadId = useChatStore((s) => s.activeThreadId);
   const threadsById = useChatStore((s) => s.threadsById);
@@ -40,6 +56,10 @@ export default function ChatSession() {
     apiUrl: streamURL,
     assistantId: assistantId,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
+    onCustomEvent: (event) => {
+      const message = getProgressMessage(event);
+      if (message !== null) setProgress(message);
+    },
     onThreadId: async (id: string) => {
       const thread = await createThread({ thread_id: id });
       upsertThread(thread);
@@ -65,9 +85,14 @@ export default function ChatSession() {
     },
   });
 
+  useEffect(() => {
+    setProgress(null);
+  }, [activeThreadId]);
+
   const handleSubmit = async (text: string, images?: string[]) => {
     const content = await prepareMessage(text, images);
 
+    setProgress(null);
     stream.submit(
       {
         messages: [
@@ -79,6 +104,7 @@ export default function ChatSession() {
       },
       {
         context: config,
+        streamMode: ["messages", "updates", "custom"],
       },
     );
   };
@@ -86,6 +112,7 @@ export default function ChatSession() {
     const handleExternalMessage = async () => {
       if (!draftText) return;
       const content = await prepareMessage(draftText);
+      setProgress(null);
       stream.submit(
         {
           messages: [
@@ -98,7 +125,7 @@ export default function ChatSession() {
             },
           ],
         },
-        { context: config },
+        { context: config, streamMode: ["messages", "updates", "custom"] },
       );
       setDraftText("");
     };
@@ -145,6 +172,15 @@ export default function ChatSession() {
         >
           <MathJax dynamic>
             <MessageList messages={visibleMessages} />
+            {stream.isLoading && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="mx-auto w-full max-w-4xl px-4 py-3 text-sm text-base-content/70"
+              >
+                {progress ?? "Working…"}
+              </div>
+            )}
           </MathJax>
         </ChatContainer>
       </div>

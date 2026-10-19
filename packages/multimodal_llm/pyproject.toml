@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Luciano Bermudez", email = "lberm007@ucr.edu" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.13.5",
 ]

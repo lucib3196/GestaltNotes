@@ -1,12 +1,14 @@
 import os
 import random
 import time
-
 from dotenv import load_dotenv
+from celery import Celery
 
+from backend.core import get_settings
+
+settings = get_settings()
 load_dotenv()
 
-from celery import Celery
 
 app = Celery(
     "random_number",
