@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from contextlib import contextmanager
 from functools import lru_cache
 from typing import Annotated
 
@@ -41,11 +42,16 @@ def session_cache():
     return initialize_database_engine()
 
 
+@contextmanager
+def open_session() -> Generator[Session, None, None]:
+    """Open a fresh session against this process's lazily cached engine."""
+    with Session(session_cache(), expire_on_commit=False) as session:
+        yield session
+
+
 def get_session() -> Generator[Session, None, None]:
-    engine = initialize_database_engine()
     """Yield a SQLModel session per request."""
-    engine = initialize_database_engine()
-    with Session(engine, expire_on_commit=False) as session:
+    with open_session() as session:
         yield session
 
 

@@ -9,6 +9,7 @@ from backend.accounts import User
 from backend.courses.exceptions import (
     CourseNoteAssociationError,
     CourseNoteNotFoundError,
+    CourseNoteRetrievalError,
 )
 from backend.courses.models import Course, CourseContentType, CourseNote
 from backend.courses.notes.repo import CourseNoteRepository
@@ -134,8 +135,19 @@ class CourseNoteService:
             raise
         await self._files.delete_blob(file.storage_key)
 
-    async def list_notes(self, course_id: UUID) -> list[CourseNote]:
-        return await self._repo.list_by_course(course_id)
+    async def get_note(self, note_id: UUID) -> CourseNoteRead:
+        note = await self._repo.get(note_id)
+        if note is None:
+            raise CourseNoteRetrievalError(
+                f"Failed to retrieve note '{note_id}': note does not exist"
+            )
+        return await self.read_note(note)
+
+    async def get_note(self, note_id: UUID) -> CourseNoteRead:
+        note = self._session.get(CourseNote, note_id)
+        if not note:
+            raise ValueError("Failed to retrieve note. Note does not exist")
+        return await self.read_note(note)
 
     async def read_note(self, note: CourseNote) -> CourseNoteRead:
         if not note.id:
@@ -154,7 +166,7 @@ class CourseNoteService:
         notes = await self.list_notes(course_id)
         return [await self.read_note(note) for note in notes]
 
-    async def download_note_file(
+    async def download_note_file_strict(
         self,
         course_id: UUID,
         note_id: UUID,
@@ -164,6 +176,12 @@ class CourseNoteService:
         if note is None or note.course_id != course_id:
             raise CourseNoteNotFoundError(str(course_id), str(note_id))
 
+        return await self._files.download_file(note.file_id)
+
+    async def download_note(self, note_id):
+        note = await self._repo.get(note_id)
+        if not note:
+            raise ValueError("Failed to retrieve note. Note does not exist")
         return await self._files.download_file(note.file_id)
 
     async def update_note_properties(

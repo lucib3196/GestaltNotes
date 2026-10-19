@@ -1,24 +1,15 @@
-import os
-import random
-import time
-from dotenv import load_dotenv
-from celery import Celery
+"""Compatibility entry point; processing code lives in backend.processing."""
 
-from backend.core import get_settings
-
-settings = get_settings()
-load_dotenv()
-
-
-app = Celery(
-    "random_number",
-    broker=os.getenv("CELERY_BROKER_URL"),
-    backend=os.getenv("CELERY_BACKEND_URL"),
+from backend.processing.celery_app import app
+from backend.processing.tasks import (
+    get_raw_lecture_output,
+    process_lecture_file,
+    vectorize_documents,
 )
 
-
-@app.task()
-def random_number(max_value):
-    time.sleep(60)
-    print("Processing......")
-    return random.randint(0, max_value)
+__all__ = [
+    "app",
+    "get_raw_lecture_output",
+    "process_lecture_file",
+    "vectorize_documents",
+]

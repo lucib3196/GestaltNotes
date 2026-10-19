@@ -11,7 +11,7 @@ from backend.shared import Status
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
-    from backend.storage.schema import File
+    from backend.storage.models import File
 
 
 class CourseContentType(StrEnum):
@@ -25,6 +25,13 @@ class CourseContentType(StrEnum):
     SYLLABUS = "syllabus"
     REFERENCE = "reference"
     OTHER = "other"
+
+
+class VectorStoreStatus(StrEnum):
+    PENDING = "pending"
+    READY = "ready"
+    FAILED = "failed"
+    ARCHIVED = "archieved"
 
 
 class CourseEnrollment(SQLModel, table=True):
@@ -132,3 +139,20 @@ class CourseModule(SQLModel, table=True):
             onupdate=datetime.utcnow,
         ),
     )
+
+
+class CourseVectorStore(SQLModel, table=True):
+    __tablename__ = "course_vector_store"  # type: ignore
+
+    course_id: UUID = Field(
+        sa_column=Column(
+            ForeignKey("course.id", ondelete="CASCADE"),
+            nullable=False,
+            primary_key=True,
+        )
+    )
+    collection_name: str = Field(unique=True, nullable=False)
+    description: str | None = Field(default=None)
+    embedding_model: str
+    provider: str
+    status: VectorStoreStatus

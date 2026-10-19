@@ -1,32 +1,31 @@
-"""Centralized SQLModel imports for Alembic metadata discovery."""
+"""Import model modules to register their tables with SQLModel metadata."""
 
-from backend.accounts.models import Role, User, UserRole, UserRoleLink
-from backend.chat.model import Message, Thread
-from backend.courses.models import (
-    Course,
-    CourseAccessCode,
-    CourseEnrollment,
-    CourseNote,
-)
-from backend.model.generated_content import GeneratedMCQ
-from backend.model.user import UserCourseLink
-from backend.storage.models import Document, File, FileProcessing, ProcessingStatus
+import sys
+from importlib import import_module
+from pathlib import Path
 
-__all__ = [
-    "Course",
-    "CourseAccessCode",
-    "CourseEnrollment",
-    "CourseNote",
-    "Document",
-    "File",
-    "FileProcessing",
-    "GeneratedMCQ",
-    "Message",
-    "ProcessingStatus",
-    "Role",
-    "Thread",
-    "User",
-    "UserCourseLink",
-    "UserRole",
-    "UserRoleLink",
-]
+import backend
+
+
+def _import_model_modules() -> None:
+    root = Path(next(iter(backend.__path__))).resolve()
+
+    for path in sorted(root.rglob("*.py")):
+        relative = path.relative_to(root)
+
+        if not (
+            path.stem in {"model", "models"}
+            or {"model", "models"}.intersection(relative.parts[:-1])
+        ):
+            continue
+
+        parts = relative.with_suffix("").parts
+        if parts[-1] == "__init__":
+            parts = parts[:-1]
+
+        module_name = ".".join(("backend", *parts))
+        if module_name not in sys.modules:
+            import_module(module_name)
+
+
+_import_model_modules()

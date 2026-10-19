@@ -20,6 +20,17 @@ class SectionResult[T: BaseModel](BaseModel):
 
 TypedSectionResult = SectionResult[Derivation] | SectionResult[ExtractedQuestion]
 
+class TaskFailure(BaseModel):
+    task: str
+    section_index: int | None = None
+    kind: Literal[
+        "input",
+        "provider",
+        "validation",
+        "unexpected",
+    ]
+    message: str
+    attempts: int | str
 
 class InputState(BaseModel):
     source: str | Path
@@ -33,7 +44,7 @@ class State(InputState):
     results: Annotated[list[TypedSectionResult], operator.add] = Field(
         default_factory=list
     )
-    failures: Annotated[list[TaskFailure], operator.add] = Field(default_factory=list)
+    failures: Annotated[list["TaskFailure"], operator.add] = Field(default_factory=list)
 
 
 class OutputState(InputState):
@@ -43,7 +54,7 @@ class OutputState(InputState):
     results: Annotated[list[TypedSectionResult], operator.add] = Field(
         default_factory=list
     )
-    failures: Annotated[list[TaskFailure], operator.add] = Field(default_factory=list)
+    failures: Annotated[list["TaskFailure"], operator.add] = Field(default_factory=list)
 
 
 class SectionTask(TypedDict):
@@ -51,14 +62,3 @@ class SectionTask(TypedDict):
     section: PDFSection[SectionMetadata]
 
 
-class TaskFailure(BaseModel):
-    task: str
-    section_index: int | None = None
-    kind: Literal[
-        "input",
-        "provider",
-        "validation",
-        "unexpected",
-    ]
-    message: str
-    attempts: int | str

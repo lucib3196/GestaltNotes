@@ -38,7 +38,7 @@ RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 
 COPY backend/pyproject.toml backend/uv.lock ./
-COPY packages/object_store /app/packages/object_store
+COPY packages /app/packages
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project

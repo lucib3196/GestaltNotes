@@ -73,10 +73,14 @@ class AppSettings(BaseSettings):
     # FIREBASE EMULATOR
     FIREBASE_AUTH_EMULATOR_HOST: str | None = None
     STORAGE_EMULATOR_HOST: str | None = None
+    GOOGLE_API_KEY: str | None = None
 
     # Langchain config
     LANGGRAPH_STREAM_URL: str | None = None
     LANGSMITH_API_KEY: str | None = None
+
+    ASTRA_DB_API_ENDPOINT: str | None = None
+    ASTRA_DB_APPLICATION_TOKEN: str | None = None
 
     # Backend CORS validation
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")

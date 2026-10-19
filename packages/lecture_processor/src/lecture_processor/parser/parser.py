@@ -1,12 +1,15 @@
 from collections.abc import Iterator
-from typing import Any
+import typing
 
 from langchain_core.documents import Document
-
+from pydantic import BaseModel
 from lecture_processor.conceptual_question import ConceptualQuestion
 from lecture_processor.extract_derivations.model import Derivation
 from lecture_processor.extracted_question.model import ExtractedQuestion
 from lecture_processor.graph.state import OutputState
+
+
+
 
 
 def _item_to_document(
@@ -70,4 +73,13 @@ if __name__ == "__main__":
 
     source = json.loads(Path("full_output.json").read_text())
     docs = parse_lecture_documents(source)
-    full = [d for d in docs]
+    parsed = []
+    for idx, d in enumerate(docs):
+        d.metadata.update(
+            {"course_id": 123, "course_name": "Course123", "storage_key": "storage123"}
+        )
+        d.id = f"course_123_chunk_{idx}"
+        parsed.append(d)
+
+    print(parsed[1])
+    print(parsed[1].id)

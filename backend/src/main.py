@@ -18,7 +18,7 @@ settings = get_settings()
 ## Intializes the database
 @asynccontextmanager
 async def on_startup(app: FastAPI):
-    engine = initialize_database_engine()
+    initialize_database_engine()
     initialize_firebase_app()
     logger.info("Initialized fb okay")
     logger.info("Created database successfully")

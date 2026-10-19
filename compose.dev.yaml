@@ -51,6 +51,7 @@ services:
     volumes:
       - ./backend:/app/backend # mount project allows for reloading
       - ./packages/object_store:/app/packages/object_store
+      - ./packages/lecture_processor:/app/packages/lecture_processor
 
   # Frontend
   gestalt_notes_frontend:
@@ -116,7 +117,14 @@ services:
     build: 
       context: .
       dockerfile: backend/Dockerfile.celery.dev
-    command: celery -A worker worker --loglevel=info
+    command:
+    - watchfiles
+    - --filter
+    - python
+    - "celery -A backend.processing.celery_app:app worker --loglevel=info"
+    - /app/backend/src
+    - /app/packages/object_store
+    - /app/packages/lecture_processor
     env_file:
       - ./backend/.env.docker
     depends_on:
@@ -124,6 +132,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - ./backend:/app/backend # mount project allows for reloading
+      - ./packages/object_store:/app/packages/object_store
+      - ./packages/lecture_processor:/app/packages/lecture_processor
 volumes:
   postgres_data:
   rabbitmq_data:

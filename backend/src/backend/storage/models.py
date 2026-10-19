@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, Column, ForeignKey
+from sqlalchemy import JSON, Column, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -14,7 +14,7 @@ class File(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     parent_id: UUID | None = Field(
         default=None,
-        sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False),
+        sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=True),
     )
     owner_id: UUID = Field(foreign_key="user.id", index=True)
     original_name: str
@@ -41,7 +41,12 @@ class FileProcessing(SQLModel, table=True):
         sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
     )
     celery_task_id: UUID
-    status: ProcessingStatus
+    status: ProcessingStatus = Field(
+        sa_column=Column(
+            Enum(ProcessingStatus, name="processing_status"),
+            nullable=False,
+        )
+    )
     stage: str | None = None
     started_at: datetime = Field(default_factory=datetime.utcnow)
     finished_at: datetime | None = None
