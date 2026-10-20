@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import UploadFile
 from object_store.exceptions import BlobStorageDeleteError
 from sqlmodel import Session
-
+from typing import Sequence
 from backend.accounts import User
 from backend.courses.exceptions import (
     CourseNoteAssociationError,
@@ -18,7 +18,7 @@ from backend.courses.service.course_service import CourseService
 from backend.storage import FileService
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key
-
+from sqlmodel import select
 
 class CourseNoteService:
     def __init__(
@@ -135,23 +135,21 @@ class CourseNoteService:
             raise
         await self._files.delete_blob(file.storage_key)
 
-    async def get_note(self, note_id: UUID) -> CourseNoteRead:
+    async def get_note_record(self, note_id: UUID) -> CourseNote:
         note = await self._repo.get(note_id)
         if note is None:
             raise CourseNoteRetrievalError(
                 f"Failed to retrieve note '{note_id}': note does not exist"
             )
-        return await self.read_note(note)
+        return note
 
     async def get_note(self, note_id: UUID) -> CourseNoteRead:
-        note = self._session.get(CourseNote, note_id)
-        if not note:
-            raise ValueError("Failed to retrieve note. Note does not exist")
-        return await self.read_note(note)
+        note = await self.get_note_record(note_id)
+        return self.to_note_read(note)
 
-    async def read_note(self, note: CourseNote) -> CourseNoteRead:
-        if not note.id:
-            raise CourseNoteAssociationError("Cannot read note without id")
+    def to_note_read(self, note: CourseNote) -> CourseNoteRead:
+        if note.id is None:
+            raise CourseNoteAssociationError("Cannot serialize note without id")
 
         return CourseNoteRead(
             id=note.id,
@@ -162,9 +160,12 @@ class CourseNoteService:
             content_type=note.file.content_type if note.file else None,
         )
 
+    async def list_notes(self, course_id: UUID)->Sequence[CourseNote]:
+        stmt = select(CourseNote).where(CourseNote.course_id == course_id)
+        return self._session.exec(stmt).all()
     async def list_notes_with_urls(self, course_id: UUID) -> list[CourseNoteRead]:
         notes = await self.list_notes(course_id)
-        return [await self.read_note(note) for note in notes]
+        return [self.to_note_read(note) for note in notes]
 
     async def download_note_file_strict(
         self,
@@ -178,7 +179,7 @@ class CourseNoteService:
 
         return await self._files.download_file(note.file_id)
 
-    async def download_note(self, note_id):
+    async def download_note(self, note_id: UUID):
         note = await self._repo.get(note_id)
         if not note:
             raise ValueError("Failed to retrieve note. Note does not exist")

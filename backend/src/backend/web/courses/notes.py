@@ -48,7 +48,7 @@ async def upload_course_note(
             upload=file,
             resource_type=resource_type,
         )
-        return await service.read_note(note)
+        return service.to_note_read(note)
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 

@@ -7,6 +7,10 @@ from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
 
+from backend.courses.vector_store.models import (
+    CourseVectorStore as CourseVectorStore,
+    VectorStoreStatus as VectorStoreStatus,
+)
 from backend.shared import Status
 
 if TYPE_CHECKING:
@@ -25,13 +29,6 @@ class CourseContentType(StrEnum):
     SYLLABUS = "syllabus"
     REFERENCE = "reference"
     OTHER = "other"
-
-
-class VectorStoreStatus(StrEnum):
-    PENDING = "pending"
-    READY = "ready"
-    FAILED = "failed"
-    ARCHIVED = "archieved"
 
 
 class CourseEnrollment(SQLModel, table=True):
@@ -139,20 +136,3 @@ class CourseModule(SQLModel, table=True):
             onupdate=datetime.utcnow,
         ),
     )
-
-
-class CourseVectorStore(SQLModel, table=True):
-    __tablename__ = "course_vector_store"  # type: ignore
-
-    course_id: UUID = Field(
-        sa_column=Column(
-            ForeignKey("course.id", ondelete="CASCADE"),
-            nullable=False,
-            primary_key=True,
-        )
-    )
-    collection_name: str = Field(unique=True, nullable=False)
-    description: str | None = Field(default=None)
-    embedding_model: str
-    provider: str
-    status: VectorStoreStatus

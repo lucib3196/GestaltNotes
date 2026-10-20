@@ -146,7 +146,7 @@ requires-dist = [
     { name = "langchain-astradb", specifier = ">=1.0.0" },
     { name = "langchain-google-genai", specifier = ">=4.4.2" },
     { name = "langgraph-sdk", specifier = ">=0.4.2,<0.5.0" },
-    { name = "lecture-processor", directory = "../packages/lecture_processor" },
+    { name = "lecture-processor", editable = "../packages/lecture_processor" },
     { name = "object-store", editable = "../packages/object_store" },
     { name = "psycopg2-binary", specifier = ">=2.9.11,<3.0.0" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.13.4,<3.0.0" },
@@ -1745,7 +1745,7 @@ wheels = [
 [[package]]
 name = "lecture-processor"
 version = "0.1.0"
-source = { directory = "../packages/lecture_processor" }
+source = { editable = "../packages/lecture_processor" }
 dependencies = [
     { name = "document-processing" },
     { name = "langchain-core" },

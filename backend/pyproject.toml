@@ -46,7 +46,7 @@ dev = [
 
 [tool.uv.sources]
 object-store = { path = "../packages/object_store", editable=true }
-lecture-processor = { path = "../packages/lecture_processor" }
+lecture-processor = { path = "../packages/lecture_processor",editable=true }
 
 [tool.ruff]
 line-length = 88
