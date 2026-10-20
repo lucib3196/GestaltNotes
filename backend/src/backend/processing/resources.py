@@ -1,16 +1,17 @@
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from contextlib import contextmanager
 
 from object_store import BlobStorage, FirebaseBlobStorage
-from collections.abc import Generator
-from contextlib import contextmanager
+
 from backend.core import get_settings
 from backend.core.exceptions import MissingConfigError
 from backend.core.firebase import initialize_firebase_app
+from backend.courses.notes.course_note_service import CourseNoteService
+from backend.courses.vector_store.course_vector_store_service import (
+    CourseVectorStoreService,
+)
 from backend.database.config import open_session
 from backend.storage import FileService
-from backend.courses.vector_store.course_vector_store_service import CourseVectorStoreService
-from backend.courses.notes.course_note_service import CourseNoteService
 
 
 def create_storage() -> BlobStorage:

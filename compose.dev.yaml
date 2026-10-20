@@ -78,7 +78,7 @@ services:
 
   # POSTGRES DB as a volume
   db:
-    image: postgres:18
+    image: pgvector/pgvector:0.8.7-pg18-trixie
     container_name: gestalt_notes_db
     restart: always
     environment:

@@ -8,8 +8,8 @@ from starlette import status
 
 from backend.processing.celery_app import app
 from backend.processing.schema import LectureTaskResponse, TaskProgress
+from backend.processing.tasks import update_course_docs
 from backend.web.courses.dependencies import CourseNoteServiceDep
-from backend.processing.tasks import  update_course_docs
 
 ID = UUID | str
 

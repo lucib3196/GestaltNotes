@@ -5,18 +5,20 @@ Revises: bf05d00743a6
 Create Date: 2026-10-20 11:44:46.107128
 
 """
-from typing import Sequence, Union
+
+from collections.abc import Sequence
+
+import sqlalchemy as sa
 
 from alembic import op
-import sqlalchemy as sa
-import sqlmodel
 from backend.core.settings import get_settings
 
 # revision identifiers, used by Alembic.
-revision: str = 'ca6f13f21955'
-down_revision: Union[str, Sequence[str], None] = 'bf05d00743a6'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+revision: str = "ca6f13f21955"
+down_revision: str | Sequence[str] | None = "bf05d00743a6"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
+
 
 def upgrade() -> None:
     collection_name = get_settings().ASTRA_DB_COLLECTION_NAME
@@ -24,9 +26,7 @@ def upgrade() -> None:
         "course_vector_store",
         sa.Column("collection_name", sa.String(), nullable=True),
     )
-    records = sa.table(
-        "course_vector_store", sa.column("collection_name", sa.String())
-    )
+    records = sa.table("course_vector_store", sa.column("collection_name", sa.String()))
     op.execute(records.update().values(collection_name=collection_name))
     with op.batch_alter_table("course_vector_store") as batch_op:
         batch_op.alter_column(

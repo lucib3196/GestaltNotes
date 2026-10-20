@@ -1,8 +1,10 @@
 from datetime import datetime
 from enum import StrEnum
 from uuid import UUID, uuid4
+
 from sqlalchemy import Column, Enum, ForeignKey
 from sqlmodel import Field, SQLModel
+
 
 class File(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)

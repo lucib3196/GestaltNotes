@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from time import perf_counter
 from typing import Any
 from uuid import UUID
+
 from langchain.chat_models import init_chat_model
 from lecture_processor.api import process_lecture
 from lecture_processor.graph.context import ExtractionContext
@@ -14,15 +15,15 @@ from lecture_processor.parser.parser import (
 )
 
 from backend.core import get_settings
-from backend.database.config import open_session
 from backend.courses.notes.models import NoteBlock
 from backend.courses.notes.note_block_service import NoteBlockService
 from backend.courses.vector_store.course_vector_store_service import create_vector_store
+from backend.database.config import open_session
 from backend.processing.celery_app import app
 from backend.processing.resources import (
-    file_service_scope,
-    course_vectorstore_scope,
     course_note_scope,
+    course_vectorstore_scope,
+    file_service_scope,
 )
 from backend.processing.schema import ProcessedLecture, VectorizedLecture
 

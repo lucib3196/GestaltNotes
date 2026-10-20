@@ -30,6 +30,15 @@ class NoteBlock(SQLModel, table=True):
         primary_key=True,
         description="Unique identifier for this editable note block.",
     )
+    course_id: UUID | None = Field(
+        default=None,
+        sa_column=Column(
+            ForeignKey("course.id", ondelete="CASCADE"),
+            nullable=True,
+            index=True,
+        ),
+        description="The course in which this block lives in",
+    )
     source_file_id: UUID | None = Field(
         default=None,
         sa_column=Column(

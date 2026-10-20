@@ -9,6 +9,8 @@ from sqlmodel import Field, Relationship, SQLModel
 
 from backend.courses.vector_store.models import (
     CourseVectorStore as CourseVectorStore,
+)
+from backend.courses.vector_store.models import (
     VectorStoreStatus as VectorStoreStatus,
 )
 from backend.shared import Status

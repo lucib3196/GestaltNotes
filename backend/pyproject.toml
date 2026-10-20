@@ -28,6 +28,7 @@ dependencies = [
     "langchain>=1.4.6",
     "langchain-google-genai>=4.4.2",
     "langchain-astradb>=1.0.0",
+    "langchain-postgres>=0.0.19",
 ]
 [tool.poetry]
 packages = [{ include = "backend", from = "src" }]

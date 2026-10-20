@@ -1,10 +1,11 @@
 import contextlib
+from collections.abc import Sequence
 from uuid import UUID
 
 from fastapi import UploadFile
 from object_store.exceptions import BlobStorageDeleteError
-from sqlmodel import Session
-from typing import Sequence
+from sqlmodel import Session, select
+
 from backend.accounts import User
 from backend.courses.exceptions import (
     CourseNoteAssociationError,
@@ -18,7 +19,7 @@ from backend.courses.service.course_service import CourseService
 from backend.storage import FileService
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key
-from sqlmodel import select
+
 
 class CourseNoteService:
     def __init__(
@@ -160,9 +161,10 @@ class CourseNoteService:
             content_type=note.file.content_type if note.file else None,
         )
 
-    async def list_notes(self, course_id: UUID)->Sequence[CourseNote]:
+    async def list_notes(self, course_id: UUID) -> Sequence[CourseNote]:
         stmt = select(CourseNote).where(CourseNote.course_id == course_id)
         return self._session.exec(stmt).all()
+
     async def list_notes_with_urls(self, course_id: UUID) -> list[CourseNoteRead]:
         notes = await self.list_notes(course_id)
         return [self.to_note_read(note) for note in notes]
