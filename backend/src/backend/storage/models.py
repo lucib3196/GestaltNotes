@@ -1,8 +1,7 @@
 from datetime import datetime
-from enum import StrEnum
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, Enum, ForeignKey
+from sqlalchemy import Column, ForeignKey
 from sqlmodel import Field, SQLModel
 
 
@@ -21,29 +20,6 @@ class File(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class ProcessingStatus(StrEnum):
-    QUEUED = "queued"
-    RUNNING = "running"
-    RETRYING = "retrying"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
-    REVOKED = "revoked"
 
 
-class FileProcessing(SQLModel, table=True):
-    __tablename__ = "file_processing"  # type: ignore
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
-    file_id: UUID | None = Field(
-        sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
-    )
-    celery_task_id: UUID
-    status: ProcessingStatus = Field(
-        sa_column=Column(
-            Enum(ProcessingStatus, name="processing_status"),
-            nullable=False,
-        )
-    )
-    stage: str | None = None
-    started_at: datetime = Field(default_factory=datetime.utcnow)
-    finished_at: datetime | None = None
-    error_message: str | None = None
+

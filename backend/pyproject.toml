@@ -30,6 +30,7 @@ dependencies = [
     "langchain-astradb>=1.0.0",
     "langchain-postgres>=0.0.19",
     "psycopg[binary]",
+    "alembic-postgresql-enum>=1.11.0",
 ]
 [tool.poetry]
 packages = [{ include = "backend", from = "src" }]
