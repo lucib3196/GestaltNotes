@@ -17,8 +17,8 @@ from backend.shared import Status
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
-    from backend.storage.models import File
     from backend.processing.model import LectureProcessingRun
+    from backend.storage.models import File
 
 
 class CourseContentType(StrEnum):
@@ -115,10 +115,10 @@ class CourseNote(SQLModel, table=True):
     course: "Course" = Relationship(back_populates="notes")
 
     file: "File" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
-    
+
     processing_runs: list["LectureProcessingRun"] = Relationship(
-    back_populates="note",
-)
+        back_populates="note",
+    )
 
 
 class CourseModule(SQLModel, table=True):

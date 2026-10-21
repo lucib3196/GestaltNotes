@@ -2,6 +2,7 @@ from enum import StrEnum
 from uuid import UUID
 
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, SQLModel
 
 
@@ -31,5 +32,15 @@ class CourseVectorStore(SQLModel, table=True):
     collection_name: str = Field(nullable=False)
     description: str | None = Field(default=None)
     embedding_model: str
-    provider: VectorstoreProvider
-    status: VectorStoreStatus
+    provider: VectorstoreProvider = Field(
+        sa_column=Column(
+            SAEnum(VectorstoreProvider, name="vector_store_provider"),
+            nullable=False,
+        ),
+    )
+    status: VectorStoreStatus = Field(
+        sa_column=Column(
+            SAEnum(VectorStoreStatus, name="vector_store_status"),
+            nullable=False,
+        ),
+    )

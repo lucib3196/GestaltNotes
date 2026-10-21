@@ -55,7 +55,7 @@ class NoteBlock(SQLModel, table=True):
         ),
     )
     course: Optional["Course"] = Relationship(
-        sa_relationship_kwargs = {"lazy": "selectin"}
+        sa_relationship_kwargs={"lazy": "selectin"}
     )
     file: Optional["File"] = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 

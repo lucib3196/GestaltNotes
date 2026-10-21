@@ -124,9 +124,7 @@ class CourseVectorStoreService:
             except (ArgumentError, ValueError) as exc:
                 raise InvalidConfigError("DATABASE_URL is malformed") from exc
             if connection_url.get_backend_name() != "postgresql":
-                raise InvalidConfigError(
-                    "PGVector requires a PostgreSQL database"
-                )
+                raise InvalidConfigError("PGVector requires a PostgreSQL database")
             connection_url = connection_url.set(drivername="postgresql+psycopg")
         elif record.provider == VectorstoreProvider.ASTRA:
             if not (

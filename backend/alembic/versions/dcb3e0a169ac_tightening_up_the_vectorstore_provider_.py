@@ -1,8 +1,9 @@
 """Tighten the vector-store provider column with an enum."""
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision = "dcb3e0a169ac"
 down_revision = "0fdfeecf3db5"

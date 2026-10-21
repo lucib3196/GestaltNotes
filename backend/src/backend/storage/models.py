@@ -18,8 +18,3 @@ class File(SQLModel, table=True):
     size_bytes: int | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-
-
-
-

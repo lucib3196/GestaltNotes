@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+
 import alembic_postgresql_enum
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
@@ -41,6 +42,7 @@ def include_name(name, type_, parent_names):
     if type_ == "table":
         return name not in EXTERNAL_TABLES
     return True
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

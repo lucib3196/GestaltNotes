@@ -1,13 +1,14 @@
 from enum import StrEnum
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
+
 from sqlalchemy import Column, ForeignKey
-from sqlmodel import Field, SQLModel
+from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import Column, Enum as SAEnum
-from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from backend.courses.models import CourseNote
+
 
 class ProcessingStatus(StrEnum):
     QUEUED = "queued"
@@ -27,37 +28,37 @@ class ProcessingStage(StrEnum):
     INDEXING = "indexing"
 
 
-class FileProcessing(SQLModel, table=True):
-    __tablename__ = "file_processing"  # type: ignore
+class ProcessingRun(SQLModel, table=True):
+    __tablename__ = "processing_run"  # type: ignore
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     celery_task_id: UUID
     task_type: str
-    status: ProcessingStatus = Field(
-    sa_column=Column(
-        SAEnum(
-            ProcessingStatus,
-            name="processing_status",
+    status: ProcessingStatus | None = Field(
+        sa_column=Column(
+            SAEnum(
+                ProcessingStatus,
+                name="processing_status",
+            ),
+            nullable=True,
         ),
-        nullable=False,
-    ),
-)
+    )
     stage: ProcessingStage = Field(
-    sa_column=Column(
-        SAEnum(
-            ProcessingStage,
-            name="processing_stage",
+        sa_column=Column(
+            SAEnum(
+                ProcessingStage,
+                name="processing_stage",
+            ),
+            nullable=False,
         ),
-        nullable=False,
-    ),
-)
-    attempt_count: int
+    )
+    attempt_count: int = 0
     error_type: str | None = None
     error_message: str | None = None
-    
+
     lecture_run: Optional["LectureProcessingRun"] = Relationship(
-    back_populates="run",
-    sa_relationship_kwargs={"uselist": False},
-)
+        back_populates="run",
+        sa_relationship_kwargs={"uselist": False},
+    )
 
 
 class LectureProcessingRun(SQLModel, table=True):
@@ -65,7 +66,7 @@ class LectureProcessingRun(SQLModel, table=True):
 
     run_id: UUID = Field(
         sa_column=Column(
-            ForeignKey("file_processing.id", ondelete="CASCADE"),
+            ForeignKey("processing_run.id", ondelete="CASCADE"),
             nullable=False,
             primary_key=True,
         )
@@ -78,7 +79,7 @@ class LectureProcessingRun(SQLModel, table=True):
         )
     )
 
-    run: "FileProcessing" = Relationship(
+    run: "ProcessingRun" = Relationship(
         back_populates="lecture_run",
         sa_relationship_kwargs={"lazy": "selectin"},
     )
