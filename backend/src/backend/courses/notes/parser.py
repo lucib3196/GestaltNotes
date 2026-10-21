@@ -5,10 +5,8 @@ from lecture_processor.extract_derivations.model import Derivation
 from lecture_processor.extracted_question import ExtractedQuestion
 from lecture_processor.graph.state import OutputState
 from pydantic import BaseModel
-from langchain_core.documents import Document
-from .models import NoteBlock
 
-from .models import NOTE_BLOCK_CONTENT_MODELS
+from .models import NoteBlock
 
 
 def parse_lecture_document(
@@ -76,61 +74,3 @@ def parse_lecture_document(
             )
 
     return notes
-
-
-def note_blocks_to_documents(blocks: list[NoteBlock]) -> list[Document]:
-    documents = []
-
-    for block in blocks:
-        if block.schema_version != 1:
-            raise ValueError(f"Unsupported schema version: {block.schema_version}")
-
-        model = NOTE_BLOCK_CONTENT_MODELS.get(block.kind)
-        if model is None:
-            raise ValueError(f"Unsupported block kind: {block.kind}")
-
-        content = model.model_validate(block.content)
-
-        metadata = {
-            "note_block_id": str(block.id),
-            "title": block.title,
-            "kind": block.kind,
-            "position": block.position,
-            "revision": block.revision,
-            "schema_version": block.schema_version,
-        }
-
-        if block.course_id is not None:
-            metadata["course_id"] = str(block.course_id)
-        if block.source_file_id is not None:
-            metadata["source_file_id"] = str(block.source_file_id)
-        if block.page_start is not None:
-            metadata["page_start"] = block.page_start
-        if block.page_end is not None:
-            metadata["page_end"] = block.page_end
-
-        documents.append(
-            Document(
-                id=str(block.id),
-                page_content=content.as_string(),
-                metadata=metadata,
-            )
-        )
-
-    return documents
-
-
-if __name__ == "__main__":
-    from pathlib import Path
-    import json
-    import backend.accounts.models
-    import backend.storage.models
-
-    path = Path(
-        r"/home/lberm/projects/gestalt/GestaltNotes/packages/lecture_processor/src/full_output.json"
-    )
-    content = json.loads(path.read_text())
-    notes = parse_lecture_document(content)
-    print(len(notes))
-    docs = note_blocks_to_documents(notes)
-    print(docs[-1])

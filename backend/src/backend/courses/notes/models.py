@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 from lecture_processor.conceptual_question import ConceptualQuestion
@@ -9,8 +9,11 @@ from lecture_processor.lecture_analysis import LectureAnalysis
 from pydantic import BaseModel
 from sqlalchemy import JSON, Column, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
+if TYPE_CHECKING:
+    from backend.courses.models import Course
+    from backend.storage.models import File
 JSONType = JSON().with_variant(JSONB, "postgresql")
 
 NOTE_BLOCK_CONTENT_MODELS: dict[str, type[BaseModel]] = {
@@ -51,6 +54,10 @@ class NoteBlock(SQLModel, table=True):
             "Deleting the source file also deletes its blocks."
         ),
     )
+    course: "Course | None" = Relationship(
+        sa_relationship_kwargs == {"lazy": "selectin"}
+    )
+    file: "File | None" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
     # Editable content
     title: str = Field(

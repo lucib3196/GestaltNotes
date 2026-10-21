@@ -82,7 +82,6 @@ class AppSettings(BaseSettings):
     ASTRA_DB_API_ENDPOINT: str | None = None
     ASTRA_DB_APPLICATION_TOKEN: str | None = None
     ASTRA_DB_COLLECTION_NAME: str = "gestalt_lectures"
-    ASTRA_DB_EMBEDDING_MODEL: str = "gemini-embedding-001"
 
     # Backend CORS validation
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
