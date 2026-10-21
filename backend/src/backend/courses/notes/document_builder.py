@@ -63,7 +63,7 @@ class NoteBlockDocumentBuilder:
                 document.metadata.update(metadata_by_file[block.source_file_id])
             if block.course:
                 document.metadata.update(
-                    course_name=block.course.name, course_id=block.course.id
+                    course_name=block.course.name, course_id=str(block.course.id)
                 )
         return documents
 

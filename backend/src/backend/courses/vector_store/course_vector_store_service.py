@@ -123,10 +123,11 @@ class CourseVectorStoreService:
                 connection_url = make_url(settings.DATABASE_URL)
             except (ArgumentError, ValueError) as exc:
                 raise InvalidConfigError("DATABASE_URL is malformed") from exc
-            if connection_url.drivername != "postgresql+psycopg":
+            if connection_url.get_backend_name() != "postgresql":
                 raise InvalidConfigError(
-                    "PGVector requires a DATABASE_URL using 'postgresql+psycopg://'"
+                    "PGVector requires a PostgreSQL database"
                 )
+            connection_url = connection_url.set(drivername="postgresql+psycopg")
         elif record.provider == VectorstoreProvider.ASTRA:
             if not (
                 settings.ASTRA_DB_API_ENDPOINT
@@ -160,7 +161,7 @@ class CourseVectorStoreService:
             vector_store = PGVector(
                 embeddings=embeddings,
                 collection_name=record.collection_name,
-                connection=settings.DATABASE_URL,
+                connection=connection_url.render_as_string(hide_password=False),
                 use_jsonb=True,
             )
         else:

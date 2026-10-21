@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID, uuid4
 
 from lecture_processor.conceptual_question import ConceptualQuestion
@@ -54,10 +54,10 @@ class NoteBlock(SQLModel, table=True):
             "Deleting the source file also deletes its blocks."
         ),
     )
-    course: "Course | None" = Relationship(
-        sa_relationship_kwargs == {"lazy": "selectin"}
+    course: Optional["Course"] = Relationship(
+        sa_relationship_kwargs = {"lazy": "selectin"}
     )
-    file: "File | None" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+    file: Optional["File"] = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
     # Editable content
     title: str = Field(

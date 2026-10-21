@@ -1,41 +1,15 @@
 from uuid import UUID
 
-from celery import chain
 from celery.result import AsyncResult
-from fastapi import HTTPException
 from fastapi.routing import APIRouter
-from starlette import status
 
 from backend.processing.celery_app import app
 from backend.processing.schema import LectureTaskResponse, TaskProgress
-from backend.processing.tasks import update_course_docs
-from backend.web.courses.dependencies import CourseNoteServiceDep
+from backend.processing.tasks import process_lecture_file
 
 ID = UUID | str
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
-
-
-@router.post("/notes/{note_id}")
-async def process_file(note_id: UUID, course_notes: CourseNoteServiceDep):
-    note = await course_notes.get_note(note_id)
-    if note.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="PDF Files are only supported type right now",
-        )
-    workflow = chain(
-        app.signature(
-            "backend.processing.tasks.get_raw_lecture_output", args=[str(note.file_id)]
-        ),
-        app.signature("backend.processing.tasks.vectorize_documents"),
-    )
-    task = workflow.apply_async()
-    return {
-        "file_id": note.file_id,
-        "task_id": task.id,
-        "summary": "Processing lecture",
-    }
 
 
 @router.get("/file/{task_id}", response_model=LectureTaskResponse)
@@ -54,7 +28,8 @@ def get_task_status(task_id: str):
 
 @router.post("/course/{course_id}/{note_id}/temp")
 async def check(course_id: UUID, note_id: UUID):
-    workflow = update_course_docs.s(course_id, note_id)
+    print("PROCESSING",note_id)
+    workflow = process_lecture_file.s(course_id, note_id) # type: ignore
     task = workflow.apply_async()
     return {
         "course_id": course_id,

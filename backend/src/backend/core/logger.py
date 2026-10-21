@@ -4,7 +4,7 @@ import os
 log_level = int(os.getenv("LOGLEVEL", logging.INFO))
 logger = logging.getLogger(__name__)
 logger.setLevel(log_level)
-logger.propagate = False
+logger.propagate = True
 
 # Formatiting
 formatter = logging.Formatter(
