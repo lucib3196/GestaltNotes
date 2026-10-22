@@ -1,19 +1,9 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 
-from .model import ProcessingRun, ProcessingStage, ProcessingStatus
-
-
-class RunUpdate(BaseModel):
-    celery_task_id: UUID | None = None
-    task_type: str | None = None
-    status: ProcessingStatus | None = None
-    stage: ProcessingStage | None = None
-    attempt_count: int | None = Field(default=None, ge=0)
-    error_type: str | None = None
-    error_message: str | None = None
+from .models import LectureProcessingRun, ProcessingRun, ProcessingStatus
+from .schema import RunUpdate
 
 
 class RunRepo:
@@ -39,6 +29,28 @@ class RunRepo:
             ProcessingRun.celery_task_id == celery_task_id
         )
         return self._session.exec(statement).one_or_none()
+
+    def get_successful_by_note(self, note_id: UUID) -> ProcessingRun | None:
+        """Find any successful run associated with a lecture note."""
+        statement = (
+            select(ProcessingRun)
+            .join(LectureProcessingRun, LectureProcessingRun.run_id == ProcessingRun.id)
+            .where(
+                LectureProcessingRun.note_id == note_id,
+                ProcessingRun.status == ProcessingStatus.SUCCEEDED,
+            )
+            .limit(1)
+        )
+        return self._session.exec(statement).first()
+
+    def list_by_note(self, note_id: UUID) -> list[ProcessingRun]:
+        """Return runs associated with a lecture note."""
+        statement = (
+            select(ProcessingRun)
+            .join(LectureProcessingRun, LectureProcessingRun.run_id == ProcessingRun.id)
+            .where(LectureProcessingRun.note_id == note_id)
+        )
+        return list(self._session.exec(statement).all())
 
     def update(
         self,

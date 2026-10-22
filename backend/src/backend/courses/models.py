@@ -17,7 +17,7 @@ from backend.shared import Status
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
-    from backend.processing.model import LectureProcessingRun
+    from backend.processing.models import LectureProcessingRun
     from backend.storage.models import File
 
 

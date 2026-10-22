@@ -53,9 +53,6 @@ class NoteBlockDocumentBuilder:
                 metadata["download_url"] = await self._files.get_download_url(file_id)
             metadata_by_file[file_id] = metadata
 
-        # Get Course Metadata
-        {block.course_id for block in blocks if block.course_id is not None}
-
         for block, document in zip(blocks, documents, strict=False):
             if block.source_file_id is not None:
                 document.metadata.update(metadata_by_file[block.source_file_id])

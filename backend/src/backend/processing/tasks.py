@@ -7,13 +7,10 @@ from uuid import UUID
 from celery import Task
 from celery.exceptions import Ignore, Reject, Retry
 from langchain.chat_models import init_chat_model
-from lecture_processor import OutputState
 from lecture_processor.api import process_lecture
 from lecture_processor.graph.context import ExtractionContext
-from pydantic import BaseModel, Field, field_validator
 
 from backend.core.logger import logger
-from backend.courses.notes.models import NoteBlock
 from backend.courses.notes.note_block_service import NoteBlockService
 from backend.courses.notes.parser import parse_lecture_document
 from backend.courses.vector_store.models import VectorStoreStatus
@@ -23,39 +20,17 @@ from backend.processing.resources import (
     block_builder,
     course_note_scope,
     course_vectorstore_scope,
-    processing_update,
 )
 
-from .model import (
+from .lecture_processing_service import LectureProcessingService
+from .models import (
     LectureProcessingRun,
     ProcessingRun,
     ProcessingStage,
     ProcessingStatus,
 )
-
-
-class LectureProcessingInput(BaseModel):
-    course_id: UUID
-    note_id: UUID
-
-
-class LecturingProcessingState(LectureProcessingInput):
-    run_id: UUID
-    file_id: UUID
-    extraction_result: OutputState | None = None
-    note_blocks: list[NoteBlock] = Field(default_factory=list)
-    vector_ids: list[str] = Field(default_factory=list)
-
-    @field_validator("note_blocks", mode="before")
-    @classmethod
-    def validate_note_blocks(cls, blocks):
-        # SQLModel table constructors do not fully validate broker JSON.
-        if isinstance(blocks, list):
-            return [
-                NoteBlock.model_validate(block) if isinstance(block, dict) else block
-                for block in blocks
-            ]
-        return blocks
+from .schema import LectureProcessingInput, LectureProcessingState
+from .tracking import processing_update
 
 
 @app.task(bind=True, pydantic=True)
@@ -76,7 +51,8 @@ def process_lecture_file(self: Task, data: LectureProcessingInput):
             | embedd_and_save.s()
         )
         logger.debug(
-            "Replacing task with preparation/extraction chain: task_id=%s", task_id
+            "Replacing task with preparation/extraction/save/index chain: task_id=%s",
+            task_id,
         )
         return self.replace(chain)
     except (Ignore, Retry, Reject):
@@ -106,6 +82,9 @@ def prepare_lecture_run(self: Task, data: LectureProcessingInput) -> dict:
     try:
         course_uuid = data.course_id
         note_uuid = data.note_id
+
+        with open_session() as session:
+            LectureProcessingService(session).assert_can_process(course_uuid, note_uuid)
 
         with course_note_scope() as course_notes:
             note = asyncio.run(course_notes.get_note_record(note_uuid))
@@ -144,7 +123,7 @@ def prepare_lecture_run(self: Task, data: LectureProcessingInput) -> dict:
             task_id=UUID(self.request.id),
             stage=ProcessingStage.VALIDATING,
         ):
-            updated = LecturingProcessingState(
+            updated = LectureProcessingState(
                 **data.model_dump(), run_id=run_id, file_id=file_id
             )
             payload = updated.model_dump(mode="json")
@@ -171,7 +150,7 @@ def prepare_lecture_run(self: Task, data: LectureProcessingInput) -> dict:
 
 
 @app.task(bind=True, pydantic=True)
-def extract_lecture_content(self: Task, data: LecturingProcessingState) -> dict:
+def extract_lecture_content(self: Task, data: LectureProcessingState) -> dict:
     started = perf_counter()
     logger.info(
         "Extraction started: task_id=%s course_id=%s note_id=%s",
@@ -182,11 +161,14 @@ def extract_lecture_content(self: Task, data: LecturingProcessingState) -> dict:
     try:
         note_id = data.note_id
         course_id = data.course_id
-        with processing_update(
-            data.run_id,
-            task_id=UUID(self.request.id),
-            stage=ProcessingStage.DOWNLOADING,
-        ), course_note_scope() as notes:
+        with (
+            processing_update(
+                data.run_id,
+                task_id=UUID(self.request.id),
+                stage=ProcessingStage.DOWNLOADING,
+            ),
+            course_note_scope() as notes,
+        ):
             file, content = asyncio.run(
                 notes.download_note_file_strict(course_id, note_id)
             )
@@ -231,7 +213,7 @@ def extract_lecture_content(self: Task, data: LecturingProcessingState) -> dict:
                         for failure in result.failures
                     ],
                 )
-            updated = LecturingProcessingState.model_validate(
+            updated = LectureProcessingState.model_validate(
                 {
                     **data.model_dump(),
                     "extraction_result": result,
@@ -260,7 +242,7 @@ def extract_lecture_content(self: Task, data: LecturingProcessingState) -> dict:
 
 
 @app.task(bind=True, pydantic=True)
-def parse_and_save_note_blocks(self: Task, data: LecturingProcessingState) -> dict:
+def parse_and_save_note_blocks(self: Task, data: LectureProcessingState) -> dict:
     started = perf_counter()
     logger.info(
         "Parsing and saving started: task_id=%s course_id=%s note_id=%s",
@@ -294,7 +276,7 @@ def parse_and_save_note_blocks(self: Task, data: LecturingProcessingState) -> di
                     data.note_id,
                     [str(block.id) for block in saved],
                 )
-            updated = LecturingProcessingState.model_validate(
+            updated = LectureProcessingState.model_validate(
                 {**data.model_dump(), "note_blocks": saved}
             )
             payload = updated.model_dump(mode="json")
@@ -320,7 +302,7 @@ def parse_and_save_note_blocks(self: Task, data: LecturingProcessingState) -> di
 
 
 @app.task(bind=True, pydantic=True)
-def embedd_and_save(self: Task, data: LecturingProcessingState) -> dict:
+def embedd_and_save(self: Task, data: LectureProcessingState) -> dict:
     started = perf_counter()
     logger.info(
         "Embedding and saving started: task_id=%s course_id=%s note_id=%s",
@@ -377,7 +359,7 @@ def embedd_and_save(self: Task, data: LecturingProcessingState) -> dict:
                     data.run_id,
                     len(vector_ids),
                 )
-            updated = LecturingProcessingState.model_validate(
+            updated = LectureProcessingState.model_validate(
                 {**data.model_dump(), "vector_ids": vector_ids}
             )
             payload = updated.model_dump(mode="json")
