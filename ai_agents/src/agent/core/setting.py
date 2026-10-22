@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     ASTRA_DB_API_ENDPOINT: str | None = None
     ASTRA_DB_APPLICATION_TOKEN: str | None = None
 
+    DATABASE_URL: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=env_file,
         extra="ignore",

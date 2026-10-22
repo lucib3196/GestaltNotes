@@ -1,10 +1,9 @@
 import contextlib
 from pathlib import Path
 from uuid import UUID
-
 from object_store import BlobMetadata, BlobStorage, BlobUploadData
 from object_store.exceptions import BlobStorageDeleteError
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from backend.accounts.models import User
 from backend.storage.exceptions import (
@@ -139,17 +138,49 @@ class FileService:
                 f"Failed to get download URL for file '{file_id}'"
             ) from e
 
-    async def download_file(self, file_id: UUID) -> tuple[File, bytes]:
-        """Return file metadata and blob contents for a persisted file."""
+    async def download_file(
+        self,
+        file_id: UUID | None = None,
+        *,
+        storage_key: str | None = None,
+    ) -> tuple[File, bytes]:
+        """Download by file ID or an explicitly specified storage key."""
+        if (file_id is None) == (storage_key is None):
+            raise ValueError("Provide exactly one of file_id or storage_key")
+
+        if file_id is not None:
+            return await self._download_file_by_id(file_id)
+        if storage_key is not None:
+            return await self._download_file_by_storage_key(storage_key)
+        else:
+            raise FileServiceRetrievalError("Cannot determine file to download")
+
+    async def _download_file_by_id(self, file_id: UUID) -> tuple[File, bytes]:
         try:
             file = await self.get_file(file_id)
-            data = await self._storage.download(file.storage_key)
-            return file, data
+            return file, await self._storage.download(file.storage_key)
         except FileNotFoundError:
             raise
         except Exception as e:
             raise FileServiceRetrievalError(
                 f"Failed to download file '{file_id}'"
+            ) from e
+
+    async def _download_file_by_storage_key(
+        self, storage_key: str
+    ) -> tuple[File, bytes]:
+        try:
+            file = self._session.exec(
+                select(File).where(File.storage_key == storage_key)
+            ).first()
+            if file is None:
+                raise FileNotFoundError(storage_key)
+            return file, await self._storage.download(file.storage_key)
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceRetrievalError(
+                f"Failed to download file with storage key '{storage_key}'"
             ) from e
 
     async def replace_file(

@@ -1,15 +1,28 @@
+"""Construct course vector stores from saved collection configuration."""
+
 from dotenv import load_dotenv
-from langchain_astradb import AstraDBVectorStore
+from langchain_core.vectorstores import VectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_postgres import PGVector
 
 from agent.core.setting import get_settings
 
 load_dotenv()
 settings = get_settings()
-embeddings = GoogleGenerativeAIEmbeddings(model=settings.embedding_model)
-vector_store = AstraDBVectorStore(
-    collection_name="me118_lecture_fb",
-    embedding=embeddings,
-    api_endpoint=settings.ASTRA_DB_API_ENDPOINT,
-    token=settings.ASTRA_DB_APPLICATION_TOKEN,
-)
+
+
+def build_course_vectorstore(
+    *,
+    collection_name: str,
+    embedding_model: str,
+) -> VectorStore:
+    """Build a PGVector client for the given collection and embedding model."""
+    embeddings = GoogleGenerativeAIEmbeddings(model=embedding_model)
+
+    return PGVector(
+        embeddings=embeddings,
+        collection_name=collection_name,
+        connection=settings.DATABASE_URL,  # postgresql+psycopg://...
+        use_jsonb=True,
+        create_extension=False,  # Provision pgvector through your migrations.
+    )

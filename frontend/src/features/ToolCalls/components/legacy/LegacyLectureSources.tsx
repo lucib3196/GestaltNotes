@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { getDownloadURL, getStorage, ref } from "firebase/storage";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   FiChevronDown,
   FiExternalLink,
@@ -45,7 +46,11 @@ export default function LegacyLectureSources({
     return [...byPath.values()];
   }, [data]);
   const paths = useMemo(() => sources.map((source) => source.path), [sources]);
-  const { files, loading, error, errorsByPath, retry } = useLoadFile(paths);
+  const loadFileUrl = useCallback(
+    (path: string) => getDownloadURL(ref(getStorage(), path)),
+    [],
+  );
+  const { files, loading, error, errorsByPath, retry } = useLoadFile(paths, loadFileUrl);
   const filesByPath = useMemo(
     () => new Map(files.map((file) => [file.path, file])),
     [files],

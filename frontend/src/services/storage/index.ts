@@ -1,0 +1,1 @@
+export { StorageAPI } from "./api";

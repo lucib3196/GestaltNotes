@@ -3,8 +3,6 @@
 from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
-from langchain_astradb import AstraDBVectorStore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from agent.config.models import GeminiModel, ModelProvider
 from agent.core.setting import get_settings
@@ -13,20 +11,15 @@ from agent.middlewear.title_generator import ThreadTitleMiddleware
 from agent.tools.flashcard_tool import create_flashcards
 from agent.tools.lecture_retriever import build_retrieval_tool
 from agent.tools.mc_tool import create_multiple_choice_questions
-from agent.tools.mermaid_diagrams import create_flowchart, mermaid_diagram
+from agent.tools.mermaid_diagrams import create_flowchart
 from agent.tools.web_search import web_search
 
 load_dotenv()
 settings = get_settings()
 
-model = init_chat_model(
-    model_provider=ModelProvider.GEMINI.value,
-    model=GeminiModel.GEMINI_2_5_FLASH.value,
-)
-embeddings = GoogleGenerativeAIEmbeddings(model=settings.embedding_model)
-graph = create_agent(
-    model=model,
-    system_prompt="""You are Gestalt, a learning assistant that helps students
+
+system_prompt = """
+You are Gestalt, a learning assistant that helps students
 understand course material, practice independently, and identify gaps in
 their understanding.
 
@@ -107,37 +100,23 @@ Reviewing student answers:
 - Acknowledge correct understanding as well as areas needing improvement.
 - Do not claim to save content or update records without a tool that performs
   that action.
-""",
+"""
+
+
+model = init_chat_model(
+    model_provider=ModelProvider.GEMINI.value,
+    model=GeminiModel.GEMINI_2_5_FLASH.value,
+)
+graph = create_agent(
+    model=model,
+    system_prompt=system_prompt,
     middleware=[ModelRoutingMiddleware(), ThreadTitleMiddleware(model=model)],  # type: ignore
     context_schema=ConfigSchema,
     tools=[
         create_multiple_choice_questions,
         create_flashcards,
-        build_retrieval_tool(
-            AstraDBVectorStore(
-                collection_name="me118_lecture_fb",
-                embedding=embeddings,
-                api_endpoint=settings.ASTRA_DB_API_ENDPOINT,
-                token=settings.ASTRA_DB_APPLICATION_TOKEN,
-            ),
-            summary_model=model,
-            name="retrieve_me118_notes",
-            description="Use this to return documents from the course me118",
-        ),
-        build_retrieval_tool(
-            AstraDBVectorStore(
-                collection_name="me116_lecture_fb",
-                embedding=embeddings,
-                api_endpoint=settings.ASTRA_DB_API_ENDPOINT,
-                token=settings.ASTRA_DB_APPLICATION_TOKEN,
-            ),
-            summary_model=model,
-            name="retrieve_me116_notes",
-            description="Use this to return documents from the course me116",
-        ),
+        build_retrieval_tool(summary_model=model),
         web_search,
         create_flowchart,
-        # mermaid_diagram,
-        # review_quiz_understanding,
     ],
 )  # type: ignore

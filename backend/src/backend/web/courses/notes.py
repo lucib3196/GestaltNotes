@@ -90,7 +90,7 @@ async def stream_course_note(
     service: CourseNoteServiceDep,
 ) -> StreamingResponse:
     try:
-        file, data = await service.download_note_file(
+        file, data = await service.download_note_file_strict(
             course_id=course_id,
             note_id=note_id,
         )

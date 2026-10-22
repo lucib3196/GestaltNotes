@@ -10,6 +10,9 @@ export const ConfigSchema = z.object({
       "gemini-2.5-pro",
     ])
     .default("gemini-3.5-flash"),
+  course_collection_name: z.string().trim().min(1).nullish(),
+  embedding_model: z.string().trim().min(1).nullish(),
+  course_name: z.string().nullish(),
 });
 
 export type ConfigSchema = z.infer<typeof ConfigSchema>;

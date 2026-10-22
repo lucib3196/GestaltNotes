@@ -3,6 +3,8 @@ import { Flashcards } from "./components";
 import LegacyLectureSources from "./components/legacy/LegacyLectureSources";
 import { flashcardSetSchema } from "./schemas/practice";
 import { legacySourceDocumentsSchema } from "./schemas/legacySources";
+import { NoteBlockSources } from "./NoteBlockRetrieval/NoteBlockSources";
+import { noteBlockDocumentsSchema } from "./NoteBlockRetrieval/schema";
 
 import { QuestionsPractice, multipleChoiceSetSchema } from "./MCQ";
 import { WebSearchSources } from "./WebSearch/WebSearchSources";
@@ -50,6 +52,15 @@ const renderWebSearchSources: ToolRenderer = (data) => {
   );
 };
 
+const renderNoteBlockSources: ToolRenderer = (data) => {
+  const result = noteBlockDocumentsSchema.safeParse(data);
+  return result.success ? (
+    <NoteBlockSources data={result.data} />
+  ) : (
+    <p role="alert">The lecture source data could not be displayed.</p>
+  );
+};
+
 function createToolEntry(render: ToolRenderer, compact = false): ToolEntry {
   return { render, compact };
 }
@@ -68,6 +79,7 @@ const mermaidEntry = createToolEntry(renderMermaidDiagram);
 const questionsEntry = createToolEntry(renderQuestions);
 const flashcardsEntry = createToolEntry(renderFlashcards);
 const legacySourcesEntry = createToolEntry(renderLegacySources);
+const noteBlockSourcesEntry = createToolEntry(renderNoteBlockSources);
 const webSearchEntry = createToolEntry(renderWebSearchSources, true);
 
 // Artifact kinds take precedence; tool names remain supported as aliases.
@@ -82,5 +94,7 @@ export const toolCallRegistry: Readonly<Record<string, ToolEntry>> = {
   flashcards: flashcardsEntry,
   create_flashcards: flashcardsEntry,
   retrieval: legacySourcesEntry,
+  note_block_retrieval_v1: noteBlockSourcesEntry,
+  retrieve_course_notes: noteBlockSourcesEntry,
   legacy_lecture_sources: legacySourcesEntry,
 };

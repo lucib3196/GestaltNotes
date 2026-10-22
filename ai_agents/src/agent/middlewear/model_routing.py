@@ -14,6 +14,9 @@ class ConfigSchema(BaseModel):
 
     model_provider: ModelProvider = ModelProvider.GEMINI
     model: GeminiModel = Field(default=GeminiModel.GEMINI_3_5_FLASH)
+    course_collection_name: str | None = None
+    embedding_model: str | None = None
+    course_name: str | None = None
 
     @model_validator(mode="after")
     def validate_model_matches_provider(self) -> "ConfigSchema":
