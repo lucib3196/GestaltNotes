@@ -35,7 +35,7 @@ class LectureProcessingState(LectureProcessingInput):
 
     @field_validator("note_blocks", mode="before")
     @classmethod
-    def validate_note_blocks(cls, blocks):
+    def validate_note_blocks(cls, blocks: object) -> object:
         # SQLModel table constructors do not fully validate broker JSON.
         if isinstance(blocks, list):
             return [

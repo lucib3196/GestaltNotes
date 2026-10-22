@@ -38,7 +38,7 @@ async def start_lecture_processing(
     note_id: UUID,
     session: SessionDep,
     _course: ReadableCourseDep,
-):
+) -> dict[str, Any]:
     service = LectureProcessingService(session)
     try:
         service.assert_can_process(course_id, note_id)

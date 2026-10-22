@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import perf_counter
+from typing import Any
 from uuid import UUID
 
 from celery import Task
@@ -34,7 +35,7 @@ from .tracking import processing_update
 
 
 @app.task(bind=True, pydantic=True)
-def process_lecture_file(self: Task, data: LectureProcessingInput):
+def process_lecture_file(self: Task, data: LectureProcessingInput) -> dict[str, Any]:
     started = perf_counter()
     task_id = self.request.id
     logger.info(
@@ -95,29 +96,28 @@ def prepare_lecture_run(self: Task, data: LectureProcessingInput) -> dict:
                 raise RuntimeError("Course note has no associated file ID")
             file_id = file.id
 
-        with open_session() as session:
-            # Commits on success and rolls back on failure.
-            with session.begin():
-                run = ProcessingRun(
-                    celery_task_id=UUID(self.request.id),
-                    task_type="lecture_processing",
-                    status=ProcessingStatus.RUNNING,
-                    stage=ProcessingStage.VALIDATING,
-                    attempt_count=1,
-                )
-                session.add(run)
-                session.flush()
+        # Commit both records together, rolling back on failure.
+        with open_session() as session, session.begin():
+            run = ProcessingRun(
+                celery_task_id=UUID(self.request.id),
+                task_type="lecture_processing",
+                status=ProcessingStatus.RUNNING,
+                stage=ProcessingStage.VALIDATING,
+                attempt_count=1,
+            )
+            session.add(run)
+            session.flush()
 
-                run_id = run.id
-                if run_id is None:
-                    raise RuntimeError("Processing run ID was not assigned")
+            run_id = run.id
+            if run_id is None:
+                raise RuntimeError("Processing run ID was not assigned")
 
-                session.add(
-                    LectureProcessingRun(
-                        run_id=run_id,
-                        note_id=note_uuid,
-                    )
+            session.add(
+                LectureProcessingRun(
+                    run_id=run_id,
+                    note_id=note_uuid,
                 )
+            )
         with processing_update(
             run_id,
             task_id=UUID(self.request.id),
