@@ -1,24 +1,90 @@
+from typing import Any
 from uuid import UUID
 
 from celery.result import AsyncResult
+from fastapi import HTTPException
 from fastapi.routing import APIRouter
+from sqlmodel import select
 
+from backend.courses.models import CourseNote
+from backend.database import SessionDep
 from backend.processing.celery_app import app
-from backend.processing.tasks import process_lecture_file
-
-ID = UUID | str
+from backend.processing.model import LectureProcessingRun, ProcessingRun
+from backend.processing.run_repo import RunRepo
+from backend.processing.schema import ProcessingRunRead
+from backend.processing.tasks import LectureProcessingInput, process_lecture_file
+from backend.web.courses.dependencies import ReadableCourseDep
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
+@router.get(
+    "/course/{course_id}/{note_id}/runs",
+    response_model=list[ProcessingRunRead],
+)
+def list_processing_runs(
+    course_id: UUID,
+    note_id: UUID,
+    session: SessionDep,
+    _course: ReadableCourseDep,
+):
+    note = session.get(CourseNote, note_id)
+    if note is None or note.course_id != course_id:
+        raise HTTPException(404, "Course note not found")
+
+    statement = (
+        select(ProcessingRun)
+        .join(
+            LectureProcessingRun,
+            LectureProcessingRun.run_id == ProcessingRun.id,
+        )
+        .where(LectureProcessingRun.note_id == note_id)
+    )
+    return session.exec(statement).all()
+
+
+@router.get(
+    "/course/{course_id}/{note_id}/runs/{run_id}",
+    response_model=ProcessingRunRead,
+)
+def get_processing_run(
+    course_id: UUID,
+    note_id: UUID,
+    run_id: UUID,
+    session: SessionDep,
+    _course: ReadableCourseDep,
+):
+    note = session.get(CourseNote, note_id)
+    if note is None or note.course_id != course_id:
+        raise HTTPException(404, "Course note not found")
+
+    association = session.get(LectureProcessingRun, run_id)
+    if association is None or association.note_id != note_id:
+        raise HTTPException(404, "Processing run not found")
+
+    run = RunRepo(session).get(run_id)
+    if run is None:
+        raise HTTPException(404, "Processing run not found")
+    return run
+
+
 @router.get("/file/{task_id}")
-def get_task_status(task_id: str):
-    task = AsyncResult(task_id, app=app) 
+def get_task_status(task_id: str) -> dict[str, Any]:
+    task = AsyncResult(task_id, app=app)
+
+    return {
+        "task_id": task.id,
+        "status": task.state,
+        "result": task.result if task.successful() else None,
+        "progress": task.info if task.state == "PROGRESS" else None,
+        "error": str(task.result) if task.failed() else None,
+    }
 
 
 @router.post("/course/{course_id}/{note_id}/temp")
 async def check(course_id: UUID, note_id: UUID):
-    workflow = process_lecture_file.s(course_id, note_id)  # type: ignore
+    payload = LectureProcessingInput(course_id=course_id, note_id=note_id)
+    workflow = process_lecture_file.s(payload.model_dump(mode="json"))  # type: ignore
     task = workflow.apply_async()
     return {
         "course_id": course_id,

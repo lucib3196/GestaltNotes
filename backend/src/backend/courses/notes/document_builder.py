@@ -13,7 +13,7 @@ from .models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock
 
 
 class NoteBlockDocumentBuilder:
-    def __init__(self, files: FileService):
+    def __init__(self, files: FileService) -> None:
         self._files = files
 
     @classmethod
@@ -54,11 +54,9 @@ class NoteBlockDocumentBuilder:
             metadata_by_file[file_id] = metadata
 
         # Get Course Metadata
-        course_ids = {
-            block.course_id for block in blocks if block.course_id is not None
-        }
+        {block.course_id for block in blocks if block.course_id is not None}
 
-        for block, document in zip(blocks, documents):
+        for block, document in zip(blocks, documents, strict=False):
             if block.source_file_id is not None:
                 document.metadata.update(metadata_by_file[block.source_file_id])
             if block.course:

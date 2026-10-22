@@ -21,6 +21,7 @@ class ProcessingStatus(StrEnum):
 
 
 class ProcessingStage(StrEnum):
+    VALIDATING = "validating"
     DOWNLOADING = "downloading"
     EXTRACTING = "extracting"
     SAVING_BLOCKS = "saving_blocks"
