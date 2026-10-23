@@ -21,6 +21,12 @@ class ProcessingRunRead(BaseModel):
     error_message: str | None
 
 
+class LectureProcessingStatusRead(BaseModel):
+    has_succeeded: bool
+    can_process: bool
+    latest_run: ProcessingRunRead | None
+
+
 class LectureProcessingInput(BaseModel):
     course_id: UUID
     note_id: UUID

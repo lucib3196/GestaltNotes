@@ -5,16 +5,16 @@ from celery.result import AsyncResult
 from fastapi import HTTPException
 from fastapi.routing import APIRouter
 
-from backend.database import SessionDep
 from backend.processing.celery_app import app
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
     LectureProcessingNoteNotFoundError,
 )
-from backend.processing.lecture_processing_service import LectureProcessingService
 from backend.processing.schema import LectureProcessingInput
 from backend.processing.tasks import process_lecture_file
 from backend.web.courses.dependencies import ReadableCourseDep
+
+from .dependencies import LectureProcessingServiceDep
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -36,10 +36,9 @@ def get_task_status(task_id: str) -> dict[str, Any]:
 async def start_lecture_processing(
     course_id: UUID,
     note_id: UUID,
-    session: SessionDep,
+    service: LectureProcessingServiceDep,
     _course: ReadableCourseDep,
 ) -> dict[str, Any]:
-    service = LectureProcessingService(session)
     try:
         service.assert_can_process(course_id, note_id)
     except LectureProcessingNoteNotFoundError as exc:

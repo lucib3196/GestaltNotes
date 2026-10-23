@@ -1,6 +1,7 @@
 import contextlib
 from pathlib import Path
 from uuid import UUID
+
 from object_store import BlobMetadata, BlobStorage, BlobUploadData
 from object_store.exceptions import BlobStorageDeleteError
 from sqlmodel import Session, select
@@ -152,8 +153,7 @@ class FileService:
             return await self._download_file_by_id(file_id)
         if storage_key is not None:
             return await self._download_file_by_storage_key(storage_key)
-        else:
-            raise FileServiceRetrievalError("Cannot determine file to download")
+        raise FileServiceRetrievalError("Cannot determine file to download")
 
     async def _download_file_by_id(self, file_id: UUID) -> tuple[File, bytes]:
         try:
