@@ -1,10 +1,7 @@
-import { createContext, useContext } from "react";
+import { useContext } from "react";
 import { useStore } from "zustand";
-import type { createCourseDetailsStore, CourseDetailsStore } from "./store";
-
-export const CourseDetailsContext = createContext<
-  ReturnType<typeof createCourseDetailsStore> | null
->(null);
+import type { CourseDetailsStore } from "./store";
+import { CourseDetailsContext } from "./context";
 
 export function useCourseDetailsStore<T>(
   selector: (state: CourseDetailsStore) => T,

@@ -1,11 +1,31 @@
+from enum import StrEnum
 from uuid import UUID
 
 from lecture_processor import OutputState
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
 from backend.courses.notes.models import NoteBlock
 
 from .models import ProcessingStage, ProcessingStatus
+
+
+class TaskState(StrEnum):
+    PENDING = "PENDING"
+    RECEIVED = "RECEIVED"
+    STARTED = "STARTED"
+    RETRY = "RETRY"
+    FAILURE = "FAILURE"
+    SUCCESS = "SUCCESS"
+    REVOKED = "REVOKED"
+    PROGRESS = "PROGRESS"
+
+
+class TaskResponse(BaseModel):
+    task_id: str
+    status: TaskState
+    result: JsonValue = None
+    progress: JsonValue = None
+    error: str | None = None
 
 
 class ProcessingRunRead(BaseModel):

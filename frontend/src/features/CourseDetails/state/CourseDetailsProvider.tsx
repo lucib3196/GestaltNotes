@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { createCourseDetailsStore } from "./store";
-import { CourseDetailsContext } from "./useCourseDetailsStore";
+import { CourseDetailsContext } from "./context";
 
 export function CourseDetailsProvider({
   courseId,

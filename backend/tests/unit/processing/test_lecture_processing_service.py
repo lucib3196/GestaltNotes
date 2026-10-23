@@ -132,7 +132,7 @@ async def test_dispatch_rejects_success_without_queuing(
 
     from fastapi import HTTPException
 
-    from backend.web.processing.tasks import (
+    from backend.web.courses.processing_runs import (
         process_lecture_file,
         start_lecture_processing,
     )

@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { useCourseDetailsStore } from "../../CourseDetails/instance";
+import { useCourseDetailsStore } from "../../CourseDetails/state";
 import { EyeIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   FileBox,

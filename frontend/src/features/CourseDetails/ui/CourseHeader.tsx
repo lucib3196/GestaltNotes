@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { MdOutlineEdit } from "react-icons/md";
 
-import { useCourseDetailsStore } from "../instance";
+import { useCourseDetailsStore } from "../state";
 import { useEditCourse } from "../../../hooks/courses";
 
 const fieldClass =

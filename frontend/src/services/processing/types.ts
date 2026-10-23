@@ -39,10 +39,28 @@ export type ProcessingTaskStarted = {
   summary: string;
 };
 
+export type TaskState =
+  | "PENDING"
+  | "RECEIVED"
+  | "STARTED"
+  | "RETRY"
+  | "FAILURE"
+  | "SUCCESS"
+  | "REVOKED"
+  | "PROGRESS";
+
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 export type ProcessingTaskStatus = {
   task_id: string;
-  status: string;
-  result: unknown;
-  progress: unknown;
+  status: TaskState;
+  result: JsonValue;
+  progress: JsonValue;
   error: string | null;
 };

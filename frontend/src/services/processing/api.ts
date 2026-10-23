@@ -13,10 +13,6 @@ function requestConfig(token: string, signal?: AbortSignal) {
   };
 }
 
-function lecturePath(courseId: string, noteId: string) {
-  return `/tasks/course/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}`;
-}
-
 function notePath(courseId: string, noteId: string) {
   return `/courses/notes/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}`;
 }
@@ -71,7 +67,7 @@ export class ProcessingTasksAPI {
     signal?: AbortSignal,
   ): Promise<ProcessingTaskStarted> {
     const res = await api.post<ProcessingTaskStarted>(
-      lecturePath(courseId, noteId),
+      `${notePath(courseId, noteId)}/process`,
       undefined,
       requestConfig(token, signal),
     );
@@ -84,7 +80,7 @@ export class ProcessingTasksAPI {
     signal?: AbortSignal,
   ): Promise<ProcessingTaskStatus> {
     const res = await api.get<ProcessingTaskStatus>(
-      `/tasks/file/${encodeURIComponent(taskId)}`,
+      `/tasks/${encodeURIComponent(taskId)}`,
       requestConfig(token, signal),
     );
     return res.data;

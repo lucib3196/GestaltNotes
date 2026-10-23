@@ -1,5 +1,6 @@
 import contextlib
 from pathlib import Path
+from time import perf_counter
 from uuid import UUID
 
 from object_store import BlobMetadata, BlobStorage, BlobUploadData
@@ -7,6 +8,7 @@ from object_store.exceptions import BlobStorageDeleteError
 from sqlmodel import Session, select
 
 from backend.accounts.models import User
+from backend.core.logger import logger
 from backend.storage.exceptions import (
     FileNotFoundError,
     FileServiceCreateError,
@@ -157,8 +159,16 @@ class FileService:
 
     async def _download_file_by_id(self, file_id: UUID) -> tuple[File, bytes]:
         try:
-            file = await self.get_file(file_id)
-            return file, await self._storage.download(file.storage_key)
+            started = perf_counter()
+            try:
+                file = await self.get_file(file_id)
+            finally:
+                logger.info(
+                    "File lookup by id: file_id=%s elapsed_seconds=%.3f",
+                    file_id,
+                    perf_counter() - started,
+                )
+            return file, await self._download_blob(file.storage_key)
         except FileNotFoundError:
             raise
         except Exception as e:
@@ -170,18 +180,37 @@ class FileService:
         self, storage_key: str
     ) -> tuple[File, bytes]:
         try:
-            file = self._session.exec(
-                select(File).where(File.storage_key == storage_key)
-            ).first()
+            started = perf_counter()
+            try:
+                file = self._session.exec(
+                    select(File).where(File.storage_key == storage_key)
+                ).first()
+            finally:
+                logger.info(
+                    "File lookup by storage key: storage_key=%s elapsed_seconds=%.3f",
+                    storage_key,
+                    perf_counter() - started,
+                )
             if file is None:
                 raise FileNotFoundError(storage_key)
-            return file, await self._storage.download(file.storage_key)
+            return file, await self._download_blob(file.storage_key)
         except FileNotFoundError:
             raise
         except Exception as e:
             raise FileServiceRetrievalError(
                 f"Failed to download file with storage key '{storage_key}'"
             ) from e
+
+    async def _download_blob(self, storage_key: str) -> bytes:
+        started = perf_counter()
+        try:
+            return await self._storage.download(storage_key)
+        finally:
+            logger.info(
+                "Blob download: storage_key=%s elapsed_seconds=%.3f",
+                storage_key,
+                perf_counter() - started,
+            )
 
     async def replace_file(
         self,
