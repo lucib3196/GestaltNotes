@@ -8,10 +8,13 @@ from pydantic import BaseModel, Field, create_model
 from lecture_processor.conceptual_question import ConceptualQuestion
 from lecture_processor.graph.models import ExtractedItems
 from lecture_processor.lecture_analysis import LectureAnalysis
-
+from typing import TypeVar
 from .context import ExtractionContext
 from .state import InputState, State
 from .utils import resolve_context_prompts
+
+
+T = TypeVar("T", bound=BaseModel)
 
 
 def prepare_lecture(state: InputState) -> dict[str, list[bytes]]:
@@ -22,7 +25,7 @@ def prepare_lecture(state: InputState) -> dict[str, list[bytes]]:
     return {"lecture_images": images}
 
 
-def generate_lecture_content[T: BaseModel](
+def generate_lecture_content(
     state: State,
     runtime: Runtime[ExtractionContext],
     *,
