@@ -9,6 +9,7 @@ from backend.courses.exceptions import (
     CourseEnrollmentAlreadyExistsError,
     CourseEnrollmentNotFoundError,
     CourseEnrollmentPermissionError,
+    CourseNoteNotFoundError,
     CourseNotFoundError,
     CourseOwnershipError,
     CoursePermissionError,
@@ -17,7 +18,10 @@ from backend.courses.exceptions import (
 
 
 def course_http_exception(error: Exception) -> HTTPException:
-    if isinstance(error, (CourseNotFoundError, CourseAccessCodeNotFoundError)):
+    if isinstance(
+        error,
+        (CourseNotFoundError, CourseNoteNotFoundError, CourseAccessCodeNotFoundError),
+    ):
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
 
     if isinstance(error, CourseEnrollmentAlreadyExistsError):

@@ -3,15 +3,15 @@ from uuid import UUID
 from fastapi import HTTPException
 from fastapi.routing import APIRouter
 
+from backend.courses.exceptions import CourseNoteNotFoundError
 from backend.processing.exceptions import (
-    LectureProcessingNoteNotFoundError,
     LectureProcessingRunNotFoundError,
 )
 from backend.processing.models import ProcessingRun
 from backend.processing.schema import LectureProcessingStatusRead, ProcessingRunRead
-from backend.web.courses.dependencies import ReadableCourseDep
+from backend.web.courses.dependencies import ReadableCourseNoteDep
 
-from .dependencies import LectureProcessingServiceDep
+from .dependencies import CourseNoteProcessingServiceDep
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -20,15 +20,15 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
     "/course/{course_id}/{note_id}/runs",
     response_model=list[ProcessingRunRead],
 )
-def list_processing_runs(
+async def list_processing_runs(
     course_id: UUID,
     note_id: UUID,
-    service: LectureProcessingServiceDep,
-    _course: ReadableCourseDep,
+    service: CourseNoteProcessingServiceDep,
+    _note: ReadableCourseNoteDep,
 ) -> list[ProcessingRun]:
     try:
-        return service.list_runs(course_id, note_id)
-    except LectureProcessingNoteNotFoundError as exc:
+        return await service.list_runs(note_id)
+    except CourseNoteNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
 
 
@@ -36,17 +36,17 @@ def list_processing_runs(
     "/course/{course_id}/{note_id}/runs/{run_id}",
     response_model=ProcessingRunRead,
 )
-def get_processing_run(
+async def get_processing_run(
     course_id: UUID,
     note_id: UUID,
     run_id: UUID,
-    service: LectureProcessingServiceDep,
-    _course: ReadableCourseDep,
+    service: CourseNoteProcessingServiceDep,
+    _note: ReadableCourseNoteDep,
 ) -> ProcessingRun:
     try:
-        return service.get_run(course_id, note_id, run_id)
+        return await service.get_run(note_id, run_id)
     except (
-        LectureProcessingNoteNotFoundError,
+        CourseNoteNotFoundError,
         LectureProcessingRunNotFoundError,
     ) as exc:
         raise HTTPException(404, str(exc)) from exc
@@ -56,13 +56,13 @@ def get_processing_run(
     "/course/{course_id}/{note_id}/status",
     response_model=LectureProcessingStatusRead,
 )
-def get_processing_status(
+async def get_processing_status(
     course_id: UUID,
     note_id: UUID,
-    service: LectureProcessingServiceDep,
-    _course: ReadableCourseDep,
+    service: CourseNoteProcessingServiceDep,
+    _note: ReadableCourseNoteDep,
 ) -> LectureProcessingStatusRead:
     try:
-        return service.get_processing_status(course_id, note_id)
-    except LectureProcessingNoteNotFoundError as exc:
+        return await service.get_processing_status(note_id)
+    except CourseNoteNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc

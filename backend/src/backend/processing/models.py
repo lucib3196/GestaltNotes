@@ -8,7 +8,7 @@ from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from backend.courses.models import CourseNote
+    from backend.courses.notes.models import CourseNote
 
 
 class ProcessingStatus(StrEnum):

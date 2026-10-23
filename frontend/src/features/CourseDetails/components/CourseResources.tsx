@@ -14,6 +14,7 @@ import { CourseNoteBox } from "./CourseNoteBox";
 import { ResourceActions } from "./ResourceActions";
 import { ResourcePreview } from "./ResourcePreview";
 import { useCourseDetailsStore } from "../instance";
+import CourseMaterials from "./CourseMaterial";
 
 export function CourseResources() {
   const courseId = useCourseDetailsStore((state) => state.selectedCourseId);
@@ -260,6 +261,7 @@ export function CourseResources() {
           }}
         />
       </div>
+      <CourseMaterials />
     </section>
   );
 }

@@ -45,3 +45,6 @@ export function useFetchCourseNotes(courseId: string | undefined) {
 
   return { notes, setNotes, loading, error, refetch: fetchNotes };
 }
+
+
+

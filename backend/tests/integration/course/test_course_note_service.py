@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from fastapi import UploadFile
 
-from backend.courses.models import CourseContentType, CourseNote
+from backend.courses.notes.models import CourseContentType, CourseNote
 from backend.storage.models import File
 
 
@@ -147,7 +147,7 @@ async def test_remove_file_deletes_association_only(
     assert course.id is not None
     assert file_record.id is not None
 
-    await course_note_service.remove_file(course.id, file_record.id)
+    await course_note_service.remove_file(note.id)
 
     assert db_session.get(CourseNote, note.id) is None
     assert db_session.get(File, file_record.id) is not None
@@ -166,7 +166,7 @@ async def test_remove_note_deletes_association_file_record_and_blob(
     assert course.id is not None
     assert file_record.id is not None
 
-    await course_note_service.remove_note(course.id, note.id, course_owner)
+    await course_note_service.remove_note(note.id, course_owner)
 
     assert db_session.get(CourseNote, note.id) is None
     assert db_session.get(File, file_record.id) is None

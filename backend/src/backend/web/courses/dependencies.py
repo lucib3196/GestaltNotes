@@ -7,7 +7,10 @@ from starlette import status
 from backend.core import logger
 from backend.courses.models import Course, CourseEnrollment
 from backend.courses.notes.course_note_service import CourseNoteService
+from backend.courses.notes.models import CourseNote
 from backend.courses.notes.note_block_service import NoteBlockService
+from backend.courses.notes.processing_service import CourseNoteProcessingService
+from backend.courses.notes.repo import CourseNoteRepository
 from backend.courses.service.access_code_service import CourseAccessCodeService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
@@ -42,6 +45,22 @@ def get_readable_course(
 
 NoteBlockServiceDep = Annotated[NoteBlockService, Depends(get_note_block_service)]
 ReadableCourseDep = Annotated[Course, Depends(get_readable_course)]
+
+
+async def get_readable_course_note(
+    note_id: UUID,
+    course: ReadableCourseDep,
+    session: SessionDep,
+) -> CourseNote:
+    note = await CourseNoteRepository(session).get_by_course_and_note(
+        course.id, note_id
+    )
+    if note is None:
+        raise HTTPException(status_code=404, detail="Course note not found")
+    return note
+
+
+ReadableCourseNoteDep = Annotated[CourseNote, Depends(get_readable_course_note)]
 
 
 def get_course_note_service(
@@ -88,6 +107,12 @@ def get_enrollment_service(
         ) from e
 
 
+def get_course_note_processing_service(
+    session: SessionDep,
+) -> CourseNoteProcessingService:
+    return CourseNoteProcessingService(session)
+
+
 CourseNoteServiceDep = Annotated[CourseNoteService, Depends(get_course_note_service)]
 CourseServiceDep = Annotated[CourseService, Depends(get_course_service)]
 
@@ -96,4 +121,9 @@ CourseAccessCodeServiceDep = Annotated[
 ]
 CourseEnrollmentServiceDep = Annotated[
     CourseEnrollmentService, Depends(get_enrollment_service)
+]
+
+CourseNoteProcessingServiceDep = Annotated[
+    CourseNoteProcessingService,
+    Depends(get_course_note_processing_service),
 ]

@@ -1,16 +1,17 @@
 from uuid import uuid4
 
 import pytest
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 
 import backend.accounts.models  # noqa: F401 -- Register relationship targets.
-from backend.courses.models import Course, CourseContentType, CourseNote
+from backend.courses.exceptions import CourseNoteNotFoundError
+from backend.courses.models import Course
+from backend.courses.notes.models import CourseContentType, CourseNote
+from backend.courses.notes.processing_service import CourseNoteProcessingService
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
-    LectureProcessingNoteNotFoundError,
     LectureProcessingRunNotFoundError,
 )
-from backend.processing.lecture_processing_service import LectureProcessingService
 from backend.processing.models import (
     LectureProcessingRun,
     ProcessingRun,
@@ -74,48 +75,50 @@ def add_run(session, note_id, status):
     "status",
     [None, ProcessingStatus.FAILED, ProcessingStatus.PARTIAL, ProcessingStatus.RUNNING],
 )
-def test_non_successful_run_allows_processing(records, status):
+@pytest.mark.asyncio
+async def test_non_successful_run_allows_processing(records, status):
     session, course, note = records
     add_run(session, note.id, status)
     assert (
-        LectureProcessingService(session).assert_can_process(course.id, note.id).id
-        == note.id
-    )
+        await CourseNoteProcessingService(session).assert_can_process(note.id)
+    ).id == note.id
 
 
-def test_any_successful_run_blocks_reprocessing(records):
+@pytest.mark.asyncio
+async def test_any_successful_run_blocks_reprocessing(records):
     session, course, note = records
     add_run(session, note.id, ProcessingStatus.SUCCEEDED)
     add_run(session, note.id, ProcessingStatus.FAILED)
-    service = LectureProcessingService(session)
+    service = CourseNoteProcessingService(session)
     with pytest.raises(LectureAlreadyProcessedError):
-        service.assert_can_process(course.id, note.id)
+        await service.assert_can_process(note.id)
 
 
-def test_success_for_different_note_does_not_block(records):
+@pytest.mark.asyncio
+async def test_success_for_different_note_does_not_block(records):
     session, course, note = records
     add_run(session, uuid4(), ProcessingStatus.SUCCEEDED)
     assert (
-        LectureProcessingService(session).assert_can_process(course.id, note.id).id
-        == note.id
-    )
+        await CourseNoteProcessingService(session).assert_can_process(note.id)
+    ).id == note.id
 
 
-def test_retrieval_is_scoped_to_note_and_course(records):
+@pytest.mark.asyncio
+async def test_retrieval_is_scoped_to_note(records):
     session, course, note = records
     run = add_run(session, note.id, ProcessingStatus.FAILED)
     unrelated = add_run(session, uuid4(), ProcessingStatus.SUCCEEDED)
-    service = LectureProcessingService(session)
-    assert [item.id for item in service.list_runs(course.id, note.id)] == [run.id]
-    assert service.get_run(course.id, note.id, run.id).id == run.id
+    service = CourseNoteProcessingService(session)
+    assert [item.id for item in await service.list_runs(note.id)] == [run.id]
+    assert (await service.get_run(note.id, run.id)).id == run.id
     with pytest.raises(LectureProcessingRunNotFoundError):
-        service.get_run(course.id, note.id, unrelated.id)
+        await service.get_run(note.id, unrelated.id)
     with pytest.raises(LectureProcessingRunNotFoundError):
-        service.get_run(course.id, note.id, uuid4())
-    with pytest.raises(LectureProcessingNoteNotFoundError):
-        service.list_runs(uuid4(), note.id)
-    with pytest.raises(LectureProcessingNoteNotFoundError):
-        service.assert_can_process(course.id, uuid4())
+        await service.get_run(note.id, uuid4())
+    with pytest.raises(CourseNoteNotFoundError):
+        await service.list_runs(uuid4())
+    with pytest.raises(CourseNoteNotFoundError):
+        await service.assert_can_process(uuid4())
 
 
 @pytest.mark.asyncio
@@ -143,11 +146,15 @@ async def test_dispatch_rejects_success_without_queuing(
     monkeypatch.setattr(process_lecture_file, "apply_async", submit)
     if successful:
         with pytest.raises(HTTPException) as caught:
-            await start_lecture_processing(course.id, note.id, session, course)
+            await start_lecture_processing(
+                course.id, note.id, CourseNoteProcessingService(session), note
+            )
         assert caught.value.status_code == 409
         submit.assert_not_called()
     else:
-        response = await start_lecture_processing(course.id, note.id, session, course)
+        response = await start_lecture_processing(
+            course.id, note.id, CourseNoteProcessingService(session), note
+        )
         assert response["task_id"] == "queued-task"
         assert submit.call_args.kwargs["args"] == [
             {"course_id": str(course.id), "note_id": str(note.id)}
@@ -175,4 +182,59 @@ def test_preparation_rechecks_success_before_creating_run(records, monkeypatch):
     with pytest.raises(LectureAlreadyProcessedError):
         tasks.prepare_lecture_run.run(payload.model_dump(mode="json"))
     note_scope.assert_not_called()
-    assert len(LectureProcessingService(session).list_runs(course.id, note.id)) == 1
+    assert len(session.exec(select(ProcessingRun)).all()) == 1
+
+
+@pytest.mark.asyncio
+async def test_status_before_processing(records):
+    session, _, note = records
+    summary = await CourseNoteProcessingService(session).get_processing_status(note.id)
+    assert summary.has_succeeded is False
+    assert summary.can_process is True
+    assert summary.latest_run is None
+
+
+@pytest.mark.asyncio
+async def test_status_preserves_success_when_latest_run_failed(records):
+    from datetime import datetime, timedelta, timezone
+
+    session, _, note = records
+    succeeded = add_run(session, note.id, ProcessingStatus.SUCCEEDED)
+    failed = add_run(session, note.id, ProcessingStatus.FAILED)
+    succeeded.created_at = datetime.now(timezone.utc) - timedelta(minutes=1)
+    failed.created_at = datetime.now(timezone.utc)
+    session.commit()
+
+    summary = await CourseNoteProcessingService(session).get_processing_status(note.id)
+    assert summary.has_succeeded is True
+    assert summary.can_process is False
+    assert summary.latest_run.id == failed.id
+    assert summary.latest_run.status == ProcessingStatus.FAILED
+
+
+@pytest.mark.asyncio
+async def test_course_note_dependency_rejects_note_from_other_course(records):
+    from fastapi import HTTPException
+
+    from backend.web.courses.dependencies import get_readable_course_note
+
+    session, course, note = records
+    other_course = Course(name="Other", owner_id=course.owner_id)
+    session.add(other_course)
+    session.commit()
+
+    assert await get_readable_course_note(note.id, course, session) is note
+    with pytest.raises(HTTPException) as caught:
+        await get_readable_course_note(note.id, other_course, session)
+    assert caught.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_overviews_are_scoped_to_course(records):
+    session, course, note = records
+    add_run(session, note.id, ProcessingStatus.SUCCEEDED)
+    service = CourseNoteProcessingService(session)
+    overviews = await service.list_notes_overview(course.id)
+    assert [overview.id for overview in overviews] == [note.id]
+    assert overviews[0].processing.has_succeeded is True
+    assert await service.list_notes_overview(uuid4()) == []
