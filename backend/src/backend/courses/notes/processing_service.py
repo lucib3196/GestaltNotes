@@ -114,5 +114,4 @@ class CourseNoteProcessingService:
 
         if association is None or association.note_id != note_id:
             raise LectureProcessingRunNotFoundError("Processing run not found")
-        run = association.run
-        return run
+        return association.run

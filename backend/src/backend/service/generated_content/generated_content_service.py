@@ -1,6 +1,5 @@
 import asyncio
 from collections.abc import Sequence
-from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -68,7 +67,8 @@ class GeneratedMCQService:
         except SQLAlchemyError as e:
             self._session.rollback()
             raise GeneratedContentRetrievalError(
-                f"Failed to retrieve and validate generated MCQs for user id '{user_id}'."
+                f"Failed to retrieve and validate generated MCQs for user id "
+                f"'{user_id}'."
             ) from e
 
     async def retrieve_all_mcq_thread(self, thread_id: ID) -> Sequence[GeneratedMCQ]:
@@ -103,7 +103,7 @@ class GeneratedMCQService:
 
     # Saving mechanism
     def add_mcq(
-        self, quiz: Any, user_id: ID, thread_id: ID, schema_version: int = 1
+        self, quiz: object, user_id: ID, thread_id: ID, schema_version: int = 1
     ) -> GeneratedMCQ:
         """Validate and save a generated MCQ for a user/thread."""
         try:
@@ -133,11 +133,12 @@ class GeneratedMCQService:
         except SQLAlchemyError as e:
             self._session.rollback()
             raise GeneratedContentPersistenceError(
-                f"Failed to save generated MCQ for user id '{user_id}' and thread id '{thread_id}'."
+                f"Failed to save generated MCQ for user id '{user_id}' and thread "
+                f"id '{thread_id}'."
             ) from e
 
     async def async_add_mcq(
-        self, quiz: Any, user_id: ID, thread_id: ID, schema_version: int = 1
+        self, quiz: object, user_id: ID, thread_id: ID, schema_version: int = 1
     ) -> GeneratedMCQ:
         """Asynchronously validate and save a generated MCQ."""
         return await asyncio.to_thread(
@@ -145,7 +146,7 @@ class GeneratedMCQService:
         )
 
     def batch_add_mcq(
-        self, data: Any, user_id: ID, thread_id: ID, schema_version: int = 1
+        self, data: object, user_id: ID, thread_id: ID, schema_version: int = 1
     ) -> list[GeneratedMCQ]:
         """Validate and save a batch of generated MCQs for a user/thread."""
         try:
@@ -161,11 +162,12 @@ class GeneratedMCQService:
         except SQLAlchemyError as e:
             self._session.rollback()
             raise GeneratedContentBatchSaveError(
-                f"Failed to batch save generated MCQs for user id '{user_id}' and thread id '{thread_id}'."
+                f"Failed to batch save generated MCQs for user id '{user_id}' and "
+                f"thread id '{thread_id}'."
             ) from e
 
     async def async_batch_add_mcq(
-        self, data: Any, user_id: ID, thread_id: ID, schema_version: int = 1
+        self, data: object, user_id: ID, thread_id: ID, schema_version: int = 1
     ) -> list[GeneratedMCQ]:
         """Asynchronously validate and save a batch of generated MCQs."""
         return await asyncio.to_thread(
@@ -173,7 +175,7 @@ class GeneratedMCQService:
         )
 
     @classmethod
-    def _validate_quiz(cls, data: Any, schema_version: int) -> MCQV1:
+    def _validate_quiz(cls, data: object, schema_version: int) -> MCQV1:
         """Validate a single MCQ payload against the supported schema version."""
         try:
             if schema_version == 1:
@@ -185,11 +187,12 @@ class GeneratedMCQService:
             raise
         except Exception as e:
             raise GeneratedContentValidationError(
-                f"Failed to validate MCQ payload for schema version {schema_version}: {e}"
+                f"Failed to validate MCQ payload for schema version "
+                f"{schema_version}: {e}"
             ) from e
 
     @classmethod
-    def _validate_quiz_payload(cls, data: Any, schema_version: int) -> MCQResponseV1:
+    def _validate_quiz_payload(cls, data: object, schema_version: int) -> MCQResponseV1:
         """Validate an MCQ response payload against the supported schema version."""
         try:
             if schema_version == 1:
@@ -199,7 +202,8 @@ class GeneratedMCQService:
             raise
         except Exception as e:
             raise GeneratedContentValidationError(
-                f"Failed to validate MCQ response payload for schema version {schema_version}: {e}"
+                f"Failed to validate MCQ response payload for schema version "
+                f"{schema_version}: {e}"
             ) from e
 
 

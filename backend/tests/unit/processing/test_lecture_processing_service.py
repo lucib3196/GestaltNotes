@@ -1,3 +1,4 @@
+from datetime import UTC
 from uuid import uuid4
 
 import pytest
@@ -77,7 +78,7 @@ def add_run(session, note_id, status):
 )
 @pytest.mark.asyncio
 async def test_non_successful_run_allows_processing(records, status):
-    session, course, note = records
+    session, _course, note = records
     add_run(session, note.id, status)
     assert (
         await CourseNoteProcessingService(session).assert_can_process(note.id)
@@ -86,7 +87,7 @@ async def test_non_successful_run_allows_processing(records, status):
 
 @pytest.mark.asyncio
 async def test_any_successful_run_blocks_reprocessing(records):
-    session, course, note = records
+    session, _course, note = records
     add_run(session, note.id, ProcessingStatus.SUCCEEDED)
     add_run(session, note.id, ProcessingStatus.FAILED)
     service = CourseNoteProcessingService(session)
@@ -96,7 +97,7 @@ async def test_any_successful_run_blocks_reprocessing(records):
 
 @pytest.mark.asyncio
 async def test_success_for_different_note_does_not_block(records):
-    session, course, note = records
+    session, _course, note = records
     add_run(session, uuid4(), ProcessingStatus.SUCCEEDED)
     assert (
         await CourseNoteProcessingService(session).assert_can_process(note.id)
@@ -105,7 +106,7 @@ async def test_success_for_different_note_does_not_block(records):
 
 @pytest.mark.asyncio
 async def test_retrieval_is_scoped_to_note(records):
-    session, course, note = records
+    session, _course, note = records
     run = add_run(session, note.id, ProcessingStatus.FAILED)
     unrelated = add_run(session, uuid4(), ProcessingStatus.SUCCEEDED)
     service = CourseNoteProcessingService(session)
@@ -196,13 +197,13 @@ async def test_status_before_processing(records):
 
 @pytest.mark.asyncio
 async def test_status_preserves_success_when_latest_run_failed(records):
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
     session, _, note = records
     succeeded = add_run(session, note.id, ProcessingStatus.SUCCEEDED)
     failed = add_run(session, note.id, ProcessingStatus.FAILED)
-    succeeded.created_at = datetime.now(timezone.utc) - timedelta(minutes=1)
-    failed.created_at = datetime.now(timezone.utc)
+    succeeded.created_at = datetime.now(UTC) - timedelta(minutes=1)
+    failed.created_at = datetime.now(UTC)
     session.commit()
 
     summary = await CourseNoteProcessingService(session).get_processing_status(note.id)

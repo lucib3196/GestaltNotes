@@ -20,7 +20,7 @@ class RoleDB:
             self.session.rollback()
             message = f"[ROLEDB] Failed to create role {e}"
             logger.error(message)
-            raise ValueError(message)
+            raise ValueError(message) from e
 
     async def get_role(self, name: UserRole) -> Role | None:
         try:
@@ -30,7 +30,7 @@ class RoleDB:
             self.session.rollback()
             message = f"[ROLEDB] Failed to get role {e}"
             logger.error(message)
-            raise ValueError(message)
+            raise ValueError(message) from e
 
     async def seed_roles(self) -> list[Role]:
         roles: list[UserRole] = [UserRole.STUDENT, UserRole.EDUCATOR, UserRole.ADMIN]

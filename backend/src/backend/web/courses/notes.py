@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import File, Form, UploadFile
@@ -51,7 +52,6 @@ async def list_course_note_overview(
 
 @router.get("/{course_id}/{note_id}/overview", response_model=NoteOverview)
 async def get_note_overview(
-    course_id: UUID,
     note_id: UUID,
     educator: CurrentUserDep,
     service: CourseNoteServiceDep,
@@ -67,7 +67,6 @@ async def get_note_overview(
 
 @router.get("/{course_id}/{note_id}/stream")
 async def stream_course_note(
-    course_id: UUID,
     note_id: UUID,
     _user: CurrentUserDep,
     service: CourseNoteServiceDep,
@@ -95,8 +94,8 @@ async def upload_course_note(
     course_id: UUID,
     educator: EducatorDep,
     service: CourseNoteServiceDep,
-    file: UploadFile = File(...),
-    resource_type: CourseContentType = Form(CourseContentType.NOTES),
+    file: Annotated[UploadFile, File()],
+    resource_type: Annotated[CourseContentType, Form()] = CourseContentType.NOTES,
 ) -> CourseNoteRead:
     try:
         note = await service.upload_note(
@@ -112,7 +111,6 @@ async def upload_course_note(
 
 @router.put("/{course_id}/{note_id}", response_model=CourseNoteRead)
 async def update_course_note(
-    course_id: UUID,
     note_id: UUID,
     educator: EducatorDep,
     service: CourseNoteServiceDep,
@@ -129,7 +127,6 @@ async def update_course_note(
 
 @router.delete("/{course_id}/{note_id}", response_model=CourseNoteDelete)
 async def remove_course_note(
-    course_id: UUID,
     note_id: UUID,
     educator: EducatorDep,
     service: CourseNoteServiceDep,

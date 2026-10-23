@@ -30,7 +30,9 @@ class Payload(BaseModel):
 
 
 @router.post("/v1")
-async def save_mcq(payload: Payload, user: CurrentUser, genmcq: GenMCQDependency):
+async def save_mcq(
+    payload: Payload, user: CurrentUser, genmcq: GenMCQDependency
+) -> list[GeneratedMCQ]:
     try:
         return await genmcq.async_batch_add_mcq(
             payload.qpayload,

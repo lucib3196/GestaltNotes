@@ -8,7 +8,8 @@ logger.propagate = True
 
 # Formatiting
 formatter = logging.Formatter(
-    r"%(asctime)s - %(levelname)-7s in_test=%(in_test)s %(threadName)-12s [%(filename)s:%(lineno)s - %(funcName)s()] - %(message)s"
+    "%(asctime)s - %(levelname)-7s in_test=%(in_test)s %(threadName)-12s "
+    "[%(filename)s:%(lineno)s - %(funcName)s()] - %(message)s"
 )
 
 

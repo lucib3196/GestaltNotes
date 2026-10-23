@@ -21,7 +21,6 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
     response_model=list[ProcessingRunRead],
 )
 async def list_processing_runs(
-    course_id: UUID,
     note_id: UUID,
     service: CourseNoteProcessingServiceDep,
     _note: ReadableCourseNoteDep,
@@ -37,7 +36,6 @@ async def list_processing_runs(
     response_model=ProcessingRunRead,
 )
 async def get_processing_run(
-    course_id: UUID,
     note_id: UUID,
     run_id: UUID,
     service: CourseNoteProcessingServiceDep,
@@ -57,7 +55,6 @@ async def get_processing_run(
     response_model=LectureProcessingStatusRead,
 )
 async def get_processing_status(
-    course_id: UUID,
     note_id: UUID,
     service: CourseNoteProcessingServiceDep,
     _note: ReadableCourseNoteDep,
