@@ -48,7 +48,7 @@ const availableTools: ToolConfig[] = [
 ];
 
 export default function WorkspaceInfo() {
-  const setMessage = useChatStore((s) => s.setExternalMessage);
+  const setMessage = useChatStore((s) => s.setDraftText);
   const setCurrentSection = useWorkspaceStore((s) => s.setCurrentSection);
   const [showHelp, setShowHelp] = useState<boolean>(false);
 

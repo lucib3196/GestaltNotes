@@ -10,7 +10,7 @@ import { useChatStore } from "../../Chat/instance";
 // This is meant to only render the tool call once it is succesful
 export function RenderToolCalls({ msg }: { msg: BaseMessage }) {
     const { user } = useAuth();
-    const threadId = useChatStore((s) => s.threadId);
+    const threadId = useChatStore((s) => s.activeThreadId);
     const requestIdRef = useRef<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>();

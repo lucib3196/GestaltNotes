@@ -7,7 +7,7 @@ export default function StarterView() {
     const setSelectedStarter = useStarterStore((s) => s.setSelectedState);
     const currentStarter = useStarterStore((s) => s.selectedState);
     const [openStarterId, setOpenStarterId] = useState<string | null>(currentStarter?.id ?? null);
-    const sendMessage = useChatStore((s) => s.setExternalMessage)
+    const sendMessage = useChatStore((s) => s.setDraftText)
 
     const handleStarterClick = (starter: { id: string }) => {
         const isOpen = openStarterId === starter.id;

@@ -1,9 +1,6 @@
 import { ChatSession } from "../features/Chat";
-import { useState } from "react";
-import { GiHamburgerMenu } from "react-icons/gi";
 import { ChatProvider } from "../features/Chat/instance";
 import { ChatSidebar } from "../features/Chat/ui/sidebar";
-import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import StarterView from "../features/ConversationStarters/components/StarterView";
 import { TabButton } from "../components/Button";
 import { WorkspaceItemsCarousel } from "../features/Tools";
