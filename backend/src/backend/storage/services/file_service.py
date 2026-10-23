@@ -1,0 +1,285 @@
+import contextlib
+from pathlib import Path
+from uuid import UUID
+from object_store import BlobMetadata, BlobStorage, BlobUploadData
+from object_store.exceptions import BlobStorageDeleteError
+from sqlmodel import Session, select
+
+from backend.accounts.models import User
+from backend.storage.exceptions import (
+    FileNotFoundError,
+    FileServiceCreateError,
+    FileServiceDeletionError,
+    FileServiceRetrievalError,
+    FileServiceUpdateError,
+)
+from backend.storage.models import File
+from backend.storage.repo.file_repository import FileRepository
+from backend.storage.schema import FileUpdate
+
+
+class FileService:
+    def __init__(self, storage: BlobStorage, session: Session) -> None:
+
+        self._storage = storage
+        self._session = session
+        self._repo = FileRepository(self._session)
+
+    async def create_file(
+        self,
+        owner: User | UUID,
+        filename: str,
+        data: BlobUploadData,
+        content_type: str | None = None,
+    ) -> File:
+        """Upload blob data and persist the matching file metadata."""
+        try:
+            file = await self.stage_file(owner, filename, data, content_type)
+            self._session.commit()
+            return file
+        except Exception as e:
+            self._session.rollback()
+            with contextlib.suppress(BlobStorageDeleteError):
+                await self._storage.delete(filename)
+            raise FileServiceCreateError(f"Failed to create file '{filename}'") from e
+
+    async def stage_file(
+        self,
+        owner: User | UUID,
+        filename: str,
+        data: BlobUploadData,
+        content_type: str | None = None,
+    ) -> File:
+        try:
+            await self._storage.upload(filename, data, content_type)
+            metadata = await self._storage.get_metadata(filename)
+            file_record = File(
+                owner_id=self._resolve_user_id(owner),
+                original_name=self._resolve_filename(filename),
+                storage_key=filename,
+                content_type=metadata.content_type or content_type,
+                size_bytes=metadata.size,
+            )
+            return await self._repo.create(file_record)
+        except Exception as e:
+            await self._cleanup_failed_stage(filename)
+            raise FileServiceCreateError(f"Failed to create file '{filename}'") from e
+
+    async def delete_file(self, file_id: UUID) -> None:
+        try:
+            file = await self.stage_delete_file(file_id)
+            self._session.commit()
+            await self._storage.delete(file.storage_key)
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            self._session.rollback()
+            raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
+
+    async def stage_delete_file(
+        self,
+        file_id: UUID,
+    ) -> File:
+        """Stage deletion of file metadata in the current transaction."""
+        try:
+            file = await self.get_file(file_id)
+            await self._repo.delete(file_id)
+            return file
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
+
+    async def delete_blob(self, storage_key: str) -> None:
+        await self._storage.delete(storage_key)
+
+    async def get_file(
+        self,
+        file_id: UUID,
+    ) -> File:
+        """Return file metadata by id."""
+        try:
+            file = await self._repo.get(file_id)
+            if file is None:
+                raise FileNotFoundError(str(file_id))
+            return file
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceRetrievalError(f"Failed to get file '{file_id}'") from e
+
+    async def get_file_metadata(
+        self,
+        file_id: UUID,
+    ) -> BlobMetadata:
+        """Return blob metadata for a persisted file."""
+        try:
+            file = await self.get_file(file_id)
+            return await self._storage.get_metadata(file.storage_key)
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceRetrievalError(
+                f"Failed to get metadata for file '{file_id}'"
+            ) from e
+
+    async def get_download_url(
+        self,
+        file_id: UUID,
+    ) -> str:
+        """Return a downloadable URL for a persisted file."""
+        try:
+            file = await self.get_file(file_id)
+            return await self._storage.get_download_url(file.storage_key)
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceRetrievalError(
+                f"Failed to get download URL for file '{file_id}'"
+            ) from e
+
+    async def download_file(
+        self,
+        file_id: UUID | None = None,
+        *,
+        storage_key: str | None = None,
+    ) -> tuple[File, bytes]:
+        """Download by file ID or an explicitly specified storage key."""
+        if (file_id is None) == (storage_key is None):
+            raise ValueError("Provide exactly one of file_id or storage_key")
+
+        if file_id is not None:
+            return await self._download_file_by_id(file_id)
+        if storage_key is not None:
+            return await self._download_file_by_storage_key(storage_key)
+        else:
+            raise FileServiceRetrievalError("Cannot determine file to download")
+
+    async def _download_file_by_id(self, file_id: UUID) -> tuple[File, bytes]:
+        try:
+            file = await self.get_file(file_id)
+            return file, await self._storage.download(file.storage_key)
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceRetrievalError(
+                f"Failed to download file '{file_id}'"
+            ) from e
+
+    async def _download_file_by_storage_key(
+        self, storage_key: str
+    ) -> tuple[File, bytes]:
+        try:
+            file = self._session.exec(
+                select(File).where(File.storage_key == storage_key)
+            ).first()
+            if file is None:
+                raise FileNotFoundError(storage_key)
+            return file, await self._storage.download(file.storage_key)
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceRetrievalError(
+                f"Failed to download file with storage key '{storage_key}'"
+            ) from e
+
+    async def replace_file(
+        self,
+        file_id: UUID,
+        data: BlobUploadData,
+        content_type: str | None = None,
+    ) -> File:
+        """Replace blob contents, update metadata, and commit."""
+        try:
+            file = await self.stage_replace_file(file_id, data, content_type)
+            self._session.commit()
+            return file
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            self._session.rollback()
+            raise FileServiceUpdateError(f"Failed to replace file '{file_id}'") from e
+
+    async def stage_replace_file(
+        self,
+        file_id: UUID,
+        data: BlobUploadData,
+        content_type: str | None = None,
+    ) -> File:
+        """Stage metadata updates after replacing blob contents."""
+        try:
+            file = await self.get_file(file_id)
+            await self._storage.upload(file.storage_key, data, content_type)
+            metadata = await self._storage.get_metadata(file.storage_key)
+            return await self._repo.update_by_id(
+                file_id,
+                FileUpdate(
+                    content_type=metadata.content_type or content_type,
+                    size_bytes=metadata.size,
+                ),
+            )
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceUpdateError(f"Failed to replace file '{file_id}'") from e
+
+    async def rename_file(
+        self,
+        file_id: UUID,
+        name: str,
+    ) -> File:
+        """Move a blob, update file metadata, and commit."""
+        try:
+            file = await self.stage_rename_file(file_id, name)
+            self._session.commit()
+            return file
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            self._session.rollback()
+            raise FileServiceUpdateError(f"Failed to rename file '{file_id}'") from e
+
+    async def stage_rename_file(
+        self,
+        file_id: UUID,
+        name: str,
+    ) -> File:
+        """Stage metadata updates after moving a blob to a new name."""
+        try:
+            file = await self.get_file(file_id)
+            new_key = self._rename_storage_key(file.storage_key, name)
+
+            data = await self._storage.download(file.storage_key)
+            await self._storage.upload(new_key, data, file.content_type)
+            await self._storage.delete(file.storage_key)
+
+            file.storage_key = new_key
+            file.original_name = self._resolve_filename(name)
+
+            return await self._repo.update(file, FileUpdate())
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            raise FileServiceUpdateError(f"Failed to rename file '{file_id}'") from e
+
+    async def _cleanup_failed_stage(self, filename: str) -> None:
+        with contextlib.suppress(BlobStorageDeleteError):
+            await self._storage.delete(filename)
+
+    def _resolve_user_id(self, user: User | UUID) -> UUID:
+        if isinstance(user, User):
+            if not (user.id):
+                raise ValueError("Failed to resolve user, missing id")
+            return user.id
+        return user
+
+    def _resolve_filename(self, filename: str) -> str:
+        return Path(filename).name
+
+    def _rename_storage_key(self, storage_key: str, name: str) -> str:
+        path = Path(storage_key)
+        parent = path.parent.as_posix()
+        filename = self._resolve_filename(name)
+        if parent == ".":
+            return filename
+        return f"{parent}/{filename}"

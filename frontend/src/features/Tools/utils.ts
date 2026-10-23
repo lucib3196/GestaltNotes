@@ -1,6 +1,6 @@
 import { BaseMessage, ToolMessage } from "langchain";
 import { TOOL_NAMES, type ToolName } from "./models/tools.types";
-import { normalizeContent } from "../Chat/utils";
+import { extractMessageContent } from "../Chat/utils/messageContent";
 export function isToolMessage(msg: BaseMessage): msg is ToolMessage {
   return (
     msg.type === "tool" &&
@@ -35,7 +35,7 @@ export function extractToolPayload(msg: ToolMessage): unknown {
     else return artifact;
   }
   const c = msg.content;
-  const cleaned = normalizeContent(c);
+  const cleaned = extractMessageContent(c);
   let text: string | null = null;
 
   try {

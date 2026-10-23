@@ -1,13 +1,13 @@
 import { useStarterStore } from "../instance/store";
 import { IoIosArrowDropdownCircle, IoIosArrowDroprightCircle } from "react-icons/io";
 import { useState } from "react";
-import { useChatStore } from "../../Chat/instance/store";
+import { useChatStore } from "../../Chat/instance";
 export default function StarterView() {
     const validStarter = useStarterStore((s) => s.validStates);
     const setSelectedStarter = useStarterStore((s) => s.setSelectedState);
     const currentStarter = useStarterStore((s) => s.selectedState);
     const [openStarterId, setOpenStarterId] = useState<string | null>(currentStarter?.id ?? null);
-    const sendMessage = useChatStore((s) => s.setExternalMessage)
+    const sendMessage = useChatStore((s) => s.setDraftText)
 
     const handleStarterClick = (starter: { id: string }) => {
         const isOpen = openStarterId === starter.id;

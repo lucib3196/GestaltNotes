@@ -1,0 +1,100 @@
+import type { ReactNode } from "react";
+import { Flashcards } from "./components";
+import LegacyLectureSources from "./components/legacy/LegacyLectureSources";
+import { flashcardSetSchema } from "./schemas/practice";
+import { legacySourceDocumentsSchema } from "./schemas/legacySources";
+import { NoteBlockSources } from "./NoteBlockRetrieval/NoteBlockSources";
+import { noteBlockDocumentsSchema } from "./NoteBlockRetrieval/schema";
+
+import { QuestionsPractice, multipleChoiceSetSchema } from "./MCQ";
+import { WebSearchSources } from "./WebSearch/WebSearchSources";
+import { webSearchSourcesSchema } from "./WebSearch/schema";
+import { MermaidDiagram } from "./MermaidDiagram/MermaidDiagram";
+import { flowDiagramDataSchema } from "./MermaidDiagram/schema";
+
+export type ToolEntry = {
+  render: ToolRenderer;
+  compact: boolean;
+};
+export type ToolRenderer = (data: unknown) => ReactNode;
+
+const renderQuestions: ToolRenderer = (data) => {
+  const result = multipleChoiceSetSchema.safeParse(data);
+  return result.success ? (
+    <QuestionsPractice data={result.data} />
+  ) : (
+    <p role="alert">The question data could not be displayed.</p>
+  );
+};
+const renderFlashcards: ToolRenderer = (data) => {
+  const result = flashcardSetSchema.safeParse(data);
+  return result.success ? (
+    <Flashcards data={result.data} />
+  ) : (
+    <p role="alert">The flashcard data could not be displayed.</p>
+  );
+};
+const renderLegacySources: ToolRenderer = (data) => {
+  const result = legacySourceDocumentsSchema.safeParse(data);
+  return result.success ? (
+    <LegacyLectureSources data={result.data} />
+  ) : (
+    <p role="alert">The lecture source data could not be displayed.</p>
+  );
+};
+
+const renderWebSearchSources: ToolRenderer = (data) => {
+  const result = webSearchSourcesSchema.safeParse(data);
+  return result.success ? (
+    <WebSearchSources data={result.data} />
+  ) : (
+    <p role="alert">The search sources could not be displayed.</p>
+  );
+};
+
+const renderNoteBlockSources: ToolRenderer = (data) => {
+  const result = noteBlockDocumentsSchema.safeParse(data);
+  return result.success ? (
+    <NoteBlockSources data={result.data} />
+  ) : (
+    <p role="alert">The lecture source data could not be displayed.</p>
+  );
+};
+
+function createToolEntry(render: ToolRenderer, compact = false): ToolEntry {
+  return { render, compact };
+}
+
+const renderMermaidDiagram: ToolRenderer = (data) => {
+  const result = flowDiagramDataSchema.safeParse(data);
+  return result.success ? (
+    <MermaidDiagram data={result.data} />
+  ) : (
+    <p role="alert">The diagram data could not be displayed.</p>
+  );
+};
+
+const mermaidEntry = createToolEntry(renderMermaidDiagram);
+
+const questionsEntry = createToolEntry(renderQuestions);
+const flashcardsEntry = createToolEntry(renderFlashcards);
+const legacySourcesEntry = createToolEntry(renderLegacySources);
+const noteBlockSourcesEntry = createToolEntry(renderNoteBlockSources);
+const webSearchEntry = createToolEntry(renderWebSearchSources, true);
+
+// Artifact kinds take precedence; tool names remain supported as aliases.
+export const toolCallRegistry: Readonly<Record<string, ToolEntry>> = {
+  mermaid: mermaidEntry,
+  create_mermaid_diagram: mermaidEntry,
+  review_quiz_understanding: mermaidEntry,
+  web_search: webSearchEntry,
+  search: webSearchEntry,
+  "multiple-choice-question": questionsEntry,
+  create_multiple_choice_questions: questionsEntry,
+  flashcards: flashcardsEntry,
+  create_flashcards: flashcardsEntry,
+  retrieval: legacySourcesEntry,
+  note_block_retrieval_v1: noteBlockSourcesEntry,
+  retrieve_course_notes: noteBlockSourcesEntry,
+  legacy_lecture_sources: legacySourcesEntry,
+};

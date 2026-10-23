@@ -1,0 +1,26 @@
+[project]
+name = "firebase-loader"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Luciano Bermudez", email = "lberm007@ucr.edu" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "firebase-admin>=7.7.0",
+    "langchain-core>=1.6.11",
+    "pydantic>=2.14.1",
+]
+
+[project.scripts]
+firebase-loader = "firebase_loader:main"
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.1",
+]

@@ -1,0 +1,47 @@
+name: Document Processing CI
+
+on:
+  push:
+    branches: ["main", "dev"]
+    paths:
+      - "packages/document_processing/**"
+      - ".github/workflows/document_processing_build.yml"
+      - ".github/actions/setup-python-project/**"
+  pull_request:
+    branches: ["main", "dev"]
+    paths:
+      - "packages/document_processing/**"
+      - ".github/workflows/document_processing_build.yml"
+      - ".github/actions/setup-python-project/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: packages/document_processing
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python and package dependencies
+        uses: ./.github/actions/setup-python-project
+        with:
+          python-version: "3.14"
+          working-dir: packages/document_processing
+
+      - name: Verify installed package imports
+        run: |
+          uv run --locked python -c "
+          from document_processing.annotator.pdf_annotator import PDFAnnotator
+          from document_processing.splitter.pdf_splitter import PDFPageSplitter
+          "
+
+      - name: Run tests
+        run: uv run --locked pytest -q

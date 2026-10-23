@@ -1,4 +1,6 @@
 
+
+
 export {
   AuthBase,
   AuthPage,
@@ -8,5 +10,8 @@ export {
   SignUpForm,
   UnauthorizedPage,
 } from "./components/login";
-
-export { AccountHeader, AccountProfile } from "./components/account"
+export {
+  AuthProvider,
+  useAuth,
+  type AuthMode,
+} from "./context/AuthProvider";

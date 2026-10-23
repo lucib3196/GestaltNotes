@@ -1,3 +1,5 @@
+export type ThreadTitleSource = "default" | "generated" | "manual";
+
 export interface ThreadCreate {
   thread_id?: string | null;
   user_id?: string | null;
@@ -11,6 +13,7 @@ export interface Thread {
   user_id: string;
   course_id: string | null;
   title: string | null;
+  title_source: ThreadTitleSource | null;
   agent: string | null;
   created_at: string;
   updated_at: string;
@@ -31,5 +34,6 @@ export interface Message {
 
 
 export interface ThreadUpdate{
-  title: string
+  title: string;
+  title_source: ThreadTitleSource;
 }
