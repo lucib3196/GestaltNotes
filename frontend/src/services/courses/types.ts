@@ -1,3 +1,5 @@
+import type { LectureProcessingStatus } from "../processing";
+
 export interface Course {
   id: string;
   name: string;
@@ -32,14 +34,13 @@ export type CourseContentType =
   | "quiz"
   | "textbook"
   | "handout"
-  | "homework"
   | "syllabus"
   | "reference"
   | "other";
 
 export type SupportedContentType = Extract<
   CourseContentType,
-  "lecture" | "notes" | "homework" | "exam" | "other"
+  "lecture" | "notes" | "assignment" | "exam" | "other"
 >;
 export interface CourseNote {
   id: string;
@@ -48,10 +49,19 @@ export interface CourseNote {
   title: string;
   resource_type: CourseContentType;
   download_url: string | null;
-  content_type?: string | null;
+  content_type: string | null;
 }
 
 export interface CourseNoteDelete {
   success: boolean;
   info: string;
+}
+
+export interface CourseNoteUpdate {
+  title?: string | null;
+  resource_type?: CourseContentType | null;
+}
+
+export interface CourseNoteOverview extends CourseNote {
+  processing: LectureProcessingStatus;
 }

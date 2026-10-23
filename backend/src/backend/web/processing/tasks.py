@@ -12,9 +12,10 @@ from backend.processing.exceptions import (
 )
 from backend.processing.schema import LectureProcessingInput
 from backend.processing.tasks import process_lecture_file
-from backend.web.courses.dependencies import ReadableCourseNoteDep
-
-from .dependencies import CourseNoteProcessingServiceDep
+from backend.web.courses.dependencies import (
+    CourseNoteProcessingServiceDep,
+    ReadableCourseNoteDep,
+)
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 

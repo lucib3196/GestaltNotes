@@ -17,6 +17,10 @@ function lecturePath(courseId: string, noteId: string) {
   return `/tasks/course/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}`;
 }
 
+function notePath(courseId: string, noteId: string) {
+  return `/courses/notes/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}`;
+}
+
 export class LectureRunsAPI {
   static async listRuns(
     token: string,
@@ -25,7 +29,7 @@ export class LectureRunsAPI {
     signal?: AbortSignal,
   ): Promise<ProcessingRun[]> {
     const res = await api.get<ProcessingRun[]>(
-      `${lecturePath(courseId, noteId)}/runs`,
+      `${notePath(courseId, noteId)}/runs`,
       requestConfig(token, signal),
     );
     return res.data;
@@ -39,7 +43,7 @@ export class LectureRunsAPI {
     signal?: AbortSignal,
   ): Promise<ProcessingRun> {
     const res = await api.get<ProcessingRun>(
-      `${lecturePath(courseId, noteId)}/runs/${encodeURIComponent(runId)}`,
+      `${notePath(courseId, noteId)}/runs/${encodeURIComponent(runId)}`,
       requestConfig(token, signal),
     );
     return res.data;
@@ -52,7 +56,7 @@ export class LectureRunsAPI {
     signal?: AbortSignal,
   ): Promise<LectureProcessingStatus> {
     const res = await api.get<LectureProcessingStatus>(
-      `${lecturePath(courseId, noteId)}/status`,
+      `${notePath(courseId, noteId)}/status`,
       requestConfig(token, signal),
     );
     return res.data;

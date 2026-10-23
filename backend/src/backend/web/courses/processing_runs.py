@@ -9,15 +9,17 @@ from backend.processing.exceptions import (
 )
 from backend.processing.models import ProcessingRun
 from backend.processing.schema import LectureProcessingStatusRead, ProcessingRunRead
-from backend.web.courses.dependencies import ReadableCourseNoteDep
 
-from .dependencies import CourseNoteProcessingServiceDep
+from .dependencies import CourseNoteProcessingServiceDep, ReadableCourseNoteDep
 
-router = APIRouter(prefix="/tasks", tags=["tasks"])
+router = APIRouter(
+    prefix="/courses/notes/{course_id}/{note_id}",
+    tags=["courses", "processing runs"],
+)
 
 
 @router.get(
-    "/course/{course_id}/{note_id}/runs",
+    "/runs",
     response_model=list[ProcessingRunRead],
 )
 async def list_processing_runs(
@@ -32,7 +34,7 @@ async def list_processing_runs(
 
 
 @router.get(
-    "/course/{course_id}/{note_id}/runs/{run_id}",
+    "/runs/{run_id}",
     response_model=ProcessingRunRead,
 )
 async def get_processing_run(
@@ -51,7 +53,7 @@ async def get_processing_run(
 
 
 @router.get(
-    "/course/{course_id}/{note_id}/status",
+    "/status",
     response_model=LectureProcessingStatusRead,
 )
 async def get_processing_status(

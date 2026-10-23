@@ -5,7 +5,6 @@ const CATEGORIES = [
   { value: "notes", label: "Lecture notes" },
   { value: "lecture", label: "Lecture materials" },
   { value: "exam", label: "Exam" },
-  { value: "homework", label: "Homework" },
   { value: "assignment", label: "Assignment" },
   { value: "quiz", label: "Quiz" },
   { value: "textbook", label: "Textbook" },

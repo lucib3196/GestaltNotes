@@ -6,5 +6,7 @@ export type {
   CourseDelete,
   CourseNote,
   CourseNoteDelete,
+  CourseNoteOverview,
+  CourseNoteUpdate,
   CourseUpdate,
 } from "./types";
