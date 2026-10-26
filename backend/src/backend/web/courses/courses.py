@@ -39,17 +39,6 @@ async def list_owned_courses(
         raise course_http_exception(e) from e
 
 
-@router.get("/get_prof_courses", response_model=list[CourseRead])
-async def get_prof_courses(
-    course_service: CourseServiceDep,
-    educator: EducatorDep,
-) -> list[Course]:
-    try:
-        return await course_service.list_owned_courses(educator)
-    except CourseServiceException as e:
-        raise course_http_exception(e) from e
-
-
 @router.get("/{course_id}", response_model=CourseRead)
 async def get_course(
     course_service: CourseServiceDep,

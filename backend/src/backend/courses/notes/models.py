@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID, uuid4
 
@@ -7,12 +8,16 @@ from lecture_processor.extract_derivations.model import Derivation
 from lecture_processor.extracted_question import ExtractedQuestion
 from lecture_processor.lecture_analysis import LectureAnalysis
 from pydantic import BaseModel
-from sqlalchemy import JSON, Column, ForeignKey
+from sqlalchemy import JSON, Column, ForeignKey, UniqueConstraint
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
+from backend.shared import Status
+
 if TYPE_CHECKING:
     from backend.courses.models import Course
+    from backend.processing.models import LectureProcessingRun
     from backend.storage.models import File
 JSONType = JSON().with_variant(JSONB, "postgresql")
 
@@ -22,6 +27,50 @@ NOTE_BLOCK_CONTENT_MODELS: dict[str, type[BaseModel]] = {
     "derivation": Derivation,
     "extracted_question": ExtractedQuestion,
 }
+
+
+class CourseContentType(StrEnum):
+    LECTURE = "lecture"
+    NOTES = "notes"
+    ASSIGNMENT = "assignment"
+    EXAM = "exam"
+    QUIZ = "quiz"
+    TEXTBOOK = "textbook"
+    HANDOUT = "handout"
+    SYLLABUS = "syllabus"
+    REFERENCE = "reference"
+    OTHER = "other"
+
+
+class CourseNote(SQLModel, table=True):
+    __tablename__ = "course_note"  # type: ignore
+    __table_args__ = (
+        UniqueConstraint("course_id", "file_id", name="uq_course_note_course_file"),
+    )
+
+    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+    course_id: UUID = Field(
+        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
+    )
+    file_id: UUID = Field(
+        sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
+    )
+    title: str
+    resource_type: CourseContentType = Field(
+        sa_column=Column(
+            SAEnum(CourseContentType, name="course_content_type"),
+            nullable=False,
+        )
+    )
+    status: Status = Status.DRAFT
+
+    course: "Course" = Relationship(back_populates="notes")
+
+    file: "File" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    processing_runs: list["LectureProcessingRun"] = Relationship(
+        back_populates="note",
+    )
 
 
 class NoteBlock(SQLModel, table=True):

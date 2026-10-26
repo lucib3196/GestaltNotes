@@ -1,4 +1,5 @@
 import os
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -17,7 +18,7 @@ settings = get_settings()
 
 ## Intializes the database
 @asynccontextmanager
-async def on_startup(app: FastAPI):
+async def on_startup(_app: FastAPI) -> AsyncIterator[None]:
     initialize_database_engine()
     initialize_firebase_app()
     logger.info("Initialized fb okay")
@@ -31,7 +32,7 @@ def add_routes(app: FastAPI, routes: list[APIRouter] = ALL_ROUTES) -> None:
         app.include_router(r)
 
 
-def get_app():
+def get_app() -> FastAPI:
     app = FastAPI(title=settings.PROJECT_NAME, lifespan=on_startup)
     logger.info("[Initialization] Initialized app")
     app.add_middleware(

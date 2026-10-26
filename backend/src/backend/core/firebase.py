@@ -47,7 +47,7 @@ def _log_firebase_emulator_config() -> None:
 
 
 @lru_cache
-def initialize_firebase_app():
+def initialize_firebase_app() -> firebase_admin.App:
 
     try:
         if firebase_admin._apps:

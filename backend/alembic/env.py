@@ -8,6 +8,10 @@ from alembic import context
 from backend.core.settings import get_settings
 from backend.database.models import *
 
+alembic_postgresql_enum.set_configuration(
+    alembic_postgresql_enum.Config(ignore_enum_values_order=True)
+)
+
 # Database models
 
 # this is the Alembic Config object, which provides

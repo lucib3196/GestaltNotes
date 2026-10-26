@@ -14,6 +14,7 @@ from lecture_processor.graph.context import ExtractionContext
 from backend.core.logger import logger
 from backend.courses.notes.note_block_service import NoteBlockService
 from backend.courses.notes.parser import parse_lecture_document
+from backend.courses.notes.processing_service import CourseNoteProcessingService
 from backend.courses.vector_store.models import VectorStoreStatus
 from backend.database.config import open_session
 from backend.processing.celery_app import app
@@ -23,7 +24,6 @@ from backend.processing.resources import (
     course_vectorstore_scope,
 )
 
-from .lecture_processing_service import LectureProcessingService
 from .models import (
     LectureProcessingRun,
     ProcessingRun,
@@ -85,7 +85,11 @@ def prepare_lecture_run(self: Task, data: LectureProcessingInput) -> dict:
         note_uuid = data.note_id
 
         with open_session() as session:
-            LectureProcessingService(session).assert_can_process(course_uuid, note_uuid)
+            note = asyncio.run(
+                CourseNoteProcessingService(session).assert_can_process(note_uuid)
+            )
+            if note.course_id != course_uuid:
+                raise ValueError("Note does not belong to the requested course")
 
         with course_note_scope() as course_notes:
             note = asyncio.run(course_notes.get_note_record(note_uuid))
@@ -160,7 +164,6 @@ def extract_lecture_content(self: Task, data: LectureProcessingState) -> dict:
     )
     try:
         note_id = data.note_id
-        course_id = data.course_id
         with (
             processing_update(
                 data.run_id,
@@ -169,9 +172,7 @@ def extract_lecture_content(self: Task, data: LectureProcessingState) -> dict:
             ),
             course_note_scope() as notes,
         ):
-            file, content = asyncio.run(
-                notes.download_note_file_strict(course_id, note_id)
-            )
+            file, content = asyncio.run(notes.download_note(note_id))
             if file.content_type != "application/pdf":
                 raise ValueError("Only PDF files can be processed")
         with processing_update(

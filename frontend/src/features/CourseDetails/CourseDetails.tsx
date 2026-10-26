@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useGetCourse } from "../../hooks/courses";
-import CourseHeader from "./components/CourseHeader";
-import { CourseResources } from "./components/CourseResources";
-import { CourseDetailsProvider, useCourseDetailsStore } from "./instance";
+import CourseHeader from "./ui/CourseHeader";
+import CourseNotePreview from "./ui/CourseNotePreview";
+import { CourseDetailsProvider, useCourseDetailsStore } from "./state";
+import CourseMaterials from "./materials/CourseMaterials";
+import CourseNoteUpload from "./ui/CourseNoteUpload";
+import { useCourseMaterials } from "./hooks/useCourseMaterials";
 
 export default function CourseDetails() {
   const { courseId } = useParams();
@@ -23,6 +26,7 @@ function CourseDetailsContent() {
     (state) => state.setSelectedCourse,
   );
   const { course, loading, error, refetch } = useGetCourse(courseId);
+  const materials = useCourseMaterials();
 
   useEffect(() => {
     let active = true;
@@ -35,7 +39,7 @@ function CourseDetailsContent() {
   }, [course, setSelectedCourse]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full  space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       <Link
         to="/educator/courses"
         className="text-sm font-medium text-text-muted hover:text-accent"
@@ -58,7 +62,11 @@ function CourseDetailsContent() {
       ) : selectedCourse ? (
         <>
           <CourseHeader />
-          <CourseResources />
+          <CourseNoteUpload onUploaded={materials.refetch} />
+          <div className="flex flex-row gap-2 px-2 py-3">
+            <CourseMaterials materials={materials} />
+            <CourseNotePreview />
+          </div>
         </>
       ) : (
         <p>Course not found.</p>

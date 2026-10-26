@@ -1,3 +1,4 @@
+from asyncio import to_thread
 from urllib.parse import urlparse, urlunparse
 
 from firebase_admin import storage
@@ -40,7 +41,10 @@ class FirebaseBlobStorage(BlobStorage):
             raise BlobStorageUploadError(f"Failed to upload blob '{blob_key}'") from e
 
     async def read(self, key: str) -> bytes:
-        """Read a Firebase blob as bytes."""
+        """Read blob bytes without blocking the event loop."""
+        return await to_thread(self._read_sync, key)
+
+    def _read_sync(self, key: str) -> bytes:
         blob_key = self._to_blob_key(key)
 
         try:
@@ -50,8 +54,7 @@ class FirebaseBlobStorage(BlobStorage):
                 raise BlobNotFoundError(blob_key)
 
             self._rewrite_emulator_media_link(blob)
-            data = blob.download_as_bytes(timeout=60)
-            return data
+            return blob.download_as_bytes(timeout=60)
         except BlobNotFoundError:
             raise
         except Exception as e:

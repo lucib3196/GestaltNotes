@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlmodel import Session, select
 
-from .models import LectureProcessingRun, ProcessingRun, ProcessingStatus
+from .models import ProcessingRun
 from .schema import RunUpdate
 
 
@@ -29,28 +29,6 @@ class RunRepo:
             ProcessingRun.celery_task_id == celery_task_id
         )
         return self._session.exec(statement).one_or_none()
-
-    def get_successful_by_note(self, note_id: UUID) -> ProcessingRun | None:
-        """Find any successful run associated with a lecture note."""
-        statement = (
-            select(ProcessingRun)
-            .join(LectureProcessingRun, LectureProcessingRun.run_id == ProcessingRun.id)
-            .where(
-                LectureProcessingRun.note_id == note_id,
-                ProcessingRun.status == ProcessingStatus.SUCCEEDED,
-            )
-            .limit(1)
-        )
-        return self._session.exec(statement).first()
-
-    def list_by_note(self, note_id: UUID) -> list[ProcessingRun]:
-        """Return runs associated with a lecture note."""
-        statement = (
-            select(ProcessingRun)
-            .join(LectureProcessingRun, LectureProcessingRun.run_id == ProcessingRun.id)
-            .where(LectureProcessingRun.note_id == note_id)
-        )
-        return list(self._session.exec(statement).all())
 
     def update(
         self,

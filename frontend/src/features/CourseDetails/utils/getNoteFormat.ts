@@ -1,4 +1,4 @@
-import type { CourseNote } from "../../services/courses";
+import type { CourseNote } from "../../../services/courses";
 
 export function getNoteFormat(note: CourseNote): string {
   const mime = note.content_type?.toLowerCase().split(";")[0].trim();

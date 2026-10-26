@@ -1,4 +1,3 @@
-from typing import Any
 from uuid import UUID
 
 from lecture_processor.extract_derivations.model import Derivation
@@ -10,7 +9,7 @@ from .models import NoteBlock
 
 
 def parse_lecture_document(
-    source: Any | OutputState,
+    source: object,
     *,
     source_file_id: UUID | None = None,
     course_id: UUID | None = None,

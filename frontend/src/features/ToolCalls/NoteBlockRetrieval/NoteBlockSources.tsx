@@ -32,6 +32,8 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
   const selectedSource = sources.find(
     (source) => source.path === selectedFile?.path,
   );
+  console.log("DATA", data);
+  console.log("Current sources", sources);
 
   return (
     <section

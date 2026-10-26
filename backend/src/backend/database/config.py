@@ -4,6 +4,7 @@ from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy import Engine
 from sqlmodel import Session, create_engine
 
 from backend.core.logger import logger
@@ -14,7 +15,7 @@ from .exceptions import DatabaseConfigError, DatabaseInitializationError
 app_settings = get_settings()
 
 
-def initialize_database_engine():
+def initialize_database_engine() -> Engine:
     DATABASE_URL = None
     if app_settings.ENV == "testing":
         DATABASE_URL = "sqlite:///:memory:"
@@ -38,7 +39,7 @@ def initialize_database_engine():
 
 
 @lru_cache
-def session_cache():
+def session_cache() -> Engine:
     return initialize_database_engine()
 
 

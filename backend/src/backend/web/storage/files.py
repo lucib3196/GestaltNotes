@@ -1,9 +1,8 @@
-from io import BytesIO
 from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 from fastapi.routing import APIRouter
 from starlette import status
 
@@ -24,7 +23,7 @@ async def get_file(
     _user: CurrentUserDep,
     file_id: UUID | None = None,
     storage_key: str | None = None,
-) -> StreamingResponse:
+) -> Response:
     if (file_id is None) == (storage_key is None):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -44,8 +43,8 @@ async def get_file(
             detail="Failed to retrieve file",
         ) from e
 
-    return StreamingResponse(
-        BytesIO(data),
+    return Response(
+        content=data,
         media_type=file.content_type or "application/octet-stream",
         headers={
             "Content-Disposition": (
@@ -60,7 +59,7 @@ async def get_file_by_id(
     file_id: UUID,
     service: FileServiceDep,
     _user: CurrentUserDep,
-) -> StreamingResponse:
+) -> Response:
     return await get_file(
         service=service,
         _user=_user,

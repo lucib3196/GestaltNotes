@@ -5,7 +5,7 @@ from backend.service.user.user_manager import UserCreate, UserManager
 from sqlmodel import create_engine
 
 from backend.core.settings import get_settings
-from backend.database import Session, engine
+from backend.database import Session
 
 settings = get_settings()
 print(settings.ENV)

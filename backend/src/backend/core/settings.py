@@ -3,7 +3,7 @@ import os
 from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self
 
 from dotenv import load_dotenv
 from pydantic import AliasChoices, Field, field_validator, model_validator
@@ -86,7 +86,7 @@ class AppSettings(BaseSettings):
     # Backend CORS validation
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v):
+    def assemble_cors_origins(cls, v: list[str] | str | None) -> list[str]:
         if v is None:
             return []
 
@@ -100,14 +100,14 @@ class AppSettings(BaseSettings):
 
     # Database validation
     @model_validator(mode="after")
-    def validate_database(self):
+    def validate_database(self) -> Self:
         if not self.DATABASE_URL:
             raise ValueError("Database URL is not set")
         return self
 
     # Firebase validation
     @model_validator(mode="after")
-    def format_credentials(self):
+    def format_credentials(self) -> Self:
         try:
             if self.FIREBASE_CRED is None:
                 raise MissingConfigError("FIREBASE_CRED must be set")
@@ -132,11 +132,11 @@ class AppSettings(BaseSettings):
 
     # During development firebase emulator must be set to prevent override
     @model_validator(mode="after")
-    def validate_emulators(self):
+    def validate_emulators(self) -> Self:
         if self.ENV == "production":
             return self
 
-        # if self.ENV == "docker" and "127.0.0.1" in os.environ["STORAGE_EMULATOR_HOST"]:
+        # Docker emulator configuration example:
         #     raise EmulatorConfigError(
         #         "STORAGE_EMULATOR_HOST cannot be 127.0.0.1 inside Docker. "
         #         "Use http://host.docker.internal:9199."
@@ -151,7 +151,7 @@ class AppSettings(BaseSettings):
     ## For development an api key is not needed however for production it is needed.
     ## This is assuming that langchain stream url is running locally
     @model_validator(mode="after")
-    def validate_langchain_deployment(self):
+    def validate_langchain_deployment(self) -> Self:
         # Checks based on production
         if self.ENV == "production" and not self.LANGSMITH_API_KEY:
             raise MissingLangchainAPIKey(

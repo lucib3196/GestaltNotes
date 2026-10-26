@@ -1,37 +1,21 @@
 from datetime import datetime
-from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
-from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
 
+from backend.courses.notes.models import CourseContentType as CourseContentType
+from backend.courses.notes.models import CourseNote as CourseNote
 from backend.courses.vector_store.models import (
     CourseVectorStore as CourseVectorStore,
 )
 from backend.courses.vector_store.models import (
     VectorStoreStatus as VectorStoreStatus,
 )
-from backend.shared import Status
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
-    from backend.processing.models import LectureProcessingRun
-    from backend.storage.models import File
-
-
-class CourseContentType(StrEnum):
-    LECTURE = "lecture"
-    NOTES = "notes"
-    ASSIGNMENT = "assignment"
-    EXAM = "exam"
-    QUIZ = "quiz"
-    TEXTBOOK = "textbook"
-    HANDOUT = "handout"
-    SYLLABUS = "syllabus"
-    REFERENCE = "reference"
-    OTHER = "other"
 
 
 class CourseEnrollment(SQLModel, table=True):
@@ -88,37 +72,6 @@ class CourseAccessCode(SQLModel, table=True):
     uses: int = 0
 
     course: "Course" = Relationship(back_populates="access_codes")
-
-
-class CourseNote(SQLModel, table=True):
-    __tablename__ = "course_note"  # type: ignore
-    __table_args__ = (
-        UniqueConstraint("course_id", "file_id", name="uq_course_note_course_file"),
-    )
-
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
-    course_id: UUID = Field(
-        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
-    )
-    file_id: UUID = Field(
-        sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
-    )
-    title: str
-    resource_type: CourseContentType = Field(
-        sa_column=Column(
-            SAEnum(CourseContentType, name="course_content_type"),
-            nullable=False,
-        )
-    )
-    status: Status = Status.DRAFT
-
-    course: "Course" = Relationship(back_populates="notes")
-
-    file: "File" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
-
-    processing_runs: list["LectureProcessingRun"] = Relationship(
-        back_populates="note",
-    )
 
 
 class CourseModule(SQLModel, table=True):

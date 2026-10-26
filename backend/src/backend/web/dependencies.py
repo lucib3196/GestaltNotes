@@ -13,8 +13,8 @@ def get_message_db(session: SessionDep) -> MessageDB:
     try:
         logger.debug("Initialized Message DB")
         return MessageDB(session)
-    except Exception:
-        raise ValueError("Failed to initialize Message DB")
+    except Exception as e:
+        raise ValueError("Failed to initialize Message DB") from e
 
 
 MessageDBDependency = Annotated[MessageDB, Depends(get_message_db)]

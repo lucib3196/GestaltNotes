@@ -33,7 +33,7 @@ class MessageDB:
             self.session.rollback()
             message = f"[MessageDB] failed to create message {e}"
             logger.error(message)
-            raise ValueError(message)
+            raise ValueError(message) from e
 
     async def get_message(self, id: UUID) -> Message:
         try:
@@ -45,7 +45,7 @@ class MessageDB:
             self.session.rollback()
             message = f"[MessageDB] failed to get message {e}"
             logger.error(message)
-            raise ValueError(message)
+            raise ValueError(message) from e
 
     async def list_messages(self, thread_id: UUID) -> list[Message]:
         try:
@@ -59,4 +59,4 @@ class MessageDB:
             self.session.rollback()
             message = f"[MessageDB] failed to list messages {e}"
             logger.error(message)
-            raise ValueError(message)
+            raise ValueError(message) from e

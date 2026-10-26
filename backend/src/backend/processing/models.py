@@ -1,13 +1,14 @@
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey
 from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from backend.courses.models import CourseNote
+    from backend.courses.notes.models import CourseNote
 
 
 class ProcessingStatus(StrEnum):
@@ -55,6 +56,18 @@ class ProcessingRun(SQLModel, table=True):
     attempt_count: int = 0
     error_type: str | None = None
     error_message: str | None = None
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            onupdate=lambda: datetime.now(UTC),
+        ),
+    )
 
     lecture_run: Optional["LectureProcessingRun"] = Relationship(
         back_populates="run",

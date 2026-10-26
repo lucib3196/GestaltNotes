@@ -6,6 +6,8 @@ import type {
   CourseDelete,
   CourseNote,
   CourseNoteDelete,
+  CourseNoteOverview,
+  CourseNoteUpdate,
   CourseUpdate,
 } from "./types";
 
@@ -40,7 +42,7 @@ export class CoursesAPI {
   }
 
   static async getCourse(token: string, courseId: string): Promise<Course> {
-    const res = await api.get<Course>(`${base}/${courseId}`, {
+    const res = await api.get<Course>(`${base}/${encodeURIComponent(courseId)}`, {
       headers: authHeaders(token),
     });
     return res.data;
@@ -51,14 +53,14 @@ export class CoursesAPI {
     courseId: string,
     data: CourseUpdate,
   ): Promise<Course> {
-    const res = await api.patch<Course>(`${base}/${courseId}`, data, {
+    const res = await api.patch<Course>(`${base}/${encodeURIComponent(courseId)}`, data, {
       headers: authHeaders(token),
     });
     return res.data;
   }
 
   static async deleteCourse(token: string, courseId: string): Promise<CourseDelete> {
-    const res = await api.delete<CourseDelete>(`${base}/${courseId}`, {
+    const res = await api.delete<CourseDelete>(`${base}/${encodeURIComponent(courseId)}`, {
       headers: authHeaders(token),
     });
     return res.data;
@@ -68,9 +70,34 @@ export class CoursesAPI {
     token: string,
     courseId: string,
   ): Promise<CourseNote[]> {
-    const res = await api.get<CourseNote[]>(`${base}/notes/${courseId}`, {
+    const res = await api.get<CourseNote[]>(`${base}/notes/${encodeURIComponent(courseId)}`, {
       headers: authHeaders(token),
     });
+    return res.data;
+  }
+
+  static async listCourseNoteOverviews(
+    token: string,
+    courseId: string,
+    signal?: AbortSignal,
+  ): Promise<CourseNoteOverview[]> {
+    const res = await api.get<CourseNoteOverview[]>(
+      `${base}/notes/${encodeURIComponent(courseId)}/overview`,
+      { headers: authHeaders(token), signal },
+    );
+    return res.data;
+  }
+
+  static async getCourseNoteOverview(
+    token: string,
+    courseId: string,
+    noteId: string,
+    signal?: AbortSignal,
+  ): Promise<CourseNoteOverview> {
+    const res = await api.get<CourseNoteOverview>(
+      `${base}/notes/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}/overview`,
+      { headers: authHeaders(token), signal },
+    );
     return res.data;
   }
 
@@ -85,7 +112,7 @@ export class CoursesAPI {
     formData.append("resource_type", resourceType);
 
     const res = await api.post<CourseNote>(
-      `${base}/notes/${courseId}`,
+      `${base}/notes/${encodeURIComponent(courseId)}`,
       formData,
       {
         headers: authHeaders(token),
@@ -98,10 +125,10 @@ export class CoursesAPI {
     token: string,
     courseId: string,
     noteId: string,
-    data: { resource_type: CourseContentType; },
+    data: CourseNoteUpdate,
   ): Promise<CourseNote> {
     const response = await api.put<CourseNote>(
-      `${base}/notes/${courseId}/${noteId}`, data,
+      `${base}/notes/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}`, data,
       { headers: authHeaders(token) },
     );
     return response.data;
@@ -113,7 +140,7 @@ export class CoursesAPI {
     noteId: string,
   ): Promise<CourseNoteDelete> {
     const res = await api.delete<CourseNoteDelete>(
-      `${base}/notes/${courseId}/${noteId}`,
+      `${base}/notes/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}`,
       {
         headers: authHeaders(token),
       },
@@ -128,7 +155,7 @@ export class CoursesAPI {
     signal?: AbortSignal,
   ): Promise<Blob> {
     const res = await api.get<Blob>(
-      `${base}/notes/${courseId}/${noteId}/stream`,
+      `${base}/notes/${encodeURIComponent(courseId)}/${encodeURIComponent(noteId)}/stream`,
       {
         responseType: "blob",
         signal,
