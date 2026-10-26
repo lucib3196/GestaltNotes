@@ -2,7 +2,9 @@ import { NotesAPI } from "../../services";
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { MathJax } from "better-react-mathjax";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import { markdownComponents } from "./config";
 
 export default function Note() {
@@ -24,7 +26,6 @@ export default function Note() {
     }, []);
 
     return (
-        <MathJax>
             <div className="min-h-screen bg-gray-50 py-10 px-4">
                 <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-lg p-8">
 
@@ -45,7 +46,8 @@ export default function Note() {
                         </div>
                     ) : (
                         <Markdown
-                            remarkPlugins={[remarkGfm]}
+                            remarkPlugins={[remarkGfm, remarkMath]}
+                            rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: "ignore" }]]}
                             components={markdownComponents}
                         >
                             {note ?? ""}
@@ -53,6 +55,5 @@ export default function Note() {
                     )}
                 </div>
             </div>
-        </MathJax>
     );
 }

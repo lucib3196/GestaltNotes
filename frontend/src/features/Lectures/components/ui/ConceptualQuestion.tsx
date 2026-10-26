@@ -1,3 +1,4 @@
+import Markdown from "../../../../components/Markdown/MarkdownRenderer";
 import type { ConceptualQuestion as ConceptualQuestionType } from "../../models/lecture.types";
 import { RenderMCQSingle } from "../../../MCQ";
 import BaseLectureEntry from "./BaseLectureEntry";
@@ -70,9 +71,9 @@ export default function ConceptualQuestion({
       </div>
 
       {submitted && (
-        <p className="rounded-md border border-accent/25 bg-accent/10 px-4 py-3 leading-relaxed text-text">
-          {question.explanation}
-        </p>
+        <div className="rounded-md border border-accent/25 bg-accent/10 px-4 py-3 leading-relaxed text-text">
+          <Markdown>{question.explanation}</Markdown>
+        </div>
       )}
     </BaseLectureEntry>
   );

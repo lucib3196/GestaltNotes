@@ -92,7 +92,7 @@ export default function QuizResults({
               {result.reasoning && (
                 <div>
                   <dt className="font-medium text-text-soft">Your reasoning</dt>
-                  <dd className="mt-1 whitespace-pre-wrap break-words text-text-muted">
+                  <dd className="mt-1 whitespace-pre-wrap wrap-break-word text-text-muted">
                     {result.reasoning}
                   </dd>
                 </div>

@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { MathJax } from "better-react-mathjax";
+import Markdown from "../../../components/Markdown/MarkdownRenderer";
 import type { FlashcardSet } from "../schemas/practice";
 
 const buttonClass =
@@ -69,9 +69,9 @@ export function FlashCard({
                     {label} · Card {index + 1}
                   </p>
                   <div className="min-w-0 text-sm text-text sm:text-base">
-                    <MathJax dynamic hideUntilTypeset="first">
+                    <Markdown>
                       {content}
-                    </MathJax>
+                    </Markdown>
                   </div>
                 </div>
               );

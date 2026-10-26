@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStream } from "@langchain/langgraph-sdk/react";
 import type { Message } from "@langchain/langgraph-sdk";
-import { MathJax } from "better-react-mathjax";
 
 import { streamURL } from "../../../config/api";
 import ChatContainer from "../ui/layout/ChatContainer";
@@ -180,7 +179,6 @@ export default function ChatSession() {
             />
           }
         >
-          <MathJax dynamic>
             <MessageList messages={visibleMessages} />
             {stream.isLoading && (
               <div
@@ -191,7 +189,6 @@ export default function ChatSession() {
                 {progress ?? "Working…"}
               </div>
             )}
-          </MathJax>
         </ChatContainer>
       </div>
     </>

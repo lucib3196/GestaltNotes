@@ -1,3 +1,4 @@
+import Markdown from "../../../components/Markdown/MarkdownRenderer";
 import type { Option } from "../api/mcq.types";
 
 type MCQOptionProps = {
@@ -40,7 +41,7 @@ export default function MCQOption({
             >
                 {String.fromCharCode(65 + idx)}.
             </span>
-            {v.option}
+            <Markdown>{v.option}</Markdown>
         </button>
     );
 }

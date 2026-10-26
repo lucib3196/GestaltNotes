@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { PageRange } from "../../models/lecture.types";
-import { MathJax } from "better-react-mathjax";
+import Markdown from "../../../../components/Markdown/MarkdownRenderer";
 
 type BaseLectureEntryVariant = "bordered" | "borderless";
 
@@ -29,7 +29,6 @@ export default function BaseLectureEntry({
       : "rounded-lg bg-surface p-4 text-text";
 
   return (
-    <MathJax>
     <article className={cardClassName}>
       <div className="flex flex-col gap-2">
         {eyebrow && (
@@ -39,19 +38,19 @@ export default function BaseLectureEntry({
         )}
 
         <div className="flex flex-col gap-1">
-          <h3 className="text-base font-semibold leading-snug">{title}</h3>
-          {subtitle && <p className="text-sm text-text-muted">{subtitle}</p>}
+          <h3 className="text-base font-semibold leading-snug"><Markdown>{title}</Markdown></h3>
+          {subtitle && <div className="text-sm text-text-muted"><Markdown>{subtitle}</Markdown></div>}
         </div>
 
         {(tags.length > 0 || reference) && (
           <div className="flex flex-wrap items-center gap-2">
             {tags.map((tag) => (
-              <span
+              <div
                 key={tag}
                 className="rounded-md border border-border bg-surface-muted px-2 py-1 text-xs text-text-muted"
               >
-                {tag}
-              </span>
+                <Markdown>{tag}</Markdown>
+              </div>
             ))}
 
             {reference && (
@@ -65,6 +64,5 @@ export default function BaseLectureEntry({
         {children && <div className="mt-2 space-y-3 text-sm">{children}</div>}
       </div>
     </article>
-    </MathJax>
   );
 }

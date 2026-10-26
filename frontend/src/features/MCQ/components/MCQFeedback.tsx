@@ -1,3 +1,4 @@
+import Markdown from "../../../components/Markdown/MarkdownRenderer";
 import type { MultipleChoiceQuestion } from "../api/mcq.types";
 
 type MCQFeedbackProps = {
@@ -23,13 +24,13 @@ export default  function MCQFeedback({
                 </p>
             ) : null}
             {submitted && !isCorrect && correctIndex >= 0 ? (
-                <p className="mt-3 rounded-md border border-accent-strong bg-surface-muted px-2.5 py-2 text-xs text-text">
+                <div className="mt-3 rounded-md border border-accent-strong bg-surface-muted px-2.5 py-2 text-xs text-text">
                     Correct answer:{" "}
-                    <span className="font-semibold">
+                    <div className="font-semibold">
                         {String.fromCharCode(65 + correctIndex)}.{" "}
-                        {question.options[correctIndex]?.option}
-                    </span>
-                </p>
+                        <Markdown>{question.options[correctIndex]?.option}</Markdown>
+                    </div>
+                </div>
             ) : null}
         </>
     );

@@ -30,18 +30,18 @@ export default function ExtractedQuestions({
       {question.options && question.options.length > 0 && (
         <ul className="space-y-2">
           {question.options.map((option) => (
-            <ul
+            <li
               key={option.text}
               className="rounded-md border border-border bg-surface-muted px-3 py-2 text-text-muted"
             >
-              <span
+              <div
                 className={
                   option.is_correct ? "font-semibold text-accent-strong" : ""
                 }
               >
-                {option.text}
-              </span>
-            </ul>
+                <Markdown>{option.text}</Markdown>
+              </div>
+            </li>
           ))}
         </ul>
       )}

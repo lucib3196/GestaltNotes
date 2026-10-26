@@ -20,6 +20,16 @@ def create_multiple_choice_questions(
     num_questions: Annotated[
         int, Field(ge=1, description="Number of questions requested by the user.")
     ],
+    quiz_title: Annotated[
+        str, Field(min_length=1, description="A concise title identifying the quiz topic.")
+    ],
+    description: Annotated[
+        str,
+        Field(
+            min_length=1,
+            description="One or two sentences describing the concepts assessed.",
+        ),
+    ],
     questions: list[MultipleChoiceQuestion],
 ) -> tuple[str, dict]:
     r"""Package exactly the requested number of multiple-choice questions.
@@ -58,7 +68,11 @@ def create_multiple_choice_questions(
     - Briefly address the main misconception represented by the distractors.
     - Keep explanations focused and avoid repeating the question verbatim.
     """
-    result = MultipleChoiceQuestionSet(questions=questions)
+    result = MultipleChoiceQuestionSet(
+        quiz_title=quiz_title,
+        description=description,
+        questions=questions,
+    )
     artifact = MultipleChoiceArtifact(data=result)
     if len(result.questions) != num_questions:
         raise ValueError(f"Expected exactly {num_questions} questions.")
