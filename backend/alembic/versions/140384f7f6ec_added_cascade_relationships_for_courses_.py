@@ -22,23 +22,19 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
+    foreign_keys = inspector.get_foreign_keys("course")
+    constraint_name = "fk_course_owner_id_user"
     with op.batch_alter_table("course", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_course_owner_id"))
-        if (
-            inspector.get_pk_constraint("course").get("name")
-            == "fk_course_owner_id_user"
-        ):
-            batch_op.drop_constraint(
+        
+        if not any(fk["name"] == constraint_name for fk in foreign_keys ):
+            batch_op.create_foreign_key(
                 batch_op.f("fk_course_owner_id_user"),
-                type_="foreignkey",
+                "user",
+                ["owner_id"],
+                ["id"],
+                ondelete="CASCADE",
             )
-        batch_op.create_foreign_key(
-            batch_op.f("fk_course_owner_id_user"),
-            "user",
-            ["owner_id"],
-            ["id"],
-            ondelete="CASCADE",
-        )
 
     with op.batch_alter_table("course_access_code", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_course_access_code_course_id"))
