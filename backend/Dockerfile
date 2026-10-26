@@ -46,12 +46,10 @@ RUN mkdir -p /opt/venv /app \
 COPY backend/pyproject.toml backend/uv.lock ./
 COPY packages /app/packages
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-install-project
 
 COPY backend/ .
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen
+RUN uv sync --frozen
 
 EXPOSE 8000
