@@ -1,20 +1,26 @@
 from uuid import UUID
 
 from fastapi.routing import APIRouter
+from pydantic import BaseModel
 from starlette import status
 
 from backend.accounts.models import User
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.models import Course, CourseEnrollment
+from backend.courses.models import Course, CourseEnrollment, CourseVectorStore
 from backend.courses.schema import CourseRead
 from backend.web.accounts.dependencies import EducatorDep, StudentDep
+from backend.web.enrollments.dependencies import CourseEnrollmentServiceDep
 
-from .dependencies import CourseEnrollmentServiceDep
-from .http import course_http_exception
+from ..courses.http import course_http_exception
 
 ID = UUID | str
 
 router = APIRouter(prefix="/courses", tags=["course-enrollments"])
+
+
+class EnrollmentChatContext(BaseModel):
+    course: Course
+    vectorstore: CourseVectorStore | None
 
 
 @router.post(
@@ -86,4 +92,16 @@ async def assert_course_access(
     try:
         return await enrollment_service.assert_course_access(course_id, student)
     except CourseServiceException as e:
+        raise course_http_exception(e) from e
+
+
+@router.get("/student/enrollment/chat-context")
+async def get_chat_context(enroll: CourseEnrollmentServiceDep, student: StudentDep):
+    try:
+        courses = await enroll.list_student_courses(student)
+        response = [
+            EnrollmentChatContext(course=c, vectorstore=c.vectorstore) for c in courses
+        ]
+        return response
+    except Exception as e:
         raise course_http_exception(e) from e

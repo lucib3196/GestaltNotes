@@ -3,9 +3,10 @@ from uuid import uuid4
 import pytest
 
 from backend.accounts.models import User
-from backend.storage.repo.file_repository import FileRepository
-from backend.storage.schema import  FileUpdate
 from backend.storage.models import File
+from backend.storage.repo.file_repository import FileRepository
+from backend.storage.schema import FileUpdate
+
 
 def storage_key(name: str) -> str:
     return f"tests/storage/{uuid4().hex}/{name}"

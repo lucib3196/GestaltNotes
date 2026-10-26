@@ -25,6 +25,7 @@ export type ChatActions = {
   clearPendingPrompt: (id: string) => void;
   clearDraft: () => void;
   startNewChat: ()=>void;
+  updateConfig: (config: Partial<ConfigSchema>)=>void;
 };
 
 export type ThreadState = {

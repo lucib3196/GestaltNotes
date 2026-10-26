@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
@@ -16,6 +16,7 @@ from backend.courses.vector_store.models import (
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
+    from backend.courses.vector_store.models import CourseVectorStore
 
 
 class CourseEnrollment(SQLModel, table=True):
@@ -42,6 +43,11 @@ class Course(SQLModel, table=True):
     owner_id: UUID = Field(
         sa_column=Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     )
+
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    # Class Attributes
     owner: "User" = Relationship(back_populates="owned_courses")
     students: list["User"] = Relationship(
         back_populates="enrolled_courses",
@@ -50,9 +56,7 @@ class Course(SQLModel, table=True):
 
     notes: list["CourseNote"] = Relationship(back_populates="course")
     access_codes: list["CourseAccessCode"] = Relationship(back_populates="course")
-
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    vectorstore: Optional["CourseVectorStore"] = Relationship(back_populates="course")
 
     @property
     def storage_prefix(self) -> str:

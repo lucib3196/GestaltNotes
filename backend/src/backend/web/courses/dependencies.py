@@ -13,7 +13,6 @@ from backend.courses.notes.processing_service import CourseNoteProcessingService
 from backend.courses.notes.repo import CourseNoteRepository
 from backend.courses.service.access_code_service import CourseAccessCodeService
 from backend.courses.service.course_service import CourseService
-from backend.courses.service.enrollment_service import CourseEnrollmentService
 from backend.database import SessionDep
 from backend.web.accounts.dependencies import CurrentUserDep
 from backend.web.storage.dependency import FileServiceDep
@@ -94,19 +93,6 @@ def get_access_code_service(session: SessionDep) -> CourseAccessCodeService:
         ) from e
 
 
-def get_enrollment_service(
-    session: SessionDep, course_service: "CourseServiceDep"
-) -> CourseEnrollmentService:
-    try:
-        return CourseEnrollmentService(course_service, session)
-    except Exception as e:
-        logger.exception("Failed to initialize CourseEnrollmentService")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to initialize course enrollment service",
-        ) from e
-
-
 def get_course_note_processing_service(
     session: SessionDep,
 ) -> CourseNoteProcessingService:
@@ -119,9 +105,7 @@ CourseServiceDep = Annotated[CourseService, Depends(get_course_service)]
 CourseAccessCodeServiceDep = Annotated[
     CourseAccessCodeService, Depends(get_access_code_service)
 ]
-CourseEnrollmentServiceDep = Annotated[
-    CourseEnrollmentService, Depends(get_enrollment_service)
-]
+
 
 CourseNoteProcessingServiceDep = Annotated[
     CourseNoteProcessingService,

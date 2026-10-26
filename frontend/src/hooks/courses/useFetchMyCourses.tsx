@@ -40,9 +40,10 @@ export function useFetchMyCourses(enabled = true) {
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {
-      if (active) void fetchCourses().catch(() => {
-        // The caller displays the fetch error.
-      });
+      if (active)
+        void fetchCourses().catch(() => {
+          // The caller displays the fetch error.
+        });
     });
     return () => {
       active = false;

@@ -1,9 +1,13 @@
 from enum import StrEnum
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import Enum as SAEnum
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from backend.courses.models import Course
 
 
 class VectorStoreStatus(StrEnum):
@@ -44,3 +48,6 @@ class CourseVectorStore(SQLModel, table=True):
             nullable=False,
         ),
     )
+
+    # Attributes
+    course: "Course" = Relationship(back_populates="vectorstore")

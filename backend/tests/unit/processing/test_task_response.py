@@ -8,7 +8,7 @@ from backend.web.processing import tasks
 
 
 def test_task_states_include_celery_builtins():
-    assert states.ALL_STATES <= {state.value for state in TaskState}
+    assert {state.value for state in TaskState} >= states.ALL_STATES
 
 
 @pytest.mark.parametrize("state", list(TaskState))

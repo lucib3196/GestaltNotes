@@ -97,8 +97,9 @@ def _build_course_notes_tool(
     )
     def retrieve(
         query: str, runtime: ToolRuntime[ConfigSchema]
-    ) -> tuple[str, dict[str, Any]]:
+    ) -> tuple[str, dict[str, Any] | None]:
         context = runtime.context
+        
 
         if (
             context is None
@@ -106,15 +107,16 @@ def _build_course_notes_tool(
             or not context.embedding_model
         ):
             return (
-                "No course is selected. Ask the user to select a course.",
-                ResourceArtifact(name=name).model_dump(mode="json"),
+                "Course notes aren't available right now. "
+                "I can still help with general questions.",
+                None,
             )
         vector_store = build_course_vectorstore(
             collection_name=context.course_collection_name,
             embedding_model=context.embedding_model,
         )
         docs = vector_store.search(query, search_type=search_type, **search_kwargs)
-        print("DOCS", docs)
+
         artifact = ResourceArtifact(
             name=name,
             label=context.course_name,

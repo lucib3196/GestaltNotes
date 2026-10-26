@@ -6,7 +6,10 @@ import { MathJax } from "better-react-mathjax";
 import { streamURL } from "../../../config/api";
 import ChatContainer from "../ui/layout/ChatContainer";
 import ChatInput from "../ui/composer/ChatInput";
-import { ChatModelPicker } from "../ui/composer/ChatModelPicker";
+import {
+  ChatModelPicker,
+  ChatCoursePicker,
+} from "../ui/composer/ChatModelPicker";
 import { ChatSessionHeader } from "../ui/layout/ChatSessionHeader";
 import MessageList from "../ui/messages/MessageList";
 import { useChatStore } from "../instance";
@@ -49,7 +52,7 @@ export default function ChatSession() {
   const setActiveThread = useChatStore((s) => s.selectThread);
   const upsertThread = useChatStore((s) => s.upsertThread);
 
-  console.log("Configuration", config)
+  console.log("Configuration", config);
 
   // Hooks
   const { createThread } = useCreateThread();
@@ -144,8 +147,7 @@ export default function ChatSession() {
     }
 
     if (message.type === "ai") {
-      const metadata =
-        stream.getMessagesMetadata(message)?.streamMetadata;
+      const metadata = stream.getMessagesMetadata(message)?.streamMetadata;
 
       // Internal model calls made while a tool is running.
       if (metadata?.langgraph_node === "tools") {
@@ -169,7 +171,12 @@ export default function ChatSession() {
               handleSubmit={handleSubmit}
               disabled={stream.isLoading}
               multiModal={true}
-              toolbar={<ChatModelPicker disabled={stream.isLoading} />}
+              toolbar={
+                <div className="flex flex-row gap-2">
+                  <ChatModelPicker disabled={stream.isLoading} />{" "}
+                  <ChatCoursePicker disabled={stream.isLoading} />
+                </div>
+              }
             />
           }
         >
@@ -187,6 +194,6 @@ export default function ChatSession() {
           </MathJax>
         </ChatContainer>
       </div>
-</>
+    </>
   );
 }
