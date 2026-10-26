@@ -21,6 +21,12 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    inspector = sa.inspect(op.get_bind())
+    columns = inspector.get_columns("course_vector_store")
+
+    if any(column["name"] == "collection_name" for column in columns):
+        return
+
     collection_name = get_settings().ASTRA_DB_COLLECTION_NAME
     op.add_column(
         "course_vector_store",
