@@ -1,10 +1,14 @@
-import { useCourseMaterials } from "../hooks/useCourseMaterials";
+import type { useCourseMaterials } from "../hooks/useCourseMaterials";
 import { NoteOverviewBox } from "./NoteOverviewBox";
 import { useCourseDetailsStore } from "../state";
 import { useEffect } from "react";
 
-export default function CourseMaterials() {
-  const { notes, loading, error, refetch, refreshNote } = useCourseMaterials();
+type Props = {
+  materials: ReturnType<typeof useCourseMaterials>;
+};
+
+export default function CourseMaterials({ materials }: Props) {
+  const { notes, loading, error, refetch, refreshNote } = materials;
   const setNotes = useCourseDetailsStore((s) => s.setNotes);
   useEffect(() => setNotes(notes), [notes, setNotes]);
   return (

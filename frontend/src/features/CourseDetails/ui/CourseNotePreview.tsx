@@ -8,10 +8,7 @@ export default function CourseNotePreview() {
   const note = useCourseDetailsStore((state) => state.getSelectedNote());
 
   return (
-    <section
-      aria-label="Resource preview"
-      className="grow"
-    >
+    <section aria-label="Resource preview" className="grow">
       {note ? (
         <SelectedNotePreview key={`${note.id}:${note.file_id}`} note={note} />
       ) : (

@@ -5,6 +5,8 @@ import CourseHeader from "./ui/CourseHeader";
 import CourseNotePreview from "./ui/CourseNotePreview";
 import { CourseDetailsProvider, useCourseDetailsStore } from "./state";
 import CourseMaterials from "./materials/CourseMaterials";
+import CourseNoteUpload from "./ui/CourseNoteUpload";
+import { useCourseMaterials } from "./hooks/useCourseMaterials";
 
 export default function CourseDetails() {
   const { courseId } = useParams();
@@ -24,6 +26,7 @@ function CourseDetailsContent() {
     (state) => state.setSelectedCourse,
   );
   const { course, loading, error, refetch } = useGetCourse(courseId);
+  const materials = useCourseMaterials();
 
   useEffect(() => {
     let active = true;
@@ -59,10 +62,9 @@ function CourseDetailsContent() {
       ) : selectedCourse ? (
         <>
           <CourseHeader />
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] ">
-            <div className="min-w-0">
-              <CourseMaterials />
-            </div>
+          <CourseNoteUpload onUploaded={materials.refetch} />
+          <div className="flex flex-row gap-2 px-2 py-3">
+            <CourseMaterials materials={materials} />
             <CourseNotePreview />
           </div>
         </>

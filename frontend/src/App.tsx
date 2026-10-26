@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HomePage, ChatPage, MyAccount } from "./pages";
+import { HomePage,  MyAccount } from "./pages";
 import {
   AuthPage,
   PasswordResetGuard,
@@ -10,7 +10,7 @@ import { Navigate } from "react-router-dom";
 import AppLayout from "./layout/AppLayout";
 import { CourseDetails } from "./features/CourseDetails";
 import CourseManagement from "./features/CourseManagement/CourseManagement";
-
+import ChatPage from "./features/Chat/ChatWorkspace";
 function App() {
   return (
     <BrowserRouter>

@@ -1,9 +1,3 @@
-import { ChatSession } from "../features/Chat";
-import { useState } from "react";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { ChatProvider } from "../features/Chat/instance";
-import { ChatSidebar } from "../features/Chat/ui/sidebar";
-import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import StarterView from "../features/ConversationStarters/components/StarterView";
 import { TabButton } from "../components/Button";
 import { WorkspaceItemsCarousel } from "../features/Tools";
@@ -74,19 +68,6 @@ export function ResourceSection() {
         {currentTab === "final_review" && <StarterView />}
         {currentTab === "info" && <WorkspaceInfo />}
       </div>
-    </section>
-  );
-}
-
-export default function ChatPage() {
-  return (
-    <section id="chat-page" className="flex min-h-0 flex-1 overflow-hidden">
-      <ChatProvider>
-        <ChatSidebar />
-        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
-          <ChatSession />
-        </div>
-      </ChatProvider>
     </section>
   );
 }
