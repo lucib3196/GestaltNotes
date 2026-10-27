@@ -2,6 +2,6 @@ export { EnrollmentsAPI } from "./api";
 export type {
   CourseEnrollment,
   CourseVectorStore,
-  EnrollmentChatContext,
+  CourseChatContext,
   EnrollmentStudent,
 } from "./types";

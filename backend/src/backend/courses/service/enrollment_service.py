@@ -144,6 +144,17 @@ class CourseEnrollmentService:
         self._assert_student(student)
         return list(student.enrolled_courses)
 
+    async def list_accessible_courses(self, user: User) -> list[Course]:
+        courses: list[Course] = []
+
+        if self._is_educator(user):
+            courses.extend(user.owned_courses)
+
+        if self._is_student(user):
+            courses.extend(user.enrolled_courses)
+
+        return list({course.id: course for course in courses}.values())
+
     async def is_enrolled(self, course_id: ID, student: User) -> bool:
         if not student.id:
             return False

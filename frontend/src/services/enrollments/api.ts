@@ -2,7 +2,7 @@ import api from "../../config/api";
 import type { Course } from "../courses";
 import type {
   CourseEnrollment,
-  EnrollmentChatContext,
+  CourseChatContext,
   EnrollmentStudent,
 } from "./types";
 
@@ -66,9 +66,9 @@ export class EnrollmentsAPI {
     return res.data;
   }
 
-  static async getChatContext(token: string): Promise<EnrollmentChatContext[]> {
-    const res = await api.get<EnrollmentChatContext[]>(
-      `${base}/student/enrollment/chat-context`,
+  static async getChatContext(token: string): Promise<CourseChatContext[]> {
+    const res = await api.get<CourseChatContext[]>(
+      `${base}/me/chat-context`,
       { headers: authHeaders(token) },
     );
     return res.data;

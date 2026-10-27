@@ -1,13 +1,13 @@
 import {
   EnrollmentsAPI,
-  type EnrollmentChatContext,
+  type CourseChatContext,
 } from "../../../services/enrollments";
 import { useAuth } from "../../Auth";
 import { useState, useEffect } from "react";
 
 export function useFetchCourseVectorstore() {
   const { user } = useAuth();
-  const [configs, setConfigs] = useState<EnrollmentChatContext[]>([]);
+  const [configs, setConfigs] = useState<CourseChatContext[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 

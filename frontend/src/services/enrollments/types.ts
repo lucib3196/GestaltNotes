@@ -25,7 +25,7 @@ export interface CourseVectorStore {
   status: "pending" | "ready" | "failed" | "archieved";
 }
 
-export interface EnrollmentChatContext {
+export interface CourseChatContext {
   course: Omit<Course, "storage_prefix"> & {
     created_at: string;
     updated_at: string;

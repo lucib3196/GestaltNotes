@@ -8,7 +8,7 @@ from backend.accounts.models import User
 from backend.courses.exceptions import CourseServiceException
 from backend.courses.models import Course, CourseEnrollment, CourseVectorStore
 from backend.courses.schema import CourseRead
-from backend.web.accounts.dependencies import EducatorDep, StudentDep
+from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep, StudentDep
 from backend.web.enrollments.dependencies import CourseEnrollmentServiceDep
 
 from ..courses.http import course_http_exception
@@ -18,7 +18,7 @@ ID = UUID | str
 router = APIRouter(prefix="/courses", tags=["course-enrollments"])
 
 
-class EnrollmentChatContext(BaseModel):
+class CourseChatContext(BaseModel):
     course: Course
     vectorstore: CourseVectorStore | None
 
@@ -95,13 +95,17 @@ async def assert_course_access(
         raise course_http_exception(e) from e
 
 
-@router.get("/student/enrollment/chat-context")
-async def get_chat_context(enroll: CourseEnrollmentServiceDep, student: StudentDep):
+@router.get("/me/chat-context", response_model=list[CourseChatContext])
+async def get_chat_context(
+    enroll: CourseEnrollmentServiceDep,
+    user: CurrentUserDep,
+) -> list[CourseChatContext]:
     try:
-        courses = await enroll.list_student_courses(student)
-        response = [
-            EnrollmentChatContext(course=c, vectorstore=c.vectorstore) for c in courses
+        courses = await enroll.list_accessible_courses(user)
+        return [
+            CourseChatContext(course=course, vectorstore=course.vectorstore)
+            for course in courses
+            if (course.vectorstore and course.vectorstore.status == "ready")
         ]
-        return response
-    except Exception as e:
+    except CourseServiceException as e:
         raise course_http_exception(e) from e
