@@ -24,7 +24,7 @@ export function NoteOverviewBox({
   const checked = checkedIds.includes(note.id);
 
   return (
-    <CourseNoteCard>
+    <CourseNoteCard selected={selected === note.id}>
       <div className="flex items-center gap-3">
         <input
           type="checkbox"
@@ -36,19 +36,19 @@ export function NoteOverviewBox({
         <button
           type="button"
           onClick={() => selectNote(note.id)}
-          aria-pressed={selected == note.id}
+          aria-pressed={selected === note.id}
           className="flex min-w-0 flex-1 items-center gap-3 rounded-lg py-2 text-left focus-visible:outline-2 focus-visible:outline-accent"
         >
           <CourseNoteDetails note={note} />
         </button>
-        <div className="ml-8 mt-2 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-xs capitalize text-text-muted">
-            {note.resource_type}
-          </span>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <ProcessingBadge status={processing.status} />
-            <ProcessingActions {...processing.actions} />
-          </div>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
+        <span className="text-xs capitalize text-text-muted">
+          {note.resource_type}
+        </span>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <ProcessingBadge status={processing.status} />
+          <ProcessingActions {...processing.actions} />
         </div>
       </div>
     </CourseNoteCard>

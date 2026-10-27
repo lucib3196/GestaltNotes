@@ -65,7 +65,7 @@ export default function CourseNoteUpload({ onUploaded }: Props) {
       aria-busy={uploading}
       className="space-y-4 text-text"
     >
-      <h2 className="text-xl font-semibold">Upload notes</h2>
+      
 
       <FileUpload
         variant="dropzone"

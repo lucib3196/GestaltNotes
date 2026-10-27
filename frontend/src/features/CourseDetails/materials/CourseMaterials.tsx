@@ -2,7 +2,6 @@ import type { useCourseMaterials } from "../hooks/useCourseMaterials";
 import { NoteOverviewBox } from "./NoteOverviewBox";
 import { useCourseDetailsStore } from "../state";
 import { useEffect } from "react";
-
 type Props = {
   materials: ReturnType<typeof useCourseMaterials>;
 };
@@ -11,14 +10,15 @@ export default function CourseMaterials({ materials }: Props) {
   const { notes, loading, error, refetch, refreshNote } = materials;
   const setNotes = useCourseDetailsStore((s) => s.setNotes);
   useEffect(() => setNotes(notes), [notes, setNotes]);
+
   return (
     <section
       aria-label="Course materials"
       aria-busy={loading}
-      className="space-y-4 b"
+      className="min-w-0 space-y-3"
     >
       <header className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-text">Course materials</h2>
+        <h2 className="text-sm font-semibold text-text">Course materials</h2>
         {!loading && !error && (
           <span className="text-sm text-text-muted">
             {notes.length} {notes.length === 1 ? "file" : "files"}
@@ -46,7 +46,7 @@ export default function CourseMaterials({ materials }: Props) {
           No course materials yet.
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="max-h-[65vh] space-y-2 overflow-y-auto overscroll-contain">
           {notes.map((note) => (
             <li key={note.id} className="min-w-0">
               <NoteOverviewBox note={note} onRefresh={refreshNote} />
