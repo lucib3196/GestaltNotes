@@ -724,3 +724,28 @@
 .chat-markdown hr { margin: 1rem 0; border-top: 1px solid var(--border); }
 .chat-markdown img { display: block; max-width: 100%; max-height: 24rem; height: auto; object-fit: contain; margin: .75rem 0; border-radius: .75rem; }
 .chat-markdown .katex-display { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: .25rem 0; }
+
+/* Match the surrounding text color. */
+.chat-markdown mjx-container[jax="SVG"] {
+  color: inherit;
+  max-width: 100%;
+}
+
+/* Keep inline equations within the text line. */
+.chat-markdown mjx-container[jax="SVG"]:not([display="true"]) {
+  display: inline-block;
+}
+
+.chat-markdown mjx-container[jax="SVG"] > svg {
+  display: inline-block;
+}
+
+/* Scroll long block equations without widening the chat. */
+.chat-markdown mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  margin: 1rem 0;
+  padding: 0.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}

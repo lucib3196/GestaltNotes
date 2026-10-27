@@ -38,7 +38,7 @@ packages = ["langgraph.templates.agent", "agent"]
 
 
 [tool.setuptools.package-data]
-"*" = ["py.typed"]
+"*" = ["py.typed", "prompts/*.md"]
 
 [tool.ruff]
 lint.select = [

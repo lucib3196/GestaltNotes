@@ -3,9 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import remarkMath from "remark-math";
-import { MathJax } from "better-react-mathjax";
-import "katex/dist/katex.min.css";
-import rehypeKatex from "rehype-katex";
+import rehypeMathjax from "rehype-mathjax";
 
 export default function MarkdownRenderer({
   children,
@@ -19,12 +17,13 @@ export default function MarkdownRenderer({
   }
 
   return (
-    <MathJax>
-      <div className="chat-markdown min-w-0 text-text">
-        <ReactMarkdown rehypePlugins={[rehypeKatex]} remarkPlugins={[remarkGfm, remarkMath]}>
-          {children}
-        </ReactMarkdown>
-      </div>
-    </MathJax>
+     <div className="chat-markdown min-w-0 text-text">
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[rehypeMathjax]}
+    >
+      {children}
+    </ReactMarkdown>
+  </div>
   );
 }

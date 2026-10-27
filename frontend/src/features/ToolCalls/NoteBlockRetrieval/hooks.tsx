@@ -11,7 +11,7 @@ export function useSources(documents: NoteBlockDocuments) {
   return useMemo(() => {
     const sources = new Map<string, MappedSource>();
 
-    console.log("Extracting sources", documents);
+
 
     for (const { metadata } of documents) {
       const path = metadata.storage_key?.trim();
