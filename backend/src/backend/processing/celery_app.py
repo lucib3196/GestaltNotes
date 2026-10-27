@@ -11,3 +11,9 @@ app = Celery(
     backend=os.getenv("CELERY_BACKEND_URL"),
     include=["backend.processing.tasks"],
 )
+app.conf.update(
+    control_queue_durable=False,
+    control_queue_exclusive=True,
+    event_queue_durable=False,
+    event_queue_exclusive=True,
+)

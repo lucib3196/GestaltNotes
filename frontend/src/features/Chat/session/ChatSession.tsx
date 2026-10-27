@@ -51,7 +51,6 @@ export default function ChatSession() {
   const setActiveThread = useChatStore((s) => s.selectThread);
   const upsertThread = useChatStore((s) => s.upsertThread);
 
-  console.log("Configuration", config);
 
   // Hooks
   const { createThread } = useCreateThread();
