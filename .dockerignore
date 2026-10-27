@@ -6,7 +6,6 @@ emulator-data
 firebase-debug.log
 
 frontend
-ai_agents
 data_analysis
 
 **/.venv
