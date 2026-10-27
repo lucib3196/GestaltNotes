@@ -1,7 +1,6 @@
 from datetime import date, datetime, time
 from enum import Enum
 from pathlib import Path
-from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -9,7 +8,7 @@ from pydantic import BaseModel
 ID = str | UUID
 
 
-def convert_uuid(val: ID):
+def convert_uuid(val: ID | None) -> UUID | None:
     if isinstance(val, str):
         return UUID(val)
     if isinstance(val, UUID):
@@ -19,7 +18,7 @@ def convert_uuid(val: ID):
     raise TypeError(f"Value {val} is not type of str or UUID")
 
 
-def to_serializable(obj: Any) -> Any:
+def to_serializable(obj: object) -> object:
     """Convert supported objects into JSON-serializable Python values."""
     if isinstance(obj, Enum):
         return obj.value

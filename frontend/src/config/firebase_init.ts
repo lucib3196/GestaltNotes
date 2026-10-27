@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getStorage, } from "firebase/storage";
-
+import { connectStorageEmulator } from "firebase/storage";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 const firebaseConfig = {
@@ -24,5 +24,5 @@ const isProduction =
 
 if (!isProduction) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
-  // connectStorageEmulator(storage, "127.0.0.1", 9199);
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
 }

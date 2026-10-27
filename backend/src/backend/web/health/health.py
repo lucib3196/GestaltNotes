@@ -2,18 +2,19 @@ import firebase_admin
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 from starlette import status
+
 from backend.web.dependencies import SessionDep
 
 router = APIRouter(tags=["Health"], prefix="/health")
 
 
 @router.get("/live", status_code=status.HTTP_200_OK)
-def startup_connection():
+def startup_connection() -> dict[str, str]:
     return {"message": "The API is LIVE!!", "status": "ok", "service": "backend"}
 
 
 @router.get("/db", status_code=status.HTTP_200_OK)
-def database_health(session: SessionDep):
+def database_health(session: SessionDep) -> dict[str, object]:
     try:
         result = session.execute(text("SELECT 1")).scalar_one()
         return {
@@ -29,7 +30,7 @@ def database_health(session: SessionDep):
 
 
 @router.get("/firebase")
-def firebase_health():
+def firebase_health() -> dict[str, str | None]:
     try:
         app = firebase_admin.get_app()
         return {
@@ -42,5 +43,3 @@ def firebase_health():
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Firebase Admin app is not initialized",
         ) from e
-
-

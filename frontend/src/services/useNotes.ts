@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../context";
+import { useAuth } from "../features/Auth";
 import { type LectureNote } from "../services/courseManager";
 import api from "../config/api";
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { InputTextForm } from "../../../../components/FormComponents";
 import { Button } from "../../../../components/Button";
-import { useAuth } from "../../../../context";
+import { useAuth } from "../..";
 import { UserManager } from "../../../../services";
 
 export default function PasswordResetForm() {

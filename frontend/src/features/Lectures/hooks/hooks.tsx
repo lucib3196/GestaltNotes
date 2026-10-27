@@ -107,7 +107,7 @@ export function useLoadPdfs(pdfPaths: string[]) {
                     prev && resolved.some((pdf) => pdf.id === prev) ? prev : resolved[0]?.id ?? null,
                 );
             } catch (err) {
-                let msg = `Failed to resolve PDFs ${err} `
+                const msg = `Failed to resolve PDFs ${err} `
                 console.error(msg);
                 setSources([]);
                 setSelectedPDF(null);

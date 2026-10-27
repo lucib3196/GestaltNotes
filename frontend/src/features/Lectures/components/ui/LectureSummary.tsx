@@ -1,3 +1,4 @@
+import Markdown from "../../../../components/Markdown/MarkdownRenderer";
 import type { LectureAnalysis } from "../../models/lecture.types";
 import BaseLectureEntry from "./BaseLectureEntry";
 
@@ -13,9 +14,9 @@ export default function LectureSummary({ lecture }: LectureSummaryProps) {
             title={lecture.lecture_title}
             subtitle={lecture.lecture_type ?? undefined}
         >
-            <p className="leading-relaxed text-text-muted">
-                {lecture.lecture_summary}
-            </p>
+            <div className="leading-relaxed text-text-muted">
+                <Markdown>{lecture.lecture_summary}</Markdown>
+            </div>
 
             <SectionList title="Core topics" items={lecture.core_topics} />
             <SectionList
@@ -49,7 +50,7 @@ function SectionList({
             {items.length > 0 ? (
                 <ul className="list-disc space-y-1 pl-5 text-text-muted">
                     {items.map((item) => (
-                        <li key={item}>{item}</li>
+                        <li key={item}><Markdown>{item}</Markdown></li>
                     ))}
                 </ul>
             ) : (

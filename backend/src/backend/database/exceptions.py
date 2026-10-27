@@ -1,4 +1,3 @@
-
 class DatabaseConfigError(Exception):
     """Raised when database configuration is invalid for the current environment."""
 

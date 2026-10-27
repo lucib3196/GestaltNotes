@@ -1,5 +1,5 @@
 import type { MultipleChoiceQuestion } from "../api/mcq.types";
-import { MathJax } from "better-react-mathjax";
+import Markdown from "../../../components/Markdown/MarkdownRenderer";
 
 type MCQHeaderProps = {
     question: MultipleChoiceQuestion;
@@ -13,11 +13,10 @@ export default function MCQHeader({
     isCorrect,
 }: MCQHeaderProps) {
     return (
-        <MathJax>
             <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-medium leading-relaxed text-text">
-                    {question.question}
-                </p>
+                <div className="min-w-0 text-sm font-medium leading-relaxed text-text">
+                    <Markdown>{question.question}</Markdown>
+                </div>
                 {submitted ? (
                     <span
                         className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${isCorrect
@@ -29,6 +28,5 @@ export default function MCQHeader({
                     </span>
                 ) : null}
             </div>
-        </MathJax>
     );
 }

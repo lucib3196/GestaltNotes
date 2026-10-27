@@ -3,7 +3,8 @@ import os
 from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self
+
 from dotenv import load_dotenv
 from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -24,6 +25,7 @@ class Environment(StrEnum):
     TESTING = "testing"
     DEV = "dev"
     PRODUCTION = "production"
+    DOCKER = "docker"
 
 
 APP_ENV = os.getenv("APP_ENV", "dev").lower()
@@ -31,9 +33,10 @@ ENV_FILES: dict[str, str] = {
     "dev": ".env.dev",
     "test": ".env.testing",
     "testing": ".env.testing",
+    "docker": ".env.docker",
 }
 env_file = ROOT_PATH / ENV_FILES.get(APP_ENV, ".env.dev")
-print("Env file", env_file)
+
 load_dotenv(env_file, override=False)
 
 
@@ -70,15 +73,20 @@ class AppSettings(BaseSettings):
     # FIREBASE EMULATOR
     FIREBASE_AUTH_EMULATOR_HOST: str | None = None
     STORAGE_EMULATOR_HOST: str | None = None
+    GOOGLE_API_KEY: str | None = None
 
     # Langchain config
     LANGGRAPH_STREAM_URL: str | None = None
     LANGSMITH_API_KEY: str | None = None
 
+    ASTRA_DB_API_ENDPOINT: str | None = None
+    ASTRA_DB_APPLICATION_TOKEN: str | None = None
+    ASTRA_DB_COLLECTION_NAME: str = "gestalt_lectures"
+
     # Backend CORS validation
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v):
+    def assemble_cors_origins(cls, v: list[str] | str | None) -> list[str]:
         if v is None:
             return []
 
@@ -92,14 +100,14 @@ class AppSettings(BaseSettings):
 
     # Database validation
     @model_validator(mode="after")
-    def validate_database(self):
+    def validate_database(self) -> Self:
         if not self.DATABASE_URL:
             raise ValueError("Database URL is not set")
         return self
 
     # Firebase validation
     @model_validator(mode="after")
-    def format_credentials(self):
+    def format_credentials(self) -> Self:
         try:
             if self.FIREBASE_CRED is None:
                 raise MissingConfigError("FIREBASE_CRED must be set")
@@ -124,9 +132,15 @@ class AppSettings(BaseSettings):
 
     # During development firebase emulator must be set to prevent override
     @model_validator(mode="after")
-    def validate_emulators(self):
+    def validate_emulators(self) -> Self:
         if self.ENV == "production":
             return self
+
+        # Docker emulator configuration example:
+        #     raise EmulatorConfigError(
+        #         "STORAGE_EMULATOR_HOST cannot be 127.0.0.1 inside Docker. "
+        #         "Use http://host.docker.internal:9199."
+        #     )
 
         if not (self.FIREBASE_AUTH_EMULATOR_HOST or self.STORAGE_EMULATOR_HOST):
             raise EmulatorConfigError(f"Missing emulator config for ENV={self.ENV}")
@@ -137,7 +151,7 @@ class AppSettings(BaseSettings):
     ## For development an api key is not needed however for production it is needed.
     ## This is assuming that langchain stream url is running locally
     @model_validator(mode="after")
-    def validate_langchain_deployment(self):
+    def validate_langchain_deployment(self) -> Self:
         # Checks based on production
         if self.ENV == "production" and not self.LANGSMITH_API_KEY:
             raise MissingLangchainAPIKey(
@@ -181,7 +195,8 @@ def get_settings_pretty_print(mode: Literal["str", "json"] = "json") -> str:
             "database": bool(app_settings.DATABASE_URL),
             "firebase_credentials": bool(app_settings.FIREBASE_CRED),
             "storage_bucket": bool(app_settings.STORAGE_BUCKET),
-            "Langsmith Agents": bool(app_settings.LANGGRAPH_STREAM_URL) and bool(app_settings.LANGSMITH_API_KEY) 
+            "Langsmith Agents": bool(app_settings.LANGGRAPH_STREAM_URL)
+            and bool(app_settings.LANGSMITH_API_KEY),
         },
     }
 

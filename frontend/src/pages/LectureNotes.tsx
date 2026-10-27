@@ -35,7 +35,9 @@ export default function LectureNotes() {
 
   // Get the root storage just the me116 notes for now
 
-  const { files, loading, error } = useCourseFiles("me116_spring_2026/lectures");
+  const { files, loading, error } = useCourseFiles(
+    "me116_spring_2026/lectures",
+  );
 
   // Load up the files on entry
 
@@ -72,15 +74,14 @@ export default function LectureNotes() {
   );
 }
 
-
 export function HomeworkNotes() {
   const [selectedFile, setSelectedFile] = useState<FileEntry | null>(null);
 
   // Get the root storage just the me116 notes for now
 
-  const { files, loading, error } = useCourseFiles("me116_spring_2026/homework");
-
-  
+  const { files, loading, error } = useCourseFiles(
+    "me116_spring_2026/homework",
+  );
 
   // Load up the files on entry
 

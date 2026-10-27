@@ -1,4 +1,5 @@
-import { useAuth } from "../../context";
+import { useAuth } from "../Auth";
+import { useFetchMyCourses } from "../../hooks/courses";
 import type { NavigationItem, DropDownNavRoute, Base } from "./types";
 import clsx from "clsx";
 import { canAccessRoute } from "./utils";
@@ -37,10 +38,16 @@ function RoutePill({ to, label }: Base) {
   );
 }
 
-function DropDownNav({ nav }: { nav: DropDownNavRoute }) {
+function DropDownNav({ nav, loading, error, onRetry }: {
+  nav: DropDownNavRoute;
+  loading?: boolean;
+  error?: Error | null;
+  onRetry: () => void;
+}) {
   return (
     <Menu as="div" className="relative">
       <MenuButton
+        onClick={onRetry}
         className={clsx(
           "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium",
           "text-text-muted transition-all duration-200 hover:bg-surface-muted hover:text-text",
@@ -58,6 +65,11 @@ function DropDownNav({ nav }: { nav: DropDownNavRoute }) {
           "focus:outline-none",
         )}
       >
+        {loading && <p role="status" className="px-3 py-2 text-xs text-text-muted">Loading courses…</p>}
+        {error && <div className="px-3 py-2 text-xs text-text-muted" role="alert">
+          <p>Could not load courses.</p>
+          <button type="button" onClick={onRetry} className="mt-1 text-accent underline">Try again</button>
+        </div>}
         {nav.items.map((child) => (
           <MenuItem key={child.to}>
             {({ focus }) => (
@@ -81,23 +93,39 @@ function DropDownNav({ nav }: { nav: DropDownNavRoute }) {
 export default function NavBar({ items }: NavBarProps) {
   const { user, userData, logout } = useAuth();
   const role = userData?.roles ?? [];
+  const isEducator = role.includes("educator");
+  const { courses, loading: coursesLoading, error: coursesError, refetch } = useFetchMyCourses(isEducator);
+  const courseNavigation: DropDownNavRoute = {
+    type: "dropdown",
+    label: "My courses",
+    to: "/educator/courses",
+    items: [
+      { label: "All courses", to: "/educator/courses" },
+      ...courses.map((course) => ({
+        label: course.name,
+        to: `/educator/courses/${course.id}`,
+      })),
+    ],
+  };
   const visibleItems = items.filter((item) => canAccessRoute(item, user, role));
+  if (user && isEducator) visibleItems.push(courseNavigation);
 
   return (
     <Disclosure
       as="nav"
       className={clsx(
-        "sticky top-0 z-40 border-b border-border/80 bg-surface/90 text-text backdrop-blur-xl",
+        "sticky top-0 z-40 shrink-0 border-b border-border/80 bg-surface/90 text-text backdrop-blur-xl",
         "supports-backdrop-filter:bg-surface/70",
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center px-3 sm:px-6 lg:px-8">
-        <div className="sm:hidden">
+      <div className="mx-auto flex h-10 max-w-7xl items-center px-3 sm:px-6 lg:px-8">
+        <div className="md:hidden">
           <DisclosureButton
             className={clsx(
               "group inline-flex items-center justify-center rounded-lg p-2 text-text-muted transition",
               "hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50",
             )}
+            onClick={() => { if (user && isEducator) void refetch().catch(() => { }); }}
             aria-label="Toggle navigation menu"
           >
             <Bars3Icon className="block h-6 w-6 group-data-open:hidden" />
@@ -105,11 +133,17 @@ export default function NavBar({ items }: NavBarProps) {
           </DisclosureButton>
         </div>
 
-        <div className="hidden sm:block">
+        <div className="hidden md:block">
           <nav className="flex items-center gap-1" aria-label="Primary views">
             {visibleItems.map((item) =>
               item.type === "dropdown" ? (
-                <DropDownNav key={item.label} nav={item} />
+                <DropDownNav
+                  key={item.label}
+                  nav={item}
+                  loading={item === courseNavigation && coursesLoading}
+                  error={item === courseNavigation ? coursesError : null}
+                  onRetry={() => void refetch().catch(() => { })}
+                />
               ) : (
                 <RoutePill key={item.to} to={item.to} label={item.label} />
               ),
@@ -124,7 +158,7 @@ export default function NavBar({ items }: NavBarProps) {
               <Link
                 to="/account"
                 className={clsx(
-                  "rounded-full px-3 py-1.5 text-sm font-medium text-text-muted transition",
+                  "hidden rounded-full px-3 py-1.5 text-sm font-medium text-text-muted transition md:inline-flex",
                   "hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50",
                 )}
               >
@@ -134,7 +168,7 @@ export default function NavBar({ items }: NavBarProps) {
                 type="button"
                 onClick={logout}
                 className={clsx(
-                  "rounded-full border border-border-strong bg-button-secondary px-3 py-1.5 text-sm font-medium text-text transition",
+                  "hidden rounded-full border border-border-strong bg-button-secondary px-3 py-1.5 text-sm font-medium text-text transition md:inline-flex",
                   "hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50",
                 )}
               >
@@ -145,7 +179,7 @@ export default function NavBar({ items }: NavBarProps) {
             <Link
               to="/login"
               className={clsx(
-                "rounded-full border border-border-strong bg-button-secondary px-3 py-1.5 text-sm font-medium text-text transition",
+                "hidden rounded-full border border-border-strong bg-button-secondary px-3 py-1.5 text-sm font-medium text-text transition md:inline-flex",
                 "hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50",
               )}
             >
@@ -155,25 +189,72 @@ export default function NavBar({ items }: NavBarProps) {
         </div>
       </div>
 
-      <DisclosurePanel className="border-t border-border bg-surface sm:hidden">
+      <DisclosurePanel className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-border bg-surface md:hidden">
         <div className="space-y-1 px-3 py-3">
-          {visibleItems.map((item) => {
-            if (item.type !== "route") return null;
-
-            return (
+          {visibleItems.map((item) =>
+            item.type === "dropdown" ? (
+              <div key={item.label} className="py-2">
+                <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-text-soft">
+                  {item.label}
+                </p>
+                {item === courseNavigation && coursesLoading && <p role="status" className="px-3 py-2 text-xs text-text-muted">Loading courses…</p>}
+                {item === courseNavigation && coursesError && <div role="alert" className="px-3 py-2 text-xs text-text-muted">
+                  <p>Could not load courses.</p>
+                  <button
+                    type="button"
+                    onClick={() => void refetch().catch(() => { })}
+                    className="mt-1 text-accent underline"
+                  >Try again</button>
+                </div>}
+                {item.items.map((child) => (
+                  <DisclosureButton
+                    key={child.to}
+                    as={Link}
+                    to={child.to}
+                    className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-muted hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                  >
+                    {child.label}
+                  </DisclosureButton>
+                ))}
+              </div>
+            ) : (
               <DisclosureButton
                 key={item.to}
                 as={Link}
                 to={item.to}
-                className={clsx(
-                  "block rounded-lg px-3 py-2 text-sm font-medium transition",
-                  "text-text-muted hover:bg-surface-muted hover:text-text",
-                )}
+                className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-muted hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
               >
                 {item.label}
               </DisclosureButton>
-            );
-          })}
+            ),
+          )}
+        </div>
+        <div className="space-y-1 border-t border-border px-3 py-3">
+          {user ? (
+            <>
+              <DisclosureButton
+                as={Link}
+                to="/account"
+                className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-text-muted hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              >
+                My Account
+              </DisclosureButton>
+              <DisclosureButton
+                onClick={() => void logout()}
+                className="flex min-h-11 w-full items-center rounded-lg px-3 text-sm font-medium text-text-muted hover:bg-surface-muted hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+              >
+                Log out
+              </DisclosureButton>
+            </>
+          ) : (
+            <DisclosureButton
+              as={Link}
+              to="/login"
+              className="flex min-h-11 items-center rounded-lg bg-button-secondary px-3 text-sm font-medium text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            >
+              Sign up / Log in
+            </DisclosureButton>
+          )}
         </div>
       </DisclosurePanel>
     </Disclosure>

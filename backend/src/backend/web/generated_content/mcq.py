@@ -13,7 +13,7 @@ from backend.service.generated_content.exceptions import (
     GeneratedContentValidationError,
     UnsupportedSchemaVersionError,
 )
-from backend.web.user.dependencies import CurrentUser
+from backend.web.accounts.dependencies import CurrentUser
 
 from .dependencies import GenMCQDependency
 
@@ -30,7 +30,9 @@ class Payload(BaseModel):
 
 
 @router.post("/v1")
-async def save_mcq(payload: Payload, user: CurrentUser, genmcq: GenMCQDependency):
+async def save_mcq(
+    payload: Payload, user: CurrentUser, genmcq: GenMCQDependency
+) -> list[GeneratedMCQ]:
     try:
         return await genmcq.async_batch_add_mcq(
             payload.qpayload,

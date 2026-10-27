@@ -1,0 +1,15 @@
+.git
+.github
+.vscode
+.pytest_cache
+emulator-data
+firebase-debug.log
+
+frontend
+data_analysis
+
+**/.venv
+**/.pytest_cache
+**/.ruff_cache
+**/__pycache__
+**/*.pyc

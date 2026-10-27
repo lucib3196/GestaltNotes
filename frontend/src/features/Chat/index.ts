@@ -1,5 +1,5 @@
 
-export { default as ChatContainer } from "./components/ChatContainer";
-export { default as ChatInput } from "./components/./ChatInput";
-export { default as ChatSideBar } from "./components/./ChatSideBar";
-export { default as ChatSession } from "./ChatSession";
+export { default as ChatContainer } from "./ui/layout/ChatContainer";
+export { default as ChatInput } from "./ui/composer/ChatInput";
+
+
