@@ -2,28 +2,8 @@ import { useEffect, useState } from "react";
 import { FilePreview } from "../../../components/FileAttachments";
 import { useStreamCourseNote } from "../../../hooks/courses";
 import type { CourseNoteOverview } from "../../../services/courses";
-import { useCourseDetailsStore } from "../state/useCourseDetailsStore";
 
-export default function CourseNotePreview() {
-  const note = useCourseDetailsStore((state) => state.getSelectedNote());
-
-  return (
-    <section aria-label="Resource preview" className="grow">
-      {note ? (
-        <SelectedNotePreview key={`${note.id}:${note.file_id}`} note={note} />
-      ) : (
-        <div className="flex min-h-80 flex-col items-center justify-center rounded-2xl bg-surface-muted/40 px-6 text-center">
-          <h3 className="font-semibold text-text">Preview a resource</h3>
-          <p className="mt-2 max-w-sm text-sm leading-6 text-text-muted">
-            Select a course material to preview its file.
-          </p>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function SelectedNotePreview({ note }: { note: CourseNoteOverview }) {
+export default function CourseNotePreview({ note }: { note: CourseNoteOverview }) {
   const { streamCourseNote, cancel, error } = useStreamCourseNote();
   const [file, setFile] = useState<File | null>(null);
   const [cancelled, setCancelled] = useState(false);

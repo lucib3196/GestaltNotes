@@ -2,12 +2,12 @@ import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useGetCourse } from "../../hooks/courses";
 import CourseHeader from "./ui/CourseHeader";
-import CourseNotePreview from "./ui/CourseNotePreview";
+import StudyWorkspace from "./ui/StudyWorkspace";
 import { CourseDetailsProvider, useCourseDetailsStore } from "./state";
 import CourseMaterials from "./materials/CourseMaterials";
 import CourseNoteUpload from "./ui/CourseNoteUpload";
 import { useCourseMaterials } from "./hooks/useCourseMaterials";
-
+import { useState } from "react";
 export default function CourseDetails() {
   const { courseId } = useParams();
   if (!courseId) return <p>Course not found.</p>;
@@ -27,6 +27,7 @@ function CourseDetailsContent() {
   );
   const { course, loading, error, refetch } = useGetCourse(courseId);
   const materials = useCourseMaterials();
+  const [showUpload, setShowUpload] = useState<boolean>(false);
 
   useEffect(() => {
     let active = true;
@@ -62,10 +63,21 @@ function CourseDetailsContent() {
       ) : selectedCourse ? (
         <>
           <CourseHeader />
-          <CourseNoteUpload onUploaded={materials.refetch} />
-          <div className="flex flex-row gap-2 px-2 py-3">
-            <CourseMaterials materials={materials} />
-            <CourseNotePreview />
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowUpload(prev=>!prev)}
+              className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              Upload notes
+            </button>
+          </div>
+          {showUpload && <CourseNoteUpload onUploaded={materials.refetch} />}
+          <div className="grid min-w-0 overflow-hidden rounded-2xl border border-border bg-surface lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <div className="min-w-0 border-b border-border bg-surface-muted/20 p-4 lg:border-b-0 lg:border-r">
+              <CourseMaterials materials={materials} />
+            </div>
+            <StudyWorkspace />
           </div>
         </>
       ) : (
