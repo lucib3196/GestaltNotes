@@ -48,12 +48,12 @@ const availableTools: ToolConfig[] = [
 ];
 
 export default function WorkspaceInfo() {
-  const setMessage = useChatStore((s) => s.setDraftText);
+  const setDraftMessage = useChatStore((s) => s.setDraftMessage);
   const setCurrentSection = useWorkspaceStore((s) => s.setCurrentSection);
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   const handleClick = (val: string, section?: SectionTab) => {
-    setMessage(val);
+    setDraftMessage({ text: val, internal: false });
     if (section) {
       setCurrentSection(section);
     }

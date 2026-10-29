@@ -32,6 +32,7 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
   const selectedSource = sources.find(
     (source) => source.path === selectedFile?.path,
   );
+  const [show, setShow]  = useState<boolean>(false)
 
 
   return (
@@ -40,7 +41,10 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
       aria-busy={loading}
       className="w-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface text-text"
     >
-      <SourcesHeader count={sources.length} />
+      <div className="flex flex-col gap-2 w-full">
+        <SourcesHeader count={sources.length} />
+        <button onClick={()=>setShow(prev=>!prev)}>Show</button>
+      </div>
 
       <div className="space-y-2 p-3">
         {loading && (
@@ -67,7 +71,7 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
           </div>
         )}
 
-        {sources.map((source) => (
+        {show && sources.map((source) => (
           <SourceRow
             key={source.path}
             source={source}

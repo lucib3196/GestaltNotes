@@ -91,7 +91,7 @@ def _build_course_notes_tool(
 
     @tool(
         name,
-        return_direct=True,
+        return_direct=False,
         description=description,
         response_format="content_and_artifact",
     )

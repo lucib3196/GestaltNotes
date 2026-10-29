@@ -7,10 +7,15 @@ import type {
 import type { Thread } from "../../services";
 import type { ConfigSchema } from "./config";
 
+export type DraftMessage = {
+  text: string;
+  internal: boolean;
+};
+
 export type ChatState = {
   config: ConfigSchema;
   assistant: Assistant;
-  draftText: string;
+  draftMessage: DraftMessage | null;
   attachments: Attachment[];
   pendingPrompt: PendingPrompt | null;
 };
@@ -18,7 +23,7 @@ export type ChatState = {
 export type ChatActions = {
   setModel: (model: ConfigSchema["model"]) => void;
   setAssistant: (id: Assistant) => void;
-  setDraftText: (text: string) => void;
+  setDraftMessage: (message: DraftMessage | null) => void;
   addAttachments: (files: File[]) => void;
   removeAttachment: (id: string) => void;
   queuePrompt: (text: string) => void;

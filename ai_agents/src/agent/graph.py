@@ -32,7 +32,10 @@ graph = create_agent(
     system_prompt=(
         Path(__file__).resolve().parent / "prompts" / "chat_prompt.md"
     ).read_text(encoding="utf-8"),
-    middleware=[ModelRoutingMiddleware(), ThreadTitleMiddleware(model=model)],  # type: ignore
+    middleware=[
+        ModelRoutingMiddleware(),
+        ThreadTitleMiddleware(model=model),
+    ],  # type: ignore
     context_schema=ConfigSchema,
     tools=[
         create_multiple_choice_questions,

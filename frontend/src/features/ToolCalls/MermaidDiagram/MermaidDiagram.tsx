@@ -11,8 +11,8 @@ export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
   const [fitToWidth, setFitToWidth] = useState(false);
   const [compact, setCompact] = useState(false);
   const [straightEdges, setStraightEdges] = useState(false);
-  const setDraftText = useChatStore((state) => state.setDraftText);
-  const draftText = useChatStore((state) => state.draftText);
+  const setDraftMessage = useChatStore((state) => state.setDraftMessage);
+  const draftMessage = useChatStore((state) => state.draftMessage);
   const [regenerationRequested, setRegenerationRequested] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>("original");
 
@@ -37,12 +37,12 @@ export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
 
 
   function regenerateGraph() {
-    if (result.status !== "error" || draftText || regenerationRequested) {
+    if (result.status !== "error" || draftMessage || regenerationRequested) {
       return;
     }
 
-    setDraftText(
-      [
+    setDraftMessage({
+      text: [
         "Regenerate this Mermaid graph using an available diagram tool.",
         "Fix the rendering error while preserving the graph's meaning.",
         "Return a corrected diagram artifact, not just Mermaid code in chat.",
@@ -54,7 +54,8 @@ export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
           error: result.error,
         }),
       ].join("\n"),
-    );
+      internal: true,
+    });
     setRegenerationRequested(true);
   }
 
@@ -141,7 +142,7 @@ export function MermaidDiagram({ data }: { data: FlowDiagramData }) {
           <button
             type="button"
             onClick={regenerateGraph}
-            disabled={Boolean(draftText) || regenerationRequested}
+            disabled={Boolean(draftMessage) || regenerationRequested}
             className="rounded-md border border-border px-3 py-2 text-sm text-text hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
           >
             Regenerate graph

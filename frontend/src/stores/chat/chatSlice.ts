@@ -23,13 +23,13 @@ export function createChatSessionSlice<
         config: ConfigSchema.parse({ ...state.config, model }),
       })),
 
-    draftText: "",
+    draftMessage: null,
     attachments: [],
     pendingPrompt: null,
 
     setAssistant: (ass) => set({ assistant: ass } as Partial<Store>),
 
-    setDraftText: (draftText) => set({ draftText } as Partial<Store>),
+    setDraftMessage: (draftMessage) => set({ draftMessage } as Partial<Store>),
 
     addAttachments: (files) =>
       set(
@@ -69,7 +69,7 @@ export function createChatSessionSlice<
 
     clearDraft: () =>
       set({
-        draftText: "",
+        draftMessage: null,
         attachments: [],
       }),
 
@@ -78,7 +78,7 @@ export function createChatSessionSlice<
         activeThreadId: null,
         activeThreadStatus: "idle",
         activeThreadError: null,
-        draftText: "",
+        draftMessage: null,
         attachments: [],
         pendingPrompt: null,
       }),

@@ -18,12 +18,15 @@ export default function QuestionsPractice({
   onSave,
   saveEnabled = false,
 }: QuestionsPracticeProps) {
-  const setDraftText = useChatStore((state) => state.setDraftText);
-  const draftText = useChatStore((state) => state.draftText);
+  const setDraftMessage = useChatStore((state) => state.setDraftMessage);
+  const draftMessage = useChatStore((state) => state.draftMessage);
   function requestReview(submission: QuizSubmission) {
-    if (draftText)
+    if (draftMessage)
       throw new Error("Another review is waiting to be submitted.");
-    setDraftText(buildReviewPrompt(data, submission));
+    setDraftMessage({
+      text: buildReviewPrompt(data, submission),
+      internal: true,
+    });
   }
   return (
     <MultipleChoiceQuiz

@@ -66,7 +66,7 @@ export function createThreadStore<
                 activeThreadId: null,
                 activeThreadStatus: "idle" as const,
                 activeThreadError: null,
-                draftText: "",
+                draftMessage: null,
                 attachments: [],
                 pendingPrompt: null,
               }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useStream } from "@langchain/langgraph-sdk/react";
 import type { Message } from "@langchain/langgraph-sdk";
 
@@ -15,7 +16,7 @@ import { useChatStore } from "../instance";
 import { prepareMessage } from "../utils/messageSending";
 import { useCreateThread } from "../hooks/useCreateThread";
 import { useUpdateThread } from "../hooks/useUpdateThread";
-
+import { ConversationStarter } from "../ui/starter/ConversationStarter";
 type ChatAgentState = {
   messages: Message[];
   thread_title?: string;
@@ -38,19 +39,33 @@ function getProgressMessage(event: unknown): string | null {
 
 export default function ChatSession() {
   const [progress, setProgress] = useState<string | null>(null);
-  const config = useChatStore((s) => s.config);
-  const activeThreadId = useChatStore((s) => s.activeThreadId);
-  const threadsById = useChatStore((s) => s.threadsById);
-  const activeThread = useChatStore((s) =>
-    activeThreadId ? (s.threadsById[activeThreadId] ?? null) : null,
+  const {
+    config,
+    activeThreadId,
+    threadsById,
+    assistant,
+    draftMessage,
+    setDraftMessage,
+    selectThread,
+    upsertThread,
+  } = useChatStore(
+    useShallow((s) => ({
+      config: s.config,
+      activeThreadId: s.activeThreadId,
+      threadsById: s.threadsById,
+      assistant: s.assistant,
+      draftMessage: s.draftMessage,
+      setDraftMessage: s.setDraftMessage,
+      selectThread: s.selectThread,
+      upsertThread: s.upsertThread,
+    })),
   );
-  const { updateThread } = useUpdateThread();
-  const assistantId = useChatStore((s) => s.assistant.id);
-  const draftText = useChatStore((s) => s.draftText);
-  const setDraftText = useChatStore((s) => s.setDraftText);
-  const setActiveThread = useChatStore((s) => s.selectThread);
-  const upsertThread = useChatStore((s) => s.upsertThread);
 
+  const activeThread = activeThreadId
+    ? (threadsById[activeThreadId] ?? null)
+    : null;
+
+  const { updateThread } = useUpdateThread();
 
   // Hooks
   const { createThread } = useCreateThread();
@@ -58,7 +73,7 @@ export default function ChatSession() {
   const stream = useStream<ChatAgentState>({
     threadId: activeThreadId,
     apiUrl: streamURL,
-    assistantId: assistantId,
+    assistantId: assistant.id,
     apiKey: import.meta.env.VITE_LANGSMITH_API_KEY,
     onCustomEvent: (event) => {
       const message = getProgressMessage(event);
@@ -67,7 +82,7 @@ export default function ChatSession() {
     onThreadId: async (id: string) => {
       const thread = await createThread({ thread_id: id });
       upsertThread(thread);
-      setActiveThread(thread.id);
+      selectThread(thread.id);
     },
     onFinish: (state, run) => {
       const title = state.values.thread_title?.trim();
@@ -114,8 +129,8 @@ export default function ChatSession() {
   };
   useEffect(() => {
     const handleExternalMessage = async () => {
-      if (!draftText) return;
-      const content = await prepareMessage(draftText);
+      if (!draftMessage?.text) return;
+      const content = await prepareMessage(draftMessage.text);
       setProgress(null);
       stream.submit(
         {
@@ -124,17 +139,17 @@ export default function ChatSession() {
               type: "human",
               content,
               additional_kwargs: {
-                internal: true,
+                internal: draftMessage.internal,
               },
             },
           ],
         },
         { context: config, streamMode: ["messages", "updates", "custom"] },
       );
-      setDraftText("");
+      setDraftMessage(null);
     };
     void handleExternalMessage();
-  }, [draftText]);
+  }, [draftMessage]);
 
   const visibleMessages = stream.messages.filter((message) => {
     if (
@@ -163,7 +178,20 @@ export default function ChatSession() {
         <ChatContainer
           bordered={false}
           scrollTrigger={stream.messages.length}
-          starters={null}
+          starters={
+            stream.messages.length > 1 ? null : (
+              <div className="flex flex-row wrap gap-2">
+                {[
+                  "Explain a key concept from my course with a simple example.",
+                  "Create 5 multiple-choice questions to check my understanding.",
+                  "Make 10 flashcards covering the main ideas from my lectures.",
+                  "Show me a diagram connecting the key concepts in this topic.",
+                ].map((starter) => (
+                  <ConversationStarter key={starter} value={starter} />
+                ))}
+              </div>
+            )
+          }
           input={
             <ChatInput
               handleSubmit={handleSubmit}
@@ -178,16 +206,16 @@ export default function ChatSession() {
             />
           }
         >
-            <MessageList messages={visibleMessages} />
-            {stream.isLoading && (
-              <div
-                role="status"
-                aria-live="polite"
-                className="mx-auto w-full max-w-4xl px-4 py-3 text-sm text-base-content/70"
-              >
-                {progress ?? "Working…"}
-              </div>
-            )}
+          <MessageList messages={visibleMessages} />
+          {stream.isLoading && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mx-auto w-full max-w-4xl px-4 py-3 text-sm text-base-content/70"
+            >
+              {progress ?? "Working…"}
+            </div>
+          )}
         </ChatContainer>
       </div>
     </>
