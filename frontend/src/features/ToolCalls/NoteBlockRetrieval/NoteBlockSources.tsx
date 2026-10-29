@@ -32,8 +32,7 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
   const selectedSource = sources.find(
     (source) => source.path === selectedFile?.path,
   );
-  const [show, setShow]  = useState<boolean>(false)
-
+  const [show, setShow] = useState<boolean>(false);
 
   return (
     <section
@@ -41,9 +40,22 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
       aria-busy={loading}
       className="w-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface text-text"
     >
-      <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-row items-baseline justify-between gap-2 w-full">
         <SourcesHeader count={sources.length} />
-        <button onClick={()=>setShow(prev=>!prev)}>Show</button>
+        <div>
+          <button
+            type="button"
+            aria-expanded={show}
+            onClick={() => setShow((prev) => !prev)}
+            className={`${actionClass} mx-3 mb-2 self-end border border-border bg-surface-strong`}
+          >
+            {show ? "Hide sources" : "Show sources"}
+            <FiChevronDown
+              aria-hidden="true"
+              className={`h-4 w-4 transition-transform ${show ? "rotate-180" : ""}`}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-2 p-3">
@@ -71,21 +83,22 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
           </div>
         )}
 
-        {show && sources.map((source) => (
-          <SourceRow
-            key={source.path}
-            source={source}
-            available={filesByPath.has(source.path)}
-            selected={selectedFile?.path === source.path}
-            error={errorsByPath[source.path]}
-            previewId={previewId}
-            onSelect={() =>
-              setSelectedPath((prev) =>
-                prev === source.path ? null : source.path,
-              )
-            }
-          />
-        ))}
+        {show &&
+          sources.map((source) => (
+            <SourceRow
+              key={source.path}
+              source={source}
+              available={filesByPath.has(source.path)}
+              selected={selectedFile?.path === source.path}
+              error={errorsByPath[source.path]}
+              previewId={previewId}
+              onSelect={() =>
+                setSelectedPath((prev) =>
+                  prev === source.path ? null : source.path,
+                )
+              }
+            />
+          ))}
       </div>
 
       {selectedFile && selectedSource && (
@@ -102,7 +115,7 @@ export function NoteBlockSources({ data }: { data: NoteBlockDocuments }) {
 
 function SourcesHeader({ count }: { count: number }) {
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+    <header className="flex items-center justify-between  gap-3 px-4 py-3">
       <div className="flex items-center gap-2">
         <FiFileText aria-hidden="true" className="h-4 w-4 text-accent" />
         <h3 className="text-sm font-semibold">Lecture sources</h3>
