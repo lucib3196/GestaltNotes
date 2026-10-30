@@ -50,10 +50,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Check 
-# RUN test -n "$GH_PACKAGE_TOKEN" \
-#     && git config --global credential.helper \
-#        '!f() { printf "%s\n" "username=x-access-token" "password=$GH_PACKAGE_TOKEN"; }; f' \
-#     && git config --global --unset credential.helper
+RUN test -n "$GH_PACKAGE_TOKEN" \
+    && git config --global credential.helper \
+       '!f() { printf "%s\n" "username=x-access-token" "password=$GH_PACKAGE_TOKEN"; }; f' \
+    && git config --global --unset credential.helper
 
 RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
