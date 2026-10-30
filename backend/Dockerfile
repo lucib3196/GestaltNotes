@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1.7
 
 ARG PYTHON_VERSION=3.13.7
+# Github
+ARG GH_PACKAGE_TOKEN
 FROM python:${PYTHON_VERSION}-slim as backend
 
 # Install uv
@@ -37,9 +39,16 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 # Install ssh for git
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git openssh-client \
+    && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
-    
+
+# Check 
+RUN test -n "$GH_PACKAGE_TOKEN" \
+    && git config --global credential.helper \
+       '!f() { printf "%s\n" "username=x-access-token" "password=$GH_PACKAGE_TOKEN"; }; f' \
+    && uv sync --frozen --no-install-project \
+    && git config --global --unset credential.helper
+
 RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 

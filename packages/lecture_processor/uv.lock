@@ -1439,7 +1439,7 @@ requires-dist = [
     { name = "langchain-core", specifier = ">=1.6.6" },
     { name = "langgraph", specifier = ">=1.2.13" },
     { name = "multimodal-llm", directory = "../multimodal_llm" },
-    { name = "object-store", git = "ssh://git@github.com/lucib3196/object_store.git?tag=v0.1.0" },
+    { name = "object-store", git = "https://github.com/lucib3196/object_store.git?tag=v0.1.0" },
     { name = "pydantic", specifier = ">=2.13.5" },
     { name = "semantic-splitter", directory = "../semantic_splitter" },
 ]
@@ -1810,7 +1810,7 @@ wheels = [
 [[package]]
 name = "object-store"
 version = "0.1.0"
-source = { git = "ssh://git@github.com/lucib3196/object_store.git?tag=v0.1.0#0ebd528eb467bad6a9ec67b3809cd7f6c2e7de75" }
+source = { git = "https://github.com/lucib3196/object_store.git?tag=v0.1.0#0ebd528eb467bad6a9ec67b3809cd7f6c2e7de75" }
 dependencies = [
     { name = "firebase-admin" },
 ]
