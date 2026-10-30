@@ -2,8 +2,10 @@
 
 ARG PYTHON_VERSION=3.13.7
 # Github
-ARG GH_PACKAGE_TOKEN
+
 FROM python:${PYTHON_VERSION}-slim as backend
+
+ARG GH_PACKAGE_TOKEN
 RUN if [ -n "$GH_PACKAGE_TOKEN" ]; then \
       echo "GH_PACKAGE_TOKEN is available"; \
     else \
