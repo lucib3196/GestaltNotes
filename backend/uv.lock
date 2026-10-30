@@ -237,7 +237,7 @@ requires-dist = [
     { name = "langchain-postgres", specifier = ">=0.0.19" },
     { name = "langgraph-sdk", specifier = ">=0.4.2,<0.5.0" },
     { name = "lecture-processor", editable = "../packages/lecture_processor" },
-    { name = "object-store", editable = "../packages/object_store" },
+    { name = "object-store", git = "ssh://git@github.com/lucib3196/object_store.git?tag=v0.1.0" },
     { name = "psycopg", extras = ["binary"] },
     { name = "psycopg2-binary", specifier = ">=2.9.11,<3.0.0" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.13.4,<3.0.0" },
@@ -2369,22 +2369,9 @@ wheels = [
 [[package]]
 name = "object-store"
 version = "0.1.0"
-source = { editable = "../packages/object_store" }
+source = { git = "ssh://git@github.com/lucib3196/object_store.git?tag=v0.1.0#0ebd528eb467bad6a9ec67b3809cd7f6c2e7de75" }
 dependencies = [
     { name = "firebase-admin" },
-    { name = "pytest-asyncio" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "firebase-admin", specifier = ">=7.7.0" },
-    { name = "pytest-asyncio", specifier = ">=1.4.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=9.1.1" },
-    { name = "ruff", specifier = ">=0.17.0" },
 ]
 
 [[package]]

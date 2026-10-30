@@ -49,8 +49,8 @@ dev = [
 "tests/**/*.py" = ["ANN", "ARG"]
 
 [tool.uv.sources]
-object-store = { path = "../packages/object_store", editable=true }
 lecture-processor = { path = "../packages/lecture_processor",editable=true }
+object-store = { git = "ssh://git@github.com/lucib3196/object_store.git", tag = "v0.1.0" }
 
 [tool.ruff]
 line-length = 88
