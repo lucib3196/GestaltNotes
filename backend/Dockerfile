@@ -65,7 +65,7 @@ COPY packages /app/packages
 
 RUN test -n "$GH_PACKAGE_TOKEN" \
     && git config --global credential.helper \
-       '!f() { printf "%s\n" "username=x-access-token" "password=$GH_PACKAGE_TOKEN"; }; f' \
+    '!f() { printf "%s\n" "username=x-access-token" "password=$GH_PACKAGE_TOKEN"; }; f' \
     && uv sync --frozen --no-install-project
     && git config --global --unset credential.helper
 
