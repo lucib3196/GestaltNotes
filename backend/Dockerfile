@@ -35,6 +35,11 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
+# Install ssh for git
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git openssh-client \
+    && rm -rf /var/lib/apt/lists/*
+    
 RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 
