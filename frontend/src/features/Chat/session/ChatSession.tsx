@@ -180,7 +180,7 @@ export default function ChatSession() {
           scrollTrigger={stream.messages.length}
           starters={
             stream.messages.length > 1 ? null : (
-              <div className="flex flex-row wrap gap-2">
+              <div className="flex flex-row wrap gap-3">
                 {[
                   "Explain a key concept from my course with a simple example.",
                   "Create 5 multiple-choice questions to check my understanding.",
