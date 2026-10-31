@@ -30,10 +30,15 @@ RUN adduser \
 
 # Install system dependencies for psycopg2 and other build tools
 RUN apt-get update && apt-get install -y \
+    git \
     gcc \
     libpq-dev \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN git config --global credential.https://github.com.helper \
+    '!f() { printf "%s\n" "username=x-access-token"; printf "password="; cat /run/secrets/GH_PACKAGE_TOKEN; printf "\n"; }; f'
+
 RUN mkdir -p /opt/venv /app \
     && chown -R appuser:appuser /opt/venv /app
 
@@ -41,12 +46,13 @@ COPY backend/pyproject.toml backend/uv.lock ./
 COPY packages /app/packages
 
 RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=secret,id=GH_PACKAGE_TOKEN,required=true \
     uv sync --frozen --no-install-project
-
 
 COPY backend/ .
 
 RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=secret,id=GH_PACKAGE_TOKEN,required=true \
     uv sync --frozen
 # Expose the port that the application listens on.
 EXPOSE 8000
