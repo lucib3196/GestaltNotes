@@ -16,7 +16,7 @@ from backend.courses.models import (
     CourseNoteRead,
     CourseNoteUpdate,
 )
-from backend.courses.notes.repo import CourseNoteRepository
+from backend.courses.repo import CourseNoteRepository
 from backend.courses.service.course_service import CourseService
 from backend.storage import FileService
 from backend.storage.models import File

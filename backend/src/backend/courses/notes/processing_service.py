@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlmodel import Session, col, select
 
 from backend.courses.models import CourseNote, NoteOverview
-from backend.courses.notes.repo import CourseNoteRepository
+from backend.courses.repo import CourseNoteRepository
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
     LectureProcessingRunNotFoundError,
