@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 from fastapi import UploadFile
 
-from backend.courses.notes.models import CourseContentType, CourseNote
+from backend.courses.models import CourseContentType, CourseNote
 from backend.storage.models import File
 
 

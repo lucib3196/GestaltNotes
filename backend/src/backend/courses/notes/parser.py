@@ -5,7 +5,7 @@ from lecture_processor.extracted_question import ExtractedQuestion
 from lecture_processor.graph.state import OutputState
 from pydantic import BaseModel
 
-from .models import NoteBlock
+from backend.courses.models import NoteBlock
 
 
 def parse_lecture_document(

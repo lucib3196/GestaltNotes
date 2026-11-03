@@ -9,10 +9,14 @@ from backend.accounts import User
 from backend.courses.exceptions import (
     CourseNoteAssociationError,
 )
-from backend.courses.models import Course
-from backend.courses.notes.models import CourseContentType, CourseNote
+from backend.courses.models import (
+    Course,
+    CourseContentType,
+    CourseNote,
+    CourseNoteRead,
+    CourseNoteUpdate,
+)
 from backend.courses.notes.repo import CourseNoteRepository
-from backend.courses.notes.schema import CourseNoteRead, CourseNoteUpdate
 from backend.courses.service.course_service import CourseService
 from backend.storage import FileService
 from backend.storage.models import File

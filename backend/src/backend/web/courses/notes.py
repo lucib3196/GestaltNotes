@@ -8,8 +8,8 @@ from fastapi.routing import APIRouter
 from starlette import status
 
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.notes.models import CourseContentType
-from backend.courses.notes.schema import (
+from backend.courses.models import (
+    CourseContentType,
     CourseNoteDelete,
     CourseNoteRead,
     CourseNoteUpdate,

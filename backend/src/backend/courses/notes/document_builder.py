@@ -7,9 +7,8 @@ from langchain_core.documents import Document
 from object_store import BlobStorage
 from sqlmodel import Session
 
+from backend.courses.models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock
 from backend.storage import FileService
-
-from .models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock
 
 
 class NoteBlockDocumentBuilder:

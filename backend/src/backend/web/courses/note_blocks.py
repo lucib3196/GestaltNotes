@@ -2,8 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
-from backend.courses.notes.models import NoteBlock
-from backend.courses.notes.schema import NoteBlockRead
+from backend.courses.models import NoteBlock, NoteBlockRead
 from backend.web.courses.dependencies import NoteBlockServiceDep, ReadableCourseDep
 
 router = APIRouter(

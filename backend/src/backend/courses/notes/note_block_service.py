@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import update
 from sqlmodel import Session, select
 
-from backend.courses.notes.models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock
+from backend.courses.models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock
 
 
 class NoteBlockNotFoundError(LookupError):

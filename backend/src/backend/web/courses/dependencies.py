@@ -1,17 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
+from backend.courses.service.access_code_service import CourseAccessCodeService
 from fastapi import Depends, HTTPException
 from starlette import status
 
 from backend.core import logger
-from backend.courses.models import Course, CourseEnrollment
+from backend.courses.models import Course, CourseEnrollment, CourseNote
 from backend.courses.notes.course_note_service import CourseNoteService
-from backend.courses.notes.models import CourseNote
 from backend.courses.notes.note_block_service import NoteBlockService
 from backend.courses.notes.processing_service import CourseNoteProcessingService
 from backend.courses.notes.repo import CourseNoteRepository
-from backend.courses.service.access_code_service import CourseAccessCodeService
 from backend.courses.service.course_service import CourseService
 from backend.database import SessionDep
 from backend.web.accounts.dependencies import CurrentUserDep

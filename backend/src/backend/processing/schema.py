@@ -4,8 +4,6 @@ from uuid import UUID
 from lecture_processor import OutputState
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, field_validator
 
-from backend.courses.notes.models import NoteBlock
-
 from .models import ProcessingStage, ProcessingStatus
 
 
@@ -50,6 +48,10 @@ class LectureProcessingStatusRead(BaseModel):
 class LectureProcessingInput(BaseModel):
     course_id: UUID
     note_id: UUID
+
+
+# Import after defining the status schemas consumed by courses.models.
+from backend.courses.models import NoteBlock  # noqa: E402
 
 
 class LectureProcessingState(LectureProcessingInput):

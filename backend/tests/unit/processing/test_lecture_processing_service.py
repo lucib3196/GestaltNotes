@@ -6,8 +6,7 @@ from sqlmodel import Session, SQLModel, create_engine, select
 
 import backend.accounts.models  # noqa: F401 -- Register relationship targets.
 from backend.courses.exceptions import CourseNoteNotFoundError
-from backend.courses.models import Course
-from backend.courses.notes.models import CourseContentType, CourseNote
+from backend.courses.models import Course, CourseContentType, CourseNote
 from backend.courses.notes.processing_service import CourseNoteProcessingService
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,

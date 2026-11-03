@@ -4,16 +4,14 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import Session, col, select
 
 from backend.accounts import User
+from backend.adapters import Repository
 from backend.core import logger
 from backend.courses.exceptions import (
     CourseNoteAssociationError,
     CourseNoteNotFoundError,
     CourseNoteRetrievalError,
 )
-from backend.courses.models import Course
-from backend.courses.notes.models import CourseNote
-from backend.courses.notes.schema import CourseNoteRead, CourseNoteUpdate
-from backend.adapters import Repository
+from backend.courses.models import Course, CourseNote, CourseNoteRead, CourseNoteUpdate
 
 
 class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):

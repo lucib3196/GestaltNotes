@@ -12,8 +12,8 @@ from sqlmodel import Session
 from backend.core import get_settings
 from backend.core.exceptions import InvalidConfigError, MissingConfigError
 from backend.courses.exceptions import CourseNotFoundError
-from backend.courses.models import Course
-from backend.courses.vector_store.models import (
+from backend.courses.models import (
+    Course,
     CourseVectorStore,
     VectorstoreProvider,
     VectorStoreStatus,

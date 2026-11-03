@@ -4,8 +4,13 @@ from fastapi.routing import APIRouter
 from starlette import status
 
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.models import Course, CourseCreate, CourseRead, CourseUpdate
-from backend.courses.schema import CourseDelete
+from backend.courses.models import (
+    Course,
+    CourseCreate,
+    CourseDelete,
+    CourseRead,
+    CourseUpdate,
+)
 from backend.web.accounts.dependencies import EducatorDep
 
 from .dependencies import CourseServiceDep
