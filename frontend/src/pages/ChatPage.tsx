@@ -1,4 +1,3 @@
-import StarterView from "../features/ConversationStarters/components/StarterView";
 import { TabButton } from "../components/Button";
 import { WorkspaceItemsCarousel } from "../features/Tools";
 import WorkspaceInfo from "../features/Tools/components/WorkspaceInfo";
@@ -65,7 +64,9 @@ export function ResourceSection() {
             variant="subtle"
           />
         )}
-        {currentTab === "final_review" && <StarterView />}
+        {currentTab === "final_review" && (
+          <p className="text-text-soft">Final review outline coming soon.</p>
+        )}
         {currentTab === "info" && <WorkspaceInfo />}
       </div>
     </section>
