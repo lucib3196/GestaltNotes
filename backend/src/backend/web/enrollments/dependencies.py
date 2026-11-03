@@ -6,14 +6,13 @@ from starlette import status
 from backend.core import logger
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 from backend.database import SessionDep
-from backend.web.courses.dependencies import CourseServiceDep
 
 
 def get_enrollment_service(
-    session: SessionDep, course_service: "CourseServiceDep"
+    session: SessionDep,
 ) -> CourseEnrollmentService:
     try:
-        return CourseEnrollmentService(course_service, session)
+        return CourseEnrollmentService(session)
     except Exception as e:
         logger.exception("Failed to initialize CourseEnrollmentService")
         raise HTTPException(

@@ -6,13 +6,15 @@ from starlette import status
 
 from backend.accounts.models import User
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.models import Course, CourseEnrollment, CourseVectorStore, CourseRead
+from backend.courses.models import (
+    Course,
+    CourseEnrollment,
+    CourseRead,
+    CourseVectorStore,
+)
 from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep, StudentDep
+from backend.web.courses.http import course_http_exception
 from backend.web.enrollments.dependencies import CourseEnrollmentServiceDep
-
-from ..courses.http import course_http_exception
-
-ID = UUID | str
 
 router = APIRouter(prefix="/courses", tags=["course-enrollments"])
 
@@ -30,8 +32,8 @@ class CourseChatContext(BaseModel):
 async def enroll_student_by_educator(
     enrollment_service: CourseEnrollmentServiceDep,
     educator: EducatorDep,
-    course_id: ID,
-    student_id: ID,
+    course_id: UUID,
+    student_id: UUID,
 ) -> CourseEnrollment:
     try:
         return await enrollment_service.enroll_student_by_id_by_educator(
@@ -50,8 +52,8 @@ async def enroll_student_by_educator(
 async def unenroll_student(
     enrollment_service: CourseEnrollmentServiceDep,
     educator: EducatorDep,
-    course_id: ID,
-    student_id: ID,
+    course_id: UUID,
+    student_id: UUID,
 ) -> None:
     try:
         await enrollment_service.unenroll_student(course_id, student_id, educator)
@@ -63,7 +65,7 @@ async def unenroll_student(
 async def list_students(
     enrollment_service: CourseEnrollmentServiceDep,
     educator: EducatorDep,
-    course_id: ID,
+    course_id: UUID,
 ) -> list[User]:
     try:
         return await enrollment_service.list_students(course_id, educator)
@@ -85,11 +87,11 @@ async def list_student_courses(
 @router.get("/{course_id}/access", response_model=CourseRead)
 async def assert_course_access(
     enrollment_service: CourseEnrollmentServiceDep,
-    student: StudentDep,
-    course_id: ID,
+    user: CurrentUserDep,
+    course_id: UUID,
 ) -> Course:
     try:
-        return await enrollment_service.assert_course_access(course_id, student)
+        return await enrollment_service.assert_course_access(course_id, user)
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 

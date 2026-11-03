@@ -4,15 +4,12 @@ from fastapi.routing import APIRouter
 from starlette import status
 
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.models import Course
-from backend.courses.models import CourseCreate,  CourseRead, CourseUpdate
+from backend.courses.models import Course, CourseCreate, CourseRead, CourseUpdate
 from backend.courses.schema import CourseDelete
 from backend.web.accounts.dependencies import EducatorDep
 
 from .dependencies import CourseServiceDep
 from .http import course_http_exception
-
-ID = UUID | str
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
@@ -24,7 +21,7 @@ async def create_course(
     data: CourseCreate,
 ) -> Course:
     try:
-        return await course_service.create_course(data, educator)
+        return await course_service.create(data, educator)
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
@@ -43,10 +40,10 @@ async def list_owned_courses(
 @router.get("/{course_id}", response_model=CourseRead)
 async def get_course(
     course_service: CourseServiceDep,
-    course_id: ID,
+    course_id: UUID,
 ) -> Course:
     try:
-        return await course_service.get_course(course_id)
+        return await course_service.get(course_id)
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
@@ -55,11 +52,11 @@ async def get_course(
 async def update_course(
     course_service: CourseServiceDep,
     educator: EducatorDep,
-    course_id: ID,
+    course_id: UUID,
     data: CourseUpdate,
 ) -> Course:
     try:
-        return await course_service.update_course(course_id, data, educator)
+        return await course_service.update(course_id, data, educator)
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
@@ -68,9 +65,9 @@ async def update_course(
 async def delete_course(
     course_service: CourseServiceDep,
     educator: EducatorDep,
-    course_id: ID,
+    course_id: UUID,
 ) -> CourseDelete:
     try:
-        return await course_service.delete_course(course_id, educator)
+        return await course_service.delete(course_id, educator)
     except CourseServiceException as e:
         raise course_http_exception(e) from e

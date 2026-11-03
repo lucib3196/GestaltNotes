@@ -83,6 +83,7 @@ class Course(CourseBase, table=True):
     owner_id: UUID = Field(
         sa_column=Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     )
+    prompt: str | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -94,7 +95,6 @@ class Course(CourseBase, table=True):
     )
 
     notes: list["CourseNote"] = Relationship(back_populates="course")
-    access_codes: list["CourseAccessCode"] = Relationship(back_populates="course")
     vectorstore: Optional["CourseVectorStore"] = Relationship(back_populates="course")
 
     @property
@@ -105,19 +105,6 @@ class Course(CourseBase, table=True):
 # -------------------------------------------------------------------
 # ---------------- Extra TBD-----------------------------------------
 # -------------------------------------------------------------------
-class CourseAccessCode(SQLModel, table=True):
-    __tablename__ = "course_access_code"  # type: ignore
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
-    course_id: UUID = Field(
-        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
-    )
-    code_hash: str = Field(unique=True, index=True)
-    active: bool = True
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: datetime | None = None
-    uses: int = 0
-
-    course: "Course" = Relationship(back_populates="access_codes")
 
 
 class CourseModule(SQLModel, table=True):
