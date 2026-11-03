@@ -1,7 +1,9 @@
 from typing import Protocol
+from uuid import uuid4
 
 import pytest_asyncio
 from pytest import fixture
+from sqlmodel import Session, select
 
 from backend.accounts import Role, User, UserCreate, UserRole
 from backend.accounts.services import AccountService, RoleDB
@@ -67,31 +69,40 @@ def make_user_payload() -> MakeUserPayload:
 
 class MakeUser(Protocol):
     async def __call__(
-        self, *, role: UserRole = UserRole.STUDENT, **overrides
+        self,
+        *,
+        role: UserRole = UserRole.STUDENT,
+        first_name: str = "Test",
+        last_name: str = "User",
+        username: str | None = None,
+        email: str | None = None,
     ) -> User: ...
 
 
-@pytest_asyncio.fixture
-async def make_user(account_service) -> MakeUser:
-    created_users: list[User] = []
+@fixture
+def make_user(db_session: Session, seed_roles) -> MakeUser:
+    """Persist a test user and role without registering with Firebase."""
 
-    async def make(*, role: UserRole = UserRole.STUDENT, **overrides):
-        default_user = {
-            "first_name": "luci",
-            "last_name": "berm",
-            "username": "luci123",
-            "password": "string",
-            "email": "lberm@email.com",
-            "role": role,
-        }
-        user = await account_service.create_account(
-            UserCreate(**{**default_user, **overrides}),
-            role=role,
+    async def make(
+        *,
+        role: UserRole = UserRole.STUDENT,
+        first_name: str = "Test",
+        last_name: str = "User",
+        username: str | None = None,
+        email: str | None = None,
+    ) -> User:
+        suffix = uuid4().hex
+        role_record = db_session.exec(select(Role).where(Role.name == role)).one()
+
+        user = User(
+            first_name=first_name,
+            last_name=last_name,
+            username=username if username is not None else f"user-{suffix}",
+            email=email if email is not None else f"user-{suffix}@example.com",
+            roles=[role_record],
         )
-        created_users.append(user)
-
+        db_session.add(user)
+        db_session.commit()
         return user
 
-    yield make
-    for user in created_users:
-        await account_service.delete_account(user.id)
+    return make

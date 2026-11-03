@@ -6,7 +6,7 @@ from sqlmodel import Session, col, select
 
 from backend.accounts.models import User
 from backend.core import logger
-from backend.database import Repository
+from backend.adapters import Repository
 from backend.storage.models import File
 from backend.storage.repo.exceptions import (
     FileCreationError,

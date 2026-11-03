@@ -1,31 +1,8 @@
-from uuid import UUID
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from .notes.schema import CourseNoteDelete as CourseNoteDelete
 from .notes.schema import CourseNoteRead as CourseNoteRead
 from .notes.schema import CourseNoteUpdate as CourseNoteUpdate
-
-
-class CourseCreate(BaseModel):
-    name: str = Field(min_length=1)
-    discipline: str | None = None
-    description: str | None = None
-
-
-class CourseUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1)
-    discipline: str | None = None
-    description: str | None = None
-
-
-class CourseRead(BaseModel):
-    id: UUID
-    name: str
-    discipline: str | None = None
-    description: str | None = None
-    owner_id: UUID
-    storage_prefix: str | None = None
 
 
 class CourseDelete(BaseModel):

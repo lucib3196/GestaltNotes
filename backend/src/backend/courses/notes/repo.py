@@ -13,7 +13,7 @@ from backend.courses.exceptions import (
 from backend.courses.models import Course
 from backend.courses.notes.models import CourseNote
 from backend.courses.notes.schema import CourseNoteRead, CourseNoteUpdate
-from backend.database import Repository
+from backend.adapters import Repository
 
 
 class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):

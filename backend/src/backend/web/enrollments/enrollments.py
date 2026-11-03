@@ -6,8 +6,7 @@ from starlette import status
 
 from backend.accounts.models import User
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.models import Course, CourseEnrollment, CourseVectorStore
-from backend.courses.schema import CourseRead
+from backend.courses.models import Course, CourseEnrollment, CourseVectorStore, CourseRead
 from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep, StudentDep
 from backend.web.enrollments.dependencies import CourseEnrollmentServiceDep
 

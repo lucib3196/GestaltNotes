@@ -5,7 +5,8 @@ from starlette import status
 
 from backend.courses.exceptions import CourseServiceException
 from backend.courses.models import Course
-from backend.courses.schema import CourseCreate, CourseDelete, CourseRead, CourseUpdate
+from backend.courses.models import CourseCreate,  CourseRead, CourseUpdate
+from backend.courses.schema import CourseDelete
 from backend.web.accounts.dependencies import EducatorDep
 
 from .dependencies import CourseServiceDep

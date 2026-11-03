@@ -19,8 +19,30 @@ if TYPE_CHECKING:
     from backend.courses.vector_store.models import CourseVectorStore
 
 
-class CourseEnrollment(SQLModel, table=True):
+# --------------------------------------------------------------------
+# ------------------- Course Enrollments -----------------------------
+# --------------------------------------------------------------------
+class CourseEnrollmentBase(SQLModel):
+    student_id: UUID
+    course_id: UUID
+
+
+class CourseEnrollmentCreate(CourseEnrollmentBase):
+    pass
+
+
+class CourseEnrollmentRead(CourseEnrollmentBase):
+    enrolled_at: datetime
+    active: bool
+
+
+class CourseEnrollmentUpdate(CourseEnrollmentBase):
+    active: bool
+
+
+class CourseEnrollment(CourseEnrollmentBase, table=True):
     __tablename__ = "course_enrollment"  # type: ignore
+    # Ensures that a student can only be enrolled in a course once
     __table_args__ = (
         UniqueConstraint(
             "student_id", "course_id", name="uq_course_enrollment_student_id"
@@ -34,20 +56,37 @@ class CourseEnrollment(SQLModel, table=True):
     active: bool = True
 
 
-class Course(SQLModel, table=True):
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+# ------------------------------------
+# ------------ Course Models ---------
+# ------------------------------------
+class CourseBase(SQLModel):
     name: str
-    discipline: str | None
+    discipline: str | None = None
     description: str | None = None
 
+
+class CourseCreate(CourseBase):
+    pass
+
+
+class CourseUpdate(CourseBase):
+    pass
+
+
+class CourseRead(CourseBase):
+    id: UUID
+    owner_id: UUID
+
+
+class Course(CourseBase, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     owner_id: UUID = Field(
         sa_column=Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     )
-
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    # Class Attributes
+    # Attributes
     owner: "User" = Relationship(back_populates="owned_courses")
     students: list["User"] = Relationship(
         back_populates="enrolled_courses",
@@ -63,6 +102,9 @@ class Course(SQLModel, table=True):
         return f"courses/{self.id}"
 
 
+# -------------------------------------------------------------------
+# ---------------- Extra TBD-----------------------------------------
+# -------------------------------------------------------------------
 class CourseAccessCode(SQLModel, table=True):
     __tablename__ = "course_access_code"  # type: ignore
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)

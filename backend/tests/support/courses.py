@@ -3,7 +3,7 @@ from typing import Protocol
 from pytest import fixture
 
 from backend.accounts import User
-from backend.courses import Course, CourseCreate
+from backend.courses.models import Course, CourseCreate
 from backend.courses.notes.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
@@ -39,8 +39,8 @@ def course_service(
 
 
 @fixture
-def enrollment_service(course_service: CourseService, db_session):
-    return CourseEnrollmentService(course_service, db_session)
+def enrollment_service(db_session):
+    return CourseEnrollmentService(db_session)
 
 
 class MakeCourse(Protocol):
@@ -51,7 +51,7 @@ class MakeCourse(Protocol):
 def make_course(course_service: CourseService) -> MakeCourse:
     async def make_course(educator: User, **overrides):
         default_course = {"name": "Mechanics101"}
-        return await course_service.create_course(
+        return await course_service.create(
             CourseCreate(**{**default_course, **overrides}), educator
         )
 
