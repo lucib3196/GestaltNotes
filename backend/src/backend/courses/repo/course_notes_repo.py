@@ -83,8 +83,6 @@ class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):
             logger.error(message)
             raise CourseNoteRetrievalError(message) from e
 
-    async def list(self) -> Sequence[CourseNote]:
-        return list(self._session.exec(select(CourseNote)).all())
 
     async def list_by_course(self, course_id: UUID) -> list[CourseNote]:
         try:

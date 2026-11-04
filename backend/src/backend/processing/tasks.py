@@ -12,7 +12,7 @@ from lecture_processor.api import process_lecture
 from lecture_processor.graph.context import ExtractionContext
 
 from backend.core.logger import logger
-from backend.courses.notes.note_block_service import NoteBlockService
+from backend.courses.service.note_block_service import NoteBlockService
 from backend.courses.notes.processing_service import CourseNoteProcessingService
 from backend.courses.utils import parse_lecture_document
 from backend.courses.vector_store.course_vector_store_service import (
