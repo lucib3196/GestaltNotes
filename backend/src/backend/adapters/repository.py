@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from typing import Protocol, TypeVar
 from uuid import UUID
 
@@ -37,10 +36,4 @@ class Repository(Protocol[RecordT, UpdateT]):
         """Delete a record by id."""
         raise NotImplementedError(
             f"{type(self).__name__}.delete() must be implemented by the repository."
-        )
-
-    async def list(self) -> Sequence[RecordT]:
-        "List all records"
-        raise NotImplementedError(
-            f"{type(self).__name__}.list() must be implemented by the repository."
         )

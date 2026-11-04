@@ -255,7 +255,6 @@ class NoteBlockBase(SQLModel):
 class NoteBlockUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    expected_revision: int = Field(ge=0)
     title: str | None = None
     content: dict[str, Any] | None = None
 

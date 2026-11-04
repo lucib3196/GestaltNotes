@@ -1,135 +1,110 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import update
-from sqlmodel import Session, select
+from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
+from sqlmodel import Session
 
-from backend.courses.models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock
-
-
-class NoteBlockNotFoundError(LookupError):
-    pass
-
-
-class NoteBlockRevisionConflictError(ValueError):
-    pass
+from backend.courses.exceptions import (
+    NoteBlockCreationError,
+    NoteBlockDeletionError,
+    NoteBlockNotFoundError,
+    NoteBlockRetrievalError,
+    NoteBlockUpdateError,
+    NoteBlockValidationError,
+)
+from backend.courses.models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock, NoteBlockUpdate
+from backend.courses.repo import NoteBlockRepo
 
 
 class NoteBlockService:
     def __init__(self, session: Session) -> None:
         self._session = session
+        self._blocks = NoteBlockRepo(session)
 
-    def create(self, block: NoteBlock) -> NoteBlock:
-        return self.create_many([block])[0]
+    async def create(self, block: NoteBlock) -> NoteBlock:
+        return (await self.create_many([block]))[0]
 
-    def add(self, block: NoteBlock) -> NoteBlock:
-        """Compatibility with existing callers."""
-        return self.create(block)
-
-    def create_many(self, blocks: list[NoteBlock]) -> list[NoteBlock]:
-        # SQLModel table construction alone is not the validation boundary.
-        validated = []
-        for block in blocks:
-            candidate = NoteBlock.model_validate(block.model_dump())
-            candidate.content = self._validate_content(candidate)
-            self._validate_pages(candidate)
-            validated.append(candidate)
+    async def create_many(self, blocks: list[NoteBlock]) -> list[NoteBlock]:
+        if not blocks:
+            return []
 
         try:
-            self._session.add_all(validated)
+            validated = []
+            for block in blocks:
+                candidate = NoteBlock.model_validate(block.model_dump())
+                candidate.content = self._validate_content(candidate)
+                validated.append(candidate)
+
+            saved = []
+            for block in validated:
+                saved.append(await self._blocks.create(block))
+
             self._session.commit()
+            return saved
+        except SQLAlchemyError as exc:
+            self._session.rollback()
+            raise NoteBlockCreationError("Could not create note blocks") from exc
         except Exception:
             self._session.rollback()
             raise
 
-        for block in validated:
-            self._session.refresh(block)
-        return validated
+    async def get(self, block_id: UUID) -> NoteBlock:
+        try:
+            block = await self._blocks.get(block_id)
+        except SQLAlchemyError as exc:
+            raise NoteBlockRetrievalError(
+                f"Could not retrieve note block '{block_id}'"
+            ) from exc
 
-    def get(self, block_id: UUID) -> NoteBlock | None:
-        return self._session.get(NoteBlock, block_id)
-
-    def get_or_raise(self, block_id: UUID) -> NoteBlock:
-        block = self.get(block_id)
         if block is None:
             raise NoteBlockNotFoundError(f"Note block '{block_id}' not found")
+
         return block
 
-    def list_by_file(self, file_id: UUID) -> list[NoteBlock]:
-        statement = (
-            select(NoteBlock)
-            .where(NoteBlock.source_file_id == file_id)
-            .order_by(NoteBlock.position, NoteBlock.id)
-        )
-        return list(self._session.exec(statement).all())
-
-    def list_by_course(self, course_id: UUID) -> list[NoteBlock]:
-        statement = (
-            select(NoteBlock)
-            .where(NoteBlock.course_id == course_id)
-            .order_by(NoteBlock.position, NoteBlock.id)
-        )
-        return list(self._session.exec(statement).all())
-
-    def update_content(
+    async def update(
         self,
         block_id: UUID,
-        *,
-        content: dict[str, Any],
-        expected_revision: int,
+        update: NoteBlockUpdate,
     ) -> NoteBlock:
-        block = self.get_or_raise(block_id)
-        validated_content = self._validate_content(block, content)
-        return self._update_revision(
-            block_id, expected_revision, {"content": validated_content}
-        )
-
-    def update_title(
-        self,
-        block_id: UUID,
-        *,
-        title: str,
-        expected_revision: int,
-    ) -> NoteBlock:
-        title = title.strip()
-        if not title:
-            raise ValueError("Title must not be empty")
-        return self._update_revision(block_id, expected_revision, {"title": title})
-
-    def reorder(self, file_id: UUID, block_ids: list[UUID]) -> None:
-        if len(block_ids) != len(set(block_ids)):
-            raise ValueError("Block IDs must not contain duplicates")
-
         try:
-            statement = (
-                select(NoteBlock)
-                .where(NoteBlock.source_file_id == file_id)
-                .with_for_update()
-            )
-            blocks = self._session.exec(statement).all()
-            by_id = {block.id: block for block in blocks}
-            if set(block_ids) != set(by_id):
-                raise ValueError(
-                    "Provide every block belonging to the file exactly once"
-                )
+            block = await self.get(block_id)
+            changes = update.model_dump(exclude_unset=True)
 
-            now = datetime.utcnow()
-            for position, block_id in enumerate(block_ids):
-                block = by_id[block_id]
-                block.position = position
-                block.updated_at = now
-                self._session.add(block)
+            if not changes:
+                raise NoteBlockValidationError("Provide at least one field to update")
+
+            if "content" in changes:
+                changes["content"] = self._validate_content(block, changes["content"])
+
+            validated_update = NoteBlockUpdate.model_validate(changes)
+
+            block.revision += 1
+            block.updated_at = datetime.now(UTC).replace(tzinfo=None)
+
+            saved = await self._blocks.update(block, validated_update)
             self._session.commit()
+            return saved
+        except SQLAlchemyError as exc:
+            self._session.rollback()
+            raise NoteBlockUpdateError(
+                f"Could not update note block '{block_id}'"
+            ) from exc
         except Exception:
             self._session.rollback()
             raise
 
-    def delete(self, block_id: UUID) -> None:
+    async def delete(self, block_id: UUID) -> None:
         try:
-            block = self.get_or_raise(block_id)
-            self._session.delete(block)
+            await self.get(block_id)
+            await self._blocks.delete(block_id)
             self._session.commit()
+        except SQLAlchemyError as exc:
+            self._session.rollback()
+            raise NoteBlockDeletionError(
+                f"Could not delete note block '{block_id}'"
+            ) from exc
         except Exception:
             self._session.rollback()
             raise
@@ -140,56 +115,22 @@ class NoteBlockService:
         content: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         if block.schema_version != 1:
-            raise ValueError(f"Unsupported schema version: {block.schema_version}")
+            raise NoteBlockValidationError(
+                f"Unsupported schema version: {block.schema_version}"
+            )
+
+        if not block.kind:
+            raise NoteBlockValidationError("Block kind is required")
+
         model = NOTE_BLOCK_CONTENT_MODELS.get(block.kind)
         if model is None:
-            raise ValueError(f"Unsupported block kind: {block.kind}")
+            raise NoteBlockValidationError(f"Unsupported block kind: {block.kind}")
+
         payload = block.content if content is None else content
-        return model.model_validate(payload).model_dump(mode="json")
 
-    @staticmethod
-    def _validate_pages(block: NoteBlock) -> None:
-        if (
-            block.page_start is not None
-            and block.page_end is not None
-            and block.page_end < block.page_start
-        ):
-            raise ValueError("page_end must be >= page_start")
-
-    def _update_revision(
-        self,
-        block_id: UUID,
-        expected_revision: int,
-        values: dict[str, Any],
-    ) -> NoteBlock:
-        if expected_revision < 0:
-            raise ValueError("Expected revision must be nonnegative")
         try:
-            statement = (
-                update(NoteBlock)
-                .where(
-                    NoteBlock.id == block_id,
-                    NoteBlock.revision == expected_revision,
-                )
-                .values(
-                    **values,
-                    revision=NoteBlock.revision + 1,
-                    updated_at=datetime.utcnow(),
-                )
-                .returning(NoteBlock)
-            )
-            block = self._session.execute(
-                statement,
-                execution_options={"populate_existing": True},
-            ).scalar_one_or_none()
-            if block is None:
-                self.get_or_raise(block_id)
-                raise NoteBlockRevisionConflictError(
-                    "The block changed; reload it before saving"
-                )
-            self._session.commit()
-        except Exception:
-            self._session.rollback()
-            raise
-        self._session.refresh(block)
-        return block
+            return model.model_validate(payload).model_dump(mode="json")
+        except ValidationError as exc:
+            raise NoteBlockValidationError(
+                f"Invalid content for block kind '{block.kind}': {exc}"
+            ) from exc

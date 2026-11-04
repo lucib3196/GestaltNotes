@@ -6,17 +6,17 @@ Create Date: 2026-11-04 10:01:03.214523
 
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
+
+import sqlalchemy as sa
 
 from alembic import op
-import sqlalchemy as sa
-import sqlmodel
 
 # revision identifiers, used by Alembic.
 revision: str = "47a63ff3517c"
-down_revision: Union[str, Sequence[str], None] = "8a65c9e67cb2"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "8a65c9e67cb2"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -36,11 +36,13 @@ def upgrade() -> None:
             AND cn.file_id = nb.source_file_id
     """)
     connection = op.get_bind()
-    missing = connection.execute(sa.text("""
+    missing = connection.execute(
+        sa.text("""
             SELECT COUNT(*)
             FROM note_block
             WHERE note_block.course_note_id is NULL
-        """)).scalar_one()
+        """)
+    ).scalar_one()
 
     if missing:
         raise RuntimeError(
@@ -129,12 +131,14 @@ def downgrade() -> None:
 
     connection = op.get_bind()
 
-    missing = connection.execute(sa.text("""
+    missing = connection.execute(
+        sa.text("""
             SELECT COUNT(*)
             FROM note_block
             WHERE course_id IS NULL
             OR source_file_id IS NULL
-        """)).scalar_one()
+        """)
+    ).scalar_one()
 
     if missing:
         raise RuntimeError(

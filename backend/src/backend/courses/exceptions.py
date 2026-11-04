@@ -84,3 +84,27 @@ class CourseEnrollmentAlreadyExistsError(CourseEnrollmentServiceError):
 
 class CourseEnrollmentPermissionError(CourseEnrollmentServiceError, PermissionError):
     """Raised when a user cannot perform an enrollment action."""
+
+
+class NoteBlockValidationError(ValueError):
+    """Block content is invalid or unsupported."""
+
+
+class NoteBlockCreationError(RuntimeError):
+    """Persisting note blocks failed."""
+
+
+class NoteBlockNotFoundError(LookupError):
+    """The requested block does not exist."""
+
+
+class NoteBlockRetrievalError(RuntimeError):
+    """Loading a note block failed."""
+
+
+class NoteBlockUpdateError(RuntimeError):
+    """Updating a note block failed."""
+
+
+class NoteBlockDeletionError(RuntimeError):
+    """Deleting a note block failed."""
