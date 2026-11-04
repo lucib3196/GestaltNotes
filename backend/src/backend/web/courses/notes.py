@@ -31,6 +31,7 @@ router = APIRouter(prefix="/courses/notes", tags=["courses", "notes"])
 async def list_course_notes(
     course_id: UUID,
     service: CourseNoteServiceDep,
+    _course: ReadableCourseDep,
 ) -> list[CourseNoteRead]:
     try:
         return await service.list_notes_with_urls(course_id)
@@ -119,7 +120,7 @@ async def update_course_note(
 ) -> CourseNoteRead:
     try:
         await service.assert_permission(educator, note_id)
-        note = await service.update_note_properties(note_id, update)
+        note = await service.update_note_properties(note_id, update, user=educator)
         return service.to_note_read(note)
     except CourseServiceException as e:
         raise course_http_exception(e) from e

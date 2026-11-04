@@ -177,7 +177,7 @@ class CourseNote(CourseNoteBase, table=True):
         UniqueConstraint("course_id", "file_id", name="uq_course_note_course_file"),
     )
 
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
 
     course_id: UUID = Field(
         sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)

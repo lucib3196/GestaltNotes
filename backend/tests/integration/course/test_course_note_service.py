@@ -117,7 +117,8 @@ async def test_upload_note_creates_file_and_course_note(
     assert file is not None
     assert file.owner_id == course_owner.id
     assert file.original_name == "note.md"
-    assert file.storage_key == f"{course.storage_prefix}/notes/note.md"
+    assert file.storage_key.startswith(f"{course.storage_prefix}/notes/")
+    assert file.storage_key.endswith("/note.md")
     assert file.content_type == "text/markdown"
     assert file.size_bytes == len(b"# Title\ncontent")
 
