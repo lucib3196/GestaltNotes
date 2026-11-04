@@ -73,7 +73,12 @@ def add_run(session, note_id, status):
 
 @pytest.mark.parametrize(
     "status",
-    [None, ProcessingStatus.FAILED, ProcessingStatus.PARTIAL, ProcessingStatus.RUNNING],
+    [
+        ProcessingStatus.QUEUED,
+        ProcessingStatus.FAILED,
+        ProcessingStatus.PARTIAL,
+        ProcessingStatus.RUNNING,
+    ],
 )
 @pytest.mark.asyncio
 async def test_non_successful_run_allows_processing(records, status):

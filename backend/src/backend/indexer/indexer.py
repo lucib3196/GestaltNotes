@@ -8,6 +8,7 @@ from langchain_core.vectorstores import VectorStore
 from pydantic import BaseModel
 
 from backend.adapters import Repository
+from backend.core.logger import logger
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 UpdateT = TypeVar("UpdateT", bound=BaseModel)
@@ -41,29 +42,48 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         *,
         force_recreate: bool = False,
     ) -> None:
-        block = await self._repo.get(resource_id)
-        if block is None:
-            raise ValueError(f"Resource '{resource_id}' not found")
+        """Load a resource, build its document, and write it to the vector store.
 
-        document = await self._builder.to_document(block)
-        document_id = document.id
-        if not document_id:
-            raise ValueError("Expected document to have an ID")
+        Skip unchanged text and metadata unless force_recreate is True.
+        Does not modify the source database record.
+        """
+        try:
+            block = await self._repo.get(resource_id)
+            if block is None:
+                raise ValueError(f"Resource '{resource_id}' not found")
 
-        existing = await self._store.aget_by_ids([document_id])
+            document = await self._builder.to_document(block)
+            document_id = document.id
+            if not document_id:
+                raise ValueError("Expected document to have an ID")
 
-        if not force_recreate and existing:
-            current = existing[0]
-            if (
-                current.page_content == document.page_content
-                and current.metadata == document.metadata
-            ):
-                return
+            existing = await self._store.aget_by_ids([document_id])
 
-        await self._store.aadd_documents(
-            [document],
-            ids=[document_id],
-        )
+            if not force_recreate and existing:
+                current = existing[0]
+                if (
+                    current.page_content == document.page_content
+                    and current.metadata == document.metadata
+                ):
+                    logger.debug(
+                        "Indexing skipped: resource_id=%s reason=unchanged", resource_id
+                    )
+                    return
+
+            await self._store.aadd_documents(
+                [document],
+                ids=[document_id],
+            )
+
+            logger.info(
+                "Document indexed: resource_id=%s document_id=%s forced=%s",
+                resource_id,
+                document_id,
+                force_recreate,
+            )
+        except Exception:
+            logger.exception("Indexing failed: resource_id=%s", resource_id)
+            raise
 
     async def index_many(
         self,
@@ -71,6 +91,10 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         *,
         force_recreate: bool = False,
     ) -> None:
+        """Index unique resource IDs sequentially, preserving input order.
+
+        Stop at the first failure; earlier vector writes remain applied.
+        """
         for resource_id in dict.fromkeys(resource_ids):
             await self.index(
                 resource_id,
@@ -78,7 +102,16 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
             )
 
     async def delete(self, resource_id: UUID) -> None:
-        """Remove the resource's indexed document, whose ID matches its UUID."""
-        result = await self._store.adelete(ids=[str(resource_id)])
-        if result is False:
-            raise RuntimeError(f"Could not delete indexed resource '{resource_id}'")
+        """Delete the vector document whose ID matches the resource UUID.
+
+        Does not delete the source database record.
+        """
+        try:
+            result = await self._store.adelete(ids=[str(resource_id)])
+            if result is False:
+                raise RuntimeError(f"Could not delete indexed resource '{resource_id}'")
+        except Exception:
+            logger.exception("Index deletion failed: resource_id=%s", resource_id)
+            raise
+
+        logger.info("Indexed document removed: resource_id=%s", resource_id)
