@@ -35,13 +35,11 @@ class ProcessingRun(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     celery_task_id: UUID
     task_type: str
-    status: ProcessingStatus | None = Field(
+    status: ProcessingStatus = Field(
+        default=ProcessingStatus.QUEUED,
         sa_column=Column(
-            SAEnum(
-                ProcessingStatus,
-                name="processing_status",
-            ),
-            nullable=True,
+            SAEnum(ProcessingStatus, name="processing_status"),
+            nullable=False,
         ),
     )
     stage: ProcessingStage = Field(

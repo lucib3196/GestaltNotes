@@ -206,15 +206,8 @@ class CourseNote(CourseNoteBase, table=True):
 
 
 class NoteBlockBase(SQLModel):
-    course_id: UUID | None = Field(
-        default=None, description="The course in which this block lives in"
-    )
-    source_file_id: UUID | None = Field(
-        default=None,
-        description=(
-            "Source file from which this block was extracted. Deleting the "
-            "source file also deletes its blocks."
-        ),
+    course_note_id: UUID | None = Field(
+        default=None, description="The note it belongs to "
     )
     title: str = Field(description="Display title for this block.")
     kind: str | None = Field(
@@ -259,6 +252,28 @@ class NoteBlockBase(SQLModel):
     )
 
 
+class NoteBlockUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    expected_revision: int = Field(ge=0)
+    title: str | None = None
+    content: dict[str, Any] | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str | None) -> str:
+        if value is None or not value.strip():
+            raise ValueError("Title must not be null or empty")
+        return value.strip()
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: dict[str, Any] | None) -> dict[str, Any]:
+        if value is None:
+            raise ValueError("Content must not be null")
+        return value
+
+
 class NoteBlock(NoteBlockBase, table=True):
     __tablename__ = "note_block"  # type: ignore
 
@@ -268,34 +283,19 @@ class NoteBlock(NoteBlockBase, table=True):
         description="Unique identifier for this editable note block.",
     )
 
-    course_id: UUID | None = Field(
+    course_note_id: UUID | None = Field(
         default=None,
         sa_column=Column(
-            ForeignKey("course.id", ondelete="CASCADE"),
-            nullable=True,
+            ForeignKey("course_note.id", ondelete="CASCADE"),
+            nullable=False,
             index=True,
         ),
-        description="The course in which this block lives in",
+        description="The course note in which this block lives in",
     )
 
-    source_file_id: UUID | None = Field(
-        default=None,
-        sa_column=Column(
-            ForeignKey("file.id", ondelete="CASCADE"),
-            nullable=True,
-            index=True,
-        ),
-        description=(
-            "Source file from which this block was extracted. "
-            "Deleting the source file also deletes its blocks."
-        ),
-    )
-
-    course: Optional["Course"] = Relationship(
+    course_note: Optional["CourseNote"] = Relationship(
         sa_relationship_kwargs={"lazy": "selectin"}
     )
-
-    file: Optional["File"] = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
     content: dict[str, Any] = Field(
         default_factory=dict,
