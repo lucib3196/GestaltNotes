@@ -5,6 +5,11 @@ from lecture_processor.extracted_question.model import Option
 
 
 class ConceptualQuestion(BaseModel):
+    title: str = Field(
+        description=(
+            "Concise, source-grounded title identifying the conceptual question."
+        )
+    )
     question: str = Field(
         description="Conceptual study question grounded in the lecture content."
     )
