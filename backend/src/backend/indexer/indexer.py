@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import Generic, TypeVar
 from uuid import UUID
-from collections.abc import Sequence
-from typing import TypeVar
-from pydantic import BaseModel
+
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
+from pydantic import BaseModel
 
 from backend.adapters import Repository
 

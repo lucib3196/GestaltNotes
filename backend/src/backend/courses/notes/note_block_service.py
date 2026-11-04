@@ -16,6 +16,7 @@ from backend.courses.models import NoteBlock, NoteBlockUpdate
 from backend.courses.repo import NoteBlockRepo
 from backend.courses.utils import validate_note_block
 
+
 class NoteBlockService:
     def __init__(self, session: Session) -> None:
         self._session = session
