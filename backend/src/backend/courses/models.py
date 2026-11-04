@@ -7,7 +7,7 @@ from lecture_processor.conceptual_question import ConceptualQuestion
 from lecture_processor.extract_derivations.model import Derivation
 from lecture_processor.extracted_question import ExtractedQuestion
 from lecture_processor.lecture_analysis import LectureAnalysis
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Index, UniqueConstraint
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import JSONB
@@ -340,6 +340,17 @@ class CourseNoteDelete(DeleteResponseBase):
 class CourseNoteUpdate(BaseModel):
     title: str | None = None
     resource_type: CourseContentType | None = None
+
+    @field_validator("title", "resource_type")
+    @classmethod
+    def reject_null(
+        cls,
+        value: str | CourseContentType | None,
+    ) -> str | CourseContentType:
+        """Allow omitted fields but reject explicit null updates."""
+        if value is None:
+            raise ValueError("Note title and resource type cannot be null")
+        return value
 
 
 class NoteBlockRead(NoteBlockBase):

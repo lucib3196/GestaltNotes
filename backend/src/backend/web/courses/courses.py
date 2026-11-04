@@ -13,7 +13,7 @@ from backend.courses.models import (
 )
 from backend.web.accounts.dependencies import EducatorDep
 
-from .dependencies import CourseServiceDep
+from .dependencies import CourseServiceDep, ReadableCourseDep
 from .http import course_http_exception
 
 router = APIRouter(prefix="/courses", tags=["courses"])
@@ -43,14 +43,8 @@ async def list_owned_courses(
 
 
 @router.get("/{course_id}", response_model=CourseRead)
-async def get_course(
-    course_service: CourseServiceDep,
-    course_id: UUID,
-) -> Course:
-    try:
-        return await course_service.get(course_id)
-    except CourseServiceException as e:
-        raise course_http_exception(e) from e
+async def get_course(course: ReadableCourseDep) -> Course:
+    return course
 
 
 @router.patch("/{course_id}", response_model=CourseRead)

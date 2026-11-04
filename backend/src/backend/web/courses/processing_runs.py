@@ -17,7 +17,11 @@ from backend.processing.schema import (
 )
 from backend.processing.tasks import process_lecture_file
 
-from .dependencies import CourseNoteProcessingServiceDep, ReadableCourseNoteDep
+from .dependencies import (
+    CourseNoteProcessingServiceDep,
+    OwnedCourseNoteDep,
+    ReadableCourseNoteDep,
+)
 
 router = APIRouter(
     prefix="/courses/notes/{course_id}/{note_id}",
@@ -80,7 +84,7 @@ async def start_lecture_processing(
     course_id: UUID,
     note_id: UUID,
     service: CourseNoteProcessingServiceDep,
-    _note: ReadableCourseNoteDep,
+    _note: OwnedCourseNoteDep,
 ) -> dict[str, Any]:
     try:
         await service.assert_can_process(note_id)

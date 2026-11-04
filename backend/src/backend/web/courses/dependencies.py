@@ -1,19 +1,21 @@
 from typing import Annotated
 from uuid import UUID
 
-from backend.courses.service.access_code_service import CourseAccessCodeService
 from fastapi import Depends, HTTPException
 from starlette import status
 
 from backend.core import logger
+from backend.courses.exceptions import CourseServiceException
 from backend.courses.models import Course, CourseEnrollment, CourseNote
-from backend.courses.notes.course_note_service import CourseNoteService
 from backend.courses.notes.note_block_service import NoteBlockService
 from backend.courses.notes.processing_service import CourseNoteProcessingService
-from backend.courses.notes.repo import CourseNoteRepository
+from backend.courses.repo import CourseNoteRepository, CourseRepo
+from backend.courses.service.course_access_service import CourseAccess
+from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.database import SessionDep
-from backend.web.accounts.dependencies import CurrentUserDep
+from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep
+from backend.web.courses.http import course_http_exception
 from backend.web.storage.dependency import FileServiceDep
 
 
@@ -81,17 +83,6 @@ def get_course_service(session: SessionDep) -> CourseService:
         ) from e
 
 
-def get_access_code_service(session: SessionDep) -> CourseAccessCodeService:
-    try:
-        return CourseAccessCodeService(session)
-    except Exception as e:
-        logger.exception("Failed to initialize CourseAccessCodeService")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to initialize course access code service",
-        ) from e
-
-
 def get_course_note_processing_service(
     session: SessionDep,
 ) -> CourseNoteProcessingService:
@@ -101,12 +92,39 @@ def get_course_note_processing_service(
 CourseNoteServiceDep = Annotated[CourseNoteService, Depends(get_course_note_service)]
 CourseServiceDep = Annotated[CourseService, Depends(get_course_service)]
 
-CourseAccessCodeServiceDep = Annotated[
-    CourseAccessCodeService, Depends(get_access_code_service)
-]
-
-
 CourseNoteProcessingServiceDep = Annotated[
     CourseNoteProcessingService,
     Depends(get_course_note_processing_service),
 ]
+
+
+async def get_owned_course(
+    course_id: UUID,
+    session: SessionDep,
+    user: EducatorDep,
+) -> Course:
+    """Require an educator who owns the requested course."""
+    try:
+        return await CourseAccess(CourseRepo(session)).require_owner(course_id, user)
+    except CourseServiceException as exc:
+        raise course_http_exception(exc) from exc
+
+
+OwnedCourseDep = Annotated[Course, Depends(get_owned_course)]
+
+
+async def get_owned_course_note(
+    note_id: UUID,
+    course: OwnedCourseDep,
+    session: SessionDep,
+) -> CourseNote:
+    """Require ownership and verify the note belongs to the course."""
+    note = await CourseNoteRepository(session).get_by_course_and_note(
+        course.id, note_id
+    )
+    if note is None:
+        raise HTTPException(status_code=404, detail="Course note not found")
+    return note
+
+
+OwnedCourseNoteDep = Annotated[CourseNote, Depends(get_owned_course_note)]

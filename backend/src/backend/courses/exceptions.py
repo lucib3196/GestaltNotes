@@ -58,38 +58,6 @@ class CourseNoteNotFoundError(CourseNoteServiceError, LookupError):
         self.file_id = file_id
 
 
-class CourseAccessCodeError(CourseServiceException):
-    """Base exception for course access code operations."""
-
-
-class CourseAccessCodeCreationError(CourseAccessCodeError):
-    """Raised when access code creation fails."""
-
-
-class CourseAccessCodeRetrievalError(CourseAccessCodeError):
-    """Raised when access code retrieval fails."""
-
-
-class CourseAccessCodeNotFoundError(CourseAccessCodeError, LookupError):
-    """Raised when an access code cannot be found."""
-
-
-class CourseAccessCodeInvalidError(CourseAccessCodeError, PermissionError):
-    """Raised when an access code is invalid."""
-
-
-class CourseAccessCodeExpiredError(CourseAccessCodeError, PermissionError):
-    """Raised when an access code is expired."""
-
-
-class CourseAccessCodeDisabledError(CourseAccessCodeError, PermissionError):
-    """Raised when an access code is disabled."""
-
-
-class CourseEnrollmentError(CourseAccessCodeError):
-    """Raised when redeeming an access code cannot enroll a student."""
-
-
 class CourseEnrollmentServiceError(CourseServiceException):
     """Base exception for course enrollment operations."""
 

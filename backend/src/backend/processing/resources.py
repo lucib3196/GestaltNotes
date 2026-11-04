@@ -6,8 +6,8 @@ from object_store import BlobStorage, FirebaseBlobStorage
 from backend.core import get_settings
 from backend.core.exceptions import MissingConfigError
 from backend.core.firebase import initialize_firebase_app
-from backend.courses.notes.course_note_service import CourseNoteService
 from backend.courses.notes.document_builder import NoteBlockDocumentBuilder
+from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.vector_store.course_vector_store_service import (
     CourseVectorStoreService,
 )

@@ -2,7 +2,7 @@ from io import BytesIO
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import File, Form, UploadFile
+from fastapi import File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.routing import APIRouter
 from starlette import status
@@ -19,6 +19,7 @@ from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep
 from backend.web.courses.dependencies import (
     CourseNoteProcessingServiceDep,
     CourseNoteServiceDep,
+    OwnedCourseNoteDep,
     ReadableCourseDep,
     ReadableCourseNoteDep,
 )
@@ -54,13 +55,10 @@ async def list_course_note_overview(
 @router.get("/{course_id}/{note_id}/overview", response_model=NoteOverview)
 async def get_note_overview(
     note_id: UUID,
-    educator: CurrentUserDep,
-    service: CourseNoteServiceDep,
     processing: CourseNoteProcessingServiceDep,
     _note: ReadableCourseNoteDep,
 ) -> NoteOverview:
     try:
-        await service.assert_permission(educator, note_id)
         return await processing.get_note_overview(note_id)
     except CourseServiceException as e:
         raise course_http_exception(e) from e
@@ -106,6 +104,8 @@ async def upload_course_note(
             resource_type=resource_type,
         )
         return service.to_note_read(note)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
@@ -115,13 +115,15 @@ async def update_course_note(
     note_id: UUID,
     educator: EducatorDep,
     service: CourseNoteServiceDep,
-    _note: ReadableCourseNoteDep,
+    _note: OwnedCourseNoteDep,
     update: CourseNoteUpdate,
 ) -> CourseNoteRead:
     try:
         await service.assert_permission(educator, note_id)
         note = await service.update_note_properties(note_id, update, user=educator)
         return service.to_note_read(note)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
@@ -131,7 +133,7 @@ async def remove_course_note(
     note_id: UUID,
     educator: EducatorDep,
     service: CourseNoteServiceDep,
-    _note: ReadableCourseNoteDep,
+    _note: OwnedCourseNoteDep,
 ) -> CourseNoteDelete:
     try:
         await service.remove_note(note_id, educator)
