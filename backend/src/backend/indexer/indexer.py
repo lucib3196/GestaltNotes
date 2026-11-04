@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import Generic, TypeVar
+from typing import TypeVar
 from uuid import UUID
 
 from langchain_core.documents import Document
@@ -13,7 +13,7 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 UpdateT = TypeVar("UpdateT", bound=BaseModel)
 
 
-class DocumentBuilder(ABC, Generic[ModelT]):
+class DocumentBuilder[ModelT: BaseModel](ABC):
     async def build(self, data: Sequence[ModelT]) -> list[Document]:
         """Convert each input into a document."""
         return [await self.to_document(item) for item in data]
@@ -24,13 +24,13 @@ class DocumentBuilder(ABC, Generic[ModelT]):
         ...
 
 
-class IndexingService(Generic[ModelT, UpdateT]):
+class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
     def __init__(
         self,
         repo: Repository[ModelT, UpdateT],
         builder: DocumentBuilder[ModelT],
         vector_store: VectorStore,
-    ):
+    ) -> None:
         self._repo = repo
         self._builder = builder
         self._store = vector_store
@@ -76,3 +76,9 @@ class IndexingService(Generic[ModelT, UpdateT]):
                 resource_id,
                 force_recreate=force_recreate,
             )
+
+    async def delete(self, resource_id: UUID) -> None:
+        """Remove the resource's indexed document, whose ID matches its UUID."""
+        result = await self._store.adelete(ids=[str(resource_id)])
+        if result is False:
+            raise RuntimeError(f"Could not delete indexed resource '{resource_id}'")

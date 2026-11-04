@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
+from backend.courses.exceptions import NoteBlockNotFoundError
 from backend.courses.models import NoteBlock, NoteBlockRead
 from backend.web.courses.dependencies import NoteBlockServiceDep, ReadableCourseDep
 
@@ -18,9 +19,14 @@ async def list_note_blocks(
     _course: ReadableCourseDep,
     source_file_id: UUID | None = None,
 ) -> list[NoteBlock]:
-    blocks = service.list_by_course(course_id)
+    blocks = await service.list_by_course(course_id)
     if source_file_id is not None:
-        blocks = [block for block in blocks if block.source_file_id == source_file_id]
+        blocks = [
+            block
+            for block in blocks
+            if block.course_note is not None
+            and block.course_note.file_id == source_file_id
+        ]
     return blocks
 
 
@@ -31,7 +37,10 @@ async def get_note_block(
     service: NoteBlockServiceDep,
     _course: ReadableCourseDep,
 ) -> NoteBlock:
-    block = service.get(block_id)
-    if block is None or block.course_id != course_id:
+    try:
+        block = await service.get(block_id)
+    except NoteBlockNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Note block not found") from exc
+    if block.course_note is None or block.course_note.course_id != course_id:
         raise HTTPException(status_code=404, detail="Note block not found")
     return block

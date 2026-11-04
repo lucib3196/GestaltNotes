@@ -19,8 +19,8 @@ from backend.web.courses.http import course_http_exception
 from backend.web.storage.dependency import FileServiceDep
 
 
-def get_note_block_service(session: SessionDep) -> NoteBlockService:
-    return NoteBlockService(session)
+def get_note_block_service(course_id: UUID, session: SessionDep) -> NoteBlockService:
+    return NoteBlockService.from_dependencies(session, course_id)
 
 
 def get_readable_course(

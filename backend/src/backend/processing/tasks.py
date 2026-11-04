@@ -12,16 +12,16 @@ from lecture_processor.api import process_lecture
 from lecture_processor.graph.context import ExtractionContext
 
 from backend.core.logger import logger
-from backend.courses.models import VectorStoreStatus
 from backend.courses.notes.note_block_service import NoteBlockService
-from backend.courses.notes.parser import parse_lecture_document
 from backend.courses.notes.processing_service import CourseNoteProcessingService
+from backend.courses.utils import parse_lecture_document
+from backend.courses.vector_store.course_vector_store_service import (
+    CourseVectorStoreService,
+)
 from backend.database.config import open_session
 from backend.processing.celery_app import app
 from backend.processing.resources import (
-    block_builder,
     course_note_scope,
-    course_vectorstore_scope,
 )
 
 from .models import (
@@ -252,8 +252,6 @@ def parse_and_save_note_blocks(self: Task, data: LectureProcessingState) -> dict
         data.note_id,
     )
     try:
-        course_id = data.course_id
-        file_id = data.file_id
         with processing_update(
             data.run_id,
             task_id=UUID(self.request.id),
@@ -264,11 +262,23 @@ def parse_and_save_note_blocks(self: Task, data: LectureProcessingState) -> dict
                     "Extraction result is required before parsing note blocks"
                 )
             note_blocks = parse_lecture_document(
-                data.extraction_result, source_file_id=file_id, course_id=course_id
+                data.extraction_result, course_note_id=data.note_id
             )
             with open_session() as session:
-                note_block_service = NoteBlockService(session)
-                saved = note_block_service.create_many(note_blocks)
+                stores = CourseVectorStoreService(session)
+                if stores.get_configuration(data.course_id) is None:
+                    stores.configure(
+                        data.course_id,
+                        collection_name=f"course_{data.course_id.hex}",
+                    )
+
+                async def save_and_index() -> list:
+                    service = NoteBlockService.from_dependencies(
+                        session, data.course_id
+                    )
+                    return await service.create_many(note_blocks)
+
+                saved = asyncio.run(save_and_index())
                 logger.info(
                     "Note blocks saved: note_id=%s count=%d", data.note_id, len(saved)
                 )
@@ -313,53 +323,29 @@ def embedd_and_save(self: Task, data: LectureProcessingState) -> dict:
     )
     try:
         course_id = data.course_id
-        note_id = data.note_id
         with processing_update(
             data.run_id,
             task_id=UUID(self.request.id),
             stage=ProcessingStage.BUILDING_DOCUMENTS,
         ):
-            note_blocks = data.note_blocks
-            with block_builder() as builder:
-                documents = asyncio.run(builder.build(note_blocks))
-                logger.info(
-                    "Documents built: note_id=%s count=%d", note_id, len(documents)
-                )
-                if not documents:
-                    logger.warning("No documents generated: note_id=%s", note_id)
+            block_ids = [block.id for block in data.note_blocks]
         with processing_update(
             data.run_id,
             task_id=UUID(self.request.id),
             stage=ProcessingStage.INDEXING,
             final_stage=True,
         ):
-            with course_vectorstore_scope() as stores:
-                config = stores.get_configuration(course_id)
-                if config is None:
-                    config = stores.configure(
-                        course_id,
-                        collection_name=f"course_{course_id.hex}",
-                    )
-                if config.status != VectorStoreStatus.READY:
-                    raise RuntimeError(
-                        f"Vector-store configuration is not ready "
-                        f"for course '{course_id}': {config.status}"
-                    )
-                logger.debug(
-                    "Vector configuration: run_id=%s collection=%s namespace=%s",
-                    data.run_id,
-                    config.collection_name,
-                    config.namespace_key,
-                )
-                vector_store = stores.get_vectorstore(course_id)
-            vector_ids = []
-            if documents:
-                vector_ids = vector_store.add_documents(documents)
-                logger.info(
-                    "Documents indexed: run_id=%s count=%d",
-                    data.run_id,
-                    len(vector_ids),
-                )
+            # Reuse the indexer: unchanged documents are skipped, including
+            # those already indexed by create_many in the preceding task.
+            with open_session() as session:
+
+                async def index_current_blocks() -> None:
+                    service = NoteBlockService.from_dependencies(session, course_id)
+                    for block_id in block_ids:
+                        await service.reindex(block_id)
+
+                asyncio.run(index_current_blocks())
+            vector_ids = [str(block_id) for block_id in block_ids]
             updated = LectureProcessingState.model_validate(
                 {**data.model_dump(), "vector_ids": vector_ids}
             )

@@ -98,7 +98,9 @@ class CourseVectorStoreService:
         self._session.refresh(record)
         return record
 
-    def get_vectorstore(self, course_id: UUID) -> VectorStore:
+    def get_vectorstore(
+        self, course_id: UUID, *, async_mode: bool = False
+    ) -> VectorStore:
         config = self.get_configuration(course_id)
         if config is None:
             raise LookupError(
@@ -108,9 +110,11 @@ class CourseVectorStoreService:
         if config.status != VectorStoreStatus.READY:
             raise ValueError(f"Vector store for course '{course_id}' is not ready")
 
-        return self._create_vector_store(config)
+        return self._create_vector_store(config, async_mode=async_mode)
 
-    def _create_vector_store(self, record: CourseVectorStore) -> VectorStore:
+    def _create_vector_store(
+        self, record: CourseVectorStore, *, async_mode: bool = False
+    ) -> VectorStore:
 
         settings = get_settings()
         if not settings.GOOGLE_API_KEY or not settings.GOOGLE_API_KEY.strip():
@@ -161,6 +165,7 @@ class CourseVectorStoreService:
                 collection_name=record.collection_name,
                 connection=connection_url.render_as_string(hide_password=False),
                 use_jsonb=True,
+                async_mode=async_mode,
             )
         else:
             vector_store = AstraDBVectorStore(

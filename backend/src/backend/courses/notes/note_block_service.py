@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import Self
 from uuid import UUID
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,13 +15,35 @@ from backend.courses.exceptions import (
 )
 from backend.courses.models import NoteBlock, NoteBlockUpdate
 from backend.courses.repo import NoteBlockRepo
+from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.courses.utils import validate_note_block
+from backend.courses.vector_store.course_vector_store_service import (
+    CourseVectorStoreService,
+)
+from backend.indexer.indexer import IndexingService
 
 
 class NoteBlockService:
-    def __init__(self, session: Session) -> None:
+    def __init__(
+        self,
+        session: Session,
+        blocks: NoteBlockRepo,
+        indexer: IndexingService[NoteBlock, NoteBlockUpdate],
+    ) -> None:
         self._session = session
-        self._blocks = NoteBlockRepo(session)
+        self._blocks = blocks
+        self._indexer = indexer
+
+    @classmethod
+    def from_dependencies(cls, session: Session, course_id: UUID) -> Self:
+        blocks = NoteBlockRepo(session)
+        stores = CourseVectorStoreService(session)
+        indexer = IndexingService[NoteBlock, NoteBlockUpdate](
+            repo=blocks,
+            builder=NoteBlockDocumentBuilder(),
+            vector_store=stores.get_vectorstore(course_id, async_mode=True),
+        )
+        return cls(session, blocks, indexer)
 
     async def create(self, block: NoteBlock) -> NoteBlock:
         return (await self.create_many([block]))[0]
@@ -41,13 +64,15 @@ class NoteBlockService:
                 saved.append(await self._blocks.create(block))
 
             self._session.commit()
-            return saved
         except SQLAlchemyError as exc:
             self._session.rollback()
             raise NoteBlockCreationError("Could not create note blocks") from exc
         except Exception:
             self._session.rollback()
             raise
+
+        await self._indexer.index_many([block.id for block in saved])
+        return saved
 
     async def get(self, block_id: UUID) -> NoteBlock:
         try:
@@ -84,7 +109,6 @@ class NoteBlockService:
 
             saved = await self._blocks.update(block, validated_update)
             self._session.commit()
-            return saved
         except SQLAlchemyError as exc:
             self._session.rollback()
             raise NoteBlockUpdateError(
@@ -94,9 +118,13 @@ class NoteBlockService:
             self._session.rollback()
             raise
 
+        await self._indexer.index(block_id)
+        return saved
+
     async def delete(self, block_id: UUID) -> None:
         try:
             await self.get(block_id)
+            await self._indexer.delete(block_id)
             await self._blocks.delete(block_id)
             self._session.commit()
         except SQLAlchemyError as exc:
@@ -107,3 +135,10 @@ class NoteBlockService:
         except Exception:
             self._session.rollback()
             raise
+
+    async def reindex(self, block_id: UUID, *, force_recreate: bool = False) -> None:
+        await self.get(block_id)
+        await self._indexer.index(block_id, force_recreate=force_recreate)
+
+    async def list_by_course(self, course_id: UUID) -> list[NoteBlock]:
+        return list(await self._blocks.list_by_course(course_id))

@@ -77,6 +77,7 @@ class NoteBlockRepo(Repository[NoteBlock, NoteBlockUpdate]):
         block = await self.get(block_id)
         if block is not None:
             return block.course_note
+        return None
 
     # Special Updates
     def reorder(self, course_note_id: UUID, block_ids: list[UUID]) -> None:
