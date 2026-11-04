@@ -1,8 +1,6 @@
 from datetime import UTC, datetime
-from typing import Any
 from uuid import UUID
 
-from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
@@ -14,9 +12,9 @@ from backend.courses.exceptions import (
     NoteBlockUpdateError,
     NoteBlockValidationError,
 )
-from backend.courses.models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock, NoteBlockUpdate
+from backend.courses.models import NoteBlock, NoteBlockUpdate
 from backend.courses.repo import NoteBlockRepo
-
+from backend.courses.utils import validate_note_block
 
 class NoteBlockService:
     def __init__(self, session: Session) -> None:
@@ -34,7 +32,7 @@ class NoteBlockService:
             validated = []
             for block in blocks:
                 candidate = NoteBlock.model_validate(block.model_dump())
-                candidate.content = self._validate_content(candidate)
+                candidate.content = validate_note_block(candidate)
                 validated.append(candidate)
 
             saved = []
@@ -76,7 +74,7 @@ class NoteBlockService:
                 raise NoteBlockValidationError("Provide at least one field to update")
 
             if "content" in changes:
-                changes["content"] = self._validate_content(block, changes["content"])
+                changes["content"] = validate_note_block(block, changes["content"])
 
             validated_update = NoteBlockUpdate.model_validate(changes)
 
@@ -108,29 +106,3 @@ class NoteBlockService:
         except Exception:
             self._session.rollback()
             raise
-
-    def _validate_content(
-        self,
-        block: NoteBlock,
-        content: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        if block.schema_version != 1:
-            raise NoteBlockValidationError(
-                f"Unsupported schema version: {block.schema_version}"
-            )
-
-        if not block.kind:
-            raise NoteBlockValidationError("Block kind is required")
-
-        model = NOTE_BLOCK_CONTENT_MODELS.get(block.kind)
-        if model is None:
-            raise NoteBlockValidationError(f"Unsupported block kind: {block.kind}")
-
-        payload = block.content if content is None else content
-
-        try:
-            return model.model_validate(payload).model_dump(mode="json")
-        except ValidationError as exc:
-            raise NoteBlockValidationError(
-                f"Invalid content for block kind '{block.kind}': {exc}"
-            ) from exc

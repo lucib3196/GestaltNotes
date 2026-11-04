@@ -3,17 +3,17 @@ from typing import Generic, TypeVar
 from uuid import UUID
 from collections.abc import Sequence
 from typing import TypeVar
-
+from pydantic import BaseModel
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 
 from backend.adapters import Repository
 
-ModelT = TypeVar("ModelT")
-UpdateT = TypeVar("UpdateT")
+ModelT = TypeVar("ModelT", bound=BaseModel)
+UpdateT = TypeVar("UpdateT", bound=BaseModel)
 
 
-class Builder(ABC, Generic[ModelT]):
+class DocumentBuilder(ABC, Generic[ModelT]):
     async def build(self, data: Sequence[ModelT]) -> list[Document]:
         """Convert each input into a document."""
         return [await self.to_document(item) for item in data]
@@ -28,7 +28,7 @@ class IndexingService(Generic[ModelT, UpdateT]):
     def __init__(
         self,
         repo: Repository[ModelT, UpdateT],
-        builder: Builder[ModelT],
+        builder: DocumentBuilder[ModelT],
         vector_store: VectorStore,
     ):
         self._repo = repo
