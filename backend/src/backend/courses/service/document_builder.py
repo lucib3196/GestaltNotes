@@ -74,7 +74,7 @@ class NoteBlockDocumentBuilder(DocumentBuilder[NoteBlock]):
 
         return NoteBlockMetadata(
             note_block_id=block.id,
-            course_note_id=block.course_note_id,
+            course_note_id=course.id,
             course_id=note.course_id,
             source_file_id=note.file_id,
             title=block.title,
