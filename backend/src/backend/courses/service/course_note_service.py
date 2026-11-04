@@ -10,7 +10,6 @@ from sqlmodel import Session
 
 from backend.accounts import User
 from backend.core.logger import logger
-from backend.courses.access import CourseAccess
 from backend.courses.exceptions import CourseNoteAssociationError
 from backend.courses.models import (
     Course,
@@ -20,6 +19,7 @@ from backend.courses.models import (
     CourseNoteUpdate,
 )
 from backend.courses.repo import CourseNoteRepository, CourseRepo
+from backend.courses.service.course_access_service import CourseAccess
 from backend.storage import FileService
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key

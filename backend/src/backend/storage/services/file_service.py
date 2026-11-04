@@ -23,7 +23,6 @@ from backend.storage.schema import FileUpdate
 
 class FileService:
     def __init__(self, storage: BlobStorage, session: Session) -> None:
-
         """Initialize blob storage and database access."""
         self._storage = storage
         self._session = session

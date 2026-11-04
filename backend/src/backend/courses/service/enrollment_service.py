@@ -5,7 +5,6 @@ from sqlmodel import Session
 
 from backend.accounts.models import User, UserRole
 from backend.core import logger
-from backend.courses.access import CourseAccess
 from backend.courses.exceptions import (
     CourseEnrollmentAlreadyExistsError,
     CourseEnrollmentCreationError,
@@ -17,6 +16,7 @@ from backend.courses.exceptions import (
 )
 from backend.courses.models import Course, CourseEnrollment
 from backend.courses.repo import CourseRepo, EnrollmentRepo
+from backend.courses.service.course_access_service import CourseAccess
 
 
 class CourseEnrollmentService:

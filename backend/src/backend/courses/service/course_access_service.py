@@ -12,6 +12,7 @@ from backend.courses.repo import CourseRepo
 
 class CourseAccess:
     """Basic checks to assert course permission"""
+
     def __init__(self, courses: CourseRepo) -> None:
         self._courses = courses
 

@@ -5,7 +5,6 @@ from sqlmodel import Session, select
 
 from backend.accounts.models import User
 from backend.core import logger
-from backend.courses.access import CourseAccess
 from backend.courses.exceptions import (
     CourseCreationError,
     CourseDeletionError,
@@ -15,6 +14,7 @@ from backend.courses.exceptions import (
 )
 from backend.courses.models import Course, CourseCreate, CourseDelete, CourseUpdate
 from backend.courses.repo import CourseRepo
+from backend.courses.service.course_access_service import CourseAccess
 
 
 class CourseService:

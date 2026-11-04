@@ -5,8 +5,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, col, select
 
 from backend.accounts.models import User
-from backend.core import logger
 from backend.adapters import Repository
+from backend.core import logger
 from backend.storage.models import File
 from backend.storage.repo.exceptions import (
     FileCreationError,
