@@ -9,10 +9,10 @@ from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
     LectureProcessingRunNotFoundError,
 )
-from backend.processing.models import ProcessingRun
-from backend.processing.schema import (
+from backend.processing.models import (
     LectureProcessingInput,
     LectureProcessingStatusRead,
+    ProcessingRun,
     ProcessingRunRead,
 )
 from backend.processing.tasks import process_lecture_file

@@ -433,7 +433,7 @@ class CourseVectorStore(CourseVectorStoreBase, table=True):
 # --------------------------------------------------------------------
 
 # NoteBlock must be defined before importing the processing schemas.
-from backend.processing.schema import LectureProcessingStatusRead  # noqa: E402
+from backend.processing.models import LectureProcessingStatusRead  # noqa: E402
 
 
 class NoteOverview(CourseNoteRead):

@@ -8,9 +8,8 @@ from celery.exceptions import Ignore, Reject, Retry
 from backend.core.logger import logger
 from backend.database.config import open_session
 
-from .models import ProcessingStage, ProcessingStatus
+from .models import ProcessingStage, ProcessingStatus, ProcessingUpdate
 from .run_repo import RunRepo
-from .schema import RunUpdate
 
 
 @contextmanager
@@ -24,7 +23,7 @@ def processing_update(
     """Persist stage lifecycle updates around work on an existing run."""
     started = perf_counter()
 
-    def update_run(changes: RunUpdate) -> None:
+    def update_run(changes: ProcessingUpdate) -> None:
         with open_session() as session, session.begin():
             repo = RunRepo(session)
             run = repo.get(run_id)
@@ -40,8 +39,8 @@ def processing_update(
     )
     try:
         update_run(
-            RunUpdate(
-                status=ProcessingStatus.RUNNING,
+            ProcessingUpdate(
+                status=ProcessingStatus.STARTED,
                 stage=stage,
                 error_type=None,
                 error_message=None,
@@ -49,10 +48,10 @@ def processing_update(
         )
         yield
         if final_stage:
-            update_run(RunUpdate(status=ProcessingStatus.SUCCEEDED))
+            update_run(ProcessingUpdate(status=ProcessingStatus.SUCCESS))
     except Retry:
         try:
-            update_run(RunUpdate(status=ProcessingStatus.RETRYING, stage=stage))
+            update_run(ProcessingUpdate(status=ProcessingStatus.RETRY, stage=stage))
         except Exception:
             logger.exception(
                 "Could not persist retry status: run_id=%s task_id=%s",
@@ -82,8 +81,8 @@ def processing_update(
         )
         try:
             update_run(
-                RunUpdate(
-                    status=ProcessingStatus.FAILED,
+                ProcessingUpdate(
+                    status=ProcessingStatus.FAILURE,
                     stage=stage,
                     error_type=type(exc).__name__,
                     error_message=f"Processing failed during {stage.value}",

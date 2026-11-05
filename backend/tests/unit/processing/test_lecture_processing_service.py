@@ -74,10 +74,10 @@ def add_run(session, note_id, status):
 @pytest.mark.parametrize(
     "status",
     [
-        ProcessingStatus.QUEUED,
-        ProcessingStatus.FAILED,
-        ProcessingStatus.PARTIAL,
-        ProcessingStatus.RUNNING,
+        ProcessingStatus.PENDING,
+        ProcessingStatus.FAILURE,
+        ProcessingStatus.RETRY,
+        ProcessingStatus.STARTED,
     ],
 )
 @pytest.mark.asyncio
@@ -92,8 +92,8 @@ async def test_non_successful_run_allows_processing(records, status):
 @pytest.mark.asyncio
 async def test_any_successful_run_blocks_reprocessing(records):
     session, _course, note = records
-    add_run(session, note.id, ProcessingStatus.SUCCEEDED)
-    add_run(session, note.id, ProcessingStatus.FAILED)
+    add_run(session, note.id, ProcessingStatus.SUCCESS)
+    add_run(session, note.id, ProcessingStatus.FAILURE)
     service = CourseNoteProcessingService(session)
     with pytest.raises(LectureAlreadyProcessedError):
         await service.assert_can_process(note.id)
@@ -102,7 +102,7 @@ async def test_any_successful_run_blocks_reprocessing(records):
 @pytest.mark.asyncio
 async def test_success_for_different_note_does_not_block(records):
     session, _course, note = records
-    add_run(session, uuid4(), ProcessingStatus.SUCCEEDED)
+    add_run(session, uuid4(), ProcessingStatus.SUCCESS)
     assert (
         await CourseNoteProcessingService(session).assert_can_process(note.id)
     ).id == note.id
@@ -111,8 +111,8 @@ async def test_success_for_different_note_does_not_block(records):
 @pytest.mark.asyncio
 async def test_retrieval_is_scoped_to_note(records):
     session, _course, note = records
-    run = add_run(session, note.id, ProcessingStatus.FAILED)
-    unrelated = add_run(session, uuid4(), ProcessingStatus.SUCCEEDED)
+    run = add_run(session, note.id, ProcessingStatus.FAILURE)
+    unrelated = add_run(session, uuid4(), ProcessingStatus.SUCCESS)
     service = CourseNoteProcessingService(session)
     assert [item.id for item in await service.list_runs(note.id)] == [run.id]
     assert (await service.get_run(note.id, run.id)).id == run.id
@@ -145,7 +145,7 @@ async def test_dispatch_rejects_success_without_queuing(
     add_run(
         session,
         note.id,
-        ProcessingStatus.SUCCEEDED if successful else ProcessingStatus.FAILED,
+        ProcessingStatus.SUCCESS if successful else ProcessingStatus.FAILURE,
     )
     submit = Mock(return_value=SimpleNamespace(id="queued-task"))
     monkeypatch.setattr(process_lecture_file, "apply_async", submit)
@@ -171,10 +171,10 @@ def test_preparation_rechecks_success_before_creating_run(records, monkeypatch):
     from unittest.mock import Mock
 
     from backend.processing import tasks
-    from backend.processing.schema import LectureProcessingInput
+    from backend.processing.models import LectureProcessingInput
 
     session, course, note = records
-    add_run(session, note.id, ProcessingStatus.SUCCEEDED)
+    add_run(session, note.id, ProcessingStatus.SUCCESS)
 
     @contextmanager
     def session_scope():
@@ -204,8 +204,8 @@ async def test_status_preserves_success_when_latest_run_failed(records):
     from datetime import datetime, timedelta
 
     session, _, note = records
-    succeeded = add_run(session, note.id, ProcessingStatus.SUCCEEDED)
-    failed = add_run(session, note.id, ProcessingStatus.FAILED)
+    succeeded = add_run(session, note.id, ProcessingStatus.SUCCESS)
+    failed = add_run(session, note.id, ProcessingStatus.FAILURE)
     succeeded.created_at = datetime.now(UTC) - timedelta(minutes=1)
     failed.created_at = datetime.now(UTC)
     session.commit()
@@ -214,7 +214,7 @@ async def test_status_preserves_success_when_latest_run_failed(records):
     assert summary.has_succeeded is True
     assert summary.can_process is False
     assert summary.latest_run.id == failed.id
-    assert summary.latest_run.status == ProcessingStatus.FAILED
+    assert summary.latest_run.status == ProcessingStatus.FAILURE
 
 
 @pytest.mark.asyncio
@@ -237,7 +237,7 @@ async def test_course_note_dependency_rejects_note_from_other_course(records):
 @pytest.mark.asyncio
 async def test_overviews_are_scoped_to_course(records):
     session, course, note = records
-    add_run(session, note.id, ProcessingStatus.SUCCEEDED)
+    add_run(session, note.id, ProcessingStatus.SUCCESS)
     service = CourseNoteProcessingService(session)
     overviews = await service.list_notes_overview(course.id)
     assert [overview.id for overview in overviews] == [note.id]

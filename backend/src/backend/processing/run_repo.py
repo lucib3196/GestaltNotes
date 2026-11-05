@@ -2,8 +2,7 @@ from uuid import UUID
 
 from sqlmodel import Session, select
 
-from .models import ProcessingRun
-from .schema import RunUpdate
+from .models import ProcessingRun, ProcessingUpdate
 
 
 class RunRepo:
@@ -33,7 +32,7 @@ class RunRepo:
     def update(
         self,
         record: ProcessingRun,
-        changes: RunUpdate,
+        changes: ProcessingUpdate,
     ) -> ProcessingRun:
         """Update supplied fields without committing the transaction."""
         values = changes.model_dump(exclude_unset=True)

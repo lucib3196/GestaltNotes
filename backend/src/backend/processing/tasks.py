@@ -12,8 +12,8 @@ from lecture_processor.api import process_lecture
 from lecture_processor.graph.context import ExtractionContext
 
 from backend.core.logger import logger
-from backend.courses.service.note_block_service import NoteBlockService
 from backend.courses.notes.processing_service import CourseNoteProcessingService
+from backend.courses.service.note_block_service import NoteBlockService
 from backend.courses.utils import parse_lecture_document
 from backend.courses.vector_store.course_vector_store_service import (
     CourseVectorStoreService,
@@ -25,12 +25,13 @@ from backend.processing.resources import (
 )
 
 from .models import (
+    LectureProcessingInput,
     LectureProcessingRun,
+    LectureProcessingState,
     ProcessingRun,
     ProcessingStage,
     ProcessingStatus,
 )
-from .schema import LectureProcessingInput, LectureProcessingState
 from .tracking import processing_update
 
 
@@ -105,7 +106,7 @@ def prepare_lecture_run(self: Task, data: LectureProcessingInput) -> dict:
             run = ProcessingRun(
                 celery_task_id=UUID(self.request.id),
                 task_type="lecture_processing",
-                status=ProcessingStatus.RUNNING,
+                status=ProcessingStatus.STARTED,
                 stage=ProcessingStage.VALIDATING,
                 attempt_count=1,
             )

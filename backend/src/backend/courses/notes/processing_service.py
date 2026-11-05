@@ -10,10 +10,11 @@ from backend.processing.exceptions import (
 )
 from backend.processing.models import (
     LectureProcessingRun,
+    LectureProcessingStatusRead,
     ProcessingRun,
+    ProcessingRunRead,
     ProcessingStatus,
 )
-from backend.processing.schema import LectureProcessingStatusRead, ProcessingRunRead
 
 
 class CourseNoteProcessingService:
@@ -43,7 +44,7 @@ class CourseNoteProcessingService:
             )
             .where(
                 LectureProcessingRun.note_id == note_id,
-                ProcessingRun.status == ProcessingStatus.SUCCEEDED,
+                ProcessingRun.status == ProcessingStatus.SUCCESS,
             )
         ).limit(1)
         return self._session.exec(stmt).first()
