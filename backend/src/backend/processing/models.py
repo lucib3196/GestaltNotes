@@ -8,7 +8,9 @@ from pydantic import BaseModel, ConfigDict, JsonValue, field_validator
 from sqlalchemy import Column, DateTime, ForeignKey
 from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
+
 from backend.courses.models import NoteBlock
+
 if TYPE_CHECKING:
     from backend.courses.models import CourseNote, NoteBlock
 

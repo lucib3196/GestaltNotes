@@ -3,6 +3,8 @@ from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.routing import APIRouter
+from starlette import status
+
 from backend.courses.exceptions import CourseNoteNotFoundError
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
@@ -15,7 +17,6 @@ from backend.processing.models import (
     ProcessingRunRead,
 )
 from backend.processing.tasks import process_lecture_file
-from starlette import status
 
 from .dependencies import (
     CourseNoteProcessingServiceDep,
@@ -85,7 +86,6 @@ async def start_lecture_processing(
     note_id: UUID,
     service: CourseNoteProcessingServiceDep,
     note: OwnedCourseNoteDep,
-    
 ) -> dict[str, Any]:
 
     # General checks to ensure we can process the note

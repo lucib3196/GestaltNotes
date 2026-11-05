@@ -6,11 +6,15 @@ from uuid import UUID, uuid4
 
 from fastapi import UploadFile
 from object_store.exceptions import BlobStorageDeleteError
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from backend.accounts import User
 from backend.core.logger import logger
-from backend.courses.exceptions import CourseNoteAssociationError
+from backend.courses.exceptions import (
+    CourseNoteAssociationError,
+    CourseNoteDeletionConflictError,
+    CourseNoteDeletionError,
+)
 from backend.courses.models import (
     Course,
     CourseContentType,
@@ -18,11 +22,16 @@ from backend.courses.models import (
     CourseNoteRead,
     CourseNoteUpdate,
 )
-from backend.courses.repo import CourseNoteRepository, CourseRepo
+from backend.courses.repo import CourseNoteRepository, NoteBlockRepo
 from backend.courses.service.course_access_service import CourseAccess
+from backend.courses.vector_store.course_vector_store_service import (
+    CourseVectorStoreService,
+)
 from backend.storage import FileService
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key
+
+from ..repo.lecture_processing_repo import LectureProcessingRepository
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,12 +44,23 @@ class FileUpload:
 class CourseNoteService:
     """Coordinate course-note records, file storage, and owner checks."""
 
-    def __init__(self, session: Session, file_service: FileService) -> None:
+    def __init__(
+        self,
+        session: Session,
+        notes: CourseNoteRepository,
+        blocks: NoteBlockRepo,
+        runs: LectureProcessingRepository,
+        access: CourseAccess,
+        files: FileService,
+        stores: CourseVectorStoreService,
+    ) -> None:
         self._session = session
-        self._files = file_service
-        self._courses = CourseRepo(session)
-        self._repo = CourseNoteRepository(session)
-        self._access = CourseAccess(self._courses)
+        self._notes = notes
+        self._blocks = blocks
+        self._runs = runs
+        self._access = access
+        self._files = files
+        self._stores = stores
 
     async def create(
         self,
@@ -68,7 +88,7 @@ class CourseNoteService:
                 data=upload.data,
                 content_type=upload.content_type,
             )
-            note = await self._repo.create(
+            note = await self._notes.create(
                 self._create_note_record(
                     course,
                     file,
@@ -114,14 +134,14 @@ class CourseNoteService:
         user: User,
     ) -> CourseNote:
         """Save note metadata after checking course ownership."""
-        note = await self._repo.get_required(note_id)
+        note = await self._notes.get_required(note_id)
         await self._access.require_owner(note.course_id, user)
         if any(
             value is None for value in update.model_dump(exclude_unset=True).values()
         ):
             raise ValueError("Note title and resource type cannot be null")
         try:
-            note = await self._repo.update(note, update)
+            note = await self._notes.update(note, update)
             self._session.commit()
             return note
         except Exception:
@@ -129,12 +149,47 @@ class CourseNoteService:
             raise
 
     async def delete(self, note_id: UUID, *, user: User) -> None:
-        """Commit note and file deletion, then remove the stored blob."""
-        note = await self._repo.get_required(note_id)
+        """Remove vectors, commit note/file deletion, then remove the stored blob."""
+        note = await self._notes.get_required(note_id)
         await self._access.require_owner(note.course_id, user)
+
+        active_run = self._runs.get_latest_active(note_id)
+        if active_run is not None:
+            raise CourseNoteDeletionConflictError(
+                "This file is being processed. "
+                "Wait for processing to finish before deleting it."
+            )
+
+        # Deleting the physical file cascades to every attachment. Avoid
+        # removing another course's resource through this note-scoped action.
+        shared_note = self._session.exec(
+            select(CourseNote).where(
+                CourseNote.file_id == note.file_id, CourseNote.id != note_id
+            )
+        ).first()
+        if shared_note is not None:
+            raise CourseNoteDeletionConflictError(
+                "This file is attached to another course note "
+                "and cannot be deleted here."
+            )
+
+        blocks = await self._blocks.list_by_note(note_id)
+        if blocks:
+            store = self._stores.get_vectorstore(note.course_id, async_mode=True)
+            try:
+                result = await store.adelete(ids=[str(block.id) for block in blocks])
+                if result is False:
+                    raise RuntimeError("Vector deletion was not acknowledged")
+            except Exception as exc:
+                logger.exception("Embedding cleanup failed: note_id=%s", note_id)
+                raise CourseNoteDeletionError(
+                    "Could not remove this file's embeddings. "
+                    "The file has not been deleted."
+                ) from exc
+
         try:
             file_id = note.file_id
-            await self._repo.delete(note_id)
+            await self._notes.delete(note_id)
             file = await self._files.stage_delete_file(file_id)
             storage_key = file.storage_key
             self._session.commit()
@@ -142,7 +197,13 @@ class CourseNoteService:
             self._session.rollback()
             raise
         # Database deletion is already committed; a blob failure cannot roll it back.
-        await self._delete_blob_with_retry(storage_key)
+        try:
+            await self._delete_blob_with_retry(storage_key)
+        except BlobStorageDeleteError as exc:
+            raise CourseNoteDeletionError(
+                "Lecture materials were removed, but deleting the stored file failed. "
+                "Refresh the list."
+            ) from exc
 
     async def _delete_blob_with_retry(self, storage_key: str) -> None:
         """Retry temporary storage deletion failures up to three attempts."""
@@ -189,7 +250,7 @@ class CourseNoteService:
 
     async def assert_permission(self, educator: User, note_id: UUID) -> None:
         """Require ownership of the course containing the note."""
-        note = await self._repo.get_required(note_id)
+        note = await self._notes.get_required(note_id)
         await self._access.require_owner(note.course_id, educator)
 
     async def add_file(
@@ -202,7 +263,7 @@ class CourseNoteService:
     ) -> CourseNote:
         """Attach an existing file for trusted internal callers; no access check."""
         try:
-            note = await self._repo.create(
+            note = await self._notes.create(
                 self._create_note_record(
                     course,
                     file,
@@ -219,30 +280,30 @@ class CourseNoteService:
     async def remove_file(self, note_id: UUID) -> None:
         """Detach a note for trusted internal callers, retaining its file."""
         try:
-            await self._repo.delete(note_id)
+            await self._notes.delete(note_id)
             self._session.commit()
         except Exception:
             self._session.rollback()
             raise
 
     async def get_note_record(self, note_id: UUID) -> CourseNote:
-        return await self._repo.get_required(note_id)
+        return await self._notes.get_required(note_id)
 
     async def get_note(self, note_id: UUID) -> CourseNoteRead:
-        return await self._repo.get_note_read(note_id)
+        return await self._notes.get_note_read(note_id)
 
     def to_note_read(self, note: CourseNote) -> CourseNoteRead:
-        return self._repo.to_note_read(note)
+        return self._notes.to_note_read(note)
 
     async def list_notes(self, course_id: UUID) -> list[CourseNote]:
-        return await self._repo.list_by_course(course_id)
+        return await self._notes.list_by_course(course_id)
 
     async def list_notes_with_urls(self, course_id: UUID) -> list[CourseNoteRead]:
-        notes = await self._repo.list_by_course(course_id)
-        return [self._repo.to_note_read(note) for note in notes]
+        notes = await self._notes.list_by_course(course_id)
+        return [self._notes.to_note_read(note) for note in notes]
 
     async def download_note(self, note_id: UUID) -> tuple[File, bytes]:
-        note = await self._repo.get_required(note_id)
+        note = await self._notes.get_required(note_id)
         return await self._files.download_file(note.file_id)
 
     def _create_note_record(
