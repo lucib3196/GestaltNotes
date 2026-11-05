@@ -7,7 +7,7 @@ from backend.courses.exceptions import (
     CoursePermissionError,
 )
 from backend.courses.models import Course
-from backend.courses.repo import CourseRepo
+from backend.courses.repo.course_repo import CourseRepo
 
 
 class CourseAccess:

@@ -15,7 +15,7 @@ from backend.courses.exceptions import (
     NoteBlockValidationError,
 )
 from backend.courses.models import NoteBlock, NoteBlockUpdate
-from backend.courses.repo import NoteBlockRepo
+from backend.courses.repo.note_blocks_repo import NoteBlockRepo
 from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.courses.utils import validate_note_block
 from backend.courses.vector_store.course_vector_store_service import (

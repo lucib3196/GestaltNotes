@@ -7,7 +7,8 @@ from starlette import status
 from backend.core import logger
 from backend.courses.exceptions import CourseServiceException
 from backend.courses.models import Course, CourseEnrollment, CourseNote
-from backend.courses.repo import CourseNoteRepository, CourseRepo
+from backend.courses.repo.course_notes_repo import CourseNoteRepository
+from backend.courses.repo.course_repo import CourseRepo
 from backend.courses.service.course_access_service import CourseAccess
 from backend.courses.service.course_note_processing_service import (
     CourseNoteProcessingService,

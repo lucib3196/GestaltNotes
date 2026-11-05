@@ -22,7 +22,7 @@ export interface CourseVectorStore {
   description: string | null;
   embedding_model: string;
   provider: "astra" | "postgres";
-  status: "pending" | "ready" | "failed" | "archieved";
+  status: "pending" | "ready" | "failed" | "archived";
 }
 
 export interface CourseChatContext {

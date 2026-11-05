@@ -20,30 +20,27 @@ if TYPE_CHECKING:
     from backend.processing.models import LectureProcessingRun
     from backend.storage.models import File
 
+
+# ---------------------------------------------------------------------------
+# Shared storage types and response fields
+# ---------------------------------------------------------------------------
+
 JSONType = JSON().with_variant(JSONB, "postgresql")
 
 
-# --------------------------------------------------------------------
-# ---------------- Courses and Enrollments ----------------
-# --------------------------------------------------------------------
+class DeleteResponseBase(BaseModel):
+    success: bool
+    info: str
+
+
+# ---------------------------------------------------------------------------
+# Course enrollments: table and schemas
+# ---------------------------------------------------------------------------
 
 
 class CourseEnrollmentBase(SQLModel):
     student_id: UUID
     course_id: UUID
-
-
-class CourseEnrollmentCreate(CourseEnrollmentBase):
-    pass
-
-
-class CourseEnrollmentRead(CourseEnrollmentBase):
-    enrolled_at: datetime
-    active: bool
-
-
-class CourseEnrollmentUpdate(CourseEnrollmentBase):
-    active: bool
 
 
 class CourseEnrollment(CourseEnrollmentBase, table=True):
@@ -62,23 +59,28 @@ class CourseEnrollment(CourseEnrollmentBase, table=True):
     active: bool = True
 
 
+class CourseEnrollmentCreate(CourseEnrollmentBase):
+    pass
+
+
+class CourseEnrollmentRead(CourseEnrollmentBase):
+    enrolled_at: datetime
+    active: bool
+
+
+class CourseEnrollmentUpdate(CourseEnrollmentBase):
+    active: bool
+
+
+# ---------------------------------------------------------------------------
+# Courses: table and schemas
+# ---------------------------------------------------------------------------
+
+
 class CourseBase(SQLModel):
     name: str
     discipline: str | None = None
     description: str | None = None
-
-
-class CourseCreate(CourseBase):
-    pass
-
-
-class CourseUpdate(CourseBase):
-    pass
-
-
-class CourseRead(CourseBase):
-    id: UUID
-    owner_id: UUID
 
 
 class Course(CourseBase, table=True):
@@ -103,6 +105,28 @@ class Course(CourseBase, table=True):
     @property
     def storage_prefix(self) -> str:
         return f"courses/{self.id}"
+
+
+class CourseCreate(CourseBase):
+    pass
+
+
+class CourseRead(CourseBase):
+    id: UUID
+    owner_id: UUID
+
+
+class CourseUpdate(CourseBase):
+    pass
+
+
+class CourseDelete(DeleteResponseBase):
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Course modules: table and schemas
+# ---------------------------------------------------------------------------
 
 
 class CourseModuleBase(SQLModel):
@@ -138,16 +162,9 @@ class CourseModule(CourseModuleBase, table=True):
     )
 
 
-# --------------------------------------------------------------------
-# ---------------- Course Notes and Note Blocks ----------------
-# --------------------------------------------------------------------
-
-NOTE_BLOCK_CONTENT_MODELS: dict[str, type[BaseModel]] = {
-    "lecture_summary": LectureAnalysis,
-    "conceptual_question": ConceptualQuestion,
-    "derivation": Derivation,
-    "extracted_question": ExtractedQuestion,
-}
+# ---------------------------------------------------------------------------
+# Course notes: content types, table, and schemas
+# ---------------------------------------------------------------------------
 
 
 class CourseContentType(StrEnum):
@@ -206,6 +223,44 @@ class CourseNote(CourseNoteBase, table=True):
     )
 
 
+class CourseNoteRead(CourseNoteBase):
+    id: UUID
+    download_url: str | None = None
+    content_type: str | None = None
+
+
+class CourseNoteUpdate(BaseModel):
+    title: str | None = None
+    resource_type: CourseContentType | None = None
+
+    @field_validator("title", "resource_type")
+    @classmethod
+    def reject_null(
+        cls,
+        value: str | CourseContentType | None,
+    ) -> str | CourseContentType:
+        """Allow omitted fields but reject explicit null updates."""
+        if value is None:
+            raise ValueError("Note title and resource type cannot be null")
+        return value
+
+
+class CourseNoteDelete(DeleteResponseBase):
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Note blocks: content models, table, and schemas
+# ---------------------------------------------------------------------------
+
+NOTE_BLOCK_CONTENT_MODELS: dict[str, type[BaseModel]] = {
+    "lecture_summary": LectureAnalysis,
+    "conceptual_question": ConceptualQuestion,
+    "derivation": Derivation,
+    "extracted_question": ExtractedQuestion,
+}
+
+
 class NoteBlockBase(SQLModel):
     course_note_id: UUID | None = Field(
         default=None, description="The note it belongs to "
@@ -253,27 +308,6 @@ class NoteBlockBase(SQLModel):
     )
 
 
-class NoteBlockUpdate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    title: str | None = None
-    content: dict[str, Any] | None = None
-
-    @field_validator("title")
-    @classmethod
-    def validate_title(cls, value: str | None) -> str:
-        if value is None or not value.strip():
-            raise ValueError("Title must not be null or empty")
-        return value.strip()
-
-    @field_validator("content")
-    @classmethod
-    def validate_content(cls, value: dict[str, Any] | None) -> dict[str, Any]:
-        if value is None:
-            raise ValueError("Content must not be null")
-        return value
-
-
 class NoteBlock(NoteBlockBase, table=True):
     __tablename__ = "note_block"  # type: ignore
 
@@ -317,42 +351,6 @@ class NoteBlock(NoteBlockBase, table=True):
     )
 
 
-# --------------------------------------------------------------------
-# ---------------- Course Note Schemas ----------------
-# --------------------------------------------------------------------
-
-
-class CourseNoteRead(CourseNoteBase):
-    id: UUID
-    download_url: str | None = None
-    content_type: str | None = None
-
-
-class DeleteResponseBase(BaseModel):
-    success: bool
-    info: str
-
-
-class CourseNoteDelete(DeleteResponseBase):
-    pass
-
-
-class CourseNoteUpdate(BaseModel):
-    title: str | None = None
-    resource_type: CourseContentType | None = None
-
-    @field_validator("title", "resource_type")
-    @classmethod
-    def reject_null(
-        cls,
-        value: str | CourseContentType | None,
-    ) -> str | CourseContentType:
-        """Allow omitted fields but reject explicit null updates."""
-        if value is None:
-            raise ValueError("Note title and resource type cannot be null")
-        return value
-
-
 class NoteBlockRead(NoteBlockBase):
     model_config = ConfigDict(from_attributes=True)  # type: ignore
 
@@ -361,25 +359,37 @@ class NoteBlockRead(NoteBlockBase):
     updated_at: datetime
 
 
-# --------------------------------------------------------------------
-# ---------------- Course Response Schemas ----------------
-# --------------------------------------------------------------------
+class NoteBlockUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str | None = None
+    content: dict[str, Any] | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str | None) -> str:
+        if value is None or not value.strip():
+            raise ValueError("Title must not be null or empty")
+        return value.strip()
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: dict[str, Any] | None) -> dict[str, Any]:
+        if value is None:
+            raise ValueError("Content must not be null")
+        return value
 
 
-class CourseDelete(DeleteResponseBase):
-    pass
-
-
-# --------------------------------------------------------------------
-# ---------------- Course Vector Stores ----------------
-# --------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Course vector stores: enums, table, and schemas
+# ---------------------------------------------------------------------------
 
 
 class VectorStoreStatus(StrEnum):
     PENDING = "pending"
     READY = "ready"
     FAILED = "failed"
-    ARCHIVED = "archieved"
+    ARCHIVED = "archived"
 
 
 class VectorstoreProvider(StrEnum):
@@ -429,11 +439,11 @@ class CourseVectorStore(CourseVectorStoreBase, table=True):
     course: "Course" = Relationship(back_populates="vectorstore")
 
 
-# --------------------------------------------------------------------
-# ---------------- Note Processing Overview --------------------------
-# --------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Processing overview and cross-module model references
+# ---------------------------------------------------------------------------
 
-# NoteBlock must be defined before importing the processing schemas.
+# Keep this import after NoteBlock so processing task references can resolve.
 from backend.processing.models import LectureProcessingStatusRead  # noqa: E402
 
 

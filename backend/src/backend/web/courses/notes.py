@@ -35,7 +35,8 @@ async def list_course_notes(
     _course: ReadableCourseDep,
 ) -> list[CourseNoteRead]:
     try:
-        return await service.list_notes_with_urls(course_id)
+        notes = await service.list_notes(course_id)
+        return [service.to_note_read(note) for note in notes]
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 

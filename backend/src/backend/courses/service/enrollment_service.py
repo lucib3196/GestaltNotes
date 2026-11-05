@@ -15,7 +15,8 @@ from backend.courses.exceptions import (
     CourseNotFoundError,
 )
 from backend.courses.models import Course, CourseEnrollment
-from backend.courses.repo import CourseRepo, EnrollmentRepo
+from backend.courses.repo.course_repo import CourseRepo
+from backend.courses.repo.enrollment_repo import EnrollmentRepo
 from backend.courses.service.course_access_service import CourseAccess
 
 

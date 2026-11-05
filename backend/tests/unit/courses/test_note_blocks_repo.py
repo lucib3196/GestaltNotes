@@ -10,7 +10,7 @@ from backend.courses.models import (
     NoteBlock,
     NoteBlockUpdate,
 )
-from backend.courses.repo import NoteBlockRepo
+from backend.courses.repo.note_blocks_repo import NoteBlockRepo
 from backend.storage.models import File
 
 

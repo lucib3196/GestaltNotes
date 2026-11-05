@@ -13,7 +13,7 @@ from backend.courses.exceptions import (
     CourseUpdateError,
 )
 from backend.courses.models import Course, CourseCreate, CourseDelete, CourseUpdate
-from backend.courses.repo import CourseRepo
+from backend.courses.repo.course_repo import CourseRepo
 from backend.courses.service.course_access_service import CourseAccess
 
 

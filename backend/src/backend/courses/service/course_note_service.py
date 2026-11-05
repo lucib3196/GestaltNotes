@@ -22,7 +22,9 @@ from backend.courses.models import (
     CourseNoteRead,
     CourseNoteUpdate,
 )
-from backend.courses.repo import CourseNoteRepository, NoteBlockRepo
+from backend.courses.repo.course_notes_repo import CourseNoteRepository
+from backend.courses.repo.lecture_processing_repo import LectureProcessingRepository
+from backend.courses.repo.note_blocks_repo import NoteBlockRepo
 from backend.courses.service.course_access_service import CourseAccess
 from backend.courses.vector_store.course_vector_store_service import (
     CourseVectorStoreService,
@@ -30,8 +32,6 @@ from backend.courses.vector_store.course_vector_store_service import (
 from backend.storage import FileService
 from backend.storage.models import File
 from backend.storage.utils import normalize_storage_key
-
-from ..repo.lecture_processing_repo import LectureProcessingRepository
 
 
 @dataclass(frozen=True, slots=True)
@@ -297,10 +297,6 @@ class CourseNoteService:
 
     async def list_notes(self, course_id: UUID) -> list[CourseNote]:
         return await self._notes.list_by_course(course_id)
-
-    async def list_notes_with_urls(self, course_id: UUID) -> list[CourseNoteRead]:
-        notes = await self._notes.list_by_course(course_id)
-        return [self._notes.to_note_read(note) for note in notes]
 
     async def download_note(self, note_id: UUID) -> tuple[File, bytes]:
         note = await self._notes.get_required(note_id)
