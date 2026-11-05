@@ -7,12 +7,12 @@ from starlette import status
 from backend.core import logger
 from backend.courses.exceptions import CourseServiceException
 from backend.courses.models import Course, CourseEnrollment, CourseNote
-from backend.courses.service.note_block_service import NoteBlockService
 from backend.courses.notes.processing_service import CourseNoteProcessingService
 from backend.courses.repo import CourseNoteRepository, CourseRepo
 from backend.courses.service.course_access_service import CourseAccess
 from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
+from backend.courses.service.note_block_service import NoteBlockService
 from backend.database import SessionDep
 from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep
 from backend.web.courses.http import course_http_exception

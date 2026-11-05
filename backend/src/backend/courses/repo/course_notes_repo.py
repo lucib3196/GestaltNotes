@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -82,7 +81,6 @@ class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):
             message = f"[CourseNoteRepository] failed to get course note {e}"
             logger.error(message)
             raise CourseNoteRetrievalError(message) from e
-
 
     async def list_by_course(self, course_id: UUID) -> list[CourseNote]:
         try:
