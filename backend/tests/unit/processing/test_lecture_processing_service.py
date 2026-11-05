@@ -2,14 +2,17 @@ from datetime import UTC
 from uuid import uuid4
 
 import pytest
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine
 
 import backend.accounts.models  # noqa: F401 -- Register relationship targets.
 from backend.courses.exceptions import CourseNoteNotFoundError
 from backend.courses.models import Course, CourseContentType, CourseNote
-from backend.courses.notes.processing_service import CourseNoteProcessingService
+from backend.courses.service.course_note_processing_service import (
+    CourseNoteProcessingService,
+)
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
+    LectureProcessingInProgressError,
     LectureProcessingRunNotFoundError,
 )
 from backend.processing.models import (
@@ -41,6 +44,7 @@ def records():
         file = File(
             owner_id=course.owner_id,
             original_name="lecture.pdf",
+            content_type="application/pdf",
             storage_key="lecture.pdf",
         )
         session.add(file)
@@ -74,10 +78,8 @@ def add_run(session, note_id, status):
 @pytest.mark.parametrize(
     "status",
     [
-        ProcessingStatus.PENDING,
         ProcessingStatus.FAILURE,
-        ProcessingStatus.RETRY,
-        ProcessingStatus.STARTED,
+        ProcessingStatus.REVOKED,
     ],
 )
 @pytest.mark.asyncio
@@ -162,32 +164,46 @@ async def test_dispatch_rejects_success_without_queuing(
         )
         assert response["task_id"] == "queued-task"
         assert submit.call_args.kwargs["args"] == [
-            {"course_id": str(course.id), "note_id": str(note.id)}
+            {
+                "course_id": str(course.id),
+                "note_id": str(note.id),
+                "file_id": str(note.file_id),
+            }
         ]
 
 
-def test_preparation_rechecks_success_before_creating_run(records, monkeypatch):
-    from contextlib import contextmanager
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "run_status",
+    [
+        ProcessingStatus.PENDING,
+        ProcessingStatus.RECEIVED,
+        ProcessingStatus.STARTED,
+        ProcessingStatus.PROGRESS,
+        ProcessingStatus.RETRY,
+    ],
+)
+async def test_active_run_blocks_dispatch(records, monkeypatch, run_status):
     from unittest.mock import Mock
 
-    from backend.processing import tasks
-    from backend.processing.models import LectureProcessingInput
+    from fastapi import HTTPException
+
+    from backend.web.courses import processing_runs
 
     session, course, note = records
-    add_run(session, note.id, ProcessingStatus.SUCCESS)
-
-    @contextmanager
-    def session_scope():
-        yield session
-
-    monkeypatch.setattr(tasks, "open_session", session_scope)
-    note_scope = Mock()
-    monkeypatch.setattr(tasks, "course_note_scope", note_scope)
-    payload = LectureProcessingInput(course_id=course.id, note_id=note.id)
-    with pytest.raises(LectureAlreadyProcessedError):
-        tasks.prepare_lecture_run.run(payload.model_dump(mode="json"))
-    note_scope.assert_not_called()
-    assert len(session.exec(select(ProcessingRun)).all()) == 1
+    add_run(session, note.id, run_status)
+    submit = Mock()
+    monkeypatch.setattr(processing_runs.process_lecture_file, "apply_async", submit)
+    service = CourseNoteProcessingService(session)
+    with pytest.raises(LectureProcessingInProgressError):
+        await service.assert_can_process(note.id)
+    with pytest.raises(HTTPException) as caught:
+        await processing_runs.start_lecture_processing(
+            course.id, note.id, service, note
+        )
+    assert caught.value.status_code == 409
+    submit.assert_not_called()
+    assert not (await service.get_processing_status(note.id)).can_process
 
 
 @pytest.mark.asyncio

@@ -149,6 +149,7 @@ async def test_update_passes_authenticated_actor():
 
 
 async def test_processing_uses_validated_note_and_course(monkeypatch):
+    from backend.storage.models import File
     from backend.web.courses import processing_runs
 
     note = CourseNote(
@@ -157,11 +158,24 @@ async def test_processing_uses_validated_note_and_course(monkeypatch):
         title="Note",
         resource_type=CourseContentType.NOTES,
     )
+    note.file = File(
+        id=note.file_id,
+        owner_id=uuid4(),
+        original_name="lecture.pdf",
+        storage_key="lecture.pdf",
+        content_type="application/pdf",
+    )
     task = Mock(return_value=SimpleNamespace(id="task-id"))
     monkeypatch.setattr(processing_runs.process_lecture_file, "apply_async", task)
     service = SimpleNamespace(assert_can_process=AsyncMock())
     result = await start_lecture_processing(note.course_id, note.id, service, note)
     assert result["task_id"] == "task-id"
     task.assert_called_once_with(
-        args=[{"course_id": str(note.course_id), "note_id": str(note.id)}]
+        args=[
+            {
+                "course_id": str(note.course_id),
+                "note_id": str(note.id),
+                "file_id": str(note.file_id),
+            }
+        ]
     )

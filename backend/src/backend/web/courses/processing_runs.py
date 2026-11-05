@@ -8,6 +8,7 @@ from starlette import status
 from backend.courses.exceptions import CourseNoteNotFoundError
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
+    LectureProcessingInProgressError,
     LectureProcessingRunNotFoundError,
 )
 from backend.processing.models import (
@@ -104,7 +105,7 @@ async def start_lecture_processing(
             )
     except CourseNoteNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
-    except LectureAlreadyProcessedError as exc:
+    except (LectureAlreadyProcessedError, LectureProcessingInProgressError) as exc:
         raise HTTPException(409, str(exc)) from exc
 
     payload = LectureProcessingInput(
