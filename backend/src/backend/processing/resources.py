@@ -12,8 +12,8 @@ from backend.courses.vector_store.course_vector_store_service import (
     CourseVectorStoreService,
 )
 from backend.database.config import open_session
-from backend.storage import FileService
 from backend.processing.processing_run_repository import ProcessingRunRepository
+from backend.storage import FileService
 
 
 def create_storage() -> BlobStorage:
