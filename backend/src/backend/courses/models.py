@@ -202,6 +202,7 @@ class CourseNote(CourseNoteBase, table=True):
 
     processing_runs: list["LectureProcessingRun"] = Relationship(
         back_populates="note",
+        sa_relationship_kwargs={"passive_deletes": "all"},
     )
 
 

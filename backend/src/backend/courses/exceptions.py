@@ -108,3 +108,11 @@ class NoteBlockUpdateError(RuntimeError):
 
 class NoteBlockDeletionError(RuntimeError):
     """Deleting a note block failed."""
+
+
+class CourseNoteDeletionConflictError(CourseNoteServiceError):
+    """The course note cannot currently be deleted."""
+
+
+class CourseNoteDeletionError(CourseNoteServiceError):
+    """Associated vector or file cleanup failed."""

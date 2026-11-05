@@ -73,8 +73,7 @@ export const conceptualQuestionSchema = z.object({
 // Validate the envelope separately so unsupported content can have a fallback.
 export const noteBlockSchema = z.object({
   id: z.string().uuid(),
-  course_id: z.string().uuid().nullable(),
-  source_file_id: z.string().uuid().nullable(),
+  course_note_id: z.string().uuid().nullable(),
   title: z.string(),
   kind: z.string().nullable(),
   content: z.record(z.string(), z.unknown()),

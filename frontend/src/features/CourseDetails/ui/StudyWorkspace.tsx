@@ -1,3 +1,4 @@
+import { activeRun } from "../materials/processingStatus";
 import { useState } from "react";
 import { NoteBlocks } from "../../NoteBlocks";
 import { useCourseDetailsStore } from "../state/useCourseDetailsStore";
@@ -33,15 +34,11 @@ export default function StudyWorkspace() {
 
   const processingMessage = note.processing.has_succeeded
     ? null
-    : latestStatus === "partial"
-      ? "Processing completed partially. Available study materials are shown below."
-      : latestStatus === "queued" ||
-          latestStatus === "running" ||
-          latestStatus === "retrying"
-        ? "Processing is in progress. Some study materials may not be available yet."
-        : latestStatus === "failed" || latestStatus === "revoked"
-          ? "Processing did not finish. Any available study materials are shown below."
-          : "Study materials will appear after this resource is processed.";
+    : activeRun(latestStatus)
+      ? "Processing is in progress. Some study materials may not be available yet."
+      : latestStatus === "FAILURE" || latestStatus === "REVOKED"
+        ? "Processing did not finish. Any available study materials are shown below."
+        : "Study materials will appear after this resource is processed.";
 
   return (
     <section
@@ -53,12 +50,13 @@ export default function StudyWorkspace() {
           <p className="text-xs font-semibold uppercase tracking-wide text-accent">
             Study workspace
           </p>
-          <h3 className="mt-1 break-words text-base font-semibold text-text">
+          <h3 className="mt-1 wrap-break-word text-base font-semibold text-text">
             {note.title}
           </h3>
         </div>
 
         <div role="group" aria-label="Preview mode" className="flex flex-wrap gap-2">
+          
           {modes.map((item) => (
             <button
               key={item.value}

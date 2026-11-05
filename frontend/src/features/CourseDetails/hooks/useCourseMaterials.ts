@@ -27,5 +27,10 @@ export function useCourseMaterials() {
     [user, setNotes],
   );
 
-  return { notes, loading, error, refetch, refreshNote };
+  const removeDeletedMaterials = useCallback((noteIds: string[]) => {
+    const removed = new Set(noteIds);
+    setNotes((current) => current.filter((note) => !removed.has(note.id)));
+  }, [setNotes]);
+
+  return { notes, loading, error, refetch, refreshNote, removeDeletedMaterials };
 }

@@ -243,3 +243,32 @@ async def test_overviews_are_scoped_to_course(records):
     assert [overview.id for overview in overviews] == [note.id]
     assert overviews[0].processing.has_succeeded is True
     assert await service.list_notes_overview(uuid4()) == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "run_status", [ProcessingStatus.STARTED, ProcessingStatus.FAILURE]
+)
+async def test_scoped_status_exposes_stage_and_failure(records, run_status):
+    from backend.processing.models import LectureProcessingStatusRead
+    from backend.web.courses.processing_runs import get_processing_status
+
+    session, _course, note = records
+    run = add_run(session, note.id, run_status)
+    run.stage = ProcessingStage.EXTRACTING
+    if run_status == ProcessingStatus.FAILURE:
+        run.error_type = "RuntimeError"
+        run.error_message = "Processing failed during extracting"
+    session.add(run)
+    session.commit()
+
+    response = await get_processing_status(
+        note.id, CourseNoteProcessingService(session), note
+    )
+    payload = LectureProcessingStatusRead.model_validate(response)
+    assert payload.latest_run is not None
+    assert payload.latest_run.celery_task_id == run.celery_task_id
+    assert payload.latest_run.status == run_status
+    assert payload.latest_run.stage == ProcessingStage.EXTRACTING
+    assert payload.latest_run.error_message == run.error_message
+    assert not payload.has_succeeded

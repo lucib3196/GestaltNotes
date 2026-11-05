@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { useCallback, useState } from "react";
 
 import { useAuth } from "../../features/Auth";
@@ -11,25 +12,25 @@ export function useDeleteCourseNote() {
 
   const deleteCourseNote = useCallback(
     async (courseId: string, noteId: string) => {
-      if (!user) {
-        throw new Error("You must be signed in to remove notes.");
-      }
-
       setLoading(true);
       setError(null);
 
       try {
+        if (!user) throw new Error("You must be signed in to remove notes.");
         const token = await user.getIdToken();
         const deletedNote = await CoursesAPI.deleteCourseNote(
           token,
           courseId,
           noteId,
         );
+        if (!deletedNote.success) throw new Error(deletedNote.info);
         setResult(deletedNote);
         return deletedNote;
       } catch (err) {
-        const error =
-          err instanceof Error ? err : new Error("Failed to remove note.");
+        const detail = isAxiosError<{ detail?: unknown }>(err)
+          ? err.response?.data.detail : undefined;
+        const error = typeof detail === "string" ? new Error(detail)
+          : err instanceof Error ? err : new Error("Failed to remove note.");
         setError(error);
         throw error;
       } finally {

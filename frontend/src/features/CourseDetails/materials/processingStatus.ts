@@ -1,5 +1,5 @@
 import type { CourseNoteOverview } from "../../../services/courses";
-import type { ProcessingStatus, TaskState } from "../../../services/processing";
+import type { ProcessingStage, ProcessingStatus, TaskState } from "../../../services/processing";
 
 export type DisplayStatus =
   | "processed"
@@ -13,7 +13,8 @@ export type DisplayStatus =
   | "checking";
 
 export const activeRun = (status: ProcessingStatus | null | undefined) =>
-  status === "queued" || status === "running" || status === "retrying";
+  status === "PENDING" || status === "RECEIVED" ||
+  status === "STARTED" || status === "PROGRESS" || status === "RETRY";
 
 export function getDisplayStatus(
   note: CourseNoteOverview,
@@ -38,20 +39,23 @@ export function getDisplayStatus(
     case "REVOKED":
       return "revoked";
     case "SUCCESS":
-      if (activeRun(note.processing.latest_run?.status)) return "checking";
-      break;
+      return "processed";
   }
   switch (note.processing.latest_run?.status) {
-    case "queued":
+    case "PENDING":
+    case "RECEIVED":
       return "queued";
-    case "running":
+    case "STARTED":
+    case "PROGRESS":
       return "running";
-    case "retrying":
+    case "RETRY":
       return "retrying";
-    case "failed":
+    case "FAILURE":
       return "failed";
-    case "revoked":
+    case "REVOKED":
       return "revoked";
+    case "SUCCESS":
+      return "processed";
     default:
       return "idle";
   }
@@ -62,3 +66,12 @@ export function isProcessingBusy(status: DisplayStatus): boolean {
     status,
   );
 }
+
+export const stageLabels: Record<ProcessingStage, string> = {
+  validating: "Preparing…",
+  downloading: "Downloading document…",
+  extracting: "Extracting lecture content…",
+  saving_blocks: "Saving notes…",
+  building_documents: "Building notes…",
+  indexing: "Indexing notes…",
+};
