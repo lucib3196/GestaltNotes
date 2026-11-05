@@ -13,6 +13,7 @@ from backend.courses.vector_store.course_vector_store_service import (
 )
 from backend.database.config import open_session
 from backend.storage import FileService
+from backend.processing.processing_run_repository import ProcessingRunRepository
 
 
 def create_storage() -> BlobStorage:
@@ -48,3 +49,9 @@ def course_note_scope() -> Generator[CourseNoteService, None, None]:
 @contextmanager
 def block_builder() -> Generator[NoteBlockDocumentBuilder, None, None]:
     yield NoteBlockDocumentBuilder()
+
+
+@contextmanager
+def processing_run_scope() -> Generator[ProcessingRunRepository, None, None]:
+    with open_session() as session:
+        yield ProcessingRunRepository(session)

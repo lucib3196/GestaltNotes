@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from .models import ProcessingRun, ProcessingUpdate
 
 
-class RunRepo:
+class ProcessingRunRepository:
     def __init__(self, session: Session) -> None:
         self._session = session
 

@@ -32,7 +32,7 @@ from .models import (
     ProcessingStage,
     ProcessingStatus,
 )
-from .tracking import processing_update
+from .tracking import processing_state
 
 
 @app.task(bind=True, pydantic=True)
@@ -123,9 +123,9 @@ def prepare_lecture_run(self: Task, data: LectureProcessingInput) -> dict:
                     note_id=note_uuid,
                 )
             )
-        with processing_update(
-            run_id,
-            task_id=UUID(self.request.id),
+        with processing_state(
+            task=self,
+            run_id=run_id,
             stage=ProcessingStage.VALIDATING,
         ):
             updated = LectureProcessingState(
@@ -166,9 +166,9 @@ def extract_lecture_content(self: Task, data: LectureProcessingState) -> dict:
     try:
         note_id = data.note_id
         with (
-            processing_update(
-                data.run_id,
-                task_id=UUID(self.request.id),
+            processing_state(
+                task=self,
+                run_id=data.run_id,
                 stage=ProcessingStage.DOWNLOADING,
             ),
             course_note_scope() as notes,
@@ -176,9 +176,9 @@ def extract_lecture_content(self: Task, data: LectureProcessingState) -> dict:
             file, content = asyncio.run(notes.download_note(note_id))
             if file.content_type != "application/pdf":
                 raise ValueError("Only PDF files can be processed")
-        with processing_update(
-            data.run_id,
-            task_id=UUID(self.request.id),
+        with processing_state(
+            task=self,
+            run_id=data.run_id,
             stage=ProcessingStage.EXTRACTING,
         ):
             context = ExtractionContext(
@@ -253,9 +253,9 @@ def parse_and_save_note_blocks(self: Task, data: LectureProcessingState) -> dict
         data.note_id,
     )
     try:
-        with processing_update(
-            data.run_id,
-            task_id=UUID(self.request.id),
+        with processing_state(
+            task=self,
+            run_id=data.run_id,
             stage=ProcessingStage.SAVING_BLOCKS,
         ):
             if data.extraction_result is None:
@@ -324,15 +324,15 @@ def embedd_and_save(self: Task, data: LectureProcessingState) -> dict:
     )
     try:
         course_id = data.course_id
-        with processing_update(
-            data.run_id,
-            task_id=UUID(self.request.id),
+        with processing_state(
+            task=self,
+            run_id=data.run_id,
             stage=ProcessingStage.BUILDING_DOCUMENTS,
         ):
             block_ids = [block.id for block in data.note_blocks]
-        with processing_update(
-            data.run_id,
-            task_id=UUID(self.request.id),
+        with processing_state(
+            task=self,
+            run_id=data.run_id,
             stage=ProcessingStage.INDEXING,
             final_stage=True,
         ):
