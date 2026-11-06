@@ -6,9 +6,10 @@ from uuid import UUID
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from pydantic import BaseModel
-
+import asyncio
 from backend.adapters import Repository
 from backend.core.logger import logger
+from typing import List
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 UpdateT = TypeVar("UpdateT", bound=BaseModel)
@@ -41,7 +42,7 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         resource_id: UUID,
         *,
         force_recreate: bool = False,
-    ) -> None:
+    ) -> List[str]:
         """Load a resource, build its document, and write it to the vector store.
 
         Skip unchanged text and metadata unless force_recreate is True.
@@ -68,18 +69,17 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
                     logger.debug(
                         "Indexing skipped: resource_id=%s reason=unchanged", resource_id
                     )
-                    return
-
-            await self._store.aadd_documents(
-                [document],
-                ids=[document_id],
-            )
+                    return []
 
             logger.info(
                 "Document indexed: resource_id=%s document_id=%s forced=%s",
                 resource_id,
                 document_id,
                 force_recreate,
+            )
+            return await self._store.aadd_documents(
+                [document],
+                ids=[document_id],
             )
         except Exception:
             logger.exception("Indexing failed: resource_id=%s", resource_id)
@@ -90,16 +90,18 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         resource_ids: Sequence[UUID],
         *,
         force_recreate: bool = False,
-    ) -> None:
+    ) -> List[str]:
         """Index unique resource IDs sequentially, preserving input order.
 
         Stop at the first failure; earlier vector writes remain applied.
         """
-        for resource_id in dict.fromkeys(resource_ids):
-            await self.index(
-                resource_id,
-                force_recreate=force_recreate,
+        results = await asyncio.gather(
+            *(
+                self.index(resource_id, force_recreate=force_recreate)
+                for resource_id in dict.fromkeys(resource_ids)
             )
+        )
+        return [item for result in results for item in result]
 
     async def delete(self, resource_id: UUID) -> None:
         """Delete the vector document whose ID matches the resource UUID.
