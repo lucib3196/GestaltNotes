@@ -92,7 +92,7 @@ async def test_add_file_uses_file_name_as_default_title(
 
 
 @pytest.mark.asyncio
-async def test_upload_note_creates_file_and_course_note(
+async def test_upload_creates_file_and_course_note(
     course_note_service,
     db_session,
     course,
@@ -100,9 +100,9 @@ async def test_upload_note_creates_file_and_course_note(
 ):
     assert course.id is not None
 
-    note = await course_note_service.upload_note(
+    note = await course_note_service.upload(
         course_id=course.id,
-        educator=course_owner,
+        user=course_owner,
         upload=upload_file(),
         resource_type=CourseContentType.NOTES,
         title="Uploaded Note",
@@ -155,7 +155,7 @@ async def test_remove_file_deletes_association_only(
 
 
 @pytest.mark.asyncio
-async def test_remove_note_deletes_association_file_record_and_blob(
+async def test_delete_removes_association_file_record_and_blob(
     course_note_service,
     db_session,
     course,
@@ -167,7 +167,7 @@ async def test_remove_note_deletes_association_file_record_and_blob(
     assert course.id is not None
     assert file_record.id is not None
 
-    await course_note_service.remove_note(note.id, course_owner)
+    await course_note_service.delete(note.id, user=course_owner)
 
     assert db_session.get(CourseNote, note.id) is None
     assert db_session.get(File, file_record.id) is None

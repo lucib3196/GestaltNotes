@@ -1,7 +1,8 @@
 from datetime import UTC, datetime
-from typing import Self
+from typing import Any
 from uuid import UUID
 
+from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
@@ -14,13 +15,8 @@ from backend.courses.exceptions import (
     NoteBlockUpdateError,
     NoteBlockValidationError,
 )
-from backend.courses.models import NoteBlock, NoteBlockUpdate
+from backend.courses.models import NOTE_BLOCK_CONTENT_MODELS, NoteBlock, NoteBlockUpdate
 from backend.courses.repo.note_blocks_repo import NoteBlockRepo
-from backend.courses.service.document_builder import NoteBlockDocumentBuilder
-from backend.courses.utils import validate_note_block
-from backend.courses.vector_store.course_vector_store_service import (
-    CourseVectorStoreService,
-)
 from backend.indexer.indexer import IndexingService
 
 
@@ -34,17 +30,6 @@ class NoteBlockService:
         self._session = session
         self._blocks = blocks
         self._indexer = indexer
-
-    @classmethod
-    def from_dependencies(cls, session: Session, course_id: UUID) -> Self:
-        blocks = NoteBlockRepo(session)
-        stores = CourseVectorStoreService(session)
-        indexer = IndexingService[NoteBlock, NoteBlockUpdate](
-            repo=blocks,
-            builder=NoteBlockDocumentBuilder(),
-            vector_store=stores.get_vectorstore(course_id, async_mode=True),
-        )
-        return cls(session, blocks, indexer)
 
     async def create(self, block: NoteBlock) -> NoteBlock:
         """Validate, save, and index one block.
@@ -65,7 +50,7 @@ class NoteBlockService:
             validated = []
             for block in blocks:
                 candidate = NoteBlock.model_validate(block.model_dump())
-                candidate.content = validate_note_block(candidate)
+                candidate.content = self.validate_note_block(candidate)
                 validated.append(candidate)
 
             saved = []
@@ -117,7 +102,7 @@ class NoteBlockService:
                 raise NoteBlockValidationError("Provide at least one field to update")
 
             if "content" in changes:
-                changes["content"] = validate_note_block(block, changes["content"])
+                changes["content"] = self.validate_note_block(block, changes["content"])
 
             validated_update = NoteBlockUpdate.model_validate(changes)
 
@@ -152,7 +137,7 @@ class NoteBlockService:
         """
         try:
             await self.get(block_id)
-            await self._indexer.delete(block_id)
+            await self._indexer.delete([block_id])
             await self._blocks.delete(block_id)
             self._session.commit()
         except SQLAlchemyError as exc:
@@ -167,6 +152,27 @@ class NoteBlockService:
 
         logger.info("Note block deleted: block_id=%s", block_id)
 
+    async def delete_by_note_id(self, note_id: UUID, *, commit: bool = True) -> None:
+        """Remove a note's vectors before deleting its block rows.
+
+        Set commit=False when an outer workflow owns the transaction.
+        Cleanup failures propagate; database rollback cannot restore vectors.
+        """
+        try:
+            blocks = await self._blocks.list_by_note(note_id)
+            if not blocks:
+                return
+            await self._indexer.delete([block.id for block in blocks])
+            for block in blocks:
+                await self._blocks.delete(block.id)
+            if commit:
+                self._session.commit()
+        except Exception:
+            logger.exception("Note block cleanup failed: note_id=%s", note_id)
+            if commit:
+                self._session.rollback()
+            raise
+
     async def reindex(self, block_id: UUID, *, force_recreate: bool = False) -> None:
         """Synchronize an existing block's document without changing its source data.
 
@@ -175,6 +181,28 @@ class NoteBlockService:
         await self.get(block_id)
         await self._indexer.index(block_id, force_recreate=force_recreate)
 
-    async def list_by_course(self, course_id: UUID) -> list[NoteBlock]:
-        """Return blocks belonging to the course without modifying or indexing them."""
-        return list(await self._blocks.list_by_course(course_id))
+    @staticmethod
+    def validate_note_block(
+        block: NoteBlock,
+        content: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if block.schema_version != 1:
+            raise NoteBlockValidationError(
+                f"Unsupported schema version: {block.schema_version}"
+            )
+
+        if not block.kind:
+            raise NoteBlockValidationError("Block kind is required")
+
+        model = NOTE_BLOCK_CONTENT_MODELS.get(block.kind)
+        if model is None:
+            raise NoteBlockValidationError(f"Unsupported block kind: {block.kind}")
+
+        payload = block.content if content is None else content
+
+        try:
+            return model.model_validate(payload).model_dump(mode="json")
+        except ValidationError as exc:
+            raise NoteBlockValidationError(
+                f"Invalid content for block kind '{block.kind}': {exc}"
+            ) from exc

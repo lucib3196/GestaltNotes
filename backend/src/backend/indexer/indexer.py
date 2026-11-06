@@ -1,15 +1,15 @@
+import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import TypeVar
+from typing import TypeVar, List
 from uuid import UUID
 
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStore
 from pydantic import BaseModel
-import asyncio
+
 from backend.adapters import Repository
 from backend.core.logger import logger
-from typing import List
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 UpdateT = TypeVar("UpdateT", bound=BaseModel)
@@ -42,7 +42,7 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         resource_id: UUID,
         *,
         force_recreate: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Load a resource, build its document, and write it to the vector store.
 
         Skip unchanged text and metadata unless force_recreate is True.
@@ -90,7 +90,7 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         resource_ids: Sequence[UUID],
         *,
         force_recreate: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Index unique resource IDs sequentially, preserving input order.
 
         Stop at the first failure; earlier vector writes remain applied.
@@ -103,17 +103,17 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         )
         return [item for result in results for item in result]
 
-    async def delete(self, resource_id: UUID) -> None:
+    async def delete(self, ids: List[UUID | str]) -> None:
         """Delete the vector document whose ID matches the resource UUID.
 
         Does not delete the source database record.
         """
         try:
-            result = await self._store.adelete(ids=[str(resource_id)])
+            result = await self._store.adelete(ids=[str(idx) for idx in ids])
             if result is False:
-                raise RuntimeError(f"Could not delete indexed resource '{resource_id}'")
+                raise RuntimeError(f"Could not delete indexed resource '{len(ids)}'")
         except Exception:
-            logger.exception("Index deletion failed: resource_id=%s", resource_id)
+            logger.exception("Index deletion failed: resource_id=%s", str(ids))
             raise
 
-        logger.info("Indexed document removed: resource_id=%s", resource_id)
+        logger.info("Indexed document removed: resource_id=%s", str(ids))
