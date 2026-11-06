@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Query
 from fastapi.routing import APIRouter
 from starlette import status
 
@@ -16,6 +16,7 @@ from backend.processing.models import (
     LectureProcessingStatusRead,
     ProcessingRun,
     ProcessingRunRead,
+    ProcessingStatus,
 )
 from backend.processing.tasks import process_lecture_file
 
@@ -39,9 +40,14 @@ async def list_processing_runs(
     note_id: UUID,
     service: CourseNoteProcessingServiceDep,
     _note: ReadableCourseNoteDep,
+    order: Literal["newest", "oldest"] = "newest",
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    statuses: Annotated[list[ProcessingStatus] | None, Query()] = None,
 ) -> list[ProcessingRun]:
     try:
-        return await service.list_runs(note_id)
+        return await service.list_runs(
+            note_id, order=order, limit=limit, statuses=statuses
+        )
     except CourseNoteNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
 
@@ -60,7 +66,6 @@ async def get_processing_run(
         return await service.get_run(note_id, run_id)
     except (
         CourseNoteNotFoundError,
-        LectureAlreadyProcessedError,
         LectureProcessingRunNotFoundError,
     ) as exc:
         raise HTTPException(404, str(exc)) from exc

@@ -203,3 +203,33 @@ async def test_reorder_can_be_rolled_back(
     found = await note_block_repo.list_by_note(course_note.id)
     assert [block.id for block in found] == original
     assert [block.position for block in found] == [0, 1, 2]
+
+
+async def test_list_by_course_filters_note_and_file(
+    note_block_repo, block, course_note
+):
+    await note_block_repo.create(block)
+    assert [
+        b.id
+        for b in await note_block_repo.list_by_course(
+            course_note.course_id,
+            course_note_id=course_note.id,
+            source_file_id=course_note.file_id,
+        )
+    ] == [block.id]
+    assert (
+        await note_block_repo.list_by_course(
+            course_note.course_id, course_note_id=uuid4()
+        )
+        == []
+    )
+    assert (
+        await note_block_repo.list_by_course(
+            course_note.course_id, source_file_id=uuid4()
+        )
+        == []
+    )
+    assert (
+        await note_block_repo.list_by_course(uuid4(), course_note_id=course_note.id)
+        == []
+    )

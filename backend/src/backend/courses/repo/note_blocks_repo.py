@@ -53,13 +53,23 @@ class NoteBlockRepo(Repository[NoteBlock, NoteBlockUpdate]):
         )
         return self._session.exec(statement).all()
 
-    async def list_by_course(self, course_id: UUID) -> Sequence[NoteBlock]:
+    async def list_by_course(
+        self,
+        course_id: UUID,
+        *,
+        course_note_id: UUID | None = None,
+        source_file_id: UUID | None = None,
+    ) -> Sequence[NoteBlock]:
         statement = (
             select(NoteBlock)
             .join(CourseNote, col(NoteBlock.course_note_id) == CourseNote.id)
             .where(CourseNote.course_id == course_id)
             .order_by(col(NoteBlock.position), col(NoteBlock.id))
         )
+        if course_note_id is not None:
+            statement = statement.where(NoteBlock.course_note_id == course_note_id)
+        if source_file_id is not None:
+            statement = statement.where(CourseNote.file_id == source_file_id)
         return self._session.exec(statement).all()
 
     async def list_by_file(self, file_id: UUID) -> Sequence[NoteBlock]:

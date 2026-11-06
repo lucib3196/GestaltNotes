@@ -13,8 +13,8 @@ from backend.courses.models import (
     CourseVectorStore,
 )
 from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep, StudentDep
+from backend.web.courses.dependencies import CourseEnrollmentServiceDep
 from backend.web.courses.http import course_http_exception
-from backend.web.enrollments.dependencies import CourseEnrollmentServiceDep
 
 router = APIRouter(prefix="/courses", tags=["course-enrollments"])
 

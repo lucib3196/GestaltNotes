@@ -143,9 +143,7 @@ async def test_update_passes_authenticated_actor():
     educator = Mock()
     update = CourseNoteUpdate(title="Updated")
     await update_course_note(note_id, educator, service, Mock(), update)
-    service.update_note_properties.assert_awaited_once_with(
-        note_id, update, user=educator
-    )
+    service.update.assert_awaited_once_with(note_id, update, user=educator)
 
 
 async def test_processing_uses_validated_note_and_course(monkeypatch):
@@ -179,3 +177,121 @@ async def test_processing_uses_validated_note_and_course(monkeypatch):
             }
         ]
     )
+
+
+def test_block_reads_do_not_construct_indexing_and_mutations_are_scoped():
+    from backend.web.courses import dependencies
+
+    app = FastAPI()
+    for router in course_routes:
+        app.include_router(router)
+    routes = {
+        route.endpoint.__name__: route
+        for route in app.routes
+        if isinstance(route, APIRoute)
+    }
+    for name in ("list_note_blocks", "get_note_block"):
+        calls = dependency_calls(routes[name].dependant)
+        assert dependencies.get_readable_course in calls
+        assert dependencies.get_note_block_service not in calls
+    for name in ("update_note_block", "delete_note_block", "reindex_note_block"):
+        calls = dependency_calls(routes[name].dependant)
+        assert dependencies.get_owned_note_block in calls
+        assert dependencies.get_owned_course in calls
+    schema = app.openapi()["paths"]
+    path = "/courses/notes/{course_id}/{note_id}"
+    assert "get" in schema[path]
+    assert schema[path]["put"]["deprecated"] is True
+    assert "patch" in schema[path]
+
+
+@pytest.mark.parametrize(
+    "wrong_course,active,expected",
+    [
+        (True, False, 404),
+        (False, True, 409),
+        (False, False, 200),
+    ],
+)
+async def test_block_mutation_scope_and_active_processing(
+    monkeypatch, wrong_course, active, expected
+):
+    from backend.web.courses import dependencies
+
+    course = SimpleNamespace(id=uuid4())
+    block = SimpleNamespace(
+        id=uuid4(),
+        course_note_id=uuid4(),
+        course_note=SimpleNamespace(course_id=uuid4() if wrong_course else course.id),
+    )
+    repo = SimpleNamespace(get=AsyncMock(return_value=block))
+    runs = SimpleNamespace(
+        get_latest_active=Mock(return_value=object() if active else None)
+    )
+    monkeypatch.setattr(dependencies, "NoteBlockRepo", lambda _: repo)
+    monkeypatch.setattr(dependencies, "LectureProcessingRepository", lambda _: runs)
+    if expected == 200:
+        assert (
+            await dependencies.get_owned_note_block(block.id, course, Mock()) is block
+        )
+    else:
+        with pytest.raises(HTTPException) as exc:
+            await dependencies.get_owned_note_block(block.id, course, Mock())
+        assert exc.value.status_code == expected
+    if wrong_course:
+        runs.get_latest_active.assert_not_called()
+
+
+async def test_processing_history_forwards_filters():
+    from backend.processing.models import ProcessingStatus
+    from backend.web.courses.processing_runs import list_processing_runs
+
+    service = SimpleNamespace(list_runs=AsyncMock(return_value=[]))
+    note_id = uuid4()
+    statuses = [ProcessingStatus.FAILURE]
+    assert (
+        await list_processing_runs(
+            note_id, service, Mock(), order="oldest", limit=5, statuses=statuses
+        )
+        == []
+    )
+    service.list_runs.assert_awaited_once_with(
+        note_id, order="oldest", limit=5, statuses=statuses
+    )
+
+
+async def test_block_mutations_delegate_to_indexing_service():
+    from backend.courses.models import NoteBlockUpdate
+    from backend.web.courses.note_blocks import (
+        delete_note_block,
+        reindex_note_block,
+        update_note_block,
+    )
+
+    block = SimpleNamespace(id=uuid4())
+    service = SimpleNamespace(
+        update=AsyncMock(return_value=block),
+        delete=AsyncMock(),
+        reindex=AsyncMock(),
+    )
+    update = NoteBlockUpdate(title="Updated")
+    assert await update_note_block(update, block, service) is block
+    service.update.assert_awaited_once_with(block.id, update)
+    assert (await reindex_note_block(block, service, True)).status_code == 204
+    service.reindex.assert_awaited_once_with(block.id, force_recreate=True)
+    assert (await delete_note_block(block, service)).status_code == 204
+    service.delete.assert_awaited_once_with(block.id)
+
+
+async def test_block_validation_error_returns_422():
+    from backend.courses.exceptions import NoteBlockValidationError
+    from backend.courses.models import NoteBlockUpdate
+    from backend.web.courses.note_blocks import update_note_block
+
+    block = SimpleNamespace(id=uuid4())
+    service = SimpleNamespace(
+        update=AsyncMock(side_effect=NoteBlockValidationError("Invalid content"))
+    )
+    with pytest.raises(HTTPException) as exc:
+        await update_note_block(NoteBlockUpdate(), block, service)
+    assert exc.value.status_code == 422

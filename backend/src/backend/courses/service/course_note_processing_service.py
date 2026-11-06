@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+from typing import Literal
 from uuid import UUID
 
 from sqlmodel import Session
@@ -14,6 +16,7 @@ from backend.processing.models import (
     LectureProcessingStatusRead,
     ProcessingRun,
     ProcessingRunRead,
+    ProcessingStatus,
 )
 
 
@@ -62,10 +65,24 @@ class CourseNoteProcessingService:
             )
         return note
 
-    async def list_runs(self, note_id: UUID) -> list[ProcessingRun]:
-        """List this note's runs, newest first, after verifying the note exists."""
+    async def list_runs(
+        self,
+        note_id: UUID,
+        *,
+        order: Literal["newest", "oldest"] = "newest",
+        limit: int | None = None,
+        statuses: Sequence[ProcessingStatus] | None = None,
+    ) -> list[ProcessingRun]:
+        """List filtered runs within an existing note, with stable ordering."""
         await self._notes.get_required(note_id)
-        return list(self._runs.list_by_note(note_id))
+        return list(
+            self._runs.list_by_note(
+                note_id,
+                order=order,
+                limit=limit,
+                statuses=statuses,
+            )
+        )
 
     async def get_run(self, note_id: UUID, run_id: UUID) -> ProcessingRun:
         """Retrieve a run only within the requested note."""
