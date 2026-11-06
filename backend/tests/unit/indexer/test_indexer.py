@@ -175,7 +175,7 @@ async def test_index_force_recreates_unchanged_document(
 @pytest.mark.asyncio
 async def test_delete_document(fake_indexer, fake_repo, vector_store):
     record_id = next(iter(fake_repo.records))
-    assert await fake_indexer.delete(record_id) is None
+    assert await fake_indexer.delete([record_id]) is None
     vector_store.adelete.assert_awaited_once_with(
         ids=[str(record_id)],
     )
@@ -189,7 +189,7 @@ async def test_delete_raises_when_vector_store_reports_failure(
     vector_store.adelete.return_value = False
 
     with pytest.raises(RuntimeError, match="Could not delete indexed resource"):
-        await fake_indexer.delete(record_id)
+        await fake_indexer.delete([record_id])
 
     vector_store.adelete.assert_awaited_once_with(ids=[str(record_id)])
 

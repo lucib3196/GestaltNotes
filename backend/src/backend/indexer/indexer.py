@@ -1,7 +1,7 @@
 import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import TypeVar, List
+from typing import TypeVar
 from uuid import UUID
 
 from langchain_core.documents import Document
@@ -103,7 +103,7 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
         )
         return [item for result in results for item in result]
 
-    async def delete(self, ids: List[UUID | str]) -> None:
+    async def delete(self, ids: list[UUID | str]) -> None:
         """Delete the vector document whose ID matches the resource UUID.
 
         Does not delete the source database record.

@@ -3,6 +3,7 @@
 # at runtime; do not rely on Celery to serialize models with union annotations.
 
 import asyncio
+import backend.indexer.indexer
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import perf_counter
@@ -14,19 +15,20 @@ from celery.exceptions import Ignore, Reject, Retry
 from langchain.chat_models import init_chat_model
 from lecture_processor.api import process_lecture
 from lecture_processor.graph.context import ExtractionContext, FailureConfig
-
+from backend.courses.repo.note_blocks_repo import NoteBlockRepo
 from backend.core.logger import logger
 from backend.courses.service.note_block_service import NoteBlockService
 from backend.courses.utils import parse_lecture_document
 from backend.courses.vector_store.course_vector_store_service import (
     CourseVectorStoreService,
 )
+from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.database.config import open_session
 from backend.processing.celery_app import app
 from backend.processing.resources import (
     course_note_scope,
 )
-
+from backend.indexer.indexer import IndexingService
 from .models import (
     LectureProcessingInput,
     LectureProcessingRun,
@@ -169,6 +171,7 @@ def parse_save_and_embedd(
                 data.course_id,
                 collection_name=f"course_{data.course_id.hex}",
             )
+        vs = stores.get_vectorstore(data.course_id, async_mode=True)
     with (
         processing_state(
             task=self,
@@ -178,7 +181,11 @@ def parse_save_and_embedd(
         ),
         open_session() as session,
     ):
-        service = NoteBlockService.from_dependencies(session, data.course_id)
+        repo = NoteBlockRepo(session)
+        indexer = IndexingService(
+            repo, builder=NoteBlockDocumentBuilder(), vector_store=vs
+        )
+        service = NoteBlockService(session, repo, indexer)
         saved = asyncio.run(service.create_many(note_blocks))
         logger.info("Note blocks saved: note_id=%s count=%d", data.note_id, len(saved))
         updated = LectureProcessingState.model_validate(
