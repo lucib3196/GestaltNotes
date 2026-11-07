@@ -66,18 +66,20 @@ function CourseDetailsContent() {
           <div>
             <button
               type="button"
-              onClick={() => setShowUpload(prev=>!prev)}
+              onClick={() => setShowUpload((prev) => !prev)}
               className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               Upload notes
             </button>
           </div>
           {showUpload && <CourseNoteUpload onUploaded={materials.refetch} />}
-          <div className="grid min-w-0 overflow-hidden rounded-2xl border border-border bg-surface lg:grid-cols-[20rem_minmax(0,1fr)]">
-            <div className="min-w-0 border-b border-border bg-surface-muted/20 p-4 lg:border-b-0 lg:border-r">
+          <div className="grid min-w-0 rounded-2xl border border-border bg-surface lg:h-[75dvh] lg:grid-cols-[20rem_minmax(0,1fr)] lg:overflow-hidden">
+            <div className="min-h-0 min-w-0 border-b border-border bg-surface-muted/20 p-4 lg:flex lg:flex-col lg:overflow-hidden lg:border-b-0 lg:border-r">
               <CourseMaterials materials={materials} />
             </div>
-            <StudyWorkspace />
+            <div className="min-h-0 min-w-0 lg:overflow-y-auto lg:overscroll-contain">
+              <StudyWorkspace />
+            </div>
           </div>
         </>
       ) : (

@@ -6,7 +6,8 @@ import {
   FiLoader,
   FiRefreshCw,
 } from "react-icons/fi";
-import type { DisplayStatus } from "../processingStatus";
+import { stageLabels, type DisplayStatus } from "../processingStatus";
+import type { ProcessingStage } from "../../../../services/processing";
 
 const badgeStyles = {
   processed: {
@@ -56,7 +57,10 @@ const badgeStyles = {
   },
 };
 
-export function ProcessingBadge({ status }: { status: DisplayStatus }) {
+export function ProcessingBadge({ status, stage }: {
+  status: DisplayStatus;
+  stage?: ProcessingStage;
+}) {
   const { label, Icon, tone } = badgeStyles[status];
   const spinning = ["starting", "running", "retrying", "checking"].includes(
     status,
@@ -70,7 +74,7 @@ export function ProcessingBadge({ status }: { status: DisplayStatus }) {
         aria-hidden="true"
         className={spinning ? "motion-safe:animate-spin" : undefined}
       />
-      {label}
+      {status === "running" && stage ? stageLabels[stage] : label}
     </span>
   );
 }

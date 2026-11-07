@@ -30,8 +30,6 @@ async def test_enroll_student(enrollment_service, make_user, make_course):
         **unique_user_fields("student"),
     )
     course = await make_course(educator)
-    assert course.id is not None
-    assert student.id is not None
 
     enrollment = await enrollment_service.enroll_student(course.id, student)
 
@@ -51,7 +49,6 @@ async def test_enroll_student_rejects_non_student(
         **unique_user_fields("educator"),
     )
     course = await make_course(educator)
-    assert course.id is not None
 
     with pytest.raises(CourseEnrollmentPermissionError):
         await enrollment_service.enroll_student(course.id, educator)

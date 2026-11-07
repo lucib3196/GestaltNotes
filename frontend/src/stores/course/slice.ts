@@ -56,6 +56,9 @@ export function createCourseNoteStore(): CourseNoteSliceCreator {
       set((state) => {
         const removed = new Set(ids);
         return {
+          checkedNoteIds: state.checkedNoteIds.filter((id) => !removed.has(id)),
+          selectedNoteID: state.selectedNoteID && removed.has(state.selectedNoteID)
+            ? null : state.selectedNoteID,
           notesById: setItemsById(
             Object.values(state.notesById).filter(
               (note) => !removed.has(note.id),

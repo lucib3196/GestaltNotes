@@ -1,26 +1,51 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from enum import StrEnum
+from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, DateTime, ForeignKey, Index, UniqueConstraint
+from lecture_processor.conceptual_question import ConceptualQuestion
+from lecture_processor.extract_derivations.model import Derivation
+from lecture_processor.extracted_question import ExtractedQuestion
+from lecture_processor.lecture_analysis import LectureAnalysis
+from pydantic import BaseModel, ConfigDict, field_validator
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
-from backend.courses.notes.models import CourseContentType as CourseContentType
-from backend.courses.notes.models import CourseNote as CourseNote
-from backend.courses.vector_store.models import (
-    CourseVectorStore as CourseVectorStore,
-)
-from backend.courses.vector_store.models import (
-    VectorStoreStatus as VectorStoreStatus,
-)
+from backend.shared import Status
 
 if TYPE_CHECKING:
     from backend.accounts.models import User
-    from backend.courses.vector_store.models import CourseVectorStore
+    from backend.processing.models import LectureProcessingRun
+    from backend.storage.models import File
 
 
-class CourseEnrollment(SQLModel, table=True):
+# ---------------------------------------------------------------------------
+# Shared storage types and response fields
+# ---------------------------------------------------------------------------
+
+JSONType = JSON().with_variant(JSONB, "postgresql")
+
+
+class DeleteResponseBase(BaseModel):
+    success: bool
+    info: str
+
+
+# ---------------------------------------------------------------------------
+# Course enrollments: table and schemas
+# ---------------------------------------------------------------------------
+
+
+class CourseEnrollmentBase(SQLModel):
+    student_id: UUID
+    course_id: UUID
+
+
+class CourseEnrollment(CourseEnrollmentBase, table=True):
     __tablename__ = "course_enrollment"  # type: ignore
+    # Ensures that a student can only be enrolled in a course once
     __table_args__ = (
         UniqueConstraint(
             "student_id", "course_id", name="uq_course_enrollment_student_id"
@@ -34,20 +59,40 @@ class CourseEnrollment(SQLModel, table=True):
     active: bool = True
 
 
-class Course(SQLModel, table=True):
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+class CourseEnrollmentCreate(CourseEnrollmentBase):
+    pass
+
+
+class CourseEnrollmentRead(CourseEnrollmentBase):
+    enrolled_at: datetime
+    active: bool
+
+
+class CourseEnrollmentUpdate(CourseEnrollmentBase):
+    active: bool
+
+
+# ---------------------------------------------------------------------------
+# Courses: table and schemas
+# ---------------------------------------------------------------------------
+
+
+class CourseBase(SQLModel):
     name: str
-    discipline: str | None
+    discipline: str | None = None
     description: str | None = None
 
+
+class Course(CourseBase, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     owner_id: UUID = Field(
         sa_column=Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     )
-
+    prompt: str | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    # Class Attributes
+    # Attributes
     owner: "User" = Relationship(back_populates="owned_courses")
     students: list["User"] = Relationship(
         back_populates="enrolled_courses",
@@ -55,7 +100,6 @@ class Course(SQLModel, table=True):
     )
 
     notes: list["CourseNote"] = Relationship(back_populates="course")
-    access_codes: list["CourseAccessCode"] = Relationship(back_populates="course")
     vectorstore: Optional["CourseVectorStore"] = Relationship(back_populates="course")
 
     @property
@@ -63,34 +107,50 @@ class Course(SQLModel, table=True):
         return f"courses/{self.id}"
 
 
-class CourseAccessCode(SQLModel, table=True):
-    __tablename__ = "course_access_code"  # type: ignore
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
-    course_id: UUID = Field(
-        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
-    )
-    code_hash: str = Field(unique=True, index=True)
-    active: bool = True
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: datetime | None = None
-    uses: int = 0
-
-    course: "Course" = Relationship(back_populates="access_codes")
+class CourseCreate(CourseBase):
+    pass
 
 
-class CourseModule(SQLModel, table=True):
+class CourseRead(CourseBase):
+    id: UUID
+    owner_id: UUID
+
+
+class CourseUpdate(CourseBase):
+    pass
+
+
+class CourseDelete(DeleteResponseBase):
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Course modules: table and schemas
+# ---------------------------------------------------------------------------
+
+
+class CourseModuleBase(SQLModel):
+    course_id: UUID = Field()
+    title: str
+    position: int = Field(default=0)
+
+
+class CourseModule(CourseModuleBase, table=True):
     __tablename__ = "course_module"  # type: ignore
+
     __table_args__ = (
         UniqueConstraint("course_id", "id", name="uq_course_module_course_id"),
         Index("ix_course_modules_course_position", "course_id", "position"),
     )
+
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+
     course_id: UUID = Field(
         sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
     )
-    title: str
-    position: int = Field(default=0)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         sa_column=Column(
@@ -100,3 +160,292 @@ class CourseModule(SQLModel, table=True):
             onupdate=datetime.utcnow,
         ),
     )
+
+
+# ---------------------------------------------------------------------------
+# Course notes: content types, table, and schemas
+# ---------------------------------------------------------------------------
+
+
+class CourseContentType(StrEnum):
+    LECTURE = "lecture"
+    NOTES = "notes"
+    ASSIGNMENT = "assignment"
+    EXAM = "exam"
+    QUIZ = "quiz"
+    TEXTBOOK = "textbook"
+    HANDOUT = "handout"
+    SYLLABUS = "syllabus"
+    REFERENCE = "reference"
+    OTHER = "other"
+
+
+class CourseNoteBase(SQLModel):
+    course_id: UUID = Field()
+    file_id: UUID = Field()
+    title: str
+    resource_type: CourseContentType = Field()
+
+
+class CourseNote(CourseNoteBase, table=True):
+    __tablename__ = "course_note"  # type: ignore
+
+    __table_args__ = (
+        UniqueConstraint("course_id", "file_id", name="uq_course_note_course_file"),
+    )
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+
+    course_id: UUID = Field(
+        sa_column=Column(ForeignKey("course.id", ondelete="CASCADE"), nullable=False)
+    )
+
+    file_id: UUID = Field(
+        sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=False)
+    )
+
+    resource_type: CourseContentType = Field(
+        sa_column=Column(
+            SAEnum(CourseContentType, name="course_content_type"),
+            nullable=False,
+        )
+    )
+
+    status: Status = Status.DRAFT
+
+    course: "Course" = Relationship(back_populates="notes")
+
+    file: "File" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    processing_runs: list["LectureProcessingRun"] = Relationship(
+        back_populates="note",
+        sa_relationship_kwargs={"passive_deletes": "all"},
+    )
+
+
+class CourseNoteRead(CourseNoteBase):
+    id: UUID
+    download_url: str | None = None
+    content_type: str | None = None
+
+
+class CourseNoteUpdate(BaseModel):
+    title: str | None = None
+    resource_type: CourseContentType | None = None
+
+    @field_validator("title", "resource_type")
+    @classmethod
+    def reject_null(
+        cls,
+        value: str | CourseContentType | None,
+    ) -> str | CourseContentType:
+        """Allow omitted fields but reject explicit null updates."""
+        if value is None:
+            raise ValueError("Note title and resource type cannot be null")
+        return value
+
+
+class CourseNoteDelete(DeleteResponseBase):
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Note blocks: content models, table, and schemas
+# ---------------------------------------------------------------------------
+
+NOTE_BLOCK_CONTENT_MODELS: dict[str, type[BaseModel]] = {
+    "lecture_summary": LectureAnalysis,
+    "conceptual_question": ConceptualQuestion,
+    "derivation": Derivation,
+    "extracted_question": ExtractedQuestion,
+}
+
+
+class NoteBlockBase(SQLModel):
+    course_note_id: UUID | None = Field(
+        default=None, description="The note it belongs to "
+    )
+    title: str = Field(description="Display title for this block.")
+    kind: str | None = Field(
+        default=None,
+        description=(
+            "Content category, such as derivation, extracted_question, "
+            "conceptual_question, or lecture_summary."
+        ),
+    )
+    content: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Structured JSON payload containing the editable block content.",
+    )
+    position: int = Field(
+        ge=0, description="Zero-based display position within the source file's blocks."
+    )
+    page_start: int | None = Field(
+        default=None,
+        ge=0,
+        description="Zero-based first source PDF page, inclusive, if known.",
+    )
+    page_end: int | None = Field(
+        default=None,
+        ge=0,
+        description="Zero-based last source PDF page, inclusive, if known.",
+    )
+    revision: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Content revision, starting at zero. Increment when editable "
+            "content changes."
+        ),
+    )
+    schema_version: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Version of the JSON content structure, used to interpret and "
+            "migrate stored payloads."
+        ),
+    )
+
+
+class NoteBlock(NoteBlockBase, table=True):
+    __tablename__ = "note_block"  # type: ignore
+
+    id: UUID = Field(
+        default_factory=uuid4,
+        primary_key=True,
+        description="Unique identifier for this editable note block.",
+    )
+
+    course_note_id: UUID | None = Field(
+        default=None,
+        sa_column=Column(
+            ForeignKey("course_note.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        ),
+        description="The course note in which this block lives in",
+    )
+
+    course_note: Optional["CourseNote"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
+
+    content: dict[str, Any] = Field(
+        default_factory=dict,
+        sa_column=Column(JSONType, nullable=False),
+        description="Structured JSON payload containing the editable block content.",
+    )
+
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="UTC creation time.",
+    )
+
+    updated_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        description=(
+            "UTC time of the last update. "
+            "The update service must refresh this value when saving changes."
+        ),
+    )
+
+
+class NoteBlockRead(NoteBlockBase):
+    model_config = ConfigDict(from_attributes=True)  # type: ignore
+
+    id: UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class NoteBlockUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str | None = None
+    content: dict[str, Any] | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str | None) -> str:
+        if value is None or not value.strip():
+            raise ValueError("Title must not be null or empty")
+        return value.strip()
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: dict[str, Any] | None) -> dict[str, Any]:
+        if value is None:
+            raise ValueError("Content must not be null")
+        return value
+
+
+# ---------------------------------------------------------------------------
+# Course vector stores: enums, table, and schemas
+# ---------------------------------------------------------------------------
+
+
+class VectorStoreStatus(StrEnum):
+    PENDING = "pending"
+    READY = "ready"
+    FAILED = "failed"
+    ARCHIVED = "archived"
+
+
+class VectorstoreProvider(StrEnum):
+    ASTRA = "astra"
+    POSTGRES = "postgres"
+
+
+class CourseVectorStoreBase(SQLModel):
+    course_id: UUID = Field()
+    namespace_key: str = Field()
+    collection_name: str = Field()
+    description: str | None = Field(default=None)
+    embedding_model: str
+    provider: VectorstoreProvider = Field()
+    status: VectorStoreStatus = Field()
+
+
+class CourseVectorStore(CourseVectorStoreBase, table=True):
+    __tablename__ = "course_vector_store"  # type: ignore
+
+    course_id: UUID = Field(
+        sa_column=Column(
+            ForeignKey("course.id", ondelete="CASCADE"),
+            nullable=False,
+            primary_key=True,
+        )
+    )
+
+    namespace_key: str = Field(unique=True, nullable=False)
+
+    collection_name: str = Field(nullable=False)
+
+    provider: VectorstoreProvider = Field(
+        sa_column=Column(
+            SAEnum(VectorstoreProvider, name="vector_store_provider"),
+            nullable=False,
+        ),
+    )
+
+    status: VectorStoreStatus = Field(
+        sa_column=Column(
+            SAEnum(VectorStoreStatus, name="vector_store_status"),
+            nullable=False,
+        ),
+    )
+
+    course: "Course" = Relationship(back_populates="vectorstore")
+
+
+# ---------------------------------------------------------------------------
+# Processing overview and cross-module model references
+# ---------------------------------------------------------------------------
+
+# Keep this import after NoteBlock so processing task references can resolve.
+from backend.processing.models import LectureProcessingStatusRead  # noqa: E402
+
+
+class NoteOverview(CourseNoteRead):
+    processing: LectureProcessingStatusRead

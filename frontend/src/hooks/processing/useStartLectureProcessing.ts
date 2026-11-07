@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { useCallback, useState } from "react";
 import { useAuth } from "../../features/Auth";
 import {
@@ -31,8 +32,12 @@ export function useStartLectureProcessing() {
         setTask(started);
         return started;
       } catch (cause) {
-        const failure =
-          cause instanceof Error
+        const detail = isAxiosError<{ detail?: unknown }>(cause)
+          ? cause.response?.data.detail
+          : undefined;
+        const failure = typeof detail === "string"
+          ? new Error(detail)
+          : cause instanceof Error
             ? cause
             : new Error("Failed to start processing.");
         setError(failure);

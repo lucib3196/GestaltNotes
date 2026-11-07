@@ -1,11 +1,12 @@
 export type ProcessingStatus =
-  | "queued"
-  | "running"
-  | "retrying"
-  | "succeeded"
-  | "partial"
-  | "failed"
-  | "revoked";
+  | "PENDING"
+  | "RECEIVED"
+  | "STARTED"
+  | "RETRY"
+  | "FAILURE"
+  | "SUCCESS"
+  | "REVOKED"
+  | "PROGRESS";
 
 export type ProcessingStage =
   | "validating"
@@ -19,9 +20,11 @@ export type ProcessingRun = {
   id: string;
   celery_task_id: string;
   task_type: string;
-  status: ProcessingStatus | null;
+  status: ProcessingStatus;
   stage: ProcessingStage;
   attempt_count: number;
+  created_at: string;
+  updated_at: string;
   error_type: string | null;
   error_message: string | null;
 };
@@ -39,15 +42,7 @@ export type ProcessingTaskStarted = {
   summary: string;
 };
 
-export type TaskState =
-  | "PENDING"
-  | "RECEIVED"
-  | "STARTED"
-  | "RETRY"
-  | "FAILURE"
-  | "SUCCESS"
-  | "REVOKED"
-  | "PROGRESS";
+export type TaskState = ProcessingStatus;
 
 export type JsonValue =
   | string

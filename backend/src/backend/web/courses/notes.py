@@ -2,14 +2,14 @@ from io import BytesIO
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import File, Form, UploadFile
+from fastapi import File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.routing import APIRouter
 from starlette import status
 
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.notes.models import CourseContentType
-from backend.courses.notes.schema import (
+from backend.courses.models import (
+    CourseContentType,
     CourseNoteDelete,
     CourseNoteRead,
     CourseNoteUpdate,
@@ -19,6 +19,7 @@ from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep
 from backend.web.courses.dependencies import (
     CourseNoteProcessingServiceDep,
     CourseNoteServiceDep,
+    OwnedCourseNoteDep,
     ReadableCourseDep,
     ReadableCourseNoteDep,
 )
@@ -31,9 +32,11 @@ router = APIRouter(prefix="/courses/notes", tags=["courses", "notes"])
 async def list_course_notes(
     course_id: UUID,
     service: CourseNoteServiceDep,
+    _course: ReadableCourseDep,
 ) -> list[CourseNoteRead]:
     try:
-        return await service.list_notes_with_urls(course_id)
+        notes = await service.list_notes(course_id)
+        return [service.to_note_read(note) for note in notes]
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
@@ -53,13 +56,10 @@ async def list_course_note_overview(
 @router.get("/{course_id}/{note_id}/overview", response_model=NoteOverview)
 async def get_note_overview(
     note_id: UUID,
-    educator: CurrentUserDep,
-    service: CourseNoteServiceDep,
     processing: CourseNoteProcessingServiceDep,
     _note: ReadableCourseNoteDep,
 ) -> NoteOverview:
     try:
-        await service.assert_permission(educator, note_id)
         return await processing.get_note_overview(note_id)
     except CourseServiceException as e:
         raise course_http_exception(e) from e
@@ -98,29 +98,33 @@ async def upload_course_note(
     resource_type: Annotated[CourseContentType, Form()] = CourseContentType.NOTES,
 ) -> CourseNoteRead:
     try:
-        note = await service.upload_note(
+        note = await service.upload(
             course_id=course_id,
-            educator=educator,
+            user=educator,
             upload=file,
             resource_type=resource_type,
         )
         return service.to_note_read(note)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
 
-@router.put("/{course_id}/{note_id}", response_model=CourseNoteRead)
+@router.patch("/{course_id}/{note_id}", response_model=CourseNoteRead)
+@router.put("/{course_id}/{note_id}", response_model=CourseNoteRead, deprecated=True)
 async def update_course_note(
     note_id: UUID,
     educator: EducatorDep,
     service: CourseNoteServiceDep,
-    _note: ReadableCourseNoteDep,
+    _note: OwnedCourseNoteDep,
     update: CourseNoteUpdate,
 ) -> CourseNoteRead:
     try:
-        await service.assert_permission(educator, note_id)
-        note = await service.update_note_properties(note_id, update)
+        note = await service.update(note_id, update, user=educator)
         return service.to_note_read(note)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except CourseServiceException as e:
         raise course_http_exception(e) from e
 
@@ -130,10 +134,25 @@ async def remove_course_note(
     note_id: UUID,
     educator: EducatorDep,
     service: CourseNoteServiceDep,
-    _note: ReadableCourseNoteDep,
+    _note: OwnedCourseNoteDep,
 ) -> CourseNoteDelete:
     try:
-        await service.remove_note(note_id, educator)
+        await service.delete(note_id, user=educator)
         return CourseNoteDelete(success=True, info="Course note deleted.")
     except CourseServiceException as e:
         raise course_http_exception(e) from e
+
+
+@router.get("/{course_id}/{note_id}", response_model=CourseNoteRead)
+async def get_course_note(
+    note: ReadableCourseNoteDep,
+) -> CourseNoteRead:
+    """Read one authorized resource without storage or embedding dependencies."""
+    return CourseNoteRead(
+        id=note.id,
+        course_id=note.course_id,
+        file_id=note.file_id,
+        title=note.title,
+        resource_type=note.resource_type,
+        content_type=note.file.content_type if note.file else None,
+    )

@@ -2,13 +2,11 @@ from fastapi import HTTPException
 from starlette import status
 
 from backend.courses.exceptions import (
-    CourseAccessCodeDisabledError,
-    CourseAccessCodeExpiredError,
-    CourseAccessCodeInvalidError,
-    CourseAccessCodeNotFoundError,
     CourseEnrollmentAlreadyExistsError,
     CourseEnrollmentNotFoundError,
     CourseEnrollmentPermissionError,
+    CourseNoteDeletionConflictError,
+    CourseNoteDeletionError,
     CourseNoteNotFoundError,
     CourseNotFoundError,
     CourseOwnershipError,
@@ -20,9 +18,17 @@ from backend.courses.exceptions import (
 def course_http_exception(error: Exception) -> HTTPException:
     if isinstance(
         error,
-        (CourseNotFoundError, CourseNoteNotFoundError, CourseAccessCodeNotFoundError),
+        (CourseNotFoundError, CourseNoteNotFoundError),
     ):
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+
+    if isinstance(error, CourseNoteDeletionConflictError):
+        return HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
+
+    if isinstance(error, CourseNoteDeletionError):
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(error)
+        )
 
     if isinstance(error, CourseEnrollmentAlreadyExistsError):
         return HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
@@ -33,9 +39,6 @@ def course_http_exception(error: Exception) -> HTTPException:
             CourseOwnershipError,
             CoursePermissionError,
             CourseEnrollmentPermissionError,
-            CourseAccessCodeDisabledError,
-            CourseAccessCodeExpiredError,
-            CourseAccessCodeInvalidError,
         ),
     ):
         return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(error))

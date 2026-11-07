@@ -1,3 +1,5 @@
+import re
+import unicodedata
 from urllib.parse import urlparse
 from uuid import UUID
 
@@ -12,8 +14,8 @@ from sqlmodel import Session
 from backend.core import get_settings
 from backend.core.exceptions import InvalidConfigError, MissingConfigError
 from backend.courses.exceptions import CourseNotFoundError
-from backend.courses.models import Course
-from backend.courses.vector_store.models import (
+from backend.courses.models import (
+    Course,
     CourseVectorStore,
     VectorstoreProvider,
     VectorStoreStatus,
@@ -21,16 +23,30 @@ from backend.courses.vector_store.models import (
 
 
 class CourseVectorStoreService:
+    # -----------------------------------------------------------------------
+    # Initialization
+    # -----------------------------------------------------------------------
+
     def __init__(self, session: Session) -> None:
+        """Keep the session used to query and save course configuration."""
         self._session = session
+
+    # -----------------------------------------------------------------------
+    # Configuration queries
+    # -----------------------------------------------------------------------
+
+    def get_configuration(self, course_id: UUID) -> CourseVectorStore | None:
+        """Return the saved course configuration, or None if absent."""
+        return self._session.get(CourseVectorStore, course_id)
 
     def is_configured(self, course_id: UUID) -> bool:
         """Check saved configuration without contacting the vector-store provider."""
         record = self._session.get(CourseVectorStore, course_id)
         return record is not None and record.status == VectorStoreStatus.READY
 
-    def get_configuration(self, course_id: UUID) -> CourseVectorStore | None:
-        return self._session.get(CourseVectorStore, course_id)
+    # -----------------------------------------------------------------------
+    # Configuration creation and validation
+    # -----------------------------------------------------------------------
 
     def configure(
         self,
@@ -41,6 +57,7 @@ class CourseVectorStoreService:
         provider: VectorstoreProvider = VectorstoreProvider.POSTGRES,
         embedding_model: str = "gemini-embedding-001",
     ) -> CourseVectorStore:
+        """Validate and commit configuration, normalizing new collection names."""
         try:
             provider = VectorstoreProvider(provider)
         except ValueError as exc:
@@ -56,6 +73,7 @@ class CourseVectorStoreService:
         record = self._session.get(CourseVectorStore, course_id)
 
         if record is None:
+            collection_name = self.normalize_collection_name(collection_name)
             record = CourseVectorStore(
                 course_id=course_id,
                 collection_name=collection_name,
@@ -98,7 +116,14 @@ class CourseVectorStoreService:
         self._session.refresh(record)
         return record
 
-    def get_vectorstore(self, course_id: UUID) -> VectorStore:
+    # -----------------------------------------------------------------------
+    # Vector-store access
+    # -----------------------------------------------------------------------
+
+    def get_vectorstore(
+        self, course_id: UUID, *, async_mode: bool = False
+    ) -> VectorStore:
+        """Construct a vector-store client for a ready course configuration."""
         config = self.get_configuration(course_id)
         if config is None:
             raise LookupError(
@@ -108,10 +133,16 @@ class CourseVectorStoreService:
         if config.status != VectorStoreStatus.READY:
             raise ValueError(f"Vector store for course '{course_id}' is not ready")
 
-        return self._create_vector_store(config)
+        return self._create_vector_store(config, async_mode=async_mode)
 
-    def _create_vector_store(self, record: CourseVectorStore) -> VectorStore:
+    # -----------------------------------------------------------------------
+    # Provider construction
+    # -----------------------------------------------------------------------
 
+    def _create_vector_store(
+        self, record: CourseVectorStore, *, async_mode: bool = False
+    ) -> VectorStore:
+        """Validate provider settings and construct its vector-store client."""
         settings = get_settings()
         if not settings.GOOGLE_API_KEY or not settings.GOOGLE_API_KEY.strip():
             raise MissingConfigError("GOOGLE_API_KEY must be configured")
@@ -161,6 +192,7 @@ class CourseVectorStoreService:
                 collection_name=record.collection_name,
                 connection=connection_url.render_as_string(hide_password=False),
                 use_jsonb=True,
+                async_mode=async_mode,
             )
         else:
             vector_store = AstraDBVectorStore(
@@ -170,3 +202,29 @@ class CourseVectorStoreService:
                 token=settings.ASTRA_DB_APPLICATION_TOKEN,
             )
         return vector_store
+
+    # -----------------------------------------------------------------------
+    # Name normalization
+    # -----------------------------------------------------------------------
+
+    @staticmethod
+    def normalize_collection_name(name: str) -> str:
+        """Normalize a collection name without silently truncating it.
+
+        Names use lowercase ASCII letters, digits, and underscores, start
+        with a letter, and contain at most 48 characters.
+        """
+        normalized = unicodedata.normalize("NFKD", name)
+        normalized = normalized.encode("ascii", errors="ignore").decode("ascii")
+        normalized = re.sub(r"[^a-z0-9]+", "_", normalized.lower()).strip("_")
+
+        if not normalized:
+            raise ValueError("Collection name must contain ASCII letters or digits")
+
+        if not normalized[0].isalpha():
+            normalized = f"collection_{normalized}"
+
+        if len(normalized) > 48:
+            raise ValueError("Normalized collection name must not exceed 48 characters")
+
+        return normalized

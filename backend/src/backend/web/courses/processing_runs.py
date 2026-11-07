@@ -1,23 +1,30 @@
-from typing import Any
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Query
 from fastapi.routing import APIRouter
+from starlette import status
 
 from backend.courses.exceptions import CourseNoteNotFoundError
 from backend.processing.exceptions import (
     LectureAlreadyProcessedError,
+    LectureProcessingInProgressError,
     LectureProcessingRunNotFoundError,
 )
-from backend.processing.models import ProcessingRun
-from backend.processing.schema import (
+from backend.processing.models import (
     LectureProcessingInput,
     LectureProcessingStatusRead,
+    ProcessingRun,
     ProcessingRunRead,
+    ProcessingStatus,
 )
 from backend.processing.tasks import process_lecture_file
 
-from .dependencies import CourseNoteProcessingServiceDep, ReadableCourseNoteDep
+from .dependencies import (
+    CourseNoteProcessingServiceDep,
+    OwnedCourseNoteDep,
+    ReadableCourseNoteDep,
+)
 
 router = APIRouter(
     prefix="/courses/notes/{course_id}/{note_id}",
@@ -33,9 +40,14 @@ async def list_processing_runs(
     note_id: UUID,
     service: CourseNoteProcessingServiceDep,
     _note: ReadableCourseNoteDep,
+    order: Literal["newest", "oldest"] = "newest",
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    statuses: Annotated[list[ProcessingStatus] | None, Query()] = None,
 ) -> list[ProcessingRun]:
     try:
-        return await service.list_runs(note_id)
+        return await service.list_runs(
+            note_id, order=order, limit=limit, statuses=statuses
+        )
     except CourseNoteNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
 
@@ -54,7 +66,6 @@ async def get_processing_run(
         return await service.get_run(note_id, run_id)
     except (
         CourseNoteNotFoundError,
-        LectureAlreadyProcessedError,
         LectureProcessingRunNotFoundError,
     ) as exc:
         raise HTTPException(404, str(exc)) from exc
@@ -80,16 +91,31 @@ async def start_lecture_processing(
     course_id: UUID,
     note_id: UUID,
     service: CourseNoteProcessingServiceDep,
-    _note: ReadableCourseNoteDep,
+    note: OwnedCourseNoteDep,
 ) -> dict[str, Any]:
+
+    # General checks to ensure we can process the note
     try:
         await service.assert_can_process(note_id)
+        file = note.file
+        if file is None or file.id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Note does not have a file associated with it ",
+            )
+        if file.content_type != "application/pdf":
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Can only process pdf files ",
+            )
     except CourseNoteNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
-    except LectureAlreadyProcessedError as exc:
+    except (LectureAlreadyProcessedError, LectureProcessingInProgressError) as exc:
         raise HTTPException(409, str(exc)) from exc
 
-    payload = LectureProcessingInput(course_id=course_id, note_id=note_id)
+    payload = LectureProcessingInput(
+        course_id=course_id, note_id=note_id, file_id=file.id
+    )
     task = process_lecture_file.apply_async(args=[payload.model_dump(mode="json")])  # type: ignore
     return {
         "course_id": course_id,

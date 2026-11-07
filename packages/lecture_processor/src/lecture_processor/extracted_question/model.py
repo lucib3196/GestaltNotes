@@ -49,6 +49,13 @@ class SolutionStep(BaseModel):
 
 
 class ExtractedQuestion(BaseModel):
+    title: str = Field(
+        min_length=1,
+        description=(
+            "Concise, source-grounded title identifying the question or "
+            "worked problem, suitable for display in a list of notes."
+        ),
+    )
     question: str = Field(
         description=(
             "Full source question, including given values, units, and subparts. "

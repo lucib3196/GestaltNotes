@@ -1,34 +1,19 @@
-from uuid import uuid4
-
 import pytest
 
 from backend.accounts.models import UserRole
-from backend.courses import CourseCreate
 from backend.courses.exceptions import (
     CourseNotFoundError,
     CourseOwnershipError,
     CoursePermissionError,
 )
-from backend.courses.schema import CourseUpdate
+from backend.courses.models import CourseCreate, CourseUpdate
 from backend.courses.service.course_service import CourseService
 
 
-def unique_user_fields(prefix: str) -> dict[str, str]:
-    suffix = uuid4().hex
-    return {
-        "email": f"{prefix}-{suffix}@example.com",
-        "username": f"{prefix}-{suffix}",
-    }
-
-
 @pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
 async def test_create_course(course_service: CourseService, make_user):
-    educator = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("educator"),
-    )
-    course = await course_service.create_course(
+    educator = await make_user(role=UserRole.EDUCATOR)
+    course = await course_service.create(
         data=CourseCreate(
             name="Mechanics",
             discipline="Physics",
@@ -46,19 +31,26 @@ async def test_create_course(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
+async def test_student_cannot_create_course(course_service: CourseService, make_user):
+    student = await make_user(role=UserRole.STUDENT)
+
+    with pytest.raises(CoursePermissionError):
+        await course_service.create(
+            data=CourseCreate(name="Mechanics"),
+            educator=student,
+        )
+
+
+@pytest.mark.asyncio
 async def test_get_course(course_service: CourseService, make_user):
-    educator = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("educator"),
-    )
-    course = await course_service.create_course(
+    educator = await make_user(role=UserRole.EDUCATOR)
+    course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
         educator=educator,
     )
     assert course.id
 
-    found_course = await course_service.get_course(course.id)
+    found_course = await course_service.get(course.id)
 
     assert found_course.id == course.id
     assert found_course.name == "Mechanics"
@@ -66,17 +58,13 @@ async def test_get_course(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
 async def test_list_owned_courses(course_service: CourseService, make_user):
-    educator = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("educator"),
-    )
-    first_course = await course_service.create_course(
+    educator = await make_user(role=UserRole.EDUCATOR)
+    first_course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
         educator=educator,
     )
-    second_course = await course_service.create_course(
+    second_course = await course_service.create(
         data=CourseCreate(name="Thermodynamics"),
         educator=educator,
     )
@@ -87,18 +75,14 @@ async def test_list_owned_courses(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
 async def test_update_course(course_service: CourseService, make_user):
-    educator = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("educator"),
-    )
-    course = await course_service.create_course(
+    educator = await make_user(role=UserRole.EDUCATOR)
+    course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
         educator=educator,
     )
     assert course.id
-    updated_course = await course_service.update_course(
+    updated_course = await course_service.update(
         course.id,
         CourseUpdate(
             name="Advanced Mechanics",
@@ -116,58 +100,32 @@ async def test_update_course(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
 async def test_delete_course(course_service: CourseService, make_user):
-    educator = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("educator"),
-    )
-    course = await course_service.create_course(
+    educator = await make_user(role=UserRole.EDUCATOR)
+    course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
         educator=educator,
     )
     assert course.id
-    result = await course_service.delete_course(course.id, educator)
+    result = await course_service.delete(course.id, educator)
     assert course.id
     assert result.success is True
     with pytest.raises(CourseNotFoundError):
-        await course_service.get_course(course.id)
+        await course_service.get(course.id)
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
-async def test_student_cannot_create_course(course_service: CourseService, make_user):
-    student = await make_user(
-        role=UserRole.STUDENT,
-        **unique_user_fields("student"),
-    )
-
-    with pytest.raises(CoursePermissionError):
-        await course_service.create_course(
-            data=CourseCreate(name="Mechanics"),
-            educator=student,
-        )
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
 async def test_non_owner_cannot_update_course(course_service: CourseService, make_user):
-    owner = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("owner"),
-    )
-    other_educator = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("other-educator"),
-    )
-    course = await course_service.create_course(
+    owner = await make_user(role=UserRole.EDUCATOR)
+    other_educator = await make_user(role=UserRole.EDUCATOR)
+    course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
         educator=owner,
     )
     assert course.id
 
     with pytest.raises(CourseOwnershipError):
-        await course_service.update_course(
+        await course_service.update(
             course.id,
             CourseUpdate(name="Stolen Mechanics"),
             other_educator,
@@ -175,21 +133,14 @@ async def test_non_owner_cannot_update_course(course_service: CourseService, mak
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("account_service", ["fake", "real"], indirect=True)
 async def test_non_owner_cannot_delete_course(course_service: CourseService, make_user):
-    owner = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("owner"),
-    )
-    other_educator = await make_user(
-        role=UserRole.EDUCATOR,
-        **unique_user_fields("other-educator"),
-    )
-    course = await course_service.create_course(
+    owner = await make_user(role=UserRole.EDUCATOR)
+    other_educator = await make_user(role=UserRole.EDUCATOR)
+    course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
         educator=owner,
     )
 
     with pytest.raises(CourseOwnershipError):
         assert course.id
-        await course_service.delete_course(course.id, other_educator)
+        await course_service.delete(course.id, other_educator)

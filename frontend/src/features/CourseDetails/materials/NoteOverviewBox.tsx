@@ -47,8 +47,9 @@ export function NoteOverviewBox({
           {note.resource_type}
         </span>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <ProcessingBadge status={processing.status} />
+          <ProcessingBadge status={processing.status} stage={processing.stage} />
           <ProcessingActions {...processing.actions} />
+
         </div>
       </div>
     </CourseNoteCard>

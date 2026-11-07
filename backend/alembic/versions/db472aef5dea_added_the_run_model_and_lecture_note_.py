@@ -27,7 +27,7 @@ def upgrade() -> None:
     inspector = sa.inspect(op.get_bind())
     primary_key = inspector.get_pk_constraint("course_note")
     pk_columns = primary_key.get("constrained_columns", [])
-    
+
     if not pk_columns:
         op.create_primary_key(
             "course_note_pkey",

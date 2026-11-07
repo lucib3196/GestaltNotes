@@ -26,8 +26,8 @@ def upgrade() -> None:
     constraint_name = "fk_course_owner_id_user"
     with op.batch_alter_table("course", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_course_owner_id"))
-        
-        if not any(fk["name"] == constraint_name for fk in foreign_keys ):
+
+        if not any(fk["name"] == constraint_name for fk in foreign_keys):
             batch_op.create_foreign_key(
                 batch_op.f("fk_course_owner_id_user"),
                 "user",

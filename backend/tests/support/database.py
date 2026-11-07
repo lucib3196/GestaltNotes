@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import event
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.core.logger import logger
@@ -13,6 +14,13 @@ def test_engine():
         echo=False,
         connect_args={"check_same_thread": False},
     )
+
+    @event.listens_for(engine, "connect")
+    def enable_foreign_keys(dbapi_connection, _):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
     SQLModel.metadata.create_all(engine)
     yield engine
     engine.dispose()

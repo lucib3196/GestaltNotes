@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ZodError } from "zod";
 import { useAuth } from "../Auth";
 import { fetchNoteBlocks } from "./api";
 import type { NoteBlock } from "./schemas";
@@ -38,14 +39,16 @@ export function useNoteBlocks(courseId: string, fileId: string) {
             error: null,
           });
         }
-      } catch {
+      } catch (cause) {
         if (!controller.signal.aborted) {
           setResult({
             courseId,
             fileId,
             userId: user!.uid,
             blocks: [],
-            error: "Unable to load note blocks. Please try again.",
+            error: cause instanceof ZodError
+              ? "The note blocks were received, but their format could not be read."
+              : "Unable to load note blocks. Please try again.",
           });
         }
       }

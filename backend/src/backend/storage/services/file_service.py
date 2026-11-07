@@ -23,7 +23,7 @@ from backend.storage.schema import FileUpdate
 
 class FileService:
     def __init__(self, storage: BlobStorage, session: Session) -> None:
-
+        """Initialize blob storage and database access."""
         self._storage = storage
         self._session = session
         self._repo = FileRepository(self._session)
@@ -53,6 +53,7 @@ class FileService:
         data: BlobUploadData,
         content_type: str | None = None,
     ) -> File:
+        """Upload the blob and stage its file record without committing."""
         try:
             await self._storage.upload(filename, data, content_type)
             metadata = await self._storage.get_metadata(filename)
@@ -69,6 +70,7 @@ class FileService:
             raise FileServiceCreateError(f"Failed to create file '{filename}'") from e
 
     async def delete_file(self, file_id: UUID) -> None:
+        """Commit deletion of the file record, then delete its blob."""
         try:
             file = await self.stage_delete_file(file_id)
             self._session.commit()
@@ -94,6 +96,7 @@ class FileService:
             raise FileServiceDeletionError(f"Failed to delete file '{file_id}'") from e
 
     async def delete_blob(self, storage_key: str) -> None:
+        """Delete a blob by storage key without changing file records."""
         await self._storage.delete(storage_key)
 
     async def get_file(
@@ -158,6 +161,7 @@ class FileService:
         raise FileServiceRetrievalError("Cannot determine file to download")
 
     async def _download_file_by_id(self, file_id: UUID) -> tuple[File, bytes]:
+        """Look up a file by ID and return its record and contents."""
         try:
             started = perf_counter()
             try:
@@ -179,6 +183,7 @@ class FileService:
     async def _download_file_by_storage_key(
         self, storage_key: str
     ) -> tuple[File, bytes]:
+        """Look up a file by storage key and return its record and contents."""
         try:
             started = perf_counter()
             try:
@@ -202,6 +207,7 @@ class FileService:
             ) from e
 
     async def _download_blob(self, storage_key: str) -> bytes:
+        """Download blob contents and log the elapsed time."""
         started = perf_counter()
         try:
             return await self._storage.download(storage_key)
@@ -292,10 +298,12 @@ class FileService:
             raise FileServiceUpdateError(f"Failed to rename file '{file_id}'") from e
 
     async def _cleanup_failed_stage(self, filename: str) -> None:
+        """Attempt to delete a staged blob, ignoring storage deletion errors."""
         with contextlib.suppress(BlobStorageDeleteError):
             await self._storage.delete(filename)
 
     def _resolve_user_id(self, user: User | UUID) -> UUID:
+        """Return the UUID from a user record or an existing UUID."""
         if isinstance(user, User):
             if not (user.id):
                 raise ValueError("Failed to resolve user, missing id")
@@ -303,9 +311,11 @@ class FileService:
         return user
 
     def _resolve_filename(self, filename: str) -> str:
+        """Extract the final filename from a path."""
         return Path(filename).name
 
     def _rename_storage_key(self, storage_key: str, name: str) -> str:
+        """Build a storage key with a new filename in the same directory."""
         path = Path(storage_key)
         parent = path.parent.as_posix()
         filename = self._resolve_filename(name)

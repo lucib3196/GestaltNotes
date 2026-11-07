@@ -23,8 +23,7 @@ export function ProcessingActions({
     "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50";
   return (
     <>
-      {!processed &&
-        (requestError ? (
+      {requestError ? (
           <button
             type="button"
             onClick={onCheck}
@@ -33,7 +32,7 @@ export function ProcessingActions({
           >
             <FiRefreshCw aria-hidden="true" /> Check again
           </button>
-        ) : (
+        ) : !processed ? (
           <button
             type="button"
             onClick={onProcess}
@@ -42,7 +41,7 @@ export function ProcessingActions({
           >
             {failed ? "Retry processing" : "Process"}
           </button>
-        ))}
+        ) : null}
       {(requestError || taskError) && (
         <p
           role="alert"

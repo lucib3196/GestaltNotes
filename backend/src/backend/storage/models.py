@@ -6,7 +6,7 @@ from sqlmodel import Field, SQLModel
 
 
 class File(SQLModel, table=True):
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     parent_id: UUID | None = Field(
         default=None,
         sa_column=Column(ForeignKey("file.id", ondelete="CASCADE"), nullable=True),

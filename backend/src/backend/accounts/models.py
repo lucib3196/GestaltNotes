@@ -46,7 +46,7 @@ class Role(SQLModel, table=True):
 
 
 class User(SQLModel, table=True):
-    id: UUID | None = Field(default_factory=uuid4, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     first_name: str | None = None
     last_name: str | None = None
     username: str | None = None

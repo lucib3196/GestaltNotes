@@ -12,3 +12,7 @@ class LectureProcessingRunNotFoundError(LectureProcessingError, LookupError):
 
 class LectureAlreadyProcessedError(LectureProcessingError):
     """The note already has a successful processing run."""
+
+
+class LectureProcessingInProgressError(LectureProcessingError):
+    """The note already has a queued, running, or retrying run."""
