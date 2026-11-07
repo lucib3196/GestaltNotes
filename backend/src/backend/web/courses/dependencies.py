@@ -1,12 +1,21 @@
+from collections.abc import Callable
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
+from langchain_core.vectorstores import VectorStore
 from starlette import status
 
 from backend.core.exceptions import InvalidConfigError, MissingConfigError
 from backend.courses.exceptions import CourseServiceException
-from backend.courses.models import Course, CourseEnrollment, CourseNote, NoteBlock
+from backend.courses.models import (
+    Course,
+    CourseEnrollment,
+    CourseNote,
+    CourseVectorStore,
+    NoteBlock,
+    NoteBlockUpdate,
+)
 from backend.courses.repo.course_notes_repo import CourseNoteRepository
 from backend.courses.repo.course_repo import CourseRepo
 from backend.courses.repo.lecture_processing_repo import LectureProcessingRepository
@@ -17,63 +26,88 @@ from backend.courses.service.course_note_processing_service import (
 )
 from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
+from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 from backend.courses.service.note_block_service import NoteBlockService
 from backend.courses.vector_store.course_vector_store_service import (
     CourseVectorStoreService,
 )
 from backend.database import SessionDep
+from backend.indexer.indexer import IndexingService
 from backend.web.accounts.dependencies import CurrentUserDep, EducatorDep
 from backend.web.courses.http import course_http_exception
 from backend.web.storage.dependency import FileServiceDep
 
 # ---------------------------------------------------------------------------
-# Service construction
+# Basic repositories
+# ---------------------------------------------------------------------------
+
+
+def get_course_repo(session: SessionDep) -> CourseRepo:
+    """Construct a repository using the request session; no authorization."""
+    return CourseRepo(session)
+
+
+CourseRepoDep = Annotated[CourseRepo, Depends(get_course_repo)]
+
+
+def get_course_note_repo(session: SessionDep) -> CourseNoteRepository:
+    """Construct a repository using the request session; no authorization."""
+    return CourseNoteRepository(session)
+
+
+CourseNoteRepoDep = Annotated[CourseNoteRepository, Depends(get_course_note_repo)]
+
+
+def get_note_block_repo(session: SessionDep) -> NoteBlockRepo:
+    """Construct a repository using the request session; no authorization."""
+    return NoteBlockRepo(session)
+
+
+NoteBlockRepoDep = Annotated[NoteBlockRepo, Depends(get_note_block_repo)]
+
+
+def get_lecture_processing_repo(session: SessionDep) -> LectureProcessingRepository:
+    """Construct a repository using the request session; no authorization."""
+    return LectureProcessingRepository(session)
+
+
+LectureProcessingRepoDep = Annotated[
+    LectureProcessingRepository, Depends(get_lecture_processing_repo)
+]
+
+
+# ---------------------------------------------------------------------------
+# Course service
 # ---------------------------------------------------------------------------
 
 
 def get_course_service(session: SessionDep) -> CourseService:
-    """Build course operations using the request's database session."""
+    """Build course operations using the request session."""
     return CourseService(session)
 
 
 CourseServiceDep = Annotated[CourseService, Depends(get_course_service)]
 
-
-def get_course_note_service(
-    session: SessionDep,
-    file_service: FileServiceDep,
-) -> CourseNoteService:
-    """Build note operations using one shared database session."""
-    return CourseNoteService(
-        session=session,
-        notes=CourseNoteRepository(session),
-        blocks=NoteBlockRepo(session),
-        runs=LectureProcessingRepository(session),
-        access=CourseAccess(CourseRepo(session)),
-        files=file_service,
-        stores=CourseVectorStoreService(session),
-    )
+# ---------------------------------------------------------------------------
+# Course access service
+# ---------------------------------------------------------------------------
 
 
-CourseNoteServiceDep = Annotated[CourseNoteService, Depends(get_course_note_service)]
+def get_course_access(repo: CourseRepoDep) -> CourseAccess:
+    """Build owner checks using the shared course repository."""
+    return CourseAccess(repo)
 
 
-def get_course_note_processing_service(
-    session: SessionDep,
-) -> CourseNoteProcessingService:
-    """Build lecture-run queries and processing eligibility checks."""
-    return CourseNoteProcessingService(session)
+CourseAccessDep = Annotated[CourseAccess, Depends(get_course_access)]
 
-
-CourseNoteProcessingServiceDep = Annotated[
-    CourseNoteProcessingService,
-    Depends(get_course_note_processing_service),
-]
+# ---------------------------------------------------------------------------
+# Enrollment service
+# ---------------------------------------------------------------------------
 
 
 def get_enrollment_service(session: SessionDep) -> CourseEnrollmentService:
-    """Build enrollment operations using the request's database session."""
+    """Build enrollment operations using the request session."""
     return CourseEnrollmentService(session)
 
 
@@ -81,9 +115,24 @@ CourseEnrollmentServiceDep = Annotated[
     CourseEnrollmentService, Depends(get_enrollment_service)
 ]
 
+# ---------------------------------------------------------------------------
+# Course-note processing service
+# ---------------------------------------------------------------------------
+
+
+def get_course_note_processing_service(
+    session: SessionDep,
+) -> CourseNoteProcessingService:
+    """Build database-only processing queries and eligibility checks."""
+    return CourseNoteProcessingService(session)
+
+
+CourseNoteProcessingServiceDep = Annotated[
+    CourseNoteProcessingService, Depends(get_course_note_processing_service)
+]
 
 # ---------------------------------------------------------------------------
-# Read access: courses and course notes
+# Course and resource access checks
 # ---------------------------------------------------------------------------
 
 
@@ -185,11 +234,11 @@ def get_note_block_repository(
     return NoteBlockRepo(session)
 
 
-NoteBlockRepoDep = Annotated[NoteBlockRepo, Depends(get_note_block_repository)]
+ReadableNoteBlockRepoDep = Annotated[NoteBlockRepo, Depends(get_note_block_repository)]
 
 
 async def get_readable_note_block(
-    block_id: UUID, course: ReadableCourseDep, blocks: NoteBlockRepoDep
+    block_id: UUID, course: ReadableCourseDep, blocks: ReadableNoteBlockRepoDep
 ) -> NoteBlock:
     """Resolve a block within a readable course without accessing embeddings."""
     block = await blocks.get(block_id)
@@ -229,18 +278,132 @@ async def get_owned_note_block(
 
 OwnedNoteBlockDep = Annotated[NoteBlock, Depends(get_owned_note_block)]
 
+# ---------------------------------------------------------------------------
+# Course vector-store service
+# ---------------------------------------------------------------------------
 
-def get_note_block_service(
-    block: OwnedNoteBlockDep, session: SessionDep
-) -> NoteBlockService:
-    """Construct indexing only after ownership, scope, and activity checks."""
+
+def get_course_vectorstore_service(session: SessionDep) -> CourseVectorStoreService:
+    """Build configuration access without constructing a provider client."""
+    return CourseVectorStoreService(session)
+
+
+CourseVectorStoreServiceDep = Annotated[
+    CourseVectorStoreService, Depends(get_course_vectorstore_service)
+]
+
+# ---------------------------------------------------------------------------
+# Course vector-store configuration and client
+# ---------------------------------------------------------------------------
+
+
+def get_course_vectorstore_config(
+    course: ReadableCourseDep,
+    stores: CourseVectorStoreServiceDep,
+) -> CourseVectorStore | None:
+    """Return configuration for an authorized course without contacting a provider."""
+    return stores.get_configuration(course.id)
+
+
+CourseVectorStoreConfigDep = Annotated[
+    CourseVectorStore | None, Depends(get_course_vectorstore_config)
+]
+
+
+def get_course_vectorstore(
+    course: ReadableCourseDep,
+    stores: CourseVectorStoreServiceDep,
+) -> VectorStore:
+    """Authorize course access before constructing its async vector-store client."""
     try:
-        return NoteBlockService.from_dependencies(session, block.course_note.course_id)
+        return stores.get_vectorstore(course.id, async_mode=True)
     except (InvalidConfigError, MissingConfigError, LookupError, ValueError) as exc:
         raise HTTPException(
-            status.HTTP_503_SERVICE_UNAVAILABLE,
-            "This course's indexing service is not available.",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="This course's indexing service is not available.",
         ) from exc
 
 
+CourseVectorStoreDep = Annotated[VectorStore, Depends(get_course_vectorstore)]
+
+# ---------------------------------------------------------------------------
+# Note-block indexer
+# ---------------------------------------------------------------------------
+
+
+def get_indexer(
+    vector_store: CourseVectorStoreDep,
+    repo: NoteBlockRepoDep,
+) -> IndexingService[NoteBlock, NoteBlockUpdate]:
+    """Build an indexer targeting the requested course's vector store."""
+    return IndexingService(
+        repo=repo,
+        vector_store=vector_store,
+        builder=NoteBlockDocumentBuilder(),
+    )
+
+
+NoteBlockIndexerDep = Annotated[
+    IndexingService[NoteBlock, NoteBlockUpdate], Depends(get_indexer)
+]
+
+
+def get_indexer_factory(
+    course: ReadableCourseDep,
+    stores: CourseVectorStoreServiceDep,
+    repo: NoteBlockRepoDep,
+) -> Callable[[], IndexingService[NoteBlock, NoteBlockUpdate]]:
+    """Capture authorized course dependencies without constructing its store."""
+
+    def build_indexer() -> IndexingService[NoteBlock, NoteBlockUpdate]:
+        return get_indexer(get_course_vectorstore(course, stores), repo)
+
+    return build_indexer
+
+
+NoteBlockIndexerFactoryDep = Annotated[
+    Callable[[], IndexingService[NoteBlock, NoteBlockUpdate]],
+    Depends(get_indexer_factory),
+]
+
+# ---------------------------------------------------------------------------
+# Note-block service
+# ---------------------------------------------------------------------------
+
+
+def get_note_block_service(
+    session: SessionDep,
+    repo: NoteBlockRepoDep,
+    indexer_factory: NoteBlockIndexerFactoryDep,
+) -> NoteBlockService:
+    """Compose block operations without initializing the vector-store client."""
+    return NoteBlockService(
+        session=session, blocks=repo, indexer_factory=indexer_factory
+    )
+
+
 NoteBlockServiceDep = Annotated[NoteBlockService, Depends(get_note_block_service)]
+
+# ---------------------------------------------------------------------------
+# Course-note service
+# ---------------------------------------------------------------------------
+
+
+def get_course_note_service(
+    session: SessionDep,
+    file_service: FileServiceDep,
+    notes: CourseNoteRepoDep,
+    blocks: NoteBlockServiceDep,
+    access: CourseAccessDep,
+) -> CourseNoteService:
+    """Compose note operations; initialize indexing only for block mutations."""
+    return CourseNoteService(
+        session=session,
+        notes=notes,
+        blocks=blocks,
+        access=access,
+        files=file_service,
+    )
+
+
+CourseNoteServiceDep = Annotated[CourseNoteService, Depends(get_course_note_service)]

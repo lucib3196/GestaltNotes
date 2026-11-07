@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import AsyncMock, Mock, call
 from uuid import UUID, uuid4
 
@@ -248,3 +249,47 @@ async def test_index_many_writes_unique_documents(
         ],
         any_order=True,
     )
+
+
+@pytest.mark.asyncio
+async def test_index_many_finishes_each_write_before_reading_next(
+    fake_indexer, fake_repo, vector_store
+):
+    record_ids = list(fake_repo.records)
+    events = []
+
+    async def get_documents(ids):
+        events.append(("read", ids[0]))
+        # Yield so concurrently launched operations would overlap.
+        await asyncio.sleep(0)
+        return []
+
+    async def add_documents(documents, *, ids):
+        await asyncio.sleep(0)
+        events.append(("write", ids[0]))
+        return ids
+
+    vector_store.aget_by_ids.side_effect = get_documents
+    vector_store.aadd_documents.side_effect = add_documents
+
+    result = await fake_indexer.index_many(record_ids)
+
+    assert result == [str(record_id) for record_id in record_ids]
+    assert events == [
+        (operation, str(record_id))
+        for record_id in record_ids
+        for operation in ("read", "write")
+    ]
+
+
+@pytest.mark.asyncio
+async def test_index_many_stops_at_first_failure(fake_indexer, fake_repo, vector_store):
+    first_id, last_id = fake_repo.records
+    missing_id = uuid4()
+
+    with pytest.raises(ValueError, match="not found"):
+        await fake_indexer.index_many([first_id, missing_id, last_id])
+
+    vector_store.aget_by_ids.assert_awaited_once_with([str(first_id)])
+    vector_store.aadd_documents.assert_awaited_once()
+    assert vector_store.aadd_documents.await_args.kwargs["ids"] == [str(first_id)]

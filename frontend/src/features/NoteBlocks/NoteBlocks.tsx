@@ -56,7 +56,7 @@ export default function NoteBlocks({ courseId, fileId }: NoteBlocksProps) {
               key={currentBlock.id}
               aria-label="Current note block"
               tabIndex={0}
-              className="max-h-[60vh] min-w-0 space-y-3 overflow-y-auto overscroll-contain p-4 focus-visible:outline-2 focus-visible:outline-accent sm:p-5"
+              className="max-h-[60vh] min-w-0 space-y-3 overflow-y-auto scrollbar-hide overscroll-contain p-4 focus-visible:outline-2 focus-visible:outline-accent sm:p-5"
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-accent">
                 {filters.find((filter) => filter.value === currentBlock.kind)?.label

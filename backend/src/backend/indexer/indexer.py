@@ -1,4 +1,3 @@
-import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from typing import TypeVar
@@ -95,13 +94,12 @@ class IndexingService[ModelT: BaseModel, UpdateT: BaseModel]:
 
         Stop at the first failure; earlier vector writes remain applied.
         """
-        results = await asyncio.gather(
-            *(
-                self.index(resource_id, force_recreate=force_recreate)
-                for resource_id in dict.fromkeys(resource_ids)
+        indexed_ids: list[str] = []
+        for resource_id in dict.fromkeys(resource_ids):
+            indexed_ids.extend(
+                await self.index(resource_id, force_recreate=force_recreate)
             )
-        )
-        return [item for result in results for item in result]
+        return indexed_ids
 
     async def delete(self, ids: list[UUID | str]) -> None:
         """Delete the vector document whose ID matches the resource UUID.

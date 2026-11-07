@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
@@ -25,11 +26,25 @@ class NoteBlockService:
         self,
         session: Session,
         blocks: NoteBlockRepo,
-        indexer: IndexingService[NoteBlock, NoteBlockUpdate],
+        indexer: IndexingService[NoteBlock, NoteBlockUpdate] | None = None,
+        *,
+        indexer_factory: Callable[[], IndexingService[NoteBlock, NoteBlockUpdate]]
+        | None = None,
     ) -> None:
+        if (indexer is None) == (indexer_factory is None):
+            raise ValueError("Provide either an indexer or an indexer factory")
         self._session = session
         self._blocks = blocks
         self._indexer = indexer
+        self._indexer_factory = indexer_factory
+
+    def _get_indexer(self) -> IndexingService[NoteBlock, NoteBlockUpdate]:
+        """Construct and cache indexing dependencies only when first needed."""
+        if self._indexer is None:
+            if self._indexer_factory is None:
+                raise RuntimeError("Indexer factory is not configured")
+            self._indexer = self._indexer_factory()
+        return self._indexer
 
     async def create(self, block: NoteBlock) -> NoteBlock:
         """Validate, save, and index one block.
@@ -67,7 +82,7 @@ class NoteBlockService:
             raise
 
         logger.info("Note blocks saved: count=%d", len(saved))
-        await self._indexer.index_many([block.id for block in saved])
+        await self._get_indexer().index_many([block.id for block in saved])
         return saved
 
     async def get(self, block_id: UUID) -> NoteBlock:
@@ -127,7 +142,7 @@ class NoteBlockService:
             saved.revision,
             ",".join(sorted(changes)),
         )
-        await self._indexer.index(block_id)
+        await self._get_indexer().index(block_id)
         return saved
 
     async def delete(self, block_id: UUID) -> None:
@@ -137,7 +152,7 @@ class NoteBlockService:
         """
         try:
             await self.get(block_id)
-            await self._indexer.delete([block_id])
+            await self._get_indexer().delete([block_id])
             await self._blocks.delete(block_id)
             self._session.commit()
         except SQLAlchemyError as exc:
@@ -162,7 +177,7 @@ class NoteBlockService:
             blocks = await self._blocks.list_by_note(note_id)
             if not blocks:
                 return
-            await self._indexer.delete([block.id for block in blocks])
+            await self._get_indexer().delete([block.id for block in blocks])
             for block in blocks:
                 await self._blocks.delete(block.id)
             if commit:
@@ -179,7 +194,7 @@ class NoteBlockService:
         Skip unchanged documents unless force_recreate is True.
         """
         await self.get(block_id)
-        await self._indexer.index(block_id, force_recreate=force_recreate)
+        await self._get_indexer().index(block_id, force_recreate=force_recreate)
 
     @staticmethod
     def validate_note_block(

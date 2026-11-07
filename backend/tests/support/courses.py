@@ -1,21 +1,14 @@
 from typing import Protocol
 
 from pytest import fixture
-from sqlmodel import Session
 
 from backend.accounts import User
 from backend.courses.models import (
     Course,
     CourseCreate,
 )
-from backend.courses.repo.course_notes_repo import CourseNoteRepository
-from backend.courses.repo.course_repo import CourseRepo
-from backend.courses.service.course_access_service import CourseAccess
-from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.course_service import CourseService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
-from backend.storage import FileService
-
 
 # @fixture
 # def course_note_service(db_session: Session, storage):

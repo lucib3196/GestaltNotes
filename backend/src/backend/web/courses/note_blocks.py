@@ -11,10 +11,10 @@ from backend.courses.exceptions import (
 )
 from backend.courses.models import NoteBlock, NoteBlockRead, NoteBlockUpdate
 from backend.web.courses.dependencies import (
-    NoteBlockRepoDep,
     NoteBlockServiceDep,
     OwnedNoteBlockDep,
     ReadableNoteBlockDep,
+    ReadableNoteBlockRepoDep,
 )
 
 router = APIRouter(
@@ -25,6 +25,8 @@ router = APIRouter(
 
 def block_http_exception(exc: Exception, *, operation: str) -> HTTPException:
     """Keep block validation errors distinct from persistence/provider failures."""
+    if isinstance(exc, HTTPException):
+        return exc
     if isinstance(exc, NoteBlockNotFoundError):
         return HTTPException(status.HTTP_404_NOT_FOUND, "Note block not found")
     if isinstance(exc, (NoteBlockValidationError, ValidationError)):
@@ -42,7 +44,7 @@ def block_http_exception(exc: Exception, *, operation: str) -> HTTPException:
 @router.get("", response_model=list[NoteBlockRead])
 async def list_note_blocks(
     course_id: UUID,
-    blocks: NoteBlockRepoDep,
+    blocks: ReadableNoteBlockRepoDep,
     source_file_id: UUID | None = None,
     course_note_id: UUID | None = None,
 ) -> list[NoteBlock]:

@@ -295,3 +295,130 @@ async def test_block_validation_error_returns_422():
     with pytest.raises(HTTPException) as exc:
         await update_note_block(NoteBlockUpdate(), block, service)
     assert exc.value.status_code == 422
+
+
+def test_composed_services_share_repository_and_session():
+    from backend.web.courses import dependencies
+
+    session = Mock()
+    repo = Mock()
+    store = Mock()
+    indexer = dependencies.get_indexer(store, repo)
+    factory = Mock(return_value=indexer)
+    blocks = dependencies.get_note_block_service(session, repo, factory)
+    factory.assert_not_called()
+    assert blocks._get_indexer() is indexer
+    assert blocks._get_indexer() is indexer
+    factory.assert_called_once_with()
+    notes = Mock()
+    files = Mock()
+    access = Mock()
+    service = dependencies.get_course_note_service(
+        session, files, notes, blocks, access
+    )
+
+    assert indexer._repo is repo
+    assert indexer._store is store
+    assert blocks._session is session
+    assert blocks._blocks is repo
+    assert blocks._indexer is indexer
+    assert service._session is session
+    assert service._blocks is blocks
+    assert service._notes is notes
+    assert service._files is files
+    assert service._access is access
+
+
+def test_vectorstore_dependency_selects_authorized_course():
+    from backend.web.courses import dependencies
+
+    course = SimpleNamespace(id=uuid4())
+    stores = Mock()
+    assert (
+        dependencies.get_course_vectorstore(course, stores)
+        is stores.get_vectorstore.return_value
+    )
+    stores.get_vectorstore.assert_called_once_with(course.id, async_mode=True)
+
+
+def test_vectorstore_dependency_reports_unavailable_configuration():
+    from backend.web.courses import dependencies
+
+    course = SimpleNamespace(id=uuid4())
+    stores = Mock()
+    stores.get_vectorstore.side_effect = LookupError("Not configured")
+    with pytest.raises(HTTPException) as exc:
+        dependencies.get_course_vectorstore(course, stores)
+    assert exc.value.status_code == 503
+
+
+async def test_upload_does_not_initialize_unconfigured_vectorstore():
+    from tempfile import SpooledTemporaryFile
+
+    from fastapi import UploadFile
+
+    from backend.courses.repo.course_notes_repo import CourseNoteRepository
+    from backend.storage.models import File
+    from backend.web.courses import dependencies
+    from backend.web.courses.notes import router, upload_course_note
+
+    course = Course(name="Mechanics", owner_id=uuid4())
+    owner = SimpleNamespace(id=course.owner_id)
+    stores = Mock()
+    stores.get_vectorstore.side_effect = LookupError("Not configured")
+    session = Mock()
+    notes = CourseNoteRepository(session)
+    notes.create = AsyncMock(side_effect=lambda note: note)
+    file = File(
+        owner_id=owner.id,
+        original_name="note.md",
+        storage_key="notes/note.md",
+        content_type="text/markdown",
+    )
+    files = SimpleNamespace(stage_file=AsyncMock(return_value=file))
+    access = SimpleNamespace(require_owner=AsyncMock(return_value=course))
+    factory = dependencies.get_indexer_factory(course, stores, Mock())
+    blocks = dependencies.get_note_block_service(session, Mock(), factory)
+    service = dependencies.get_course_note_service(
+        session, files, notes, blocks, access
+    )
+    with SpooledTemporaryFile() as upload_data:
+        upload_data.write(b"# Lecture")
+        upload_data.seek(0)
+        upload = UploadFile(filename="note.md", file=upload_data)
+        result = await upload_course_note(
+            course.id, owner, service, upload, CourseContentType.NOTES
+        )
+
+    assert result.course_id == course.id
+    stores.get_vectorstore.assert_not_called()
+    files.stage_file.assert_awaited_once()
+    session.commit.assert_called_once_with()
+
+    # Verify FastAPI uses the deferred factory rather than the eager store.
+    route = next(
+        route
+        for route in router.routes
+        if isinstance(route, APIRoute) and route.endpoint is upload_course_note
+    )
+    calls = dependency_calls(route.dependant)
+    assert dependencies.get_indexer_factory in calls
+    assert dependencies.get_course_vectorstore not in calls
+
+
+async def test_lazy_indexer_reports_configuration_failure_when_used():
+    from backend.web.courses import dependencies
+
+    course = SimpleNamespace(id=uuid4())
+    stores = Mock()
+    stores.get_vectorstore.side_effect = LookupError("Not configured")
+    repo = SimpleNamespace(get=AsyncMock(return_value=Mock()))
+    factory = dependencies.get_indexer_factory(course, stores, repo)
+    service = dependencies.get_note_block_service(Mock(), repo, factory)
+    stores.get_vectorstore.assert_not_called()
+
+    with pytest.raises(HTTPException) as exc:
+        await service.reindex(uuid4())
+
+    assert exc.value.status_code == 503
+    stores.get_vectorstore.assert_called_once_with(course.id, async_mode=True)

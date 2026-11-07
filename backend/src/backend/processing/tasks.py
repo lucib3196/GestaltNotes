@@ -3,7 +3,6 @@
 # at runtime; do not rely on Celery to serialize models with union annotations.
 
 import asyncio
-import backend.indexer.indexer
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import perf_counter
@@ -15,20 +14,22 @@ from celery.exceptions import Ignore, Reject, Retry
 from langchain.chat_models import init_chat_model
 from lecture_processor.api import process_lecture
 from lecture_processor.graph.context import ExtractionContext, FailureConfig
-from backend.courses.repo.note_blocks_repo import NoteBlockRepo
+
 from backend.core.logger import logger
+from backend.courses.repo.note_blocks_repo import NoteBlockRepo
+from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.courses.service.note_block_service import NoteBlockService
 from backend.courses.utils import parse_lecture_document
 from backend.courses.vector_store.course_vector_store_service import (
     CourseVectorStoreService,
 )
-from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.database.config import open_session
+from backend.indexer.indexer import IndexingService
 from backend.processing.celery_app import app
 from backend.processing.resources import (
     course_note_scope,
 )
-from backend.indexer.indexer import IndexingService
+
 from .models import (
     LectureProcessingInput,
     LectureProcessingRun,
@@ -95,7 +96,7 @@ def extract_lecture_content(self: Task, data: LectureProcessingState) -> dict:
             run_id=data.run_id,
             stage=ProcessingStage.DOWNLOADING,
         ),
-        course_note_scope() as notes,
+        course_note_scope(data.course_id) as notes,
     ):
         file, content = asyncio.run(notes.download_note(note_id))
         if file.content_type != "application/pdf":
