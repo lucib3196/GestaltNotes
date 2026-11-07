@@ -4,7 +4,7 @@ import argparse
 import asyncio
 from collections import Counter
 from pathlib import Path
-
+from backend.storage.models import File
 from pydantic import EmailStr, TypeAdapter, ValidationError
 
 
