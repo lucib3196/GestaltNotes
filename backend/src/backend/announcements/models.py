@@ -3,6 +3,11 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel
 from sqlalchemy import Column, DateTime
 from sqlmodel import Field, SQLModel
+from datetime import UTC, datetime
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
 
 
 class AnnouncementBase(SQLModel):
@@ -68,7 +73,28 @@ class Announcement(AnnouncementBase, table=True):
         ondelete="SET NULL",
         index=True,
     )
+    created_at: datetime | None = Field(
+        default=datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
+    )
+    created_at: datetime = Field(
+        default_factory=utc_now,
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            default=utc_now,
+        ),
+    )
 
+    updated_at: datetime = Field(
+        default_factory=utc_now,
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            default=utc_now,
+            onupdate=utc_now,
+        ),
+    )
     published_at: datetime | None = Field(
         default=None,
         sa_column=Column(DateTime(timezone=True), nullable=True),

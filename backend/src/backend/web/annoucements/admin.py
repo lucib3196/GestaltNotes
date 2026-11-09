@@ -27,6 +27,13 @@ class RecipientRequest(BaseModel):
 ###############################################################################
 
 
+@router.get("/")
+async def get_all(
+    service: AnnouncementManagementDep,
+):
+    return await service.list_all()
+
+
 @router.post("/", response_model=Announcement, status_code=status.HTTP_201_CREATED)
 async def create_announcement(
     data: AnnouncementBase,
