@@ -16,14 +16,11 @@ from backend.courses.models import Course, CourseNote, CourseNoteRead, CourseNot
 
 class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):
     def __init__(self, session: Session) -> None:
-        self._session = session
+        super().__init__(session, CourseNote)
 
     async def create(self, record: CourseNote) -> CourseNote:
         try:
-            self._session.add(record)
-            self._session.flush()
-            self._session.refresh(record)
-            return record
+            return await super().create(record)
         except IntegrityError as e:
             message = f"[CourseNoteRepository] failed to create course note {e}"
             logger.error(message)
@@ -35,7 +32,7 @@ class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):
 
     async def get(self, record_id: UUID) -> CourseNote | None:
         try:
-            return self._session.get(CourseNote, record_id)
+            return await super().get(record_id)
         except SQLAlchemyError as e:
             message = f"[CourseNoteRepository] failed to get course note {e}"
             logger.error(message)
@@ -109,13 +106,7 @@ class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):
 
     async def update(self, record: CourseNote, update: CourseNoteUpdate) -> CourseNote:
         try:
-            for key, value in update.model_dump(exclude_unset=True).items():
-                setattr(record, key, value)
-
-            self._session.add(record)
-            self._session.flush()
-            self._session.refresh(record)
-            return record
+            return await super().update(record, update)
         except SQLAlchemyError as e:
             message = f"[CourseNoteRepository] failed to update course note {e}"
             logger.error(message)
@@ -140,8 +131,7 @@ class CourseNoteRepository(Repository[CourseNote, CourseNoteUpdate]):
             if note is None:
                 raise CourseNoteNotFoundError("", str(record_id))
 
-            self._session.delete(note)
-            self._session.flush()
+            await super().delete(record_id)
         except CourseNoteNotFoundError:
             raise
         except SQLAlchemyError as e:
