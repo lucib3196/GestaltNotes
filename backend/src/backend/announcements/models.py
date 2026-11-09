@@ -52,14 +52,16 @@ class Announcement(AnnouncementBase, table=True):
 
 
 class AnnouncementRecipient(SQLModel, table=True):
-    __tablename__ = "announcement_recipients"  # type: ignore
+    __tablename__ = "announcement_recipients" # type: ignore
 
     announcement_id: UUID = Field(
         foreign_key="announcements.id",
         primary_key=True,
+        ondelete="CASCADE",
     )
     user_id: UUID = Field(
         foreign_key="user.id",
         primary_key=True,
+        ondelete="CASCADE",
     )
     read_at: datetime | None = Field(default=None)
