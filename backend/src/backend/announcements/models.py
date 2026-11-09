@@ -1,12 +1,7 @@
-from sqlmodel import SQLModel
-from uuid import UUID, uuid4
 from datetime import datetime
-from sqlmodel import Field, SQLModel
-from sqlalchemy import Column, DateTime
-
-from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
+from sqlalchemy import Column, DateTime
 from sqlmodel import Field, SQLModel
 
 
@@ -31,16 +26,24 @@ class AnnouncementBase(SQLModel):
         max_length=255,
         description="Human-readable summary of the intended audience, such as 'All students'.",
     )
+    published: bool = Field(
+        default=False,
+        description="Whether this announcement is visible to recipients.",
+    )
+
+
+class AnnoucementUpdate(SQLModel):
+    published: bool = Field(
+        default=False,
+        description="Whether this announcement is visible to recipients.",
+    )
 
 
 class Announcement(AnnouncementBase, table=True):
     __tablename__ = "announcements"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    published: bool = Field(
-        default=False,
-        description="Whether this announcement is visible to recipients.",
-    )
+
     published_at: datetime | None = Field(
         default=None,
         sa_column=Column(DateTime(timezone=True), nullable=True),
