@@ -1,6 +1,6 @@
 from datetime import datetime
 from uuid import UUID, uuid4
-
+from pydantic import BaseModel
 from sqlalchemy import Column, DateTime
 from sqlmodel import Field, SQLModel
 
@@ -61,6 +61,13 @@ class Announcement(AnnouncementBase, table=True):
     __tablename__ = "announcements"  # type: ignore
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
+    created_by_id: UUID | None = Field(
+        default=None,
+        foreign_key="user.id",
+        nullable=True,
+        ondelete="SET NULL",
+        index=True,
+    )
 
     published_at: datetime | None = Field(
         default=None,
@@ -83,3 +90,13 @@ class AnnouncementRecipient(SQLModel, table=True):
         ondelete="CASCADE",
     )
     read_at: datetime | None = Field(default=None)
+
+
+class AnnouncementAudiencePreview(BaseModel):
+    announcement_id: UUID
+    published: bool
+    total_users: int
+    existing_recipients: int
+    new_recipients: int
+    read_recipients: int
+    unread_recipients: int
