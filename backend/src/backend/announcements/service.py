@@ -69,13 +69,25 @@ class AnnoucementService:
     async def remove_recipients(self, an_id: UUID, user_ids: Sequence[UUID]) -> None:
         try:
             await self._assert_get(an_id)
-            self._session.execute(
+            self._session.exec(
                 delete(AnnouncementRecipient).where(
                     col(AnnouncementRecipient.announcement_id) == an_id,
                     col(AnnouncementRecipient.user_id).in_(user_ids),
                 )
             )
             self._session.commit()
+        except Exception:
+            self._session.rollback()
+            raise
+
+    async def list_recipients(self, an_id: UUID) -> Sequence[AnnouncementRecipient]:
+        try:
+            await self._assert_get(an_id)
+            return self._session.exec(
+                select(AnnouncementRecipient).where(
+                    col(AnnouncementRecipient.announcement_id) == an_id
+                )
+            ).all()
         except Exception:
             self._session.rollback()
             raise

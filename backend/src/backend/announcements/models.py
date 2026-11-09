@@ -33,6 +33,24 @@ class AnnouncementBase(SQLModel):
 
 
 class AnnoucementUpdate(SQLModel):
+    title: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=150,
+        description="Short heading shown to recipients.",
+    )
+    message: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=5000,
+        description="Announcement content shown to recipients.",
+    )
+    version: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+        description="App version associated with this announcement, such as 1.2.0.",
+    )
     published: bool = Field(
         default=False,
         description="Whether this announcement is visible to recipients.",
@@ -52,7 +70,7 @@ class Announcement(AnnouncementBase, table=True):
 
 
 class AnnouncementRecipient(SQLModel, table=True):
-    __tablename__ = "announcement_recipients" # type: ignore
+    __tablename__ = "announcement_recipients"  # type: ignore
 
     announcement_id: UUID = Field(
         foreign_key="announcements.id",

@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy import event
 from sqlmodel import Session, SQLModel, create_engine
 
+import backend.database.models  # noqa: F401 -- Register all database tables.
 from backend.core.logger import logger
 
 
