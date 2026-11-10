@@ -1,9 +1,14 @@
 name: Node.js CI
 
 # Only runs if there changes to the frontend
+
 on:
   push:
+    paths:
+      - "frontend/**"
   pull_request:
+    paths:
+      - "frontend/**"
 
 jobs:
   build:
