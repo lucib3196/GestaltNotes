@@ -20,12 +20,11 @@ from backend.courses.repo.course_notes_repo import CourseNoteRepository
 from backend.courses.repo.course_repo import CourseRepo
 from backend.courses.repo.lecture_processing_repo import LectureProcessingRepository
 from backend.courses.repo.note_blocks_repo import NoteBlockRepo
-from backend.courses.service.course_access_service import CourseAccess
+from backend.courses.service.course_management import CourseManagementService
 from backend.courses.service.course_note_processing_service import (
     CourseNoteProcessingService,
 )
 from backend.courses.service.course_note_service import CourseNoteService
-from backend.courses.service.course_service import CourseService
 from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 from backend.courses.service.note_block_service import NoteBlockService
@@ -82,24 +81,24 @@ LectureProcessingRepoDep = Annotated[
 # ---------------------------------------------------------------------------
 
 
-def get_course_service(session: SessionDep) -> CourseService:
+def get_course_service(session: SessionDep) -> CourseManagementService:
     """Build course operations using the request session."""
-    return CourseService(session)
+    return CourseManagementService(session)
 
 
-CourseServiceDep = Annotated[CourseService, Depends(get_course_service)]
+CourseServiceDep = Annotated[CourseManagementService, Depends(get_course_service)]
 
 # ---------------------------------------------------------------------------
 # Course access service
 # ---------------------------------------------------------------------------
 
 
-def get_course_access(repo: CourseRepoDep) -> CourseAccess:
+def get_course_access(session: SessionDep) -> CourseManagementService:
     """Build owner checks using the shared course repository."""
-    return CourseAccess(repo)
+    return CourseManagementService(session)
 
 
-CourseAccessDep = Annotated[CourseAccess, Depends(get_course_access)]
+CourseAccessDep = Annotated[CourseManagementService, Depends(get_course_access)]
 
 # ---------------------------------------------------------------------------
 # Enrollment service
@@ -195,7 +194,7 @@ async def get_owned_course(
 ) -> Course:
     """Require an educator who owns the requested course."""
     try:
-        return await CourseAccess(CourseRepo(session)).require_owner(course_id, user)
+        return await CourseManagementService(session).require_owner(course_id, user)
     except CourseServiceException as exc:
         raise course_http_exception(exc) from exc
 
