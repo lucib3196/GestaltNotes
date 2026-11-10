@@ -1,49 +1,54 @@
 from uuid import UUID
 
+from authorization import AccessDeniedError, RoleAccessDeniedError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
-from backend.accounts.models import User
+from backend.accounts.models import User, UserRole
 from backend.core import logger
 from backend.courses.exceptions import (
     CourseCreationError,
     CourseDeletionError,
     CourseNotFoundError,
+    CourseOwnershipError,
+    CoursePermissionError,
     CourseRetrievalError,
     CourseUpdateError,
 )
 from backend.courses.models import Course, CourseCreate, CourseDelete, CourseUpdate
 from backend.courses.repo.course_repo import CourseRepo
-from backend.courses.service.course_access_service import CourseAccess
+from backend.courses.service.course_access_gate import CourseOwnershipAccessGate
 
 
-class CourseService:
+class CourseManagementService:
+    """Manage courses with educator and ownership checks."""
+
     def __init__(self, session: Session) -> None:
         self._session = session
-        self._course = CourseRepo(session)
-        self._access = CourseAccess(self._course)
+        self._courses = CourseRepo(session)
+        self._access = CourseOwnershipAccessGate()
 
     async def create(self, data: CourseCreate, educator: User) -> Course:
-        self._assert_educator(educator)
+        self.assert_educator(educator)
         try:
-            assert educator.id
             course = Course(
                 name=data.name,
                 discipline=data.discipline,
                 description=data.description,
                 owner_id=educator.id,
             )
-            await self._course.create(course)
+            await self._courses.create(course)
             self._session.commit()
             return course
         except SQLAlchemyError as e:
             self._session.rollback()
-            message = f"[CourseService] failed to create course {e}"
+            message = f"[CourseManagementService] failed to create course {e}"
             logger.error(message)
             raise CourseCreationError(message) from e
 
     async def get(self, course_id: UUID) -> Course:
-        course = await self._course.get(course_id)
+        """Load a course for trusted callers; this method does not authorize reads."""
+        course = await self._courses.get(course_id)
         if not course:
             raise CourseNotFoundError(str(course_id))
         return course
@@ -53,17 +58,17 @@ class CourseService:
     ) -> Course:
         course = await self.assert_course_owner(course_id, educator)
         try:
-            course = await self._course.update(course, update)
+            course = await self._courses.update(course, update)
             self._session.commit()
             return course
         except SQLAlchemyError as e:
             self._session.rollback()
-            message = f"[CourseService] failed to update course {e}"
+            message = f"[CourseManagementService] failed to update course {e}"
             logger.error(message)
             raise CourseUpdateError(message) from e
 
     async def list_owned_courses(self, educator: User) -> list[Course]:
-        self._assert_educator(educator)
+        self.assert_educator(educator)
 
         if not educator.id:
             raise CourseRetrievalError("Cannot list courses for user without id")
@@ -76,24 +81,50 @@ class CourseService:
             )
         except SQLAlchemyError as e:
             self._session.rollback()
-            message = f"[CourseService] failed to list owned courses {e}"
+            message = f"[CourseManagementService] failed to list owned courses {e}"
             logger.error(message)
             raise CourseRetrievalError(message) from e
 
     async def delete(self, course_id: UUID, educator: User) -> CourseDelete:
         await self.assert_course_owner(course_id, educator)
         try:
-            await self._course.delete(course_id)
+            # TODO: Clean up course notes, stored files, and vectors on deletion.
+            await self._courses.delete(course_id)
             self._session.commit()
             return CourseDelete(success=True, info=f"Deleted course {course_id}")
         except SQLAlchemyError as e:
             self._session.rollback()
-            message = f"[CourseService] failed to delete course {e}"
+            message = f"[CourseManagementService] failed to delete course {e}"
             logger.error(message)
             raise CourseDeletionError(message) from e
 
-    async def assert_course_owner(self, course_id: UUID, educator: User) -> Course:
-        return await self._access.require_owner(course_id, educator)
+    async def require_owner(self, course_id: UUID, user: User) -> Course:
+        """Load a course and require an educator who owns it."""
+        self.assert_educator(user)
+        course = await self.get(course_id)
+        self.assert_owner(user, course)
+        return course
 
-    def _assert_educator(self, user: User) -> None:
-        return self._access.require_educator(user)
+    async def assert_course_owner(self, course_id: UUID, educator: User) -> Course:
+        """Retain the existing ID-based ownership helper."""
+        return await self.require_owner(course_id, educator)
+
+    def assert_educator(self, user: User) -> None:
+        """Require the educator role using the course gate."""
+        try:
+            self._access.require_roles(user, allowed_roles=[UserRole.EDUCATOR])
+        except RoleAccessDeniedError as exc:
+            raise CoursePermissionError("Educator role required") from exc
+
+    def require_educator(self, user: User) -> None:
+        """Retain the role-check interface used by enrollment operations."""
+        self.assert_educator(user)
+
+    def assert_owner(self, user: User, course: Course) -> None:
+        """Require ownership of the supplied course."""
+        try:
+            self._access.require_ownership(user, course)
+        except AccessDeniedError as exc:
+            raise CourseOwnershipError(
+                f"User '{user.id}' does not own course '{course.id}'"
+            ) from exc

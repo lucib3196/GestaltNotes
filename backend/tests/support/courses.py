@@ -7,7 +7,7 @@ from backend.courses.models import (
     Course,
     CourseCreate,
 )
-from backend.courses.service.course_service import CourseService
+from backend.courses.service.course_management import CourseManagementService
 from backend.courses.service.enrollment_service import CourseEnrollmentService
 
 # @fixture
@@ -16,7 +16,7 @@ from backend.courses.service.enrollment_service import CourseEnrollmentService
 #         db_session,
 #         notes=CourseNoteRepository(db_session),
 #         blocks=NoteBlockService,
-#         access=CourseAccess(CourseRepo(db_session)),
+#         access=CourseManagementService(CourseRepo(db_session)),
 #         files=FileService(storage, db_session),
 #     )
 
@@ -24,8 +24,8 @@ from backend.courses.service.enrollment_service import CourseEnrollmentService
 @fixture
 def course_service(
     db_session,
-) -> CourseService:
-    return CourseService(
+) -> CourseManagementService:
+    return CourseManagementService(
         db_session,
     )
 
@@ -40,7 +40,7 @@ class MakeCourse(Protocol):
 
 
 @fixture
-def make_course(course_service: CourseService) -> MakeCourse:
+def make_course(course_service: CourseManagementService) -> MakeCourse:
     async def make_course(educator: User, **overrides):
         default_course = {"name": "Mechanics101"}
         return await course_service.create(

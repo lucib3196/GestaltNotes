@@ -77,12 +77,12 @@ async def test_note_dependencies_scope_the_query(monkeypatch, owned):
 async def test_owned_course_requires_educator_and_ownership(
     monkeypatch, role, is_owner, expected
 ):
-    from backend.web.courses import dependencies
+    from backend.courses.service import course_management
 
     user = SimpleNamespace(id=uuid4(), roles=[SimpleNamespace(name=role)])
     course = Course(name="Course", owner_id=user.id if is_owner else uuid4())
     repository = SimpleNamespace(get=AsyncMock(return_value=course))
-    monkeypatch.setattr(dependencies, "CourseRepo", lambda _: repository)
+    monkeypatch.setattr(course_management, "CourseRepo", lambda _: repository)
     if expected == 200:
         assert await get_owned_course(course.id, Mock(), user) is course
     else:

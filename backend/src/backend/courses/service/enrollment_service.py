@@ -17,7 +17,7 @@ from backend.courses.exceptions import (
 from backend.courses.models import Course, CourseEnrollment
 from backend.courses.repo.course_repo import CourseRepo
 from backend.courses.repo.enrollment_repo import EnrollmentRepo
-from backend.courses.service.course_access_service import CourseAccess
+from backend.courses.service.course_management import CourseManagementService
 
 
 class CourseEnrollmentService:
@@ -26,7 +26,7 @@ class CourseEnrollmentService:
         self._session = session
         self._courses = CourseRepo(session)
         self._enrollments = EnrollmentRepo(session)
-        self._access = CourseAccess(self._courses)
+        self._access = CourseManagementService(session)
 
     async def enroll_student(self, course_id: UUID, student: User) -> CourseEnrollment:
         self._assert_student(student)

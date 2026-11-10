@@ -7,11 +7,11 @@ from backend.courses.exceptions import (
     CoursePermissionError,
 )
 from backend.courses.models import CourseCreate, CourseUpdate
-from backend.courses.service.course_service import CourseService
+from backend.courses.service.course_management import CourseManagementService
 
 
 @pytest.mark.asyncio
-async def test_create_course(course_service: CourseService, make_user):
+async def test_create_course(course_service: CourseManagementService, make_user):
     educator = await make_user(role=UserRole.EDUCATOR)
     course = await course_service.create(
         data=CourseCreate(
@@ -31,7 +31,9 @@ async def test_create_course(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-async def test_student_cannot_create_course(course_service: CourseService, make_user):
+async def test_student_cannot_create_course(
+    course_service: CourseManagementService, make_user
+):
     student = await make_user(role=UserRole.STUDENT)
 
     with pytest.raises(CoursePermissionError):
@@ -42,7 +44,7 @@ async def test_student_cannot_create_course(course_service: CourseService, make_
 
 
 @pytest.mark.asyncio
-async def test_get_course(course_service: CourseService, make_user):
+async def test_get_course(course_service: CourseManagementService, make_user):
     educator = await make_user(role=UserRole.EDUCATOR)
     course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
@@ -58,7 +60,7 @@ async def test_get_course(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-async def test_list_owned_courses(course_service: CourseService, make_user):
+async def test_list_owned_courses(course_service: CourseManagementService, make_user):
     educator = await make_user(role=UserRole.EDUCATOR)
     first_course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
@@ -75,7 +77,7 @@ async def test_list_owned_courses(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-async def test_update_course(course_service: CourseService, make_user):
+async def test_update_course(course_service: CourseManagementService, make_user):
     educator = await make_user(role=UserRole.EDUCATOR)
     course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
@@ -100,7 +102,7 @@ async def test_update_course(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-async def test_delete_course(course_service: CourseService, make_user):
+async def test_delete_course(course_service: CourseManagementService, make_user):
     educator = await make_user(role=UserRole.EDUCATOR)
     course = await course_service.create(
         data=CourseCreate(name="Mechanics"),
@@ -115,7 +117,9 @@ async def test_delete_course(course_service: CourseService, make_user):
 
 
 @pytest.mark.asyncio
-async def test_non_owner_cannot_update_course(course_service: CourseService, make_user):
+async def test_non_owner_cannot_update_course(
+    course_service: CourseManagementService, make_user
+):
     owner = await make_user(role=UserRole.EDUCATOR)
     other_educator = await make_user(role=UserRole.EDUCATOR)
     course = await course_service.create(
@@ -133,7 +137,9 @@ async def test_non_owner_cannot_update_course(course_service: CourseService, mak
 
 
 @pytest.mark.asyncio
-async def test_non_owner_cannot_delete_course(course_service: CourseService, make_user):
+async def test_non_owner_cannot_delete_course(
+    course_service: CourseManagementService, make_user
+):
     owner = await make_user(role=UserRole.EDUCATOR)
     other_educator = await make_user(role=UserRole.EDUCATOR)
     course = await course_service.create(

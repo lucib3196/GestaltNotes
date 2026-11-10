@@ -9,9 +9,8 @@ from backend.core.exceptions import MissingConfigError
 from backend.core.firebase import initialize_firebase_app
 from backend.courses.models import NoteBlock, NoteBlockUpdate
 from backend.courses.repo.course_notes_repo import CourseNoteRepository
-from backend.courses.repo.course_repo import CourseRepo
 from backend.courses.repo.note_blocks_repo import NoteBlockRepo
-from backend.courses.service.course_access_service import CourseAccess
+from backend.courses.service.course_management import CourseManagementService
 from backend.courses.service.course_note_service import CourseNoteService
 from backend.courses.service.document_builder import NoteBlockDocumentBuilder
 from backend.courses.service.note_block_service import NoteBlockService
@@ -72,7 +71,7 @@ def course_note_scope(
                 blocks=blocks,
                 indexer_factory=build_indexer,
             ),
-            access=CourseAccess(CourseRepo(session)),
+            access=CourseManagementService(session),
             files=FileService(storage=storage, session=session),
         )
 

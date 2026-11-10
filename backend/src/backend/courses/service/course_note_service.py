@@ -22,7 +22,7 @@ from backend.courses.models import (
     CourseNoteUpdate,
 )
 from backend.courses.repo.course_notes_repo import CourseNoteRepository
-from backend.courses.service.course_access_service import CourseAccess
+from backend.courses.service.course_management import CourseManagementService
 from backend.courses.service.note_block_service import NoteBlockService
 from backend.storage import FileService
 from backend.storage.models import File
@@ -50,7 +50,7 @@ class CourseNoteService:
         files: FileService,
         notes: CourseNoteRepository,
         blocks: NoteBlockService,
-        access: CourseAccess,
+        access: CourseManagementService,
     ) -> None:
         self._session = session
         self._notes = notes
