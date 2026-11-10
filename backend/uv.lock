@@ -190,7 +190,7 @@ wheels = [
 
 [[package]]
 name = "authorization"
-version = "0.1.0"
+version = "0.2.2"
 source = { editable = "../packages/authorization" }
 dependencies = [
     { name = "pydantic" },
@@ -200,7 +200,10 @@ dependencies = [
 requires-dist = [{ name = "pydantic", specifier = ">=2,<3" }]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=9,<10" }]
+dev = [
+    { name = "pytest", specifier = ">=9,<10" },
+    { name = "ruff", specifier = ">=0.17.4" },
+]
 
 [[package]]
 name = "backend"
