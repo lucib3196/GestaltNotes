@@ -26,6 +26,7 @@ settings = get_settings()
 model = init_chat_model(
     model_provider=ModelProvider.GEMINI.value,
     model=GeminiModel.GEMINI_2_5_PRO.value,
+    api_version="v1beta",
 )
 graph = create_agent(
     model=model,
