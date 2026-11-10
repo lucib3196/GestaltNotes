@@ -38,6 +38,7 @@ def get_model_cache() -> dict[str, BaseChatModel]:
         model.value: init_chat_model(
             model_provider=model_provider.value,
             model=model.value,
+            api_version="v1beta",
         )
         for model_provider, models in MODELS_BY_PROVIDER.items()
         for model in models

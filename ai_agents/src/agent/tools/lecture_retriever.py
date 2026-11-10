@@ -116,7 +116,6 @@ def _build_course_notes_tool(
             embedding_model=context.embedding_model,
         )
         docs = vector_store.search(query, search_type=search_type, **search_kwargs)
-
         artifact = ResourceArtifact(
             name=name,
             label=context.course_name,
