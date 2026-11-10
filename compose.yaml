@@ -62,6 +62,7 @@ services:
       - ./backend:/app/backend # mount project allows for reloading
       - ./packages/object_store:/app/packages/object_store
       - ./packages/lecture_processor:/app/packages/lecture_processor
+      - ./packages/authorization:/app/packages/authorization
 
   # Frontend
   gestalt_notes_frontend:

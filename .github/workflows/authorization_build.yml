@@ -1,0 +1,42 @@
+name: Authorization CI
+
+on:
+  push:
+    branches: ["main", "dev"]
+    paths:
+      - "packages/authorization/**"
+      - ".github/workflows/authorization_build.yml"
+      - ".github/actions/setup-python-project/**"
+  pull_request:
+    branches: ["main", "dev"]
+    paths:
+      - "packages/authorization/**"
+      - ".github/workflows/authorization_build.yml"
+      - ".github/actions/setup-python-project/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: packages/authorization
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-python-project
+        with:
+          python-version: "3.14"
+          working-dir: packages/authorization
+
+      - name: Verify package imports
+        run: |
+          uv run --locked python -c \
+            "from authorization import AccessGate, OwnershipAccessGate"
+
+      - name: Run tests
+        run: uv run --locked pytest -q
