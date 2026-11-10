@@ -409,3 +409,131 @@ async def test_management_rejects_non_owned_announcements(
         users[2].id, announcement_id
     )
     assert recipient.read_at is None
+
+
+@pytest.fixture
+async def role_audience(make_user, db_session):
+    from sqlmodel import select
+
+    from backend.accounts.models import Role
+
+    student = await make_user(role=UserRole.STUDENT)
+    educator = await make_user(role=UserRole.EDUCATOR)
+    dual = await make_user(role=UserRole.STUDENT)
+    dual.roles.append(
+        db_session.exec(select(Role).where(Role.name == UserRole.EDUCATOR)).one()
+    )
+    unroled = User(email=f"no-role-{uuid4().hex}@example.com")
+    db_session.add(unroled)
+    db_session.commit()
+    return {"student": student, "educator": educator, "dual": dual, "unroled": unroled}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("roles", "keys", "summary"),
+    [
+        (None, ["student", "educator", "dual", "unroled"], "All current users"),
+        ([UserRole.STUDENT], ["student", "dual"], "All current students"),
+        ([UserRole.EDUCATOR], ["educator", "dual"], "All current educators"),
+        (
+            [UserRole.STUDENT, UserRole.EDUCATOR],
+            ["student", "educator", "dual"],
+            "All current students and educators",
+        ),
+        (
+            [UserRole.EDUCATOR, UserRole.STUDENT, UserRole.STUDENT],
+            ["student", "educator", "dual"],
+            "All current students and educators",
+        ),
+    ],
+)
+async def test_publish_role_audience_matches_preview_and_preserves_read_status(
+    management_service,
+    user_service,
+    role_audience,
+    admin,
+    make_announcement,
+    roles,
+    keys,
+    summary,
+):
+    announcement = await make_announcement()
+    expected = {role_audience[key].id for key in keys}
+    if roles is None:
+        expected.add(admin.id)
+    existing = role_audience[keys[0]]
+    await management_service.add_recipients(announcement.id, [existing.id])
+    read_at = (
+        await user_service.mark_announcement_read(existing.id, announcement.id)
+    ).read_at
+
+    preview = await management_service.preview_all_users(announcement.id, roles=roles)
+
+    assert preview.total_users == len(expected)
+    assert preview.existing_recipients == 1
+    assert preview.new_recipients == len(expected) - 1
+    assert preview.read_recipients == 1
+    assert preview.conflicting_recipients == 0
+    published = await management_service.publish_to_all_users(
+        announcement.id, roles=roles
+    )
+    assert published.audience_summary == summary
+    recipients = await management_service.list_recipients(announcement.id)
+    assert len(recipients) == len(expected)
+    assert {recipient.user_id for recipient in recipients} == expected
+    assert (
+        await user_service.retrieve_annoucement_for_user(existing.id, announcement.id)
+    ).read_at == read_at
+    for user in [*role_audience.values(), admin]:
+        assigned = await user_service.list_announcements_for_user(user.id)
+        assert bool(assigned) == (user.id in expected)
+
+
+@pytest.mark.asyncio
+async def test_role_publish_blocks_outside_recipients_without_sending(
+    management_service, user_service, role_audience, make_announcement
+):
+    announcement = await make_announcement()
+    student, educator = role_audience["student"], role_audience["educator"]
+    await management_service.add_recipients(announcement.id, [student.id, educator.id])
+    preview = await management_service.preview_all_users(
+        announcement.id, roles=[UserRole.STUDENT]
+    )
+    assert preview.total_users == 2
+    assert preview.existing_recipients == 1
+    assert preview.new_recipients == 1
+    assert preview.conflicting_recipients == 1
+
+    with pytest.raises(ValueError, match="outside the selected roles"):
+        await management_service.publish_to_all_users(
+            announcement.id, roles=[UserRole.STUDENT]
+        )
+
+    stored = await management_service.get(announcement.id)
+    assert not stored.published
+    assert stored.published_at is None
+    assert stored.audience_summary is None
+    assert len(await management_service.list_recipients(announcement.id)) == 2
+    assert await user_service.list_announcements_for_user(educator.id) == []
+    assert await user_service.list_announcements_for_user(student.id) == []
+    await management_service.remove_recipients(announcement.id, [educator.id])
+    await management_service.publish_to_all_users(
+        announcement.id, roles=[UserRole.STUDENT]
+    )
+    assert await user_service.list_announcements_for_user(educator.id) == []
+    assert {
+        recipient.user_id
+        for recipient in await management_service.list_recipients(announcement.id)
+    } == {student.id, role_audience["dual"].id}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["preview_all_users", "publish_to_all_users"])
+async def test_empty_role_filter_is_rejected(
+    management_service, make_announcement, method
+):
+    announcement = await make_announcement()
+    with pytest.raises(ValueError, match="at least one role"):
+        await getattr(management_service, method)(announcement.id, roles=[])
+    assert not (await management_service.get(announcement.id)).published

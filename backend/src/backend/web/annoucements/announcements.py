@@ -1,9 +1,13 @@
 from collections.abc import Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
-from backend.announcements.models import Announcement, AnnouncementRecipient
+from backend.announcements.models import (
+    Announcement,
+    AnnouncementHistoryPage,
+    AnnouncementRecipient,
+)
 from backend.web.accounts.dependencies import CurrentUserDep
 
 from .dependency import UserAnnouncementDep
@@ -15,8 +19,19 @@ router = APIRouter(tags=["announcements"], prefix="/announcements")
 async def list_my_announcements(
     service: UserAnnouncementDep,
     user: CurrentUserDep,
+    unread_only: bool = False,
 ) -> Sequence[Announcement]:
-    return await service.list_announcements_for_user(user.id)
+    return await service.list_announcements_for_user(user.id, unread_only=unread_only)
+
+
+@router.get("/history", response_model=AnnouncementHistoryPage)
+async def list_announcement_history(
+    service: UserAnnouncementDep,
+    user: CurrentUserDep,
+    limit: int = Query(default=5, ge=1, le=5),
+    offset: int = Query(default=0, ge=0),
+) -> AnnouncementHistoryPage:
+    return await service.list_announcement_history(user.id, limit=limit, offset=offset)
 
 
 @router.get("/{announcement_id}", response_model=Announcement)

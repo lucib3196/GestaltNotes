@@ -1,10 +1,12 @@
 from collections.abc import Sequence
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 
+from backend.accounts.models import UserRole
 from backend.announcements.models import (
     AnnoucementUpdate,
     Announcement,
@@ -30,7 +32,7 @@ class RecipientRequest(BaseModel):
 @router.get("/")
 async def get_all(
     service: AnnouncementManagementDep,
-):
+) -> Sequence[Announcement]:
     return await service.list_all()
 
 
@@ -109,9 +111,10 @@ async def delete_announcement(
 async def preview_all_users(
     announcement_id: UUID,
     service: AnnouncementManagementDep,
+    roles: Annotated[list[UserRole] | None, Query()] = None,
 ) -> AnnouncementAudiencePreview:
     try:
-        return await service.preview_all_users(announcement_id)
+        return await service.preview_all_users(announcement_id, roles=roles)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail="Announcement not found") from exc
 
@@ -120,15 +123,14 @@ async def preview_all_users(
 async def publish_to_all_users(
     announcement_id: UUID,
     service: AnnouncementManagementDep,
+    roles: Annotated[list[UserRole] | None, Query()] = None,
 ) -> Announcement:
     try:
-        return await service.publish_to_all_users(announcement_id)
+        return await service.publish_to_all_users(announcement_id, roles=roles)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail="Announcement not found") from exc
     except ValueError as exc:
-        raise HTTPException(
-            status_code=409, detail="Announcement is already published"
-        ) from exc
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 ###############################################################################

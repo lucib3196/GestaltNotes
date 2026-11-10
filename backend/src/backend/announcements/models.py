@@ -126,3 +126,16 @@ class AnnouncementAudiencePreview(BaseModel):
     new_recipients: int
     read_recipients: int
     unread_recipients: int
+    conflicting_recipients: int = 0
+
+
+class AnnouncementHistoryItem(BaseModel):
+    announcement: Announcement
+    read_at: datetime | None
+
+
+class AnnouncementHistoryPage(BaseModel):
+    items: list[AnnouncementHistoryItem]
+    total: int
+    limit: int
+    offset: int

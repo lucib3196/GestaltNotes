@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HomePage,  MyAccount } from "./pages";
+import { HomePage, MyAccount } from "./pages";
 import {
   AuthPage,
   PasswordResetGuard,
@@ -11,6 +11,10 @@ import AppLayout from "./layout/AppLayout";
 import { CourseDetails } from "./features/CourseDetails";
 import CourseManagement from "./features/CourseManagement/CourseManagement";
 import ChatPage from "./features/Chat/ChatWorkspace";
+import {
+  AnnouncementDashboard,
+  AnnouncementInbox,
+} from "./features/announcements";
 function App() {
   return (
     <BrowserRouter>
@@ -23,6 +27,17 @@ function App() {
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
           <Route element={<PasswordResetGuard />}>
+            <Route path="/annoucements" element={<AnnouncementInbox />} />
+            <Route element={<RoleRedirect allow={["admin"]} />}>
+              <Route
+                path="/admin"
+                element={<Navigate to="/admin/announcements" replace />}
+              />
+              <Route
+                path="/admin/announcements"
+                element={<AnnouncementDashboard />}
+              />
+            </Route>
             {/* Student Only Roots */}
             <Route
               element={
@@ -36,10 +51,16 @@ function App() {
             </Route>
 
             <Route element={<RoleRedirect allow={["educator"]} />}>
-              <Route path="/educator" element={<Navigate to="/educator/courses" replace />} />
+              <Route
+                path="/educator"
+                element={<Navigate to="/educator/courses" replace />}
+              />
 
               <Route path="/educator/courses" element={<CourseManagement />} />
-              <Route path="/educator/courses/:courseId" element={<CourseDetails />} />
+              <Route
+                path="/educator/courses/:courseId"
+                element={<CourseDetails />}
+              />
             </Route>
           </Route>
 

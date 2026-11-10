@@ -2,9 +2,15 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from uuid import UUID
 
+from sqlalchemy import func
 from sqlmodel import Session, col, select
 
-from backend.announcements.models import Announcement, AnnouncementRecipient
+from backend.announcements.models import (
+    Announcement,
+    AnnouncementHistoryItem,
+    AnnouncementHistoryPage,
+    AnnouncementRecipient,
+)
 from backend.announcements.repository import AnnouncementRepository
 
 
@@ -17,7 +23,7 @@ class UserAnnouncementService:
         return await self._repo.get(an_id)
 
     async def list_announcements_for_user(
-        self, user_id: UUID
+        self, user_id: UUID, *, unread_only: bool = False
     ) -> Sequence[Announcement]:
         stmt = (
             select(Announcement)
@@ -31,7 +37,48 @@ class UserAnnouncementService:
             )
             .order_by(col(Announcement.published_at).desc())
         )
+        if unread_only:
+            stmt = stmt.where(col(AnnouncementRecipient.read_at).is_(None))
         return self._session.exec(stmt).all()
+
+    async def list_announcement_history(
+        self, user_id: UUID, *, limit: int = 5, offset: int = 0
+    ) -> AnnouncementHistoryPage:
+        """Page through published assignments, including their recipient read status."""
+        if not 1 <= limit <= 5 or offset < 0:
+            raise ValueError(
+                "Limit must be between 1 and 5 and offset must be nonnegative"
+            )
+        statement = (
+            select(Announcement, AnnouncementRecipient.read_at)
+            .join(
+                AnnouncementRecipient,
+                col(AnnouncementRecipient.announcement_id) == col(Announcement.id),
+            )
+            .where(
+                col(AnnouncementRecipient.user_id) == user_id,
+                col(Announcement.published).is_(True),
+            )
+        )
+        total = self._session.exec(
+            select(func.count()).select_from(statement.subquery())
+        ).one()
+        rows = self._session.exec(
+            statement.order_by(
+                col(Announcement.published_at).desc(), col(Announcement.id).desc()
+            )
+            .limit(limit)
+            .offset(offset)
+        ).all()
+        return AnnouncementHistoryPage(
+            items=[
+                AnnouncementHistoryItem(announcement=announcement, read_at=read_at)
+                for announcement, read_at in rows
+            ],
+            total=total,
+            limit=limit,
+            offset=offset,
+        )
 
     async def retrieve_annoucement_for_user(
         self, user_id: UUID, an_id: UUID

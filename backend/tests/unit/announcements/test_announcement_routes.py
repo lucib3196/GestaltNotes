@@ -271,6 +271,7 @@ def test_preview_and_publish_to_all_users(api):
         "new_recipients": 2,
         "read_recipients": 0,
         "unread_recipients": 1,
+        "conflicting_recipients": 0,
     }
     assert len(api.client.get(f"{base}/recipients").json()) == 1
     assert not api.client.get(base).json()["published"]
@@ -321,3 +322,208 @@ def test_other_admin_cannot_manage_announcement(api, method, suffix, body):
     assert stored.json()["title"] == "Release"
     assert not stored.json()["published"]
     assert api.client.get(f"{base}/recipients").json() == []
+
+
+def test_unread_announcements_filter_is_scoped_to_recipient(api):
+    assigned = create_draft(api)
+    other = create_draft(api)
+    draft = create_draft(api)
+    for announcement_id, user_id in [
+        (assigned, api.reader.id),
+        (other, api.outsider.id),
+        (draft, api.reader.id),
+    ]:
+        assert (
+            api.client.post(
+                f"/admin/announcements/{announcement_id}/recipients",
+                json={"user_ids": [str(user_id)]},
+            ).status_code
+            == 201
+        )
+    for announcement_id in [assigned, other]:
+        assert (
+            api.client.post(
+                f"/admin/announcements/{announcement_id}/publish"
+            ).status_code
+            == 200
+        )
+    api.actor.id, api.actor.admin = api.reader.id, False
+    unread = api.client.get("/announcements/", params={"unread_only": True})
+    assert unread.status_code == 200
+    assert [item["id"] for item in unread.json()] == [assigned]
+    assert api.client.put(f"/announcements/{assigned}/read").status_code == 200
+    assert api.client.get("/announcements/?unread_only=true").json() == []
+    assert [item["id"] for item in api.client.get("/announcements/").json()] == [
+        assigned
+    ]
+    api.actor.id = api.outsider.id
+    assert [
+        item["id"] for item in api.client.get("/announcements/?unread_only=true").json()
+    ] == [other]
+
+
+def test_history_paginates_published_assignments_and_keeps_read_items(api, db_session):
+    from datetime import UTC, datetime
+    from uuid import UUID
+
+    published_at = datetime(2026, 11, 9, tzinfo=UTC)
+    read_at = datetime(2026, 11, 10)
+    announcements = [
+        Announcement(
+            id=UUID(int=index),
+            title=f"Update {index}",
+            message="Message",
+            version="1",
+            published=True,
+            published_at=published_at,
+        )
+        for index in range(1, 8)
+    ]
+    draft = Announcement(title="Draft", message="Message", version="1")
+    other = Announcement(
+        title="Other user's",
+        message="Message",
+        version="1",
+        published=True,
+        published_at=published_at,
+    )
+    unassigned = Announcement(
+        title="Unassigned",
+        message="Message",
+        version="1",
+        published=True,
+        published_at=published_at,
+    )
+    db_session.add_all([*announcements, draft, other, unassigned])
+    db_session.flush()
+    db_session.add_all(
+        [
+            AnnouncementRecipient(
+                announcement_id=announcement.id,
+                user_id=api.reader.id,
+                read_at=read_at if index == 0 else None,
+            )
+            for index, announcement in enumerate(announcements)
+        ]
+    )
+    db_session.add_all(
+        [
+            AnnouncementRecipient(announcement_id=draft.id, user_id=api.reader.id),
+            AnnouncementRecipient(announcement_id=other.id, user_id=api.outsider.id),
+        ]
+    )
+    db_session.commit()
+    api.actor.id, api.actor.admin = api.reader.id, False
+
+    first = api.client.get("/announcements/history")
+    assert first.status_code == 200
+    assert first.json()["total"] == 7
+    assert first.json()["limit"] == 5
+    assert first.json()["offset"] == 0
+    assert [item["announcement"]["id"] for item in first.json()["items"]] == [
+        str(announcement.id) for announcement in reversed(announcements[2:])
+    ]
+    second = api.client.get("/announcements/history?limit=5&offset=5")
+    assert second.status_code == 200
+    assert second.json()["total"] == 7
+    assert len(second.json()["items"]) == 2
+    assert [item["announcement"]["id"] for item in second.json()["items"]] == [
+        str(announcements[1].id),
+        str(announcements[0].id),
+    ]
+    assert second.json()["items"][1]["read_at"] == read_at.isoformat()
+    beyond = api.client.get("/announcements/history?limit=5&offset=20")
+    assert beyond.json() == {"items": [], "total": 7, "limit": 5, "offset": 20}
+    api.actor.id = api.outsider.id
+    other_page = api.client.get("/announcements/history")
+    assert other_page.json()["total"] == 1
+    assert other_page.json()["items"][0]["announcement"]["id"] == str(other.id)
+
+
+@pytest.mark.parametrize("query", ["limit=0", "limit=6", "offset=-1", "limit=abc"])
+def test_history_rejects_invalid_pagination(api, query):
+    assert api.client.get(f"/announcements/history?{query}").status_code == 422
+
+
+def test_history_empty_page(api):
+    response = api.client.get("/announcements/history")
+    assert response.status_code == 200
+    assert response.json() == {"items": [], "total": 0, "limit": 5, "offset": 0}
+
+
+@pytest.mark.asyncio
+async def test_role_filtered_preview_and_publish(api, make_user):
+    student = await make_user(role=UserRole.STUDENT)
+    educator = await make_user(role=UserRole.EDUCATOR)
+    announcement_id = create_draft(api)
+    base = f"/admin/announcements/{announcement_id}"
+    preview = api.client.get(f"{base}/audience-preview?roles=student")
+    assert preview.status_code == 200
+    assert preview.json()["total_users"] == 1
+    assert preview.json()["new_recipients"] == 1
+    assert preview.json()["conflicting_recipients"] == 0
+    published = api.client.post(f"{base}/publish-to-all?roles=student")
+    assert published.status_code == 200
+    assert published.json()["audience_summary"] == "All current students"
+    assert {row["user_id"] for row in api.client.get(f"{base}/recipients").json()} == {
+        str(student.id)
+    }
+    api.actor.id, api.actor.admin = educator.id, False
+    assert api.client.get("/announcements/?unread_only=true").json() == []
+    api.actor.id = student.id
+    assert [
+        row["id"] for row in api.client.get("/announcements/?unread_only=true").json()
+    ] == [announcement_id]
+
+
+@pytest.mark.asyncio
+async def test_role_publish_conflict_returns_409(api, make_user):
+    educator = await make_user(role=UserRole.EDUCATOR)
+    announcement_id = create_draft(api)
+    base = f"/admin/announcements/{announcement_id}"
+    assert (
+        api.client.post(
+            f"{base}/recipients", json={"user_ids": [str(educator.id)]}
+        ).status_code
+        == 201
+    )
+    preview = api.client.get(f"{base}/audience-preview?roles=student")
+    assert preview.json()["conflicting_recipients"] == 1
+    response = api.client.post(f"{base}/publish-to-all?roles=student")
+    assert response.status_code == 409
+    assert "outside the selected roles" in response.json()["detail"]
+    assert not api.client.get(base).json()["published"]
+    api.actor.id, api.actor.admin = educator.id, False
+    assert api.client.get("/announcements/?unread_only=true").json() == []
+
+
+@pytest.mark.asyncio
+async def test_multiple_role_query_parameters(api, make_user):
+    student = await make_user(role=UserRole.STUDENT)
+    educator = await make_user(role=UserRole.EDUCATOR)
+    announcement_id = create_draft(api)
+    base = f"/admin/announcements/{announcement_id}"
+    roles = [("roles", "student"), ("roles", "educator")]
+    assert (
+        api.client.get(f"{base}/audience-preview", params=roles).json()["total_users"]
+        == 2
+    )
+    response = api.client.post(f"{base}/publish-to-all", params=roles)
+    assert response.status_code == 200
+    assert response.json()["audience_summary"] == "All current students and educators"
+    assert {row["user_id"] for row in api.client.get(f"{base}/recipients").json()} == {
+        str(student.id),
+        str(educator.id),
+    }
+
+
+@pytest.mark.parametrize("suffix", ["audience-preview", "publish-to-all"])
+def test_invalid_role_returns_422(api, suffix):
+    announcement_id = create_draft(api)
+    method = "GET" if suffix == "audience-preview" else "POST"
+    assert (
+        api.client.request(
+            method, f"/admin/announcements/{announcement_id}/{suffix}?roles=unknown"
+        ).status_code
+        == 422
+    )
