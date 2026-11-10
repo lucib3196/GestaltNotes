@@ -15,6 +15,10 @@ from backend.accounts.services.user import AccountService
 from backend.core.logger import logger
 from backend.database import SessionDep
 
+###############################################################################
+### Firebase token verification
+###############################################################################
+
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
@@ -51,6 +55,10 @@ def get_firebase_user_from_token(
 FireBaseToken = Annotated[dict[str, Any], Depends(get_firebase_user_from_token)]
 
 
+###############################################################################
+### Authenticated user ID
+###############################################################################
+
 def get_current_user_id(
     token: FireBaseToken,
 ) -> str:
@@ -68,6 +76,10 @@ def get_current_user_id(
 CurrentUser = Annotated[str, Depends(get_current_user_id)]
 
 
+###############################################################################
+### Account service
+###############################################################################
+
 def get_account_service(session: SessionDep) -> AccountService:
     """Create an AccountService scoped to the current request session."""
     try:
@@ -82,6 +94,10 @@ def get_account_service(session: SessionDep) -> AccountService:
 
 AccountServiceDependency = Annotated[AccountService, Depends(get_account_service)]
 
+
+###############################################################################
+### Current user account
+###############################################################################
 
 async def get_current_user(
     user_id: CurrentUser,
@@ -108,29 +124,37 @@ async def get_current_user(
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 
-def require_student(user: CurrentUserDep) -> User:
-    """Ensure current user has student role."""
-    if not any(r.name == UserRole.STUDENT for r in user.roles):
+###############################################################################
+### Role authorization
+###############################################################################
+
+def require_role(user: CurrentUserDep, role: UserRole):
+    if not any(r.name == role for r in user.roles):
         logger.info(
-            "Authorization denied: student role required for user_id=%s", user.id
+            f"Authorization denied: {role.name} role required for user_id=%s", user.id
         )
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Student access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"{role.name} access required"
         )
     return user
+
+
+def require_student(user: CurrentUserDep) -> User:
+    return require_role(user, UserRole.STUDENT)
 
 
 def require_educator(user: CurrentUserDep) -> User:
-    """Ensure current user has educator role."""
-    if not any(r.name == UserRole.EDUCATOR for r in user.roles):
-        logger.info(
-            "Authorization denied: educator role required for user_id=%s", user.id
-        )
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Educator access required"
-        )
-    return user
+    return require_role(user, UserRole.EDUCATOR)
 
+
+def require_admin(user: CurrentUserDep) -> User:
+    return require_role(user, UserRole.ADMIN)
+
+
+###############################################################################
+### Role dependency aliases
+###############################################################################
 
 StudentDep = Annotated[User, Depends(require_student)]
 EducatorDep = Annotated[User, Depends(require_educator)]
+AdminDep = Annotated[User, Depends(require_admin)]

@@ -2,7 +2,6 @@ import { Navigate, useLocation, Outlet } from "react-router-dom";
 import { useAuth } from "../..";
 import type { ValidRole } from "../../../../services";
 
-
 export default function RoleRedirect({ allow }: { allow: ValidRole[] }) {
   const { user, userData, loading } = useAuth();
   const userRoles = userData?.roles;
@@ -15,7 +14,7 @@ export default function RoleRedirect({ allow }: { allow: ValidRole[] }) {
 
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   if (!allow.some((r) => userRoles?.includes(r))) {
-    return <Navigate to="/forbidden" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
   return <Outlet />;
 }

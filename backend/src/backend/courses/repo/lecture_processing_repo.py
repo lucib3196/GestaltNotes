@@ -4,18 +4,20 @@ from uuid import UUID
 
 from sqlmodel import Session, col, select
 
+from backend.adapters import Repository
 from backend.processing.models import (
     LectureProcessingRun,
     ProcessingRun,
     ProcessingStatus,
+    ProcessingUpdate,
 )
 
 
-class LectureProcessingRepository:
+class LectureProcessingRepository(Repository[ProcessingRun, ProcessingUpdate]):
     """Query processing runs within their associated course notes."""
 
     def __init__(self, session: Session) -> None:
-        self._session = session
+        super().__init__(session, ProcessingRun)
 
     def get_by_note_and_run(self, note_id: UUID, run_id: UUID) -> ProcessingRun | None:
         """Return the run only if it belongs to the requested note."""

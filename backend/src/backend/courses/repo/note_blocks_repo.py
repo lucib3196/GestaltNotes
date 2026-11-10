@@ -10,38 +10,13 @@ from backend.courses.models import CourseNote, NoteBlock, NoteBlockUpdate
 
 class NoteBlockRepo(Repository[NoteBlock, NoteBlockUpdate]):
     def __init__(self, session: Session) -> None:
-        self._session = session
-
-    async def create(self, record: NoteBlock) -> NoteBlock:
-        self._session.add(record)
-        self._session.flush()
-        self._session.refresh(record)
-        return record
-
-    async def get(self, record_id: UUID) -> NoteBlock | None:
-        return self._session.exec(
-            select(NoteBlock).where(NoteBlock.id == record_id)
-        ).first()
-
-    async def update(self, record: NoteBlock, update: NoteBlockUpdate) -> NoteBlock:
-        for key, value in update.model_dump(exclude_unset=True).items():
-            setattr(record, key, value)
-        self._session.add(record)
-        self._session.flush()
-        self._session.refresh(record)
-        return record
+        super().__init__(session, NoteBlock)
 
     async def update_by_id(self, record_id: UUID, update: NoteBlockUpdate) -> NoteBlock:
         note = await self.get(record_id)
         if note is None:
             raise ValueError()
         return await self.update(note, update)
-
-    async def delete(self, record_id: UUID) -> None:
-        note = await self.get(record_id)
-        if note is not None:
-            self._session.delete(note)
-            self._session.flush()
 
     # Listing
     async def list_by_note(self, note_id: UUID) -> Sequence[NoteBlock]:
