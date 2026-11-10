@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from enum import StrEnum
 from uuid import UUID, uuid4
 
@@ -27,12 +28,15 @@ class Resource(BaseModel):
     owner_id: UUID
 
 
-class ResourceGate(OwnershipAccessGate[Role, Resource]):
-    def check_access(self, actor: Actor[Role], resource: Resource) -> AccessDecision:
+class ResourceGate(OwnershipAccessGate[Role, Resource, User]):
+    def check_access(self, actor: User, resource: Resource) -> AccessDecision:
         return self.check_ownership(actor, resource)
 
-    def check_ownership(self, actor: Actor[Role], resource: Resource) -> AccessDecision:
+    def check_ownership(self, actor: User, resource: Resource) -> AccessDecision:
         return AccessDecision(access=actor.id == resource.owner_id)
+    
+    def get_roles(self, actor: User) -> Iterable[Role]:
+        return actor.roles
 
 
 def test_owner_has_access():
