@@ -4,7 +4,7 @@ from authorization import AccessGate, OwnershipAccessGate
 from authorization.service import AccessDecision
 from sqlmodel import Session, col, select
 
-from backend.accounts.models import Role, User, UserRole
+from backend.accounts.models import User, UserRole
 from backend.courses.models import Course, CourseEnrollment
 
 

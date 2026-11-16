@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
+
 from pydantic import BaseModel
 from sqlalchemy import Column, DateTime
 from sqlmodel import Field, SQLModel
-from datetime import UTC, datetime
 
 
 def utc_now() -> datetime:

@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, ForeignKey
+from pydantic import field_validator
+from sqlalchemy import Column, ForeignKey, Text
 from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -50,3 +51,59 @@ class Message(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     thread: "Thread" = Relationship(back_populates="messages")
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+class PromptBase(SQLModel):
+    title: str = Field(
+        min_length=1,
+        max_length=150,
+        description="Human-readable name of the prompt.",
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=1000,
+        description="Optional description of the prompt's purpose.",
+    )
+
+    content: str = Field(
+        sa_column=Column(Text, nullable=False),
+        description="The actual prompt text sent to the AI model.",
+    )
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Prompt content cannot be empty.")
+
+        if len(value) > 100_000:
+            raise ValueError("Prompt exceeds maximum length.")
+
+        return value
+
+
+class Prompt(PromptBase, table=True):
+    __tablename__ = "prompts"
+
+    id: UUID = Field(
+        default_factory=uuid4,
+        primary_key=True,
+    )
+
+    user_id: UUID = Field(
+        foreign_key="users.id",
+        index=True,
+        nullable=False,
+    )
+
+    created_at: datetime = Field(
+        default_factory=utc_now,
+    )
+
+    updated_at: datetime = Field(
+        default_factory=utc_now,
+    )
