@@ -111,7 +111,33 @@ class Prompt(PromptBase, table=True):
 
 
 class PromptUpdate(PromptBase):
-    pass
+    title: str | None = Field(
+        min_length=1,
+        max_length=150,
+        description="Human-readable name of the prompt.",
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=1000,
+        description="Optional description of the prompt's purpose.",
+    )
+
+    content: str | None = Field(
+        default=None,
+        sa_column=Column(Text, nullable=False),
+        description="The actual prompt text sent to the AI model.",
+    )
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Prompt content cannot be empty.")
+
+        if len(value) > 100_000:
+            raise ValueError("Prompt exceeds maximum length.")
+
+        return value
 
 
 class PromptSummary(SQLModel):

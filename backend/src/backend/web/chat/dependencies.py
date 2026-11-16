@@ -4,6 +4,7 @@ from fastapi import Depends
 from langgraph_sdk import get_client
 
 from backend.chat import ThreadService
+from backend.chat.service.prompt_service import PromptAccessGate, PromptService
 from backend.core.settings import get_settings
 from backend.database import SessionDep
 
@@ -19,3 +20,10 @@ def get_thread_service(session: SessionDep) -> ThreadService:
 
 
 ThreadServiceDependency = Annotated[ThreadService, Depends(get_thread_service)]
+
+
+def get_prompt_service(session: SessionDep):
+    return PromptService(session=session, access=PromptAccessGate())
+
+
+PromptServiceDep = Annotated[PromptService, Depends(get_prompt_service)]
