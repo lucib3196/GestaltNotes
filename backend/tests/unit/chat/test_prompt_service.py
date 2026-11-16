@@ -5,8 +5,8 @@ from authorization import AccessDeniedError
 from backend.accounts.models import User
 from backend.chat.model import Prompt, PromptBase, PromptUpdate
 from backend.chat.service.prompt_service import (
-    PaginationOptions,
     PromptAccessGate,
+    PromptListOptions,
     PromptService,
 )
 
@@ -121,7 +121,7 @@ async def test_list_prompts_applies_sort_offset_and_limit(service, user):
     ]
 
     prompts = await service.list_user_prompts(
-        user, PaginationOptions(sort="created", order="asc", offset=1, limit=1)
+        user, PromptListOptions(sort="created", order="asc", offset=1, limit=1)
     )
 
     assert [prompt.id for prompt in prompts] == [created[1].id]

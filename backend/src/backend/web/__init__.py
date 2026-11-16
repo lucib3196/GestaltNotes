@@ -7,6 +7,7 @@ from .generated_content.mcq import router as mcq_router
 from .health.health import router as health_router
 from .processing import processing_routes
 from .storage.files import router as files_router
+from .chat.prompts import router as prompt_router
 
 ALL_ROUTES = [
     announcements_router,
@@ -19,4 +20,5 @@ ALL_ROUTES = [
     health_router,
     *account_routes,
     *processing_routes,
+    prompt_router
 ]

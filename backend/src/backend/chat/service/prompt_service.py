@@ -3,7 +3,6 @@ from typing import Literal
 from uuid import UUID
 
 from authorization import AccessDecision, OwnershipAccessGate
-from pydantic import BaseModel, Field
 from sqlalchemy import Select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, col, select
@@ -13,6 +12,7 @@ from backend.chat.exceptions import PromptNotFoundError, PromptServiceError
 from backend.chat.model import Prompt, PromptBase, PromptSummary, PromptUpdate
 from backend.chat.repo.prompt_repo import PromptRepo
 from backend.core.logger import logger
+from backend.core.pagination import PaginationOptions
 
 
 class PromptAccessGate(OwnershipAccessGate[UserRole, Prompt, User]):
@@ -29,11 +29,8 @@ class PromptAccessGate(OwnershipAccessGate[UserRole, Prompt, User]):
         return self.check_access(actor, resource)
 
 
-class PaginationOptions(BaseModel):
-    offset: int = Field(default=0, ge=0)
-    limit: int = Field(default=20, ge=1, le=100)
+class PromptListOptions(PaginationOptions):
     sort: Literal["updated", "created"] = "updated"
-    order: Literal["desc", "asc"] = "desc"
 
 
 class PromptService:
@@ -99,10 +96,10 @@ class PromptService:
             raise PromptServiceError("Failed to delete prompt") from exc
 
     async def list_user_prompts(
-        self, user: User, options: PaginationOptions | None = None
+        self, user: User, options: PromptListOptions | None = None
     ) -> Sequence[Prompt]:
         stmt = select(Prompt).where(Prompt.user_id == user.id)
-        stmt = self._format_pagination(stmt, options or PaginationOptions())
+        stmt = self._format_pagination(stmt, options or PromptListOptions())
         try:
             return self._session.exec(stmt).all()
         except SQLAlchemyError as exc:
@@ -111,12 +108,12 @@ class PromptService:
             raise PromptServiceError("Failed to list prompts") from exc
 
     async def list_user_prompts_by_title(
-        self, user: User, options: PaginationOptions | None = None
+        self, user: User, options: PromptListOptions | None = None
     ) -> Sequence[PromptSummary]:
         stmt = select(Prompt.id, Prompt.title, Prompt.description).where(
             Prompt.user_id == user.id
         )
-        stmt = self._format_pagination(stmt, options or PaginationOptions())
+        stmt = self._format_pagination(stmt, options or PromptListOptions())
         try:
             return [
                 PromptSummary(id=uid, title=title, description=description)
@@ -127,7 +124,7 @@ class PromptService:
             logger.exception("Failed to list prompts")
             raise PromptServiceError("Failed to list prompts") from exc
 
-    def _format_pagination(self, stmt: Select, options: PaginationOptions) -> Select:
+    def _format_pagination(self, stmt: Select, options: PromptListOptions) -> Select:
         sort_column = (
             col(Prompt.updated_at)
             if options.sort == "updated"

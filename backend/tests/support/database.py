@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy import event
+from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine
 
 import backend.database.models  # noqa: F401 -- Register all database tables.
@@ -14,6 +15,7 @@ def test_engine():
         url,
         echo=False,
         connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
     )
 
     @event.listens_for(engine, "connect")
