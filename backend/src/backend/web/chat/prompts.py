@@ -25,7 +25,7 @@ def prompt_http_error(exc: PromptServiceError | AccessDeniedError) -> HTTPExcept
     )
 
 
-@router.post("/", response_model=Prompt)
+@router.post("/", response_model=Prompt, status_code=status.HTTP_201_CREATED)
 async def create(
     service: PromptServiceDep, data: PromptBase, user: CurrentUserDep
 ) -> Prompt:
