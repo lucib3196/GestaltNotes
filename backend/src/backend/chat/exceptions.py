@@ -32,3 +32,11 @@ class ThreadClientDeleteError(ThreadBaseException):
 
 class ThreadDeleteCommitError(ThreadDeleteError):
     """Remote deletion succeeded, but the SQL commit failed."""
+
+
+class PromptServiceError(Exception):
+    """A prompt persistence operation failed."""
+
+
+class PromptNotFoundError(PromptServiceError, LookupError):
+    """The requested prompt does not exist."""

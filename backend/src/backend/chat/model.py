@@ -95,7 +95,7 @@ class Prompt(PromptBase, table=True):
     )
 
     user_id: UUID = Field(
-        foreign_key="users.id",
+        foreign_key="user.id",
         index=True,
         nullable=False,
     )
@@ -106,4 +106,15 @@ class Prompt(PromptBase, table=True):
 
     updated_at: datetime = Field(
         default_factory=utc_now,
+        sa_column_kwargs={"onupdate": utc_now},
     )
+
+
+class PromptUpdate(PromptBase):
+    pass
+
+
+class PromptSummary(SQLModel):
+    id: UUID
+    title: str
+    description: str | None = None

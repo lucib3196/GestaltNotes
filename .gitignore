@@ -128,3 +128,6 @@ packages/document_processing/src/document_processing/assets
 **.pckl
 packages/document_processing/src/document_processing/assets/Lec16_post.pdf
 packages/document_processing/src/document_processing/assets/me116_spring_2026_lectures_Lecture_04_02_Lecture_04_02.pdf
+
+**firebase-cred.json
+.agents
