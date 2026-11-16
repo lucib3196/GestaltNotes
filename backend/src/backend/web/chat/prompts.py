@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from authorization import AccessDeniedError
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 from starlette import status
 
 from backend.chat.exceptions import PromptNotFoundError, PromptServiceError
@@ -75,3 +75,16 @@ async def update_prompt(
         return await service.update_prompt(prompt_id, update, user)
     except (PromptServiceError, AccessDeniedError) as exc:
         raise prompt_http_error(exc) from exc
+
+
+@router.delete("/{prompt_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_prompt(
+    prompt_id: UUID,
+    service: PromptServiceDep,
+    user: CurrentUserDep,
+) -> Response:
+    try:
+        await service.delete_prompt(prompt_id, user)
+    except (PromptServiceError, AccessDeniedError) as exc:
+        raise prompt_http_error(exc) from exc
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
