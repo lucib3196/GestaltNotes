@@ -1,5 +1,5 @@
 
-FROM node:20-slim AS front-end-build
+FROM node:24-slim AS front-end-build
 WORKDIR /app
 
 

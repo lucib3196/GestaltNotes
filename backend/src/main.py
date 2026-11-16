@@ -7,10 +7,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 
+from backend.accounts.services.role import RoleDB
 from backend.core.firebase import initialize_firebase_app
 from backend.core.logger import logger
 from backend.core.settings import get_settings
-from backend.database.config import initialize_database_engine
+from backend.database.config import initialize_database_engine, open_session
 from backend.web import ALL_ROUTES
 
 settings = get_settings()
@@ -23,6 +24,8 @@ async def on_startup(_app: FastAPI) -> AsyncIterator[None]:
     initialize_firebase_app()
     logger.info("Initialized fb okay")
     logger.info("Created database successfully")
+    with open_session() as session:
+        await RoleDB(session).seed_roles()
 
     yield
 

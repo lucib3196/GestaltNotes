@@ -59,6 +59,7 @@ FireBaseToken = Annotated[dict[str, Any], Depends(get_firebase_user_from_token)]
 ### Authenticated user ID
 ###############################################################################
 
+
 def get_current_user_id(
     token: FireBaseToken,
 ) -> str:
@@ -80,6 +81,7 @@ CurrentUser = Annotated[str, Depends(get_current_user_id)]
 ### Account service
 ###############################################################################
 
+
 def get_account_service(session: SessionDep) -> AccountService:
     """Create an AccountService scoped to the current request session."""
     try:
@@ -98,6 +100,7 @@ AccountServiceDependency = Annotated[AccountService, Depends(get_account_service
 ###############################################################################
 ### Current user account
 ###############################################################################
+
 
 async def get_current_user(
     user_id: CurrentUser,
@@ -127,6 +130,7 @@ CurrentUserDep = Annotated[User, Depends(get_current_user)]
 ###############################################################################
 ### Role authorization
 ###############################################################################
+
 
 def require_role(user: CurrentUserDep, role: UserRole):
     if not any(r.name == role for r in user.roles):

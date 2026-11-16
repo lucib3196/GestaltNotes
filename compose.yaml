@@ -50,10 +50,11 @@ services:
         condition: service_healthy
 
     environment:
-      DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
       APP_ENV: docker
+      DATABASE_URL: postgresql://postgres:password@db:5432/gestalt_notes
       FIREBASE_AUTH_EMULATOR_HOST: firebase_emulator:9099
       STORAGE_EMULATOR_HOST: http://firebase_emulator:9199
+      
     env_file:
       - ./backend/.env.docker
     ports:
@@ -69,6 +70,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+    environment:
+      VITE_FIREBASE_AUTH_EMULATOR_HOST: firebase_emulator:9099
+      VITE_STORAGE_EMULATOR_HOST: http://firebase_emulator:9199
+      VITE_API_URL: http://localhost:8000
+      VITE_MODE: dev
     env_file:
       - ./frontend/.env.dev.docker
     ports:
