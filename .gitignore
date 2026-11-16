@@ -131,3 +131,4 @@ packages/document_processing/src/document_processing/assets/me116_spring_2026_le
 
 **firebase-cred.json
 .agents
+.env.testing
